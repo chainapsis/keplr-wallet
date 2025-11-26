@@ -39,7 +39,7 @@ export const useBitcoinTxConfigsQueryString = (configs: {
 
     const initialTxSize = searchParams.get("initialTxSize");
     if (initialTxSize) {
-      configs.txSizeConfig.setValue(Number.parseInt(initialTxSize));
+      configs.txSizeConfig.setValue(Number.parseFloat(initialTxSize));
     }
 
     const initialFeeRateType = searchParams.get("initialFeeRateType");

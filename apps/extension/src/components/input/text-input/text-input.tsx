@@ -19,6 +19,7 @@ export const TextInput = forwardRef<
   TextInputProps &
     React.InputHTMLAttributes<HTMLInputElement> & {
       inputStyle?: React.CSSProperties;
+      textInputContainerStyle?: React.CSSProperties;
     }
 >(
   (
@@ -32,12 +33,13 @@ export const TextInput = forwardRef<
       left,
       right,
       bottom,
-      textSuffix,
+      suffix,
       isLoading,
       autoComplete,
       labelAlignment = "space-between",
       inputStyle,
       borderRadius,
+      textInputContainerStyle,
       ...props
     },
     ref
@@ -126,6 +128,7 @@ export const TextInput = forwardRef<
         <Styles.TextInputContainer
           paragraph={paragraph}
           error={error}
+          style={textInputContainerStyle}
           disabled={props.disabled}
           errorBorder={props.errorBorder}
           borderRadius={borderRadius}
@@ -138,7 +141,7 @@ export const TextInput = forwardRef<
              */}
             <MockBox show={!!left}>
               <Box alignY="center" marginLeft="1rem">
-                <Styles.Icon>
+                <Styles.Icon iconColor={props.iconColor}>
                   <Box>{left}</Box>
                 </Styles.Icon>
               </Box>
@@ -163,7 +166,7 @@ export const TextInput = forwardRef<
                 />
                 <div
                   style={(() => {
-                    if (suffixTextWidth == null || !textSuffix) {
+                    if (suffixTextWidth == null || !suffix) {
                       return {
                         width: 0,
                         opacity: 0,
@@ -174,7 +177,7 @@ export const TextInput = forwardRef<
                     };
                   })()}
                 />
-                <Styles.TextSuffix
+                <Styles.Suffix
                   ref={suffixWidthCheckRef}
                   textWidth={(() => {
                     if (textWidth != null && textInputWidth != null) {
@@ -190,14 +193,14 @@ export const TextInput = forwardRef<
                     return 0;
                   })()}
                 >
-                  {textSuffix}
-                </Styles.TextSuffix>
+                  {suffix}
+                </Styles.Suffix>
               </div>
             </Column>
 
             <MockBox show={!!right}>
               <Box alignY="center" marginRight="1rem">
-                <Styles.Icon>
+                <Styles.Icon iconColor={props.iconColor}>
                   <Box>{right}</Box>
                 </Styles.Icon>
               </Box>

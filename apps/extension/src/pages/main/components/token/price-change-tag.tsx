@@ -1,12 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { DecUtils, RatePretty } from "@keplr-wallet/unit";
-import { useTheme } from "styled-components";
 import { Box } from "../../../../components/box";
 import { XAxis } from "../../../../components/axis";
 import { ColorPalette } from "../../../../styles";
-import Color from "color";
 import { Gutter } from "../../../../components/gutter";
-import { Caption2 } from "../../../../components/typography";
+import { Body2 } from "../../../../components/typography";
 
 const PriceChangeTag: FunctionComponent<{
   rate: RatePretty;
@@ -14,6 +12,7 @@ const PriceChangeTag: FunctionComponent<{
   const info: {
     text: string;
     isNeg: boolean;
+    isZero: boolean;
   } = (() => {
     // Max decimals가 2인데 이 경우 숫자가 0.00123%같은 경우면 +0.00% 같은식으로 표시될 수 있다.
     // 이 경우는 오차를 무시하고 0.00%로 생각한다.
@@ -27,6 +26,7 @@ const PriceChangeTag: FunctionComponent<{
       return {
         text: "0.00%",
         isNeg: false,
+        isZero: true,
       };
     } else {
       const res = rate
@@ -40,66 +40,52 @@ const PriceChangeTag: FunctionComponent<{
       return {
         text: isNeg ? res.replace("-", "") : res,
         isNeg,
+        isZero: false,
       };
     }
   })();
 
-  const theme = useTheme();
-
   return (
     <Box
-      height="1.125rem"
-      minHeight="1.125rem"
-      borderRadius="0.375rem"
-      paddingX="0.25rem"
       alignY="center"
-      backgroundColor={(() => {
-        if (theme.mode === "light") {
-          return info.isNeg
-            ? ColorPalette["orange-50"]
-            : ColorPalette["green-50"];
-        }
-
-        return info.isNeg
-          ? Color(ColorPalette["orange-700"]).alpha(0.4).toString()
-          : Color(ColorPalette["green-700"]).alpha(0.2).toString();
-      })()}
-      color={(() => {
-        if (theme.mode === "light") {
-          return info.isNeg
-            ? ColorPalette["orange-400"]
-            : ColorPalette["green-500"];
-        }
-
-        return info.isNeg
-          ? ColorPalette["orange-400"]
-          : ColorPalette["green-400"];
-      })()}
+      color={
+        info.isZero
+          ? ColorPalette["gray-300"]
+          : info.isNeg
+          ? ColorPalette["orange-500"]
+          : ColorPalette["green-500"]
+      }
     >
       <XAxis alignY="center">
         {info.isNeg ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="10"
+            width="7"
+            height="6"
+            viewBox="0 0 7 6"
             fill="none"
-            viewBox="0 0 12 10"
           >
-            <path stroke="currentColor" d="M1 1l4 5.5 2.667-3L11 9" />
+            <path
+              d="M2.6603 5.43792C3.0538 6.05132 3.9502 6.05132 4.3437 5.43792L6.84425 1.53995C7.27121 0.874393 6.79329 0 6.00255 0H1.00145C0.210719 0 -0.267203 0.874392 0.159753 1.53995L2.6603 5.43792Z"
+              fill="currentColor"
+            />
           </svg>
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="10"
+            width="7"
+            height="6"
+            viewBox="0 0 7 6"
             fill="none"
-            viewBox="0 0 12 10"
           >
-            <path stroke="currentColor" d="M1 9l4-5.5 2.667 3L11 1" />
+            <path
+              d="M2.6603 0.460027C3.0538 -0.153374 3.9502 -0.153375 4.3437 0.460026L6.84425 4.358C7.27121 5.02356 6.79329 5.89795 6.00255 5.89795H1.00145C0.210719 5.89795 -0.267203 5.02356 0.159753 4.358L2.6603 0.460027Z"
+              fill="currentColor"
+            />
           </svg>
         )}
-        <Gutter size="0.25rem" />
-        <Caption2>{info.text}</Caption2>
+        <Gutter size="0.125rem" />
+        <Body2 style={{ lineHeight: "120%" }}>{info.text}</Body2>
       </XAxis>
     </Box>
   );

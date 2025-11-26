@@ -48,7 +48,7 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
       return 0;
     }
 
-    const num = Number.parseInt(this._value);
+    const num = Number.parseFloat(this._value);
     if (Number.isNaN(num)) {
       if (this._disallowZeroTxSize) {
         return undefined;
@@ -67,7 +67,7 @@ export class TxSizeConfig extends TxChainSetter implements ITxSizeConfig {
       };
     }
 
-    const num = Number.parseInt(this._value);
+    const num = Number.parseFloat(this._value);
     if (Number.isNaN(num)) {
       return {
         error: new Error("Tx size is not valid number"),

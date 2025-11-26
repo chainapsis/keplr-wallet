@@ -12,21 +12,12 @@ import {
   ChainImageFallback,
   CurrencyImageFallback,
 } from "../../../../components/image";
-import {
-  Subtitle2,
-  Subtitle3,
-  Caption1,
-  Body2,
-} from "../../../../components/typography";
+import { Subtitle3, Caption1 } from "../../../../components/typography";
 import { BottomTagType, TokenItem } from "./index";
 import { PriceChangeTag } from "./price-change-tag";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
-import { ArrowRightIcon } from "../../../../components/icon";
 import { useStore } from "../../../../stores";
 import { useSearchParams } from "react-router-dom";
-import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
-import { useEarnFeature } from "../../../../hooks/use-earn-feature";
-import Color from "color";
 import { IconProps } from "../../../../components/icon/types";
 import { usePriceChange } from "../../../../hooks/use-price-change";
 import { useTokenTag } from "../../../../hooks/use-token-tag";
@@ -35,32 +26,7 @@ import { CopyAddressButton } from "./copy-address-button";
 import { useCopyAddress } from "../../../../hooks/use-copy-address";
 import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { Tooltip } from "../../../../components/tooltip";
-
-const StandaloneEarnBox: FunctionComponent<{
-  bottomTagType?: BottomTagType;
-  earnedAssetPrice?: string;
-}> = observer(({ bottomTagType, earnedAssetPrice }) => {
-  const { message, handleClick } = useEarnFeature(
-    bottomTagType,
-    earnedAssetPrice
-  );
-
-  const theme = useTheme();
-
-  const textColor =
-    theme.mode === "light"
-      ? ColorPalette["green-600"]
-      : ColorPalette["green-400"];
-
-  return (
-    <StyledEarningsBox onClick={handleClick}>
-      <Body2 color={textColor} style={{ textAlign: "center" }}>
-        {message}
-      </Body2>
-      <ArrowRightIcon width="1rem" height="1rem" color={textColor} />
-    </StyledEarningsBox>
-  );
-});
+import { EarnBox } from "./earn-box";
 
 const NestedTokenItemContainer = styled.div<{ tagPosition: string }>`
   background-color: transparent;
@@ -145,14 +111,17 @@ const NestedTokenItem: FunctionComponent<{
         )}
       </Subtitle3>
     );
-  }, [uiConfigStore.hideStringIfPrivacyMode, viewToken.token, theme.mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiConfigStore.isPrivacyMode, viewToken.token, theme.mode]);
 
   const pricePrettyString = useMemo(() => {
     return uiConfigStore.hideStringIfPrivacyMode(
       pricePretty ? pricePretty.inequalitySymbol(true).toString() : "-",
       2
     );
-  }, [uiConfigStore.hideStringIfPrivacyMode, pricePretty]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiConfigStore.isPrivacyMode, pricePretty]);
+
   return (
     <NestedTokenItemContainer
       tagPosition={tagPosition}
@@ -263,9 +232,9 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
 
           <Gutter size="0.75rem" />
 
-          <Stack gutter="0.25rem">
+          <Stack gutter="0.375rem">
             <XAxis alignY="center">
-              <Subtitle2
+              <Subtitle3
                 color={
                   theme.mode === "light"
                     ? ColorPalette["gray-700"]
@@ -273,7 +242,7 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
                 }
               >
                 {coinDenom}
-              </Subtitle2>
+              </Subtitle3>
 
               {price24HChange ? (
                 <React.Fragment>
@@ -324,7 +293,7 @@ const TokenGroupHeader: FunctionComponent<TokenGroupHeaderProps> = observer(
           <Column weight={1} />
 
           <Columns sum={1} gutter="0.25rem" alignY="center">
-            <Stack gutter="0.25rem" alignX="right">
+            <Stack gutter="0.375rem" alignX="right">
               <Subtitle3
                 color={
                   theme.mode === "light"
@@ -477,31 +446,23 @@ export const GroupedTokenItem: FunctionComponent<{
 
     return (
       <div>
-        <WrapperwithBottomTag
-          bottomTagType={bottomTagType}
-          earnedAssetPrice={effectiveEarnedAssetPrice}
-          hideBottomTag={isOpen && !!bottomTagType}
-        >
-          <TokenGroupHeader
-            disabled={disabled}
-            isOpen={isOpen}
-            onClick={handleClick}
-            mainToken={mainToken}
-            tokens={tokens}
-            uniqueChainIds={uniqueChainIds}
-            coinDenom={coinDenom}
-            price24HChange={price24HChange}
-            totalBalance={totalBalance}
-            totalPrice={totalPrice}
-          />
-        </WrapperwithBottomTag>
-
+        <TokenGroupHeader
+          disabled={disabled}
+          isOpen={isOpen}
+          onClick={handleClick}
+          mainToken={mainToken}
+          tokens={tokens}
+          uniqueChainIds={uniqueChainIds}
+          coinDenom={coinDenom}
+          price24HChange={price24HChange}
+          totalBalance={totalBalance}
+          totalPrice={totalPrice}
+        />
         <VerticalCollapseTransition collapsed={!delayedIsOpen}>
           <Styles.ChildrenContainer>
             {tokens.map((token, index) => (
               <Box
                 key={`${token.chainInfo.chainId}-${token.token.currency.coinMinimalDenom}`}
-                marginTop={"0.375rem"}
                 marginBottom={
                   alwaysOpen && index === tokens.length - 1 ? "1rem" : "none"
                 }
@@ -515,17 +476,17 @@ export const GroupedTokenItem: FunctionComponent<{
                 />
               </Box>
             ))}
-
-            {isOpen && bottomTagType && (
-              <Box marginTop="0.375rem">
-                <StandaloneEarnBox
-                  bottomTagType={bottomTagType}
-                  earnedAssetPrice={effectiveEarnedAssetPrice}
-                />
-              </Box>
-            )}
           </Styles.ChildrenContainer>
         </VerticalCollapseTransition>
+
+        {bottomTagType ? (
+          <Box margin="0.25rem 0">
+            <EarnBox
+              bottomTagType={bottomTagType}
+              earnedAssetPrice={effectiveEarnedAssetPrice}
+            />
+          </Box>
+        ) : null}
       </div>
     );
   }
@@ -594,17 +555,10 @@ const Styles = {
     disabled?: boolean;
     isOpen: boolean;
   }>`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-650"]};
-    padding: 0.875rem 1rem;
+    background-color: transparent;
+    padding: 0.875rem 0.5rem;
     border-radius: 0.375rem;
     cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
     position: relative;
 
     &:hover {
@@ -703,26 +657,3 @@ const Styles = {
     font-weight: 400;
   `,
 };
-
-const StyledEarningsBox = styled.div`
-  display: flex;
-  height: 40px;
-  padding: 6px 0px;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  align-self: stretch;
-  border-radius: 6px;
-  background: ${({ theme }) =>
-    theme.mode === "light"
-      ? ColorPalette["green-100"]
-      : Color(ColorPalette["green-600"]).alpha(0.2).toString()};
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${({ theme }) =>
-      theme.mode === "light"
-        ? Color(ColorPalette["green-200"]).alpha(0.5).toString()
-        : Color(ColorPalette["green-600"]).alpha(0.15).toString()};
-  }
-`;

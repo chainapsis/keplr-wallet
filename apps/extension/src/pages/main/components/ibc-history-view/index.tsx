@@ -293,7 +293,7 @@ const IbcHistoryViewItem: FunctionComponent<{
   return (
     <Box
       padding="1.25rem"
-      borderRadius="0.375rem"
+      borderRadius="1.25rem"
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }
@@ -829,7 +829,7 @@ const SkipHistoryViewItem: FunctionComponent<{
   return (
     <Box
       padding="1.25rem"
-      borderRadius="0.375rem"
+      borderRadius="1.25rem"
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }

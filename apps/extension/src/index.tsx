@@ -88,16 +88,17 @@ import { useTheme } from "styled-components";
 import { PageChangeScrollTop } from "./use-page-change-scroll-top";
 import { IBCSwapPage } from "./pages/ibc-swap";
 import {
-  BottomTabActivityIcon,
+  BottomTabHistoryIcon,
   BottomTabHomeIcon,
-  BottomTabSettingIcon,
+  BottomTabSettingsIcon,
   BottomTabsRouteProvider,
+  BottomTabStakeIcon,
   BottomTabSwapIcon,
 } from "./bottom-tabs";
 import { IBCSwapDestinationSelectAssetPage } from "./pages/ibc-swap/select-asset";
 import { RoutePageAnalytics } from "./route-page-analytics";
 import { useIntl } from "react-intl";
-import { ActivitiesPage } from "./pages/activities";
+import { HistoryPage } from "./pages/history";
 import { isRunningInSidePanel } from "./utils";
 import { StarknetSendPage } from "./pages/starknet/send";
 import { SignStarknetTxPage } from "./pages/starknet/sign/tx";
@@ -120,6 +121,9 @@ import { EarnOverviewPage } from "./pages/earn/overview";
 import { EarnWithdrawAmountPage } from "./pages/earn/withdraw/amount";
 import { AboutKeplrPage } from "./pages/setting/about";
 import { HistoryDetailPage } from "./pages/history-detail";
+import { StakePage } from "./pages/stake";
+import { StakeExplorePage } from "./pages/stake/explore";
+import { StakeEmptyPage } from "./pages/stake/empty";
 
 configure({
   enforceActions: "always", // Make mobx to strict mode.
@@ -354,14 +358,22 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
         tabs={[
           {
             pathname: "/",
-            icon: <BottomTabHomeIcon width="1.75rem" height="1.75rem" />,
+            icon: <BottomTabHomeIcon width="1.5rem" height="1.5rem" />,
             text: intl.formatMessage({
               id: "bottom-tabs.home",
             }),
           },
+
+          {
+            pathname: "/stake",
+            icon: <BottomTabStakeIcon width="1.5rem" height="1.5rem" />,
+            text: intl.formatMessage({
+              id: "bottom-tabs.stake",
+            }),
+          },
           {
             pathname: "/ibc-swap",
-            icon: <BottomTabSwapIcon width="1.75rem" height="1.75rem" />,
+            icon: <BottomTabSwapIcon width="1.5rem" height="1.5rem" />,
             text: intl.formatMessage({
               id: "bottom-tabs.swap",
             }),
@@ -382,15 +394,15 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             })(),
           },
           {
-            pathname: "/activities",
-            icon: <BottomTabActivityIcon width="1.75rem" height="1.75rem" />,
+            pathname: "/history",
+            icon: <BottomTabHistoryIcon width="1.5rem" height="1.5rem" />,
             text: intl.formatMessage({
-              id: "bottom-tabs.activity",
+              id: "bottom-tabs.history",
             }),
           },
           {
             pathname: "/setting",
-            icon: <BottomTabSettingIcon width="1.75rem" height="1.75rem" />,
+            icon: <BottomTabSettingsIcon width="1.5rem" height="1.5rem" />,
             text: intl.formatMessage({
               id: "bottom-tabs.settings",
             }),
@@ -421,7 +433,10 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
                 path="/ibc-swap/select-destination"
                 element={<IBCSwapDestinationSelectAssetPage />}
               />
-              <Route path="/activities" element={<ActivitiesPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/stake" element={<StakePage />} />
+              <Route path="/stake/explore" element={<StakeExplorePage />} />
+              <Route path="/stake/empty" element={<StakeEmptyPage />} />
               <Route
                 path="/manage-view-asset-token-list"
                 element={<ManageViewAssetTokenListPage />}

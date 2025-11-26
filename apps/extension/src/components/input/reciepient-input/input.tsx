@@ -89,7 +89,7 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             })(),
           })}
           value={recipientConfig.value}
-          textSuffix={(() => {
+          suffix={(() => {
             if ("nameServiceResult" in recipientConfig) {
               const r = recipientConfig.nameServiceResult;
               if (r.length > 0) {

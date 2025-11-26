@@ -13,6 +13,7 @@ import { useInteractionInfo } from "../../../hooks";
 import { InteractionWaitingData } from "@keplr-wallet/background";
 import { useIntl } from "react-intl";
 import { handleExternalInteractionWithNoProceedNext } from "../../../utils";
+import { stringLengthByGrapheme } from "../../../utils/string";
 
 const Styles = {
   Container: styled(Stack)`
@@ -112,6 +113,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
       onSubmit={handleSubmit(async (data) => {
         try {
           if (vaultId) {
+            const trimmedName = data.name.trim();
             if (
               interactionInfo.interaction &&
               !interactionInfo.interactionInternal
@@ -120,7 +122,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
                 interactionStore
                   .getAllData("change-keyring-name")
                   .map((data) => data.id),
-                data.name,
+                trimmedName,
                 (proceedNext) => {
                   if (!proceedNext) {
                     handleExternalInteractionWithNoProceedNext();
@@ -128,7 +130,7 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
                 }
               );
             } else {
-              await keyRingStore.changeKeyRingName(vaultId, data.name);
+              await keyRingStore.changeKeyRingName(vaultId, trimmedName);
 
               navigate(-1);
             }
@@ -153,7 +155,30 @@ export const WalletChangeNamePage: FunctionComponent = observer(() => {
           })}
           error={errors.name && errors.name.message}
           disabled={notEditable}
-          {...register("name", { required: true })}
+          {...(() => {
+            const { ...rest } = register("name", {
+              required: intl.formatMessage({
+                id: "page.wallet.change-name.min-length-error",
+              }),
+              validate: (value) => {
+                const trimmedValue = value.trim();
+                if (stringLengthByGrapheme(trimmedValue) < 4) {
+                  return intl.formatMessage({
+                    id: "page.wallet.change-name.min-length-error",
+                  });
+                }
+                return true;
+              },
+            });
+            return {
+              ...rest,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+                const trimmedStartValue = value.trimStart();
+                setValue("name", trimmedStartValue, { shouldValidate: true });
+              },
+            };
+          })()}
         />
       </Styles.Container>
     </HeaderLayout>

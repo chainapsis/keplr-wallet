@@ -59,10 +59,10 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
     <Stack>
       <Box
         marginBottom="0.5rem"
-        paddingX="0.375rem"
         onClick={(e) => {
           e.preventDefault();
         }}
+        paddingX="0.25rem"
       >
         <Columns sum={1} alignY="center">
           <Subtitle4
@@ -82,7 +82,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         </Columns>
       </Box>
 
-      <Stack gutter="0.5rem">{alwaysShown}</Stack>
+      <Stack>{alwaysShown}</Stack>
 
       <VerticalCollapseTransition
         collapsed={isCollapsed}
@@ -96,8 +96,7 @@ export const CollapsibleList: FunctionComponent<CollapsibleListProps> = ({
         notRenderHiddenItemsIsClosing ||
         !isCollapsed ? (
           <React.Fragment>
-            <Gutter size="0.5rem" />
-            <Stack gutter="0.5rem">{hidden}</Stack>
+            <Stack>{hidden}</Stack>
           </React.Fragment>
         ) : null}
       </VerticalCollapseTransition>
