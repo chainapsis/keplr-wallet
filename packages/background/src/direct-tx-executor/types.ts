@@ -76,7 +76,7 @@ export interface DirectTxsExecutionData {
   readonly timestamp: number; // Timestamp when execution started
 }
 
-// Execution result
+// Execution result (summary of the execution data)
 export interface DirectTxsExecutionResult {
   readonly id: string;
   readonly txs: {
