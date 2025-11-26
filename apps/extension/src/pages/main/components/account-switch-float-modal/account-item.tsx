@@ -219,12 +219,13 @@ export const AccountItemSwitchModal = observer(
                   <React.Fragment>
                     <Gutter size="0.375rem" />
                     <Tooltip
+                      hideArrow={true}
                       content={
                         <Caption2 color={ColorPalette["white"]}>
                           {icnsPrimaryName}
                         </Caption2>
                       }
-                      allowedPlacements={["top", "bottom"]}
+                      allowedPlacements={["top", "bottom", "right"]}
                     >
                       <Image
                         alt="icns-icon"
