@@ -58,7 +58,9 @@ export const RewardsCard: FunctionComponent<{
 
   useEffect(() => {
     if (initialExpand) {
-      setIsExpanded(true);
+      setTimeout(() => {
+        setIsExpanded(true);
+      }, 250);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

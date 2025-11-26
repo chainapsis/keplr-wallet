@@ -700,7 +700,7 @@
 
   "page.main.components.context-menu.title": "View Options",
   "page.main.components.context-menu.tooltip-title": "New",
-  "page.main.components.context-menu.tooltip-paragraph": "Tired of cluttered asset lists?{br}Try Smart Grouping (Beta)!",
+  "page.main.components.context-menu.tooltip-paragraph": "Tired of cluttered asset lists?{br}Try Smart Grouping!",
   "page.main.components.context-menu.hide-low-balance": "Hide Low Balances",
   "page.main.components.context-menu.manage-asset-list": "Manage Asset List",
   "page.main.components.context-menu.smart-grouping": "Smart Grouping",

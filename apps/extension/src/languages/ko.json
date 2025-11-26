@@ -681,7 +681,7 @@
 
   "page.main.components.context-menu.title": "자산 보기 설정",
   "page.main.components.context-menu.tooltip-title": "신규",
-  "page.main.components.context-menu.tooltip-paragraph": "흩어진 자산을 한 눈에!{br}스마트 그루핑 기능(베타) 출시",
+  "page.main.components.context-menu.tooltip-paragraph": "흩어진 자산을 한 눈에!{br}스마트 그루핑 기능을 사용해보세요!",
   "page.main.components.context-menu.hide-low-balance": "소액 숨기기",
   "page.main.components.context-menu.smart-grouping": "Smart Grouping",
   "page.main.components.context-menu.manage-asset-list": "자산 표시 관리",
