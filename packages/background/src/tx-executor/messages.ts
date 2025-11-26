@@ -53,7 +53,6 @@ export class ResumeDirectTxsMsg extends Message<void> {
 
   constructor(
     public readonly id: string,
-    public readonly vaultId: string,
     public readonly txIndex: number,
     // NOTE: these fields are optional for hardware wallet cases
     public readonly signedTx?: Uint8Array,
@@ -66,11 +65,17 @@ export class ResumeDirectTxsMsg extends Message<void> {
     if (!this.id) {
       throw new KeplrError("direct-tx-executor", 101, "id is empty");
     }
-    if (!this.vaultId) {
-      throw new KeplrError("direct-tx-executor", 102, "vaultId is empty");
-    }
     if (!this.txIndex) {
       throw new KeplrError("direct-tx-executor", 103, "txIndex is empty");
+    }
+
+    // signedTx and signature should be provided together
+    if (this.signedTx && !this.signature) {
+      throw new KeplrError("direct-tx-executor", 104, "signature is empty");
+    }
+
+    if (!this.signedTx && this.signature) {
+      throw new KeplrError("direct-tx-executor", 105, "signedTx is empty");
     }
   }
 

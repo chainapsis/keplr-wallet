@@ -131,24 +131,34 @@ export class BackgroundTxExecutorService {
    * Execute single specific transaction by execution id and transaction index
    * Tx hash is returned if the transaction is executed successfully
    */
+  @action
   async resumeDirectTxs(
     env: Env,
-    _id: string,
-    _vaultId: string,
-    _txIndex: number,
-    _signedTx?: Uint8Array,
-    _signature?: Uint8Array
+    id: string,
+    txIndex: number,
+    signedTx?: Uint8Array,
+    signature?: Uint8Array
   ): Promise<void> {
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
 
-    // TODO: implement
-    throw new Error("Not implemented");
+    return await this.executeDirectTxs(id, {
+      txIndex,
+      signedTx,
+      signature,
+    });
   }
 
-  protected async executeDirectTxs(id: string): Promise<void> {
+  protected async executeDirectTxs(
+    id: string,
+    options?: {
+      txIndex?: number;
+      signedTx?: Uint8Array;
+      signature?: Uint8Array;
+    }
+  ): Promise<void> {
     const batch = this.getDirectTxsBatch(id);
     if (!batch) {
       return;
@@ -171,13 +181,13 @@ export class BackgroundTxExecutorService {
       throw new KeplrError("direct-tx-executor", 102, "Key info not found");
     }
 
-    const txIndex = Math.min(
-      batch.txIndex < 0 ? 0 : batch.txIndex,
+    const currentTxIndex = Math.min(
+      options?.txIndex ?? batch.txIndex < 0 ? 0 : batch.txIndex,
       batch.txs.length - 1
     );
-    let nextTxIndex = txIndex;
+    let nextTxIndex = currentTxIndex;
 
-    const currentTx = batch.txs[txIndex];
+    const currentTx = batch.txs[currentTxIndex];
     if (!currentTx) {
       throw new KeplrError("direct-tx-executor", 103, "Tx not found");
     }
@@ -200,7 +210,7 @@ export class BackgroundTxExecutorService {
     // if the current transaction is already confirmed,
     // should start the next transaction execution
     if (currentTx.status === DirectTxStatus.CONFIRMED) {
-      nextTxIndex = txIndex + 1;
+      nextTxIndex = currentTxIndex + 1;
     }
 
     // if tx index is out of range, the execution should be completed
@@ -214,15 +224,26 @@ export class BackgroundTxExecutorService {
       batch.status = DirectTxsBatchStatus.PROCESSING;
     }
 
-    for (let i = txIndex; i < batch.txs.length; i++) {
+    for (let i = nextTxIndex; i < batch.txs.length; i++) {
       // CHECK: multi tx 케이스인 경우, 연속해서 실행할 수 없는 상황이 발생할 수 있음...
-      await this.executePendingDirectTx(id, i);
+      if (options?.txIndex != null && i === options.txIndex) {
+        await this.executePendingDirectTx(id, i, {
+          signedTx: options.signedTx,
+          signature: options.signature,
+        });
+      } else {
+        await this.executePendingDirectTx(id, i);
+      }
     }
   }
 
   protected async executePendingDirectTx(
     id: string,
-    index: number
+    index: number,
+    _options?: {
+      signedTx?: Uint8Array;
+      signature?: Uint8Array;
+    }
   ): Promise<void> {
     const batch = this.getDirectTxsBatch(id);
     if (!batch) {

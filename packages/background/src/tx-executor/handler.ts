@@ -65,7 +65,6 @@ const handleResumeDirectTxsMsg: (
     return await service.resumeDirectTxs(
       env,
       msg.id,
-      msg.vaultId,
       msg.txIndex,
       msg.signedTx,
       msg.signature
