@@ -1,21 +1,24 @@
 import { Router } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
-import { DirectTxExecutorService } from "./service";
+import { BackgroundTxExecutorService } from "./service";
 import {
   RecordAndExecuteDirectTxsMsg,
-  GetDirectTxsExecutionDataMsg,
-  ExecuteDirectTxMsg,
-  CancelDirectTxsExecutionMsg,
-  GetDirectTxsExecutionResultMsg,
+  ResumeDirectTxsMsg,
+  CancelDirectTxsMsg,
+  GetDirectTxsBatchMsg,
+  GetDirectTxsBatchResultMsg,
 } from "./messages";
 
-export function init(router: Router, service: DirectTxExecutorService): void {
+export function init(
+  router: Router,
+  service: BackgroundTxExecutorService
+): void {
   router.registerMessage(RecordAndExecuteDirectTxsMsg);
-  router.registerMessage(ExecuteDirectTxMsg);
-  router.registerMessage(GetDirectTxsExecutionDataMsg);
-  router.registerMessage(GetDirectTxsExecutionResultMsg);
-  router.registerMessage(CancelDirectTxsExecutionMsg);
+  router.registerMessage(ResumeDirectTxsMsg);
+  router.registerMessage(GetDirectTxsBatchMsg);
+  router.registerMessage(GetDirectTxsBatchResultMsg);
+  router.registerMessage(CancelDirectTxsMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

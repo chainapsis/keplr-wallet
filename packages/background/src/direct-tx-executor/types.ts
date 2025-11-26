@@ -4,11 +4,13 @@ import { StdSignDoc, StdSignature } from "@keplr-wallet/types";
 export enum DirectTxStatus {
   PENDING = "pending",
   SIGNING = "signing",
+  SIGNED = "signed",
   BROADCASTING = "broadcasting",
-  WAITING = "waiting",
-  COMPLETED = "completed",
-  FAILED = "failed",
+  BROADCASTED = "broadcasted",
+  CONFIRMED = "confirmed",
+  REVERTED = "reverted",
   CANCELLED = "cancelled",
+  FAILED = "failed",
 }
 
 // Transaction type
@@ -47,7 +49,7 @@ export interface DirectTx {
   error?: string;
 }
 
-export enum DirectTxsExecutionStatus {
+export enum DirectTxsBatchStatus {
   PENDING = "pending",
   PROCESSING = "processing",
   COMPLETED = "completed",
@@ -55,16 +57,16 @@ export enum DirectTxsExecutionStatus {
   CANCELLED = "cancelled",
 }
 
-export interface DirectTxsExecutionData {
+export interface DirectTxsBatch {
   readonly id: string;
-  status: DirectTxsExecutionStatus;
+  status: DirectTxsBatchStatus;
 
   // keyring vault id
   readonly vaultId: string;
 
   // transactions
   readonly txs: DirectTx[];
-  currentTxIndex: number; // Current transaction being processed
+  txIndex: number; // Current transaction being processed
 
   // swap history id after record swap history
   swapHistoryId?: string;
@@ -77,12 +79,12 @@ export interface DirectTxsExecutionData {
 }
 
 // Execution result (summary of the execution data)
-export interface DirectTxsExecutionResult {
+export interface DirectTxsBatchResult {
   readonly id: string;
   readonly txs: {
     chainId: string;
     txHash?: string;
+    error?: string;
   }[];
   readonly swapHistoryId?: string;
-  readonly error?: string;
 }
