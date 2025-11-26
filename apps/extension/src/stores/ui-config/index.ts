@@ -56,7 +56,7 @@ export class UIConfigStore {
   @observable
   protected _options: UIConfigOptions = {
     isDeveloperMode: false,
-    assetViewMode: "flat",
+    assetViewMode: "grouped",
     hideLowBalance: false,
     showFiatValue: true,
     isPrivacyMode: false,
