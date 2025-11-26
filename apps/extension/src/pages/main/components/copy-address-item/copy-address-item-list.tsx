@@ -45,7 +45,7 @@ export const CopyAddressItemList = ({
   containerStyle,
   copyItemAddressHoverColor,
 }: CopyAddressItemListProps) => {
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const itemContainerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const itemHandlesRef = useRef<(CopyAddressItemHandle | null)[]>([]);
@@ -78,12 +78,15 @@ export const CopyAddressItemList = ({
     [sortedAddresses]
   );
 
+  const previousTrimSearchRef = useRef("");
+
   // keyDown addEventListener를 마운트 될때 한번 등록하기 위해서
   // 관련 상태를 ref로 관리함
   const focusedIndexRef = useRef<number | null>(focusedIndex);
   const maxIndexRef = useRef<number>(0);
   const hoveredIndexRef = useRef<number | null>(hoveredIndex);
   const blockInteractionRef = useRef<boolean>(blockInteraction);
+
   useEffect(() => {
     focusedIndexRef.current = focusedIndex;
     maxIndexRef.current = flattenedAddresses.length - 1;
@@ -116,8 +119,12 @@ export const CopyAddressItemList = ({
       setFocusOrigin("search");
       setFocusedIndex(0);
     } else {
-      setFocusedIndex(null);
+      if (previousTrimSearchRef.current.length > 0) {
+        setFocusedIndex(null);
+      }
     }
+
+    previousTrimSearchRef.current = search.trim();
 
     setHoveredIndex(null);
   }, [search, flattenedAddresses.length]);
@@ -295,7 +302,7 @@ export const EnterTag = () => {
                 : ColorPalette["gray-200"],
           }}
         >
-          Ent
+          Enter
         </div>
         <_EnterIcon
           color={
