@@ -2107,7 +2107,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             shouldTopUp && remainingText
               ? remainingText
               : intl.formatMessage({
-                  id: "page.ibc-swap.button.next",
+                  id: "page.ibc-swap.button.swap",
                 })
           }
           color="primary"
