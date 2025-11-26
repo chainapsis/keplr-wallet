@@ -310,7 +310,11 @@ export const SceneTransitionBase = forwardRef<
 export const SceneTransitionBaseInner: FunctionComponent<
   Pick<
     SceneTransitionBaseProps,
-    "width" | "scenes" | "transitionAlign" | "transitionMode"
+    | "width"
+    | "scenes"
+    | "transitionAlign"
+    | "transitionMode"
+    | "transitionContainerStyle"
   > &
     ReturnType<typeof useSceneTransitionBase>
 > = ({
@@ -326,6 +330,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
   stack,
   notDetachedStackNames,
   registry,
+  transitionContainerStyle,
 }) => {
   return (
     <SceneTransitionContextBase.Provider
@@ -344,6 +349,7 @@ export const SceneTransitionBaseInner: FunctionComponent<
       }}
     >
       <VerticalResizeTransition
+        style={transitionContainerStyle}
         width={width}
         transitionAlign={transitionAlign}
         registry={registry}

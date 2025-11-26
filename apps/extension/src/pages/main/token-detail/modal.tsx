@@ -42,6 +42,7 @@ import { FormattedMessage } from "react-intl";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { MintPhotonButton } from "./mint-photon-button";
 import { ModularChainInfo } from "@keplr-wallet/types";
+import Joi from "joi";
 
 const Styles = {
   Container: styled.div`
@@ -586,17 +587,18 @@ export const TokenDetailModal: FunctionComponent<{
 
           {(() => {
             if ("cosmos" in modularChainInfo) {
-              const modularChainInfoImpl =
-                chainStore.getModularChainInfoImpl(chainId);
-
               if (validateIsUsdcFromNoble(currency, chainId)) {
                 return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
               }
 
               if (
-                modularChainInfoImpl.stakeCurrency &&
-                modularChainInfoImpl.stakeCurrency.coinMinimalDenom ===
-                  currency.coinMinimalDenom
+                modularChainInfo.cosmos.stakeCurrency &&
+                modularChainInfo.cosmos.stakeCurrency.coinMinimalDenom ===
+                  currency.coinMinimalDenom &&
+                modularChainInfo.cosmos.walletUrlForStaking &&
+                !Joi.string()
+                  .uri()
+                  .validate(modularChainInfo.cosmos.walletUrlForStaking).error
               ) {
                 return (
                   <React.Fragment>

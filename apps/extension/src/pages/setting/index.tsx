@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
 import { Box } from "../../components/box";
-import { MainHeaderLayout } from "../main/layouts/header";
 import {
   Body2,
   Body3,
@@ -35,6 +34,9 @@ import { Tooltip } from "../../components/tooltip";
 import { useTheme } from "styled-components";
 import { version } from "../../../package.json";
 import { useIntl } from "react-intl";
+import { HeaderLayout } from "../../layouts/header";
+import { BackButton } from "../../layouts/header/components";
+import { useGetIcnsName } from "../../hooks/use-get-icns-name";
 
 export const SettingPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -99,7 +101,10 @@ export const SettingPage: FunctionComponent = observer(() => {
   const hasSearchText = searchText.trim().length > 0;
 
   return (
-    <MainHeaderLayout>
+    <HeaderLayout
+      title={intl.formatMessage({ id: "page.setting.title" })}
+      left={<BackButton />}
+    >
       <Box paddingTop="1rem">
         <Box paddingX="1rem">
           <SearchTextInput
@@ -246,12 +251,6 @@ export const SettingPage: FunctionComponent = observer(() => {
                           setIsOpen: () => {
                             toggleSidePanelMode(!sidePanelEnabled, (res) => {
                               setSidePanelEnabled(res);
-
-                              if (res) {
-                                uiConfigStore.setShowNewSidePanelHeaderTop(
-                                  false
-                                );
-                              }
                             });
                           },
                         },
@@ -426,7 +425,7 @@ export const SettingPage: FunctionComponent = observer(() => {
           </Box>
         )}
       </Box>
-    </MainHeaderLayout>
+    </HeaderLayout>
   );
 });
 
@@ -438,34 +437,17 @@ const TopSection: FunctionComponent<{
     onClick?: () => void;
   }[];
 }> = observer(({ items }) => {
-  const {
-    chainStore,
-    accountStore,
-    queriesStore,
-    keyRingStore,
-    uiConfigStore,
-    hugeQueriesStore,
-  } = useStore();
+  const { accountStore, keyRingStore, uiConfigStore, hugeQueriesStore } =
+    useStore();
 
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const icnsPrimaryName = (() => {
-    if (
-      uiConfigStore.icnsInfo &&
-      chainStore
-        .getModularChainInfoImpl(uiConfigStore.icnsInfo.chainId)
-        .matchModule("cosmos")
-    ) {
-      const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);
-      const icnsQuery = queries.icns.queryICNSNames.getQueryContract(
-        uiConfigStore.icnsInfo.resolverContractAddress,
-        accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
-      );
-
-      return icnsQuery.primaryName.split(".")[0];
-    }
-  })();
+  const icnsPrimaryName = useGetIcnsName(
+    uiConfigStore.icnsInfo?.chainId
+      ? accountStore.getAccount(uiConfigStore.icnsInfo.chainId).bech32Address
+      : undefined
+  );
 
   const disabledViewAssetTokenMap =
     uiConfigStore.manageViewAssetTokenConfig.getViewAssetTokenMapByVaultId(
@@ -603,6 +585,12 @@ const TopSection: FunctionComponent<{
                     ? ColorPalette["gray-700"]
                     : ColorPalette["gray-10"]
                 }
+                style={{
+                  maxWidth: "14rem",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
               >
                 {keyRingStore.selectedKeyInfo?.name || "Keplr Account"}
               </Subtitle3>

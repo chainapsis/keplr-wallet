@@ -12,8 +12,8 @@ import { Column, Columns } from "../../../../components/column";
 import { observer } from "mobx-react-lite";
 import { ViewToken } from "../../index";
 import {
+  Body3,
   Caption1,
-  Subtitle2,
   Subtitle3,
   Subtitle4,
 } from "../../../../components/typography";
@@ -35,59 +35,11 @@ import { WrongViewingKeyError } from "@keplr-wallet/stores";
 import { useNavigate } from "react-router";
 import { Secret20Currency } from "@keplr-wallet/types";
 import { FormattedMessage, useIntl } from "react-intl";
-import { WrapperwithBottomTag } from "./wrapper-with-bottom-tag";
 import { usePriceChange } from "../../../../hooks/use-price-change";
 import { PriceChangeTag } from "./price-change-tag";
 import { TokenTag } from "./token-tag";
 import { CopyAddressButton } from "./copy-address-button";
-
-const Styles = {
-  Container: styled.div<{
-    forChange: boolean | undefined;
-    isError: boolean;
-    disabled?: boolean;
-    disableHoverStyle?: boolean;
-    isNotReady?: boolean;
-  }>`
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? props.isNotReady
-          ? ColorPalette["skeleton-layer-0"]
-          : ColorPalette.white
-        : ColorPalette["gray-650"]};
-    padding: ${({ forChange }) =>
-      forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "0.875rem 1rem"};
-    border-radius: 0.375rem;
-    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-
-    border: ${({ isError }) =>
-      isError
-        ? `1.5px solid ${Color(ColorPalette["yellow-400"])
-            .alpha(0.5)
-            .toString()}`
-        : undefined};
-
-    box-shadow: ${(props) =>
-      props.theme.mode === "light" && !props.isNotReady
-        ? "0px 1px 4px 0px rgba(43, 39, 55, 0.10)"
-        : "none"};
-
-    ${({ disabled, theme, disableHoverStyle }) => {
-      if (!disableHoverStyle && !disabled) {
-        return css`
-          &:hover {
-            background-color: ${theme.mode === "light"
-              ? ColorPalette["gray-10"]
-              : ColorPalette["gray-600"]};
-          }
-        `;
-      }
-    }}
-  `,
-  IconContainer: styled.div`
-    color: ${ColorPalette["gray-300"]};
-  `,
-};
+import { EarnBox } from "./earn-box";
 
 export const TokenTitleView: FunctionComponent<{
   title: string;
@@ -106,10 +58,7 @@ export const TokenTitleView: FunctionComponent<{
       <Columns sum={1} alignY="center">
         <Subtitle4
           style={{
-            color:
-              theme.mode === "light"
-                ? ColorPalette["gray-500"]
-                : ColorPalette["gray-200"],
+            color: ColorPalette["gray-300"],
           }}
         >
           {title}
@@ -169,6 +118,7 @@ interface TokenItemProps {
 
   // If this prop is provided, the token item will be shown with loading state.
   isLoading?: boolean;
+  stakingApr?: string;
 }
 
 export const TokenItem: FunctionComponent<TokenItemProps> = observer(
@@ -188,6 +138,7 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
     earnedAssetPrice,
     noTokenTag,
     isLoading,
+    stakingApr,
   }) => {
     const { priceStore, uiConfigStore } = useStore();
     const navigate = useNavigate();
@@ -279,17 +230,21 @@ export const TokenItem: FunctionComponent<TokenItemProps> = observer(
         price24HChange={price24HChange}
         tag={tokenTag}
         isLoading={isLoading}
+        stakingApr={stakingApr}
       />
     );
 
     if (bottomTagType) {
       return (
-        <WrapperwithBottomTag
-          bottomTagType={bottomTagType as BottomTagType}
-          earnedAssetPrice={earnedAssetPrice}
-        >
+        <React.Fragment>
           {content}
-        </WrapperwithBottomTag>
+          <Box margin="0.25rem 0">
+            <EarnBox
+              bottomTagType={bottomTagType}
+              earnedAssetPrice={earnedAssetPrice}
+            />
+          </Box>
+        </React.Fragment>
       );
     }
 
@@ -323,6 +278,7 @@ interface TokenItemContentProps {
     tooltip?: string;
   };
   isLoading?: boolean;
+  stakingApr?: string;
 }
 
 const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
@@ -347,6 +303,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
   pricePretty,
   price24HChange,
   tag,
+  stakingApr,
 }) => (
   <Styles.Container
     forChange={forChange}
@@ -403,10 +360,10 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
 
       <Gutter size="0.75rem" />
 
-      <Stack gutter="0.25rem">
+      <Stack gutter="0.375rem">
         <XAxis alignY="center">
           <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
-            <Subtitle2
+            <Subtitle3
               color={
                 theme.mode === "light"
                   ? ColorPalette["gray-700"]
@@ -420,8 +377,27 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
                 .hideAmount(true)
                 .hideIBCMetadata(true)
                 .toString()}
-            </Subtitle2>
+            </Subtitle3>
           </Skeleton>
+
+          {stakingApr ? (
+            <React.Fragment>
+              <Gutter size="0.25rem" />
+              <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4rem">
+                <Caption1
+                  style={{
+                    color: ColorPalette["gray-300"],
+                    fontSize: "0.875rem",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    lineHeight: "120%",
+                  }}
+                >
+                  {stakingApr}
+                </Caption1>
+              </Skeleton>
+            </React.Fragment>
+          ) : null}
 
           {price24HChange ? (
             <React.Fragment>
@@ -487,11 +463,11 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
           }}
         >
           <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="4.5rem">
-            <Caption1 style={{ color: ColorPalette["gray-300"] }}>
+            <Body3 style={{ color: ColorPalette["gray-300"] }}>
               {isIBC
                 ? `on ${viewToken.chainInfo.chainName}`
                 : viewToken.chainInfo.chainName}
-            </Caption1>
+            </Body3>
           </Skeleton>
           <XAxis>
             {tag ? (
@@ -517,7 +493,7 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
       <Column weight={1} />
 
       <Columns sum={1} gutter="0.25rem" alignY="center">
-        <Stack gutter="0.25rem" alignX="right">
+        <Stack gutter="0.375rem" alignX="right">
           {!hideBalance ? (
             <Skeleton layer={1} isNotReady={isNotReady} dummyMinWidth="3.25rem">
               <Subtitle3
@@ -603,6 +579,44 @@ const TokenItemContent: FunctionComponent<TokenItemContentProps> = ({
     </Columns>
   </Styles.Container>
 );
+
+const Styles = {
+  Container: styled.div<{
+    forChange: boolean | undefined;
+    isError: boolean;
+    disabled?: boolean;
+    disableHoverStyle?: boolean;
+    isNotReady?: boolean;
+  }>`
+    background-color: transparent;
+    padding: ${({ forChange }) =>
+      forChange ? "0.875rem 0.25rem 0.875rem 1rem" : "0.875rem 0.5rem"};
+    border-radius: 0.375rem;
+    cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+
+    border: ${({ isError }) =>
+      isError
+        ? `1.5px solid ${Color(ColorPalette["yellow-400"])
+            .alpha(0.5)
+            .toString()}`
+        : undefined};
+
+    ${({ disabled, theme, disableHoverStyle }) => {
+      if (!disableHoverStyle && !disabled) {
+        return css`
+          &:hover {
+            background-color: ${theme.mode === "light"
+              ? ColorPalette["gray-50"]
+              : ColorPalette["gray-650"]};
+          }
+        `;
+      }
+    }}
+  `,
+  IconContainer: styled.div`
+    color: ${ColorPalette["gray-300"]};
+  `,
+};
 
 const ErrorIcon: FunctionComponent<{
   size: string;

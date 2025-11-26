@@ -19,6 +19,8 @@ import { Stack } from "../../../../components/stack";
 import { NativeChainMarkIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
 import { convertModularChainInfoToChainInfo } from "@keplr-wallet/common";
+import { useKeyCoinTypeFinalize } from "../../../manage-chains/hooks/use-key-coin-type-finalize";
+import { determineLedgerApp } from "../../../../utils/determine-ledger-app";
 
 export const LookingForChains: FunctionComponent<{
   lookingForChains: {
@@ -59,10 +61,13 @@ export const LookingForChainItem: FunctionComponent<{
   stored: boolean;
 }> = observer(({ chainInfo, embedded, stored }) => {
   const { analyticsStore, keyRingStore, chainStore } = useStore();
-  const keyType = keyRingStore.selectedKeyInfo?.type;
   const intl = useIntl();
   const theme = useTheme();
   const navigate = useNavigate();
+
+  const { needFinalizeKeyCoinTypeAction } = useKeyCoinTypeFinalize();
+
+  const chainId = chainInfo.chainId;
 
   return (
     <Box
@@ -134,21 +139,23 @@ export const LookingForChainItem: FunctionComponent<{
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {
               try {
-                const convertedChainInfo =
-                  convertModularChainInfoToChainInfo(chainInfo);
+                if ("bech32Config" in chainInfo) {
+                  const convertedChainInfo =
+                    convertModularChainInfoToChainInfo(chainInfo);
 
-                if (!convertedChainInfo) {
-                  return;
+                  if (!convertedChainInfo) {
+                    return;
+                  }
+
+                  await window.keplr?.experimentalSuggestChain(
+                    convertedChainInfo
+                  );
+                  await keyRingStore.refreshKeyRingStatus();
+                  await chainStore.updateChainInfosFromBackground();
+                  await chainStore.updateEnabledChainIdentifiersFromBackground();
+
+                  dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
                 }
-
-                await window.keplr?.experimentalSuggestChain(
-                  convertedChainInfo
-                );
-                await keyRingStore.refreshKeyRingStatus();
-                await chainStore.updateChainInfosFromBackground();
-                await chainStore.updateEnabledChainIdentifiersFromBackground();
-
-                dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
               } catch {
                 return;
               }
@@ -160,42 +167,38 @@ export const LookingForChainItem: FunctionComponent<{
                 chainName: chainInfo.chainName,
               });
 
-              if (keyType === "ledger") {
-                const isStarknet = "starknet" in chainInfo;
-                const isBitcoin = "bitcoin" in chainInfo;
+              if (
+                chainStore.hasModularChain(chainId) &&
+                chainStore
+                  .getModularChainInfoImpl(chainId)
+                  .matchModule("cosmos")
+              ) {
+                const needModal = await needFinalizeKeyCoinTypeAction(
+                  keyRingStore.selectedKeyInfo.id,
+                  chainInfo
+                );
 
-                if (isStarknet || isBitcoin) {
-                  browser.tabs.create({
-                    url: `/register.html#?route=enable-chains&vaultId=${
-                      keyRingStore.selectedKeyInfo.id
-                    }&skipWelcome=true&initialSearchValue=${
-                      chainInfo.chainName
-                    }&${
-                      isStarknet
-                        ? "fallbackStarknetLedgerApp=true"
-                        : "fallbackBitcoinLedgerApp=true"
-                    }`,
-                  });
-                  return;
+                if (!needModal) {
+                  await chainStore.enableChainInfoInUI(chainInfo.chainId);
                 }
               }
 
-              const isEthereumChain = chainStore.isEvmOrEthermintLikeChain(
-                chainInfo.chainId
-              );
+              if (chainStore.hasModularChain(chainId)) {
+                if (keyRingStore.selectedKeyInfo?.type === "ledger") {
+                  const ledgerApp = determineLedgerApp(
+                    chainStore,
+                    chainInfo,
+                    chainId
+                  );
 
-              if (keyType === "ledger" && isEthereumChain) {
-                browser.tabs.create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}&fallbackEthereumLedgerApp=true`,
-                });
-                return;
-              }
+                  const alreadyAppended = Boolean(
+                    keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
+                  );
 
-              if (keyType === "ledger") {
-                browser.tabs.create({
-                  url: `/register.html#?route=enable-chains&vaultId=${keyRingStore.selectedKeyInfo.id}&skipWelcome=true&initialSearchValue=${chainInfo.chainName}`,
-                });
-                return;
+                  if (alreadyAppended) {
+                    await chainStore.enableChainInfoInUI(chainInfo.chainId);
+                  }
+                }
               }
 
               navigate(

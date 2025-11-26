@@ -15,7 +15,7 @@ import {
 } from "@keplr-wallet/types";
 import { ThemeOption } from "../../../theme";
 import { INITIA_CHAIN_ID } from "../../../config.ui";
-import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { useGetStakingApr } from "../../../hooks/use-get-staking-apr";
 
 export const StakedBalance: FunctionComponent<{
   modularChainInfo: ModularChainInfo;
@@ -46,23 +46,10 @@ const CosmosStakedBalance: FunctionComponent<{
 
   const chainId = chainInfo.chainId;
 
-  const queryAPR = queriesStore.simpleQuery.queryGet<{
-    overview: {
-      apr: number;
-    };
-    lastUpdated: number;
-  }>(
-    "https://pjld2aanw3elvteui4gwyxgx4m0ceweg.lambda-url.us-west-2.on.aws",
-    `/apr/${ChainIdHelper.parse(chainId).identifier}`
-  );
-
-  const cosmosAPR =
-    queryAPR.response &&
-    "apr" in queryAPR.response.data &&
-    typeof queryAPR.response.data.apr === "number" &&
-    queryAPR.response.data.apr > 0
-      ? new Dec(queryAPR.response.data.apr).mul(new Dec(100)).toString(2)
-      : null;
+  const cosmosAPRDec = useGetStakingApr(chainId);
+  const cosmosAPR = cosmosAPRDec
+    ? `${cosmosAPRDec.toString(2)}% APR`
+    : undefined;
 
   const isInitia = chainId === INITIA_CHAIN_ID;
 
@@ -112,7 +99,7 @@ const CosmosStakedBalance: FunctionComponent<{
                           : ColorPalette["gray-200"]
                       }
                     >
-                      {`${cosmosAPR}% APR`}
+                      {cosmosAPR}
                     </Body3>
                   )}
                 </React.Fragment>
@@ -160,7 +147,7 @@ const CosmosStakedBalance: FunctionComponent<{
           }}
         />
         <XAxis alignY="center">
-          {!stakeBalanceIsZero && cosmosAPR && typeof cosmosAPR === "string" ? (
+          {!stakeBalanceIsZero && cosmosAPR ? (
             <Subtitle3
               color={
                 theme.mode === "light"
@@ -168,7 +155,7 @@ const CosmosStakedBalance: FunctionComponent<{
                   : ColorPalette["gray-300"]
               }
             >
-              {`${cosmosAPR}% APR`}
+              {cosmosAPR}
             </Subtitle3>
           ) : null}
 

@@ -36,7 +36,7 @@ class ObservableQueryTopUpStatusInner extends ObservableQuery<StatusResponse> {
 
   @computed
   get topUpStatus(): TopUpStatus | undefined {
-    if (this.error || !this.response?.data || this.isFetching) {
+    if (this.error || !this.response?.data) {
       return undefined;
     }
 

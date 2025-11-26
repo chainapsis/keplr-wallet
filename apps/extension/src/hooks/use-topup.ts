@@ -169,6 +169,10 @@ export function useTopUp({
       throw error;
     } finally {
       setIsTopUpInProgress(false);
+
+      // 마지막으로 query의 상태를 최신화한다.
+      // (서명 이후 extension을 끄지 않고 바로 다시 tx를 시도할때 ui flickering 방지)
+      feeConfig.refreshTopUpStatus();
     }
   }
 

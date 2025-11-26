@@ -1,10 +1,10 @@
-import React, { FunctionComponent, useEffect, useRef } from "react";
+import React, { FunctionComponent, useEffect } from "react";
 import { useTheme } from "styled-components";
 import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import SimpleBar from "simplebar-react";
 import { Box } from "../../../../components/box";
 import { Columns } from "../../../../components/column";
-import { ArrowLeftIcon, RightArrowIcon } from "../../../../components/icon";
+import { ArrowLeftIcon } from "../../../../components/icon";
 import { ChainImageFallback } from "../../../../components/image";
 import {
   Body2,
@@ -26,6 +26,7 @@ import { ModularChainInfo } from "@keplr-wallet/types";
 import { parseEcosystemSpecificOptions } from "./utils";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis } from "../../../../components/axis";
+import { FloatModal } from "../../../../components/float-modal";
 
 export const EcosystemsSelector: FunctionComponent<{
   ecosystemSections: Array<EcosystemSection>;
@@ -94,37 +95,12 @@ export const EcosystemsSelector: FunctionComponent<{
       shift(),
       offset({
         mainAxis: 10,
-        crossAxis: 10,
+        crossAxis: 12,
       }),
     ],
     whileElementsMounted: autoUpdate,
     open: isOpen,
   });
-
-  const closeRef = useRef(() => onOpenChange(false));
-  closeRef.current = () => onOpenChange(false);
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const floatingRef = refs.floating;
-      const triggerRef = refs.reference;
-
-      if (
-        floatingRef.current &&
-        "contains" in floatingRef.current &&
-        !floatingRef.current.contains(event.target as Node) &&
-        triggerRef.current &&
-        "contains" in triggerRef.current &&
-        !triggerRef.current.contains(event.target as Node)
-      ) {
-        closeRef.current();
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [refs.floating, refs.reference]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -294,25 +270,26 @@ export const EcosystemsSelector: FunctionComponent<{
         </Box>
       </div>
 
-      {isOpen && (
+      <FloatModal isOpen={isOpen} close={() => onOpenChange(false)}>
         <div
           ref={refs.setFloating}
           style={{
             position: strategy,
             top: y ?? 0,
             left: x ?? 0,
-            width: "19rem",
+            width: "21rem",
             backgroundColor:
               theme.mode === "light"
-                ? ColorPalette["white"]
-                : ColorPalette["gray-600"],
-            borderRadius: "0.375rem",
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-650"],
+            borderRadius: "0.75rem",
             borderStyle: "solid",
             borderWidth: "1px",
             borderColor:
               theme.mode === "light"
                 ? ColorPalette["gray-100"]
-                : ColorPalette["gray-500"],
+                : ColorPalette["gray-550"],
+            overflow: "hidden",
           }}
         >
           <Box
@@ -391,7 +368,6 @@ export const EcosystemsSelector: FunctionComponent<{
             style={{
               display: "flex",
               flexDirection: "column",
-              // overview mode should display all options without scroll
               ...(selectionState !== null && {
                 maxHeight: "16rem",
                 overflowY: "auto",
@@ -418,7 +394,7 @@ export const EcosystemsSelector: FunctionComponent<{
             </Box>
           )}
         </div>
-      )}
+      </FloatModal>
     </React.Fragment>
   );
 };
@@ -462,8 +438,8 @@ export const EcosystemOverview: FunctionComponent<{
             paddingY="1.25rem"
             backgroundColor={
               theme.mode === "light"
-                ? ColorPalette["white"]
-                : ColorPalette["gray-600"]
+                ? ColorPalette["gray-10"]
+                : ColorPalette["gray-650"]
             }
             style={{
               borderBottomStyle: isLast ? "none" : "solid",
@@ -475,7 +451,7 @@ export const EcosystemOverview: FunctionComponent<{
             }}
           >
             <Columns sum={1} alignY="center">
-              <Subtitle3
+              <Body2
                 color={
                   theme.mode === "light"
                     ? ColorPalette["gray-700"]
@@ -483,7 +459,7 @@ export const EcosystemOverview: FunctionComponent<{
                 }
               >
                 {EcosystemTypeToText[section.type]}
-              </Subtitle3>
+              </Body2>
               <div style={{ flex: 1 }} />
               <Box
                 cursor="pointer"
@@ -516,8 +492,8 @@ export const EcosystemOverview: FunctionComponent<{
                     {chainInfo.chainName}
                   </Subtitle3>
                 </XAxis>
-                <RightArrowIcon
-                  color={ColorPalette["gray-300"]}
+                <_RightArrowIcon
+                  color={ColorPalette["gray-200"]}
                   width="1rem"
                   height="1rem"
                 />
@@ -582,18 +558,12 @@ const EcosystemOptionItem: FunctionComponent<{
       padding="0.75rem"
       backgroundColor={
         theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-550"]
+          ? ColorPalette["gray-75"]
+          : ColorPalette["gray-600"]
       }
-      borderRadius="0.375rem"
+      borderRadius="0.75rem"
     >
-      <Caption1
-        color={
-          theme.mode === "light"
-            ? ColorPalette["gray-700"]
-            : ColorPalette["gray-200"]
-        }
-      >
+      <Caption1 color={ColorPalette["gray-300"]}>
         {parsed.config.label}
       </Caption1>
       <Gutter size="0.75rem" />
@@ -638,9 +608,9 @@ const EcosystemOptionItem: FunctionComponent<{
               {parsed.secondaryText}
             </Body2>
           )}
-          <RightArrowIcon
+          <_RightArrowIcon
             color={
-              isHovered ? ColorPalette["gray-400"] : ColorPalette["gray-300"]
+              isHovered ? ColorPalette["gray-300"] : ColorPalette["gray-200"]
             }
             width="1rem"
             height="1rem"
@@ -648,5 +618,29 @@ const EcosystemOptionItem: FunctionComponent<{
         </Box>
       </XAxis>
     </Box>
+  );
+};
+
+const _RightArrowIcon: FunctionComponent<{
+  color?: string;
+  width: string;
+  height: string;
+}> = ({ color, width, height }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width}
+      height={height}
+      viewBox="0 0 16 16"
+      fill="none"
+    >
+      <path
+        d="M5.5 2.99997L10.5 7.99997L5.5 13"
+        stroke={color || "currentColor"}
+        strokeWidth="1.45833"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 };

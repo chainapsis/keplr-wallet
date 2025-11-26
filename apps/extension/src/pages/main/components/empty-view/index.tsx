@@ -1,10 +1,11 @@
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import React, { FunctionComponent } from "react";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { Body3, Subtitle1 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { Gutter } from "../../../../components/gutter";
+import { useIntl } from "react-intl";
 
 const Styles = {
   Title: styled(Subtitle1)`
@@ -18,30 +19,56 @@ const Styles = {
     text-align: center;
     color: ${ColorPalette["gray-300"]};
   `,
+
+  ButtonDiv: styled.div`
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+  `,
 };
 
 interface MainEmptyViewProps {
-  image: React.ReactNode;
-  title: string;
-  paragraph: string;
-  button: React.ReactNode;
+  buttons: React.ReactNode[];
 }
 
 export const MainEmptyView: FunctionComponent<MainEmptyViewProps> = ({
-  image,
-  title,
-  paragraph,
-  button,
+  buttons,
 }) => {
-  return (
-    <Box marginTop="1.25rem" marginBottom="2rem">
-      <Stack alignX="center" gutter="0.75rem">
-        <Box>{image}</Box>
-        <Styles.Title>{title}</Styles.Title>
-        <Styles.Paragraph>{paragraph}</Styles.Paragraph>
+  const theme = useTheme();
+  const intl = useIntl();
 
-        <Gutter size="0.75rem" />
-        {button}
+  return (
+    <Box marginBottom="2rem" paddingX="0.625rem">
+      <Stack alignX="center" gutter="0.75rem">
+        <Box>
+          <img
+            src={require(theme.mode === "light"
+              ? "../../../../public/assets/img/main-empty-balance-light.png"
+              : "../../../../public/assets/img/main-empty-balance.png")}
+            style={{
+              width: "6.25rem",
+              height: "6.25rem",
+            }}
+            alt="empty balance image"
+          />
+        </Box>
+        <Styles.Title>
+          {intl.formatMessage({
+            id: "page.main.spendable.empty-view-title",
+          })}
+        </Styles.Title>
+        <Styles.Paragraph>
+          {intl.formatMessage({
+            id: "page.main.spendable.empty-view-paragraph",
+          })}
+        </Styles.Paragraph>
+
+        <Gutter size="1rem" />
+        <Styles.ButtonDiv>
+          {buttons.map((button, index) => (
+            <React.Fragment key={index}>{button}</React.Fragment>
+          ))}
+        </Styles.ButtonDiv>
       </Stack>
     </Box>
   );

@@ -19,10 +19,13 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     
     &[data-lang="ko"] {
-      font-family: 'NotoSansKR', sans-serif;
+      font-family: 'Inter', 'NotoSansKR', sans-serif;
       
       word-break: keep-all;
       word-wrap: break-word;
+    }
+    &[data-lang="zh-cn"] {
+      font-family: 'Inter', 'NotoSansSC', sans-serif;
     }
     color: ${(props) =>
       props.theme.mode === "light"
@@ -49,7 +52,10 @@ export const GlobalStyle = createGlobalStyle`
     color: ${ColorPalette["gray-200"]};
 
     &[data-lang="ko"] {
-      font-family: 'NotoSansKR', sans-serif;
+      font-family: 'Inter', 'NotoSansKR', sans-serif;
+    }
+    &[data-lang="zh-cn"] {
+      font-family: 'Inter', 'NotoSansSC', sans-serif;
     }
   }
 

@@ -823,8 +823,6 @@ export class HugeQueriesStore {
     }
   );
 
-  // CHECK: starknet 스테이킹 관련 로직 추가 필요 여부.
-  //        현재 익스텐션에서 stakables, notStakbles, ibcTokens, claimableRewards를 참조하는 곳은 없음.
   @computed
   get stakables(): ViewToken[] {
     const keys: Map<string, boolean> = new Map();
@@ -834,6 +832,18 @@ export class HugeQueriesStore {
       }
       const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
       keys.set(key, true);
+    }
+
+    for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
+      if ("starknet" in modularChainInfo) {
+        const chainIdentifier = ChainIdHelper.parse(
+          modularChainInfo.chainId
+        ).identifier;
+        const strkContractAddress =
+          modularChainInfo.starknet.strkContractAddress;
+        const strkKey = `${chainIdentifier}/erc20:${strkContractAddress.toLowerCase()}`;
+        keys.set(strkKey, true);
+      }
     }
 
     return this.balanceBinarySort.arr.filter((viewToken) => {

@@ -809,6 +809,7 @@ export const CosmosTxView: FunctionComponent<{
                       disableAutomaticFeeSet={preferNoSetFee}
                       isExternalMsg={!interactionData.isInternal}
                       shouldTopUp={shouldTopUp}
+                      forceTopUp={interactionData.data.signOptions.forceTopUp}
                     />
                   );
                 })()}
@@ -889,10 +890,13 @@ export const CosmosTxView: FunctionComponent<{
           />
         )}
         {topUpError ? (
-          <GuideBox
-            color="warning"
-            title={topUpError.message || topUpError.toString()}
-          />
+          <React.Fragment>
+            <Gutter size="0.75rem" />
+            <GuideBox
+              color="warning"
+              title={topUpError.message || topUpError.toString()}
+            />
+          </React.Fragment>
         ) : null}
       </Box>
       {!isKeystonUSB && (
