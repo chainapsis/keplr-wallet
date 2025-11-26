@@ -9,8 +9,12 @@ export const VerticalResizeContainer = forwardRef<
 
     width?: string | SpringValue<string>;
     transitionAlign?: "top" | "bottom" | "center";
+    style?: Omit<
+      React.CSSProperties,
+      "width" | "height" | "flexShrink" | "position" | "overflow"
+    >;
   }>
->(({ children, heightPx, width, transitionAlign }, ref) => {
+>(({ children, heightPx, width, transitionAlign, style }, ref) => {
   return (
     <animated.div
       style={{
@@ -22,6 +26,7 @@ export const VerticalResizeContainer = forwardRef<
         ),
         // Should not shrink under flex container
         flexShrink: 0,
+        ...style,
       }}
     >
       <animated.div

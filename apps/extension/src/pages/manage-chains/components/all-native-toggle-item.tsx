@@ -49,7 +49,7 @@ export const AllNativeToggleItem: FunctionComponent<
       iconElement={<IconElement />}
       style={{
         border: `0.09375rem solid ${
-          ColorPalette[theme.mode === "light" ? "blue-200" : "blue-600"]
+          ColorPalette[theme.mode === "light" ? "blue-200" : "blue-700"]
         }`,
       }}
     />

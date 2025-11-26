@@ -39,7 +39,7 @@ import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
-import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
@@ -2257,7 +2257,7 @@ const WarningGuideBox: FunctionComponent<{
 
     let collapsed = error == null;
 
-    const globalSimpleBar = useGlobarSimpleBar();
+    const globalSimpleBar = useGlobalSimpleBar();
     useEffect(() => {
       if (!collapsed) {
         const timeoutId = setTimeout(() => {

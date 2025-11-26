@@ -14,14 +14,6 @@
     "default_popup": "popup.html",
     "default_title": "Keplr"
   },
-  "commands": {
-    "_execute_browser_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+K",
-        "mac": "Command+Shift+K"
-      }
-    }
-  },
   "background": {
     "page": "background.html",
     "persistent": true
