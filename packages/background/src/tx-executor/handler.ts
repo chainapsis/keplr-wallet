@@ -66,8 +66,7 @@ const handleResumeDirectTxsMsg: (
       env,
       msg.id,
       msg.txIndex,
-      msg.signedTx,
-      msg.signature
+      msg.signedTx
     );
   };
 };

@@ -174,8 +174,7 @@ export class BackgroundTxExecutorService {
     env: Env,
     id: string,
     txIndex?: number,
-    signedTx?: Uint8Array,
-    signature?: Uint8Array
+    signedTx?: Uint8Array
   ): Promise<DirectTxBatchStatus> {
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
@@ -186,7 +185,6 @@ export class BackgroundTxExecutorService {
       env,
       txIndex,
       signedTx,
-      signature,
     });
   }
 
@@ -196,7 +194,6 @@ export class BackgroundTxExecutorService {
       env?: Env;
       txIndex?: number;
       signedTx?: Uint8Array;
-      signature?: Uint8Array;
     }
   ): Promise<DirectTxBatchStatus> {
     const batch = this.getDirectTxBatch(id);
@@ -235,7 +232,6 @@ export class BackgroundTxExecutorService {
         txStatus = await this.executePendingDirectTx(id, i, {
           env: options?.env,
           signedTx: options.signedTx,
-          signature: options.signature,
         });
       } else {
         txStatus = await this.executePendingDirectTx(id, i, {
@@ -282,7 +278,6 @@ export class BackgroundTxExecutorService {
     options?: {
       env?: Env;
       signedTx?: Uint8Array;
-      signature?: Uint8Array;
     }
   ): Promise<DirectTxStatus> {
     const batch = this.getDirectTxBatch(id);
@@ -314,9 +309,8 @@ export class BackgroundTxExecutorService {
       // TODO: check if the condition is met to resume the execution
       // this will be handled with recent send history tracking to check if the condition is met to resume the execution
       // check if the current transaction's chainId is included in the chainIds of the recent send history (might enough with this)
-      if (
-        this.checkIfTxIsBlocked(batch.executableChainIds, currentTx.chainId)
-      ) {
+      const isBlocked = !batch.executableChainIds.includes(currentTx.chainId);
+      if (isBlocked) {
         currentTx.status = DirectTxStatus.BLOCKED;
         return currentTx.status;
       } else {
@@ -326,34 +320,23 @@ export class BackgroundTxExecutorService {
 
     if (currentTx.status === DirectTxStatus.SIGNING) {
       // if options are provided, temporary set the options to the current transaction
-      if (options?.signedTx && options.signature) {
+      if (options?.signedTx) {
         currentTx.signedTx = options.signedTx;
-        currentTx.signature = options.signature;
       }
 
-      // check if the transaction is signed
-      if (this.checkIfTxIsSigned(currentTx)) {
-        // if already signed, signing -> signed
+      try {
+        const { signedTx } = await this.signTx(
+          batch.vaultId,
+          currentTx.chainId,
+          currentTx,
+          options?.env
+        );
+
+        currentTx.signedTx = signedTx;
         currentTx.status = DirectTxStatus.SIGNED;
-      }
-
-      // if not signed, try sign
-      if (currentTx.status === DirectTxStatus.SIGNING) {
-        try {
-          const { signedTx, signature } = await this.signTx(
-            batch.vaultId,
-            currentTx.chainId,
-            currentTx,
-            options?.env
-          );
-
-          currentTx.signedTx = signedTx;
-          currentTx.signature = signature;
-          currentTx.status = DirectTxStatus.SIGNED;
-        } catch (error) {
-          currentTx.status = DirectTxStatus.FAILED;
-          currentTx.error = error.message ?? "Transaction signing failed";
-        }
+      } catch (error) {
+        currentTx.status = DirectTxStatus.FAILED;
+        currentTx.error = error.message ?? "Transaction signing failed";
       }
     }
 
@@ -361,16 +344,6 @@ export class BackgroundTxExecutorService {
       currentTx.status === DirectTxStatus.SIGNED ||
       currentTx.status === DirectTxStatus.BROADCASTING
     ) {
-      if (currentTx.status === DirectTxStatus.BROADCASTING) {
-        // check if the transaction is broadcasted
-        if (this.checkIfTxIsBroadcasted(currentTx)) {
-          currentTx.status = DirectTxStatus.BROADCASTED;
-        }
-      } else {
-        // set the transaction status to broadcasting
-        currentTx.status = DirectTxStatus.BROADCASTING;
-      }
-
       try {
         const { txHash } = await this.broadcastTx(currentTx);
 
@@ -385,7 +358,7 @@ export class BackgroundTxExecutorService {
     if (currentTx.status === DirectTxStatus.BROADCASTED) {
       // broadcasted -> confirmed
       try {
-        const confirmed = await this.checkIfTxIsConfirmed(currentTx);
+        const confirmed = await this.traceTx(currentTx);
         if (confirmed) {
           currentTx.status = DirectTxStatus.CONFIRMED;
         } else {
@@ -401,29 +374,6 @@ export class BackgroundTxExecutorService {
     return currentTx.status;
   }
 
-  protected checkIfTxIsBlocked(
-    executableChainIds: string[],
-    chainId: string
-  ): boolean {
-    return !executableChainIds.includes(chainId);
-  }
-
-  protected checkIfTxIsSigned(tx: DirectTx): boolean {
-    return tx.signedTx != null && tx.signature != null;
-  }
-
-  protected checkIfTxIsBroadcasted(tx: DirectTx): boolean {
-    const isBroadcasted = tx.txHash != null;
-    if (!isBroadcasted) {
-      return false;
-    }
-
-    // optimistic assumption here:
-    // if the tx hash is set, the transaction is broadcasted successfully
-    // do not need to check broadcasted status here
-    return true;
-  }
-
   protected async signTx(
     vaultId: string,
     chainId: string,
@@ -431,8 +381,13 @@ export class BackgroundTxExecutorService {
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
-    signature: Uint8Array;
   }> {
+    if (tx.signedTx != null) {
+      return {
+        signedTx: tx.signedTx,
+      };
+    }
+
     if (tx.type === DirectTxType.EVM) {
       return this.signEvmTx(vaultId, chainId, tx, env);
     }
@@ -440,16 +395,14 @@ export class BackgroundTxExecutorService {
     return this.signCosmosTx(vaultId, chainId, tx, env);
   }
 
-  protected async signEvmTx(
+  private async signEvmTx(
     vaultId: string,
     chainId: string,
     tx: EVMDirectTx,
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
-    signature: Uint8Array;
   }> {
-    // check key
     const keyInfo = await this.keyRingCosmosService.getKey(vaultId, chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
     const signer = keyInfo.ethereumHexAddress;
@@ -507,29 +460,63 @@ export class BackgroundTxExecutorService {
 
     return {
       signedTx: signedTx,
-      signature: result.signature,
     };
   }
 
-  protected async signCosmosTx(
-    _vaultId: string,
-    _chainId: string,
-    _tx: CosmosDirectTx,
-    _env?: Env
+  private async signCosmosTx(
+    vaultId: string,
+    chainId: string,
+    tx: CosmosDirectTx,
+    env?: Env
   ): Promise<{
     signedTx: Uint8Array;
     signature: Uint8Array;
   }> {
     // check key
+    const keyInfo = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
+    const signer = keyInfo.bech32Address;
+    const origin =
+      typeof browser !== "undefined"
+        ? new URL(browser.runtime.getURL("/")).origin
+        : "extension";
 
-    // check chain
+    // let result: AminoSignResponse;
+    if (isHardware) {
+      if (!env) {
+        throw new KeplrError(
+          "direct-tx-executor",
+          109,
+          "Hardware wallet signing should be triggered from user interaction"
+        );
+      }
 
-    // if ledger
-    // - check if env is provided
-    // - sign page로 이동해서 서명 요청
+      await this.keyRingCosmosService.signAmino(
+        env,
+        origin,
+        vaultId,
+        chainId,
+        signer,
+        tx.txData,
+        {}
+      );
 
-    // else
-    // - sign directly with stored key
+      // experimentalSignEIP712CosmosTx_v0 if eip712Signing
+    } else {
+      throw new KeplrError(
+        "direct-tx-executor",
+        110,
+        "Software wallet signing is not supported"
+      );
+      // result = await this.keyRingCosmosService.signAminoDirect(
+      //   origin,
+      //   vaultId,
+      //   chainId,
+      //   signer,
+      //   tx.txData,
+      //   {}
+      // );
+    }
 
     return {
       signedTx: new Uint8Array(),
@@ -540,6 +527,15 @@ export class BackgroundTxExecutorService {
   protected async broadcastTx(tx: DirectTx): Promise<{
     txHash: string;
   }> {
+    if (tx.txHash != null) {
+      // optimistic assumption here:
+      // if the tx hash is set, the transaction is broadcasted successfully
+      // do not need to check broadcasted status here
+      return {
+        txHash: tx.txHash,
+      };
+    }
+
     if (tx.type === DirectTxType.EVM) {
       return this.broadcastEvmTx(tx);
     }
@@ -547,7 +543,7 @@ export class BackgroundTxExecutorService {
     return this.broadcastCosmosTx(tx);
   }
 
-  protected async broadcastEvmTx(tx: EVMDirectTx): Promise<{
+  private async broadcastEvmTx(tx: EVMDirectTx): Promise<{
     txHash: string;
   }> {
     // check signed tx and signature
@@ -579,11 +575,12 @@ export class BackgroundTxExecutorService {
     };
   }
 
-  protected async broadcastCosmosTx(tx: CosmosDirectTx): Promise<{
+  private async broadcastCosmosTx(tx: CosmosDirectTx): Promise<{
     txHash: string;
   }> {
-    // check signed tx and signature
-    // do not validate the signed tx and signature here just assume it is valid
+    if (!tx.signedTx) {
+      throw new KeplrError("direct-tx-executor", 108, "Signed tx not found");
+    }
 
     // broadcast the tx
     const txHash = await this.backgroundTxService.sendTx(
@@ -601,17 +598,17 @@ export class BackgroundTxExecutorService {
     };
   }
 
-  protected async checkIfTxIsConfirmed(tx: DirectTx): Promise<boolean> {
+  protected async traceTx(tx: DirectTx): Promise<boolean> {
     if (tx.type === DirectTxType.EVM) {
-      return this.checkIfEvmTxIsConfirmed(tx);
+      return this.traceEvmTx(tx);
     }
 
-    return this.checkIfCosmosTxIsConfirmed(tx);
+    return this.traceCosmosTx(tx);
   }
 
-  protected async checkIfEvmTxIsConfirmed(tx: EVMDirectTx): Promise<boolean> {
+  private async traceEvmTx(tx: EVMDirectTx): Promise<boolean> {
     if (!tx.txHash) {
-      return false;
+      throw new KeplrError("direct-tx-executor", 108, "Tx hash not found");
     }
 
     const origin =
@@ -632,11 +629,9 @@ export class BackgroundTxExecutorService {
     return txReceipt.status === EthTxStatus.Success;
   }
 
-  protected async checkIfCosmosTxIsConfirmed(
-    tx: CosmosDirectTx
-  ): Promise<boolean> {
+  private async traceCosmosTx(tx: CosmosDirectTx): Promise<boolean> {
     if (!tx.txHash) {
-      return false;
+      throw new KeplrError("direct-tx-executor", 108, "Tx hash not found");
     }
 
     const txResult = await this.backgroundTxService.traceTx(
