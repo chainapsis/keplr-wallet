@@ -139,6 +139,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     });
   }
 
+  /**
+   * @deprecated Use `modularChainInfos` instead
+   */
   @computed
   override get chainInfos(): IChainInfoImpl<ChainInfoWithCoreTypes>[] {
     // Sort by chain name.
@@ -237,6 +240,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     return this._enabledChainIdentifiers;
   }
 
+  /**
+   * @deprecated Use `modularChainInfosInUI` instead
+   */
   @computed
   get chainInfosInUI() {
     return this.chainInfos.filter((chainInfo) => {
@@ -279,6 +285,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
   // property 이름이 얘매해서 일단 이렇게 지었다.
+  /**
+   * @deprecated Use `modularChainInfosInListUI` instead
+   */
   @computed
   get chainInfosInListUI() {
     return this.chainInfos.filter((chainInfo) => {

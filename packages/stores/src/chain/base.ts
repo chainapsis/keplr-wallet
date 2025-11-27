@@ -1555,6 +1555,9 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     keepAlive(this, "modularChainInfoMap");
   }
 
+  /**
+   * @deprecated Use `modularChainInfos` instead
+   */
   get chainInfos(): IChainInfoImpl<C>[] {
     return this._chainInfos;
   }
@@ -1580,6 +1583,9 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     return result;
   }
 
+  /**
+   * @deprecated Use `getmodularChain` or `getModularChainInfoImpl` instead
+   */
   getChain(chainId: string): IChainInfoImpl<C> {
     const chainIdentifier = ChainIdHelper.parse(chainId);
 
@@ -1592,6 +1598,9 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
     return chainInfo;
   }
 
+  /**
+   * @deprecated Use `hasModularChain` instead
+   */
   hasChain(chainId: string): boolean {
     const chainIdentifier = ChainIdHelper.parse(chainId);
 
