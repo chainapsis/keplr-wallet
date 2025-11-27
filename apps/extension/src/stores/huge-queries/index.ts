@@ -826,19 +826,19 @@ export class HugeQueriesStore {
   @computed
   get stakables(): ViewToken[] {
     const keys: Map<string, boolean> = new Map();
-    for (const chainInfo of this.chainStore.chainInfosInUI) {
-      if (!chainInfo.stakeCurrency) {
-        continue;
-      }
-      const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
-      keys.set(key, true);
-    }
 
     for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
-      if ("starknet" in modularChainInfo) {
-        const chainIdentifier = ChainIdHelper.parse(
-          modularChainInfo.chainId
-        ).identifier;
+      const chainIdentifier = ChainIdHelper.parse(
+        modularChainInfo.chainId
+      ).identifier;
+
+      if ("cosmos" in modularChainInfo) {
+        if (!modularChainInfo.cosmos.stakeCurrency) {
+          continue;
+        }
+        const key = `${chainIdentifier}/${modularChainInfo.cosmos.stakeCurrency.coinMinimalDenom}`;
+        keys.set(key, true);
+      } else if ("starknet" in modularChainInfo) {
         const strkContractAddress =
           modularChainInfo.starknet.strkContractAddress;
         const strkKey = `${chainIdentifier}/erc20:${strkContractAddress.toLowerCase()}`;
@@ -855,11 +855,15 @@ export class HugeQueriesStore {
   @computed
   get notStakbles(): ViewToken[] {
     const keys: Map<string, boolean> = new Map();
-    for (const chainInfo of this.chainStore.chainInfosInUI) {
-      for (const currency of chainInfo.currencies) {
+    for (const chainInfo of this.chainStore.modularChainInfosInUI) {
+      const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+        chainInfo.chainId
+      );
+
+      for (const currency of modularChainInfoImpl.getCurrencies()) {
         if (
           currency.coinMinimalDenom ===
-          chainInfo.stakeCurrency?.coinMinimalDenom
+          modularChainInfoImpl.stakeCurrency?.coinMinimalDenom
         ) {
           continue;
         }
@@ -871,7 +875,9 @@ export class HugeQueriesStore {
           continue;
         }
 
-        const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
+        const key = `${ChainIdHelper.parse(chainInfo.chainId).identifier}/${
+          currency.coinMinimalDenom
+        }`;
         keys.set(key, true);
       }
     }
@@ -884,14 +890,20 @@ export class HugeQueriesStore {
   @computed
   get ibcTokens(): ViewToken[] {
     const keys: Map<string, boolean> = new Map();
-    for (const chainInfo of this.chainStore.chainInfosInUI) {
-      for (const currency of chainInfo.currencies) {
+    for (const modularChainInfo of this.chainStore.modularChainInfosInUI) {
+      const modularChainInfoImpl = this.chainStore.getModularChainInfoImpl(
+        modularChainInfo.chainId
+      );
+
+      for (const currency of modularChainInfoImpl.getCurrencies()) {
         const denomHelper = new DenomHelper(currency.coinMinimalDenom);
         if (
           denomHelper.type === "native" &&
           denomHelper.denom.startsWith("ibc/")
         ) {
-          const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
+          const key = `${
+            ChainIdHelper.parse(modularChainInfo.chainId).identifier
+          }/${currency.coinMinimalDenom}`;
           keys.set(key, true);
         }
       }

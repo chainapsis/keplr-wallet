@@ -67,8 +67,7 @@ export const CopyAddressItem = observer(
       }: CopyAddressItemProps,
       ref
     ) {
-      const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
-        useStore();
+      const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
       const theme = useTheme();
 

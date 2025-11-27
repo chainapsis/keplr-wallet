@@ -309,30 +309,25 @@ const AddressDisplay = ({
   const account = accountStore.getAccount(chainId);
   const theme = useTheme();
 
-  const isEVMOnlyChain = (() => {
-    if ("cosmos" in modularChainInfo) {
-      return chainStore.isEvmOnlyChain(chainId);
-    }
-    return false;
-  })();
+  const isEVMOnlyChain =
+    "evm" in modularChainInfo && chainStore.isEvmOnlyChain(chainId);
 
   const displayAddress = useMemo<DisplayAddress>(() => {
     const LENGTH_OF_FIRST_PART = 10;
     const LENGTH_OF_LAST_PART = 6;
 
-    if ("cosmos" in modularChainInfo) {
-      if (isEVMOnlyChain) {
-        return {
-          former: account.ethereumHexAddress.slice(0, LENGTH_OF_FIRST_PART),
-          middle: account.ethereumHexAddress.slice(
-            LENGTH_OF_FIRST_PART,
-            account.ethereumHexAddress.length - LENGTH_OF_LAST_PART
-          ),
-          latter: account.ethereumHexAddress.slice(
-            account.ethereumHexAddress.length - LENGTH_OF_LAST_PART
-          ),
-        };
-      }
+    if (isEVMOnlyChain) {
+      return {
+        former: account.ethereumHexAddress.slice(0, LENGTH_OF_FIRST_PART),
+        middle: account.ethereumHexAddress.slice(
+          LENGTH_OF_FIRST_PART,
+          account.ethereumHexAddress.length - LENGTH_OF_LAST_PART
+        ),
+        latter: account.ethereumHexAddress.slice(
+          account.ethereumHexAddress.length - LENGTH_OF_LAST_PART
+        ),
+      };
+    } else if ("cosmos" in modularChainInfo) {
       return {
         former: account.bech32Address.slice(0, LENGTH_OF_FIRST_PART),
         middle: account.bech32Address.slice(
@@ -381,12 +376,10 @@ const AddressDisplay = ({
           onClick={(e) => {
             e.preventDefault();
 
-            if ("cosmos" in modularChainInfo) {
-              navigator.clipboard.writeText(
-                isEVMOnlyChain
-                  ? account.ethereumHexAddress
-                  : account.bech32Address
-              );
+            if (isEVMOnlyChain) {
+              navigator.clipboard.writeText(account.ethereumHexAddress);
+            } else if ("cosmos" in modularChainInfo) {
+              navigator.clipboard.writeText(account.bech32Address);
             } else if ("starknet" in modularChainInfo) {
               navigator.clipboard.writeText(account.starknetHexAddress);
             } else if ("bitcoin" in modularChainInfo) {

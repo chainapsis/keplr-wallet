@@ -68,20 +68,26 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
   const stakeCurrencyItems = useMemo<StakeCurrencyItem[]>(() => {
     const items: StakeCurrencyItem[] = [];
-    for (const chainInfo of chainStore.chainInfos) {
-      if (chainInfo.isTestnet || !chainInfo.stakeCurrency) {
-        continue;
-      }
-      const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
-      items.push({
-        key,
-        chainInfo: chainInfo,
-        currency: chainInfo.stakeCurrency,
-      });
-    }
 
     for (const modularChainInfo of chainStore.modularChainInfos) {
-      if ("starknet" in modularChainInfo) {
+      if ("cosmos" in modularChainInfo) {
+        if (
+          modularChainInfo.isTestnet ||
+          !modularChainInfo.cosmos.stakeCurrency
+        ) {
+          continue;
+        }
+
+        const key = `${
+          ChainIdHelper.parse(modularChainInfo.chainId).identifier
+        }/${modularChainInfo.cosmos.stakeCurrency.coinMinimalDenom}`;
+
+        items.push({
+          key,
+          chainInfo: modularChainInfo,
+          currency: modularChainInfo.cosmos.stakeCurrency,
+        });
+      } else if ("starknet" in modularChainInfo) {
         if (modularChainInfo.isTestnet) {
           continue;
         }
@@ -93,7 +99,8 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
         const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
           modularChainInfo.chainId
         );
-        const currencies = modularChainInfoImpl.getCurrencies("starknet");
+        const currencies =
+          modularChainInfoImpl.getCurrenciesByModule("starknet");
         if (currencies.length === 0) {
           continue;
         }
