@@ -21,6 +21,7 @@ import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
+import { ParagraphWithLinks } from "./paragraph-with-links";
 
 export type UpdateNotePageData = {
   title: string;
@@ -32,6 +33,9 @@ export type UpdateNotePageData = {
       }
     | undefined;
   paragraph: string;
+  links?: {
+    [key: string]: string;
+  };
   isSidePanelBeta?: boolean;
 };
 
@@ -271,13 +275,9 @@ const CarouselPage: FunctionComponent<{
               : ColorPalette["gray-100"]
           }
         >
-          <FormattedMessage
-            id="update-node/paragraph/noop"
-            defaultMessage={notePageData.paragraph}
-            values={{
-              br: <br />,
-              b: (...chunks: any) => <b>{chunks}</b>,
-            }}
+          <ParagraphWithLinks
+            paragraph={notePageData.paragraph}
+            links={notePageData.links}
           />
         </Body2>
       </Box>
