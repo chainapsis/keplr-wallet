@@ -80,7 +80,7 @@ class PsbtSimulatorState {
   @action
   setInitialTxSize(value: number | string) {
     if (typeof value === "string") {
-      value = parseInt(value);
+      value = Number.parseFloat(value);
     }
 
     this._initialTxSize = value;

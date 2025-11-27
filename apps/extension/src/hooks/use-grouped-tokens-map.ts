@@ -44,6 +44,11 @@ export function useGroupedTokensMap(search: string) {
         }
       });
 
+      const isAllLowBalanceTokens = filteredMap.size === 0;
+      if (isAllLowBalanceTokens) {
+        return originalMap;
+      }
+
       return filteredMap;
     }
 

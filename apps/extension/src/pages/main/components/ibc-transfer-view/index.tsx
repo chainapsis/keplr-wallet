@@ -70,6 +70,7 @@ export const IBCTransferView: FunctionComponent = () => {
         <Column weight={1} />
 
         <Button
+          color="secondary"
           text={intl.formatMessage({
             id: "page.main.components.ibc-transfer-view.transfer-button",
           })}
@@ -81,6 +82,10 @@ export const IBCTransferView: FunctionComponent = () => {
                 "/ibc-transfer?chainId={chainId}&coinMinimalDenom={coinMinimalDenom}"
               )}`
             );
+          }}
+          buttonStyle={{
+            borderRadius: "1.3125rem",
+            padding: "0.5rem 1rem",
           }}
         />
       </Columns>
