@@ -3896,6 +3896,51 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: ["cosmwasm"],
   },
+  {
+    rpc: "https://rpc.monad.xyz",
+    rest: "https://rpc.monad.xyz",
+    evm: {
+      chainId: 143,
+      rpc: "https://rpc.monad.xyz",
+      websocket: "wss://rpc.monad.xyz",
+    },
+    chainId: "eip155:143",
+    chainName: "Monad Mainnet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "MON",
+        coinMinimalDenom: "monad-native",
+        coinDecimals: 18,
+        coinGeckoId: "monad",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/monad-native.png",
+      },
+      {
+        coinDenom: "WMON",
+        coinMinimalDenom: "erc20:0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
+        coinDecimals: 18,
+        coinGeckoId: "wrapped-monad",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/erc20/0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MON",
+        coinMinimalDenom: "monad-native",
+        coinDecimals: 18,
+        coinGeckoId: "monad",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/monad-native.png",
+      },
+    ],
+    features: [],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.
