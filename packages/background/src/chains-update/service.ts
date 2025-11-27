@@ -131,7 +131,7 @@ export class ChainsUpdateService {
         // 6시간마다 모든 chain info를 업데이트한다.
         // init()에서 먼저 모든 chain info에 대한 업데이트를 실행하도록 하는게 의도이다.
         // 그러므로 delay를 나중에 준다.
-        const chainInfos = this.chainsService.getChainInfos();
+        const chainInfos = this.chainsService.getModularChainInfos();
         for (const chainInfo of chainInfos) {
           // No need to wait
           this.updateChainInfo(chainInfo.chainId).catch((e) => {
@@ -172,7 +172,7 @@ export class ChainsUpdateService {
     const promises: Promise<void>[] = [];
 
     const chainIdentifiers = this.chainsService
-      .getChainInfos()
+      .getModularChainInfos()
       .map((c) => c.chainId);
     for (const chainIdentifier of chainIdentifiers) {
       // No need to wait

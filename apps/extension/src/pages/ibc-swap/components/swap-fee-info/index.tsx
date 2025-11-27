@@ -143,11 +143,12 @@ export const SwapFeeInfo: FunctionComponent<{
             feeConfig.type
           );
           if (currentFeeCurrencyBal.toDec().lt(currentFee.toDec())) {
+            const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+              feeConfig.chainId
+            );
             const isOsmosis =
-              chainStore.hasChain(feeConfig.chainId) &&
-              chainStore
-                .getChain(feeConfig.chainId)
-                .hasFeature("osmosis-txfees");
+              modularChainInfoImpl.matchModules({ or: ["cosmos"] }) &&
+              modularChainInfoImpl.hasFeature("osmosis-txfees");
 
             // Not enough balances for fee.
             // Try to find other fee currency to send.

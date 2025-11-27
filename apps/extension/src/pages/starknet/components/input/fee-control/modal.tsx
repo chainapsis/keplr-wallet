@@ -77,7 +77,7 @@ export const TransactionFeeModal: FunctionComponent<{
                 const contractAddress = starknet.strkContractAddress;
                 const cur = chainStore
                   .getModularChainInfoImpl(senderConfig.chainId)
-                  .getCurrencies("starknet")
+                  .getCurrenciesByModule("starknet")
                   .find(
                     (cur) =>
                       "contractAddress" in cur &&

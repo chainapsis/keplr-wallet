@@ -79,8 +79,8 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   canUseCurrency(currency: AppCurrency): boolean {
     return (
-      this.chainInfo.stakeCurrency?.coinMinimalDenom ===
-      currency.coinMinimalDenom
+      this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency
+        ?.coinMinimalDenom === currency.coinMinimalDenom
     );
   }
 
@@ -149,23 +149,28 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get currency(): AppCurrency {
-    const chainInfo = this.chainInfo;
-    if (chainInfo.stakeCurrency) {
-      return chainInfo.stakeCurrency;
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
+    if (modularChainInfoImpl.stakeCurrency) {
+      return modularChainInfoImpl.stakeCurrency;
     }
 
     if (this._currency) {
-      const find = chainInfo.findCurrency(this._currency.coinMinimalDenom);
+      const find = modularChainInfoImpl.findCurrency(
+        this._currency.coinMinimalDenom
+      );
       if (find) {
         return find;
       }
     }
 
-    if (chainInfo.currencies.length === 0) {
+    if (modularChainInfoImpl.getCurrencies().length === 0) {
       throw new Error("Chain doesn't have the sendable currency informations");
     }
 
-    return chainInfo.currencies[0];
+    return modularChainInfoImpl.getCurrencies()[0];
   }
 
   @action
@@ -180,7 +185,14 @@ export class StakedAmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get sendCurrency(): AppCurrency {
-    return this.chainInfo.stakeCurrency || this.chainInfo.currencies[0];
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
+    return (
+      modularChainInfoImpl.stakeCurrency ||
+      modularChainInfoImpl.getCurrencies()[0]
+    );
   }
 
   @computed

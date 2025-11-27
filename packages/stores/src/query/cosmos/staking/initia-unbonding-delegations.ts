@@ -30,7 +30,7 @@ export class ObservableQueryInitiaUnbondingDelegationsInner extends ObservableCh
   }
 
   protected override canFetch(): boolean {
-    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+    if (!this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency) {
       return false;
     }
     // If bech32 address is empty, it will always fail, so don't need to fetch it.
@@ -40,8 +40,8 @@ export class ObservableQueryInitiaUnbondingDelegationsInner extends ObservableCh
   // a function to extract amount from unbonding balance
   // For Initia chain, the balance is an array of Coin
   protected getAmountFromBalanceArray(balance: Coin[]): string {
-    const stakeDenom = this.chainGetter.getChain(this.chainId).stakeCurrency
-      ?.coinMinimalDenom;
+    const stakeDenom = this.chainGetter.getModularChainInfoImpl(this.chainId)
+      .stakeCurrency?.coinMinimalDenom;
 
     if (!stakeDenom) {
       return "0";
@@ -53,7 +53,9 @@ export class ObservableQueryInitiaUnbondingDelegationsInner extends ObservableCh
 
   @computed
   get total(): CoinPretty | undefined {
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return;
@@ -88,7 +90,9 @@ export class ObservableQueryInitiaUnbondingDelegationsInner extends ObservableCh
   }[] {
     const unbondings = this.unbondings;
 
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     if (!stakeCurrency) {
       return [];
@@ -126,7 +130,9 @@ export class ObservableQueryInitiaUnbondingDelegationsInner extends ObservableCh
       return [];
     }
 
-    const stakeCurrency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    ).stakeCurrency;
 
     return this.response.data.unbonding_responses.map((unbonding) => {
       const filtered = unbonding.entries.filter((entry) =>

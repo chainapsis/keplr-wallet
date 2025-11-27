@@ -156,8 +156,12 @@ export class RecipientConfig
 
   @computed
   get bech32Prefix(): string {
+    if (!("cosmos" in this.chainInfo)) {
+      return "";
+    }
+
     if (!this._bech32Prefix) {
-      return this.chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
+      return this.chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     }
 
     return this._bech32Prefix;
@@ -177,12 +181,14 @@ export class RecipientConfig
     const rawRecipient = this.value.trim();
 
     const chainInfo = this.chainInfo;
-    const isEvmChain = !!this.chainInfo.evm;
+    const isEvmChain = "evm" in chainInfo && chainInfo.evm;
     const hasEthereumAddress =
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign") ||
-      isEvmChain;
+      isEvmChain ||
+      ("cosmos" in chainInfo &&
+        (chainInfo.cosmos.bip44.coinType === 60 ||
+          !!chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          !!chainInfo.cosmos.features?.includes("eth-key-sign")));
+
     if (
       hasEthereumAddress &&
       EthereumAccountBase.isEthereumHexAddressWithChecksum(rawRecipient) &&
@@ -222,12 +228,13 @@ export class RecipientConfig
     }
 
     const chainInfo = this.chainInfo;
-    const isEvmChain = !!this.chainInfo.evm;
+    const isEvmChain = "evm" in chainInfo && chainInfo.evm;
     const hasEthereumAddress =
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign") ||
-      isEvmChain;
+      isEvmChain ||
+      ("cosmos" in chainInfo &&
+        (chainInfo.cosmos.bip44.coinType === 60 ||
+          !!chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          !!chainInfo.cosmos.features?.includes("eth-key-sign")));
     const isHexAddressAllowed =
       this._allowHexAddressOnly ||
       (rawRecipient.startsWith("0x") && this._allowHexAddressToBech32Address);

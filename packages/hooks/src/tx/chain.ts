@@ -1,6 +1,7 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { ChainGetter, IChainInfoImpl } from "@keplr-wallet/stores";
+import { ChainGetter } from "@keplr-wallet/stores";
 import { ITxChainSetter } from "./types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 
 export class TxChainSetter implements ITxChainSetter {
   @observable
@@ -16,8 +17,8 @@ export class TxChainSetter implements ITxChainSetter {
   }
 
   @computed
-  get chainInfo(): IChainInfoImpl {
-    return this.chainGetter.getChain(this.chainId);
+  get chainInfo(): ModularChainInfo {
+    return this.chainGetter.getModularChain(this.chainId);
   }
 
   get chainId(): string {

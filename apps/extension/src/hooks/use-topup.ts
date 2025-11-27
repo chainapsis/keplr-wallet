@@ -122,7 +122,25 @@ export function useTopUp({
         fee: stdFee,
       });
 
-      const rpc = chainStore.getChain(feeConfig.chainId).rpc;
+      const rpc = (() => {
+        const modularChainInfo = chainStore.getModularChain(feeConfig.chainId);
+
+        if ("cosmos" in modularChainInfo) {
+          return modularChainInfo.cosmos.rpc;
+        }
+        if ("evm" in modularChainInfo) {
+          return modularChainInfo.evm.rpc;
+        }
+        if ("starknet" in modularChainInfo) {
+          return modularChainInfo.starknet.rpc;
+        }
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.rpc;
+        }
+
+        throw new Error("RPC is not found");
+      })();
+
       const tracer = new TendermintTxTracer(rpc, "/websocket");
 
       try {

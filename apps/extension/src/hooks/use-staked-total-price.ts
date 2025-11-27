@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useStore } from "../stores";
 import { PricePretty } from "@keplr-wallet/unit";
-import { ChainInfoWithCoreTypes } from "@keplr-wallet/background";
 
 export function useStakedTotalPrice() {
   const { hugeQueriesStore, priceStore } = useStore();
@@ -32,10 +31,7 @@ export function useStakedTotalPrice() {
   const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+      if (!("cosmos" in bal.chainInfo)) {
         continue;
       }
       if (bal.price) {
@@ -50,10 +46,7 @@ export function useStakedTotalPrice() {
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (!("currencies" in bal.chainInfo)) {
-        continue;
-      }
-      if (!(bal.chainInfo.embedded as ChainInfoWithCoreTypes).embedded) {
+      if (!("cosmos" in bal.chainInfo)) {
         continue;
       }
       if (bal.price) {

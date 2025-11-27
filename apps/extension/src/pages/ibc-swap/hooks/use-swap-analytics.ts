@@ -154,11 +154,11 @@ export const useSwapAnalytics = ({
   const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
   const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
 
-  const inChainName = chainStore.hasChain(inChainId)
-    ? chainStore.getChain(inChainId).chainName
+  const inChainName = chainStore.hasModularChain(inChainId)
+    ? chainStore.getModularChain(inChainId).chainName
     : undefined;
-  const outChainName = chainStore.hasChain(outChainId)
-    ? chainStore.getChain(outChainId).chainName
+  const outChainName = chainStore.hasModularChain(outChainId)
+    ? chainStore.getModularChain(outChainId).chainName
     : undefined;
 
   // source selected
@@ -429,8 +429,8 @@ function getChainProperties(
   const chainIdentifier = Number.isNaN(parseInt(_chainIdentifier, 10))
     ? _chainIdentifier
     : `eip155:${_chainIdentifier}`;
-  const chain = chainStore.hasChain(chainIdentifier)
-    ? chainStore.getChain(chainIdentifier)
+  const chain = chainStore.hasModularChain(chainIdentifier)
+    ? chainStore.getModularChainInfoImpl(chainIdentifier)
     : undefined;
 
   if (!chain) {
@@ -449,7 +449,7 @@ function getChainProperties(
 
   return {
     chainIdentifier,
-    chainName: chain.chainName,
+    chainName: chain.embedded.chainName,
     coinDenom: currency.coinDenom,
     amountUsd: price ? price.toDec().toString() : undefined,
   };
