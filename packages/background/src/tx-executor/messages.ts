@@ -16,7 +16,8 @@ export class RecordAndExecuteDirectTxsMsg extends Message<string> {
   constructor(
     public readonly vaultId: string,
     public readonly batchType: DirectTxBatchType,
-    public readonly txs: DirectTx[]
+    public readonly txs: DirectTx[],
+    public readonly executableChainIds: string[]
   ) {
     super();
   }
@@ -32,6 +33,14 @@ export class RecordAndExecuteDirectTxsMsg extends Message<string> {
 
     if (!this.txs || this.txs.length === 0) {
       throw new KeplrError("direct-tx-executor", 102, "txs is empty");
+    }
+
+    if (!this.executableChainIds || this.executableChainIds.length === 0) {
+      throw new KeplrError(
+        "direct-tx-executor",
+        103,
+        "executableChainIds is empty"
+      );
     }
   }
 
@@ -71,8 +80,9 @@ export class ResumeDirectTxsMsg extends Message<void> {
     if (!this.id) {
       throw new KeplrError("direct-tx-executor", 101, "id is empty");
     }
-    if (!this.txIndex) {
-      throw new KeplrError("direct-tx-executor", 103, "txIndex is empty");
+
+    if (this.txIndex == null || this.txIndex < 0) {
+      throw new KeplrError("direct-tx-executor", 103, "txIndex is invalid");
     }
 
     // signedTx and signature should be provided together

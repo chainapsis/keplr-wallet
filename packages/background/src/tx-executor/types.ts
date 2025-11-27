@@ -51,16 +51,18 @@ interface DirectTxBase {
   error?: string;
 }
 
+export interface EVMDirectTx extends DirectTxBase {
+  readonly type: DirectTxType.EVM;
+  readonly txData: EvmTxData;
+}
+
+export interface CosmosDirectTx extends DirectTxBase {
+  readonly type: DirectTxType.COSMOS;
+  readonly txData: CosmosTxData;
+}
+
 // Single transaction data with discriminated union based on type
-export type DirectTx =
-  | (DirectTxBase & {
-      readonly type: DirectTxType.EVM;
-      readonly txData: EvmTxData;
-    })
-  | (DirectTxBase & {
-      readonly type: DirectTxType.COSMOS;
-      readonly txData: CosmosTxData;
-    });
+export type DirectTx = EVMDirectTx | CosmosDirectTx;
 
 export enum DirectTxBatchStatus {
   PENDING = "pending",
@@ -87,6 +89,8 @@ export interface DirectTxBatchBase {
   // transactions
   readonly txs: DirectTx[];
   txIndex: number; // Current transaction being processed
+
+  executableChainIds: string[]; // executable chain ids
 
   readonly timestamp: number; // Timestamp when execution started
 }

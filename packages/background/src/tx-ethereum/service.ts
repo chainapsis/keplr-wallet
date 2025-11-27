@@ -20,6 +20,7 @@ export class BackgroundTxEthereumService {
     tx: Uint8Array,
     options: {
       silent?: boolean;
+      skipTracingTxResult?: boolean;
       onFulfill?: (txReceipt: EthTxReceipt) => void;
     }
   ): Promise<string> {
@@ -62,6 +63,10 @@ export class BackgroundTxEthereumService {
           sendRawTransactionResponse.data.error ??
           new Error("No tx hash responded")
         );
+      }
+
+      if (options.skipTracingTxResult) {
+        return txHash;
       }
 
       retry(
@@ -119,6 +124,58 @@ export class BackgroundTxEthereumService {
       }
       throw e;
     }
+  }
+
+  async getEthereumTxReceipt(
+    origin: string,
+    chainId: string,
+    txHash: string
+  ): Promise<EthTxReceipt | null> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+    if (!evmInfo) {
+      return null;
+    }
+
+    return await retry(
+      () => {
+        return new Promise<EthTxReceipt | null>(async (resolve, reject) => {
+          const txReceiptResponse = await simpleFetch<{
+            result: EthTxReceipt | null;
+            error?: Error;
+          }>(evmInfo.rpc, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              "request-source": origin,
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method: "eth_getTransactionReceipt",
+              params: [txHash],
+              id: 1,
+            }),
+          });
+
+          if (txReceiptResponse.data.error) {
+            console.error(txReceiptResponse.data.error);
+            resolve(null);
+          }
+
+          const txReceipt = txReceiptResponse.data.result;
+          if (txReceipt) {
+            resolve(txReceipt);
+          }
+
+          reject(new Error("No tx receipt responded"));
+        });
+      },
+      {
+        maxRetries: 50,
+        waitMsAfterError: 500,
+        maxWaitMsAfterError: 15000,
+      }
+    );
   }
 
   private static processTxResultNotification(notification: Notification): void {
