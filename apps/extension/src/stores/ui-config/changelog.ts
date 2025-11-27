@@ -23,6 +23,9 @@ interface VersionHistory {
     };
     aspectRatio?: string;
     paragraph: string;
+    links?: {
+      [key: string]: string;
+    };
   }[];
   isSidePanelBeta?: boolean;
 }
@@ -44,6 +47,9 @@ const Schema = Joi.object<{
               }).optional(),
               aspectRatio: Joi.string().optional(),
               paragraph: Joi.string().required(),
+              links: Joi.object()
+                .pattern(Joi.string(), Joi.string())
+                .optional(),
             })
           )
           .min(1)
