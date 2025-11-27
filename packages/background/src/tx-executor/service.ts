@@ -8,11 +8,12 @@ import { BackgroundTxService } from "../tx";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
-  DirectTxsBatch,
-  DirectTxsBatchResult,
+  DirectTxBatch,
   DirectTx,
-  DirectTxsBatchStatus,
+  DirectTxBatchStatus,
   DirectTxStatus,
+  DirectTxBatchType,
+  DirectTxBatchBase,
 } from "./types";
 import {
   action,
@@ -23,13 +24,12 @@ import {
   toJS,
 } from "mobx";
 
-// TODO: implement this service
 export class BackgroundTxExecutorService {
   @observable
-  protected recentDirectTxsBatchesSeq: number = 0;
+  protected recentDirectTxBatchSeq: number = 0;
   // Key: id (sequence, it should be increased by 1 for each)
   @observable
-  protected readonly recentDirectTxsBatchesMap: Map<string, DirectTxsBatch> =
+  protected readonly recentDirectTxBatchMap: Map<string, DirectTxBatch> =
     new Map();
 
   constructor(
@@ -46,38 +46,38 @@ export class BackgroundTxExecutorService {
   }
 
   async init(): Promise<void> {
-    const recentDirectTxsBatchesSeqSaved = await this.kvStore.get<number>(
-      "recentDirectTxsBatchesSeq"
+    const recentDirectTxBatchSeqSaved = await this.kvStore.get<number>(
+      "recentDirectTxBatchSeq"
     );
-    if (recentDirectTxsBatchesSeqSaved) {
+    if (recentDirectTxBatchSeqSaved) {
       runInAction(() => {
-        this.recentDirectTxsBatchesSeq = recentDirectTxsBatchesSeqSaved;
+        this.recentDirectTxBatchSeq = recentDirectTxBatchSeqSaved;
       });
     }
     autorun(() => {
-      const js = toJS(this.recentDirectTxsBatchesSeq);
-      this.kvStore.set<number>("recentDirectTxsBatchesSeq", js);
+      const js = toJS(this.recentDirectTxBatchSeq);
+      this.kvStore.set<number>("recentDirectTxBatchSeq", js);
     });
 
-    const recentDirectTxsBatchesMapSaved = await this.kvStore.get<
-      Record<string, DirectTxsBatch>
-    >("recentDirectTxsBatchesMap");
-    if (recentDirectTxsBatchesMapSaved) {
+    const recentDirectTxBatchMapSaved = await this.kvStore.get<
+      Record<string, DirectTxBatch>
+    >("recentDirectTxBatchMap");
+    if (recentDirectTxBatchMapSaved) {
       runInAction(() => {
-        let entries = Object.entries(recentDirectTxsBatchesMapSaved);
+        let entries = Object.entries(recentDirectTxBatchMapSaved);
         entries = entries.sort(([, a], [, b]) => {
           return parseInt(a.id) - parseInt(b.id);
         });
         for (const [key, value] of entries) {
-          this.recentDirectTxsBatchesMap.set(key, value);
+          this.recentDirectTxBatchMap.set(key, value);
         }
       });
     }
     autorun(() => {
-      const js = toJS(this.recentDirectTxsBatchesMap);
+      const js = toJS(this.recentDirectTxBatchMap);
       const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, DirectTxsBatch>>(
-        "recentDirectTxsBatchesMap",
+      this.kvStore.set<Record<string, DirectTxBatch>>(
+        "recentDirectTxBatchMap",
         obj
       );
     });
@@ -103,17 +103,18 @@ export class BackgroundTxExecutorService {
   recordAndExecuteDirectTxs(
     env: Env,
     vaultId: string,
+    type: DirectTxBatchType,
     txs: DirectTx[]
   ): string {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
 
-    const id = (this.recentDirectTxsBatchesSeq++).toString();
+    const id = (this.recentDirectTxBatchSeq++).toString();
 
-    const batch: DirectTxsBatch = {
+    const batchBase: DirectTxBatchBase = {
       id,
-      status: DirectTxsBatchStatus.PENDING,
+      status: DirectTxBatchStatus.PENDING,
       vaultId: vaultId,
       txs: txs,
       txIndex: -1,
@@ -121,14 +122,40 @@ export class BackgroundTxExecutorService {
       // TODO: add swap history data...
     };
 
-    this.recentDirectTxsBatchesMap.set(id, batch);
+    let batch: DirectTxBatch;
+    if (type === DirectTxBatchType.SWAP_V2) {
+      batch = {
+        ...batchBase,
+        type: DirectTxBatchType.SWAP_V2,
+        // TODO: add swap history data...
+        swapHistoryData: {
+          chainId: txs[0].chainId,
+        },
+      };
+    } else if (type === DirectTxBatchType.IBC_TRANSFER) {
+      batch = {
+        ...batchBase,
+        type: DirectTxBatchType.IBC_TRANSFER,
+        // TODO: add ibc history data...
+        ibcHistoryData: {
+          chainId: txs[0].chainId,
+        },
+      };
+    } else {
+      batch = {
+        ...batchBase,
+        type: DirectTxBatchType.UNDEFINED,
+      };
+    }
+
+    this.recentDirectTxBatchMap.set(id, batch);
     this.executeDirectTxs(id);
 
     return id;
   }
 
   /**
-   * Execute single specific transaction by execution id and transaction index
+   * Execute paused direct transactions by execution id and transaction index
    * Tx hash is returned if the transaction is executed successfully
    */
   @action
@@ -159,17 +186,17 @@ export class BackgroundTxExecutorService {
       signature?: Uint8Array;
     }
   ): Promise<void> {
-    const batch = this.getDirectTxsBatch(id);
+    const batch = this.getDirectTxBatch(id);
     if (!batch) {
       return;
     }
 
-    // Only pending or processing executions can be executed
-    const needContinue =
-      batch.status === DirectTxsBatchStatus.PENDING ||
-      batch.status === DirectTxsBatchStatus.PROCESSING;
-
-    if (!needContinue) {
+    // Only pending/processing/blocked executions can be executed
+    const needResume =
+      batch.status === DirectTxBatchStatus.PENDING ||
+      batch.status === DirectTxBatchStatus.PROCESSING ||
+      batch.status === DirectTxBatchStatus.BLOCKED;
+    if (!needResume) {
       return;
     }
 
@@ -193,17 +220,14 @@ export class BackgroundTxExecutorService {
     }
 
     if (currentTx.status === DirectTxStatus.CANCELLED) {
-      batch.status = DirectTxsBatchStatus.CANCELLED;
+      batch.status = DirectTxBatchStatus.CANCELLED;
       return;
     }
 
-    // if the current transaction is in failed/reverted status,
+    // if the current transaction is in failed status,
     // the execution should be failed and the execution should be stopped
-    if (
-      currentTx.status === DirectTxStatus.FAILED ||
-      currentTx.status === DirectTxStatus.REVERTED
-    ) {
-      batch.status = DirectTxsBatchStatus.FAILED;
+    if (currentTx.status === DirectTxStatus.FAILED) {
+      batch.status = DirectTxBatchStatus.FAILED;
       return;
     }
 
@@ -215,24 +239,46 @@ export class BackgroundTxExecutorService {
 
     // if tx index is out of range, the execution should be completed
     if (nextTxIndex >= batch.txs.length) {
-      batch.status = DirectTxsBatchStatus.COMPLETED;
-      // TODO: record swap history if needed
+      batch.status = DirectTxBatchStatus.COMPLETED;
+      this.recordHistoryIfNeeded(batch);
       return;
     }
 
-    if (batch.status === DirectTxsBatchStatus.PENDING) {
-      batch.status = DirectTxsBatchStatus.PROCESSING;
+    if (
+      batch.status === DirectTxBatchStatus.PENDING ||
+      batch.status === DirectTxBatchStatus.BLOCKED
+    ) {
+      batch.status = DirectTxBatchStatus.PROCESSING;
     }
 
     for (let i = nextTxIndex; i < batch.txs.length; i++) {
-      // CHECK: multi tx 케이스인 경우, 연속해서 실행할 수 없는 상황이 발생할 수 있음...
+      let txStatus: DirectTxStatus;
+
       if (options?.txIndex != null && i === options.txIndex) {
-        await this.executePendingDirectTx(id, i, {
+        txStatus = await this.executePendingDirectTx(id, i, {
           signedTx: options.signedTx,
           signature: options.signature,
         });
       } else {
-        await this.executePendingDirectTx(id, i);
+        txStatus = await this.executePendingDirectTx(id, i);
+      }
+
+      // if the tx is blocked, the execution should be stopped
+      // and the execution should be resumed later when the condition is met
+      if (txStatus === DirectTxStatus.BLOCKED) {
+        batch.status = DirectTxBatchStatus.BLOCKED;
+        return;
+      }
+
+      // if the tx is failed, the execution should be stopped
+      if (txStatus === DirectTxStatus.FAILED) {
+        batch.status = DirectTxBatchStatus.FAILED;
+        return;
+      }
+
+      // something went wrong...
+      if (txStatus !== DirectTxStatus.CONFIRMED) {
+        throw new KeplrError("direct-tx-executor", 107, "Unexpected tx status");
       }
     }
   }
@@ -240,12 +286,12 @@ export class BackgroundTxExecutorService {
   protected async executePendingDirectTx(
     id: string,
     index: number,
-    _options?: {
+    options?: {
       signedTx?: Uint8Array;
       signature?: Uint8Array;
     }
-  ): Promise<void> {
-    const batch = this.getDirectTxsBatch(id);
+  ): Promise<DirectTxStatus> {
+    const batch = this.getDirectTxBatch(id);
     if (!batch) {
       throw new KeplrError("direct-tx-executor", 105, "Execution not found");
     }
@@ -255,69 +301,79 @@ export class BackgroundTxExecutorService {
       throw new KeplrError("direct-tx-executor", 106, "Tx not found");
     }
 
-    if (currentTx.status === DirectTxStatus.CONFIRMED) {
-      return;
-    }
-
     // these statuses are not expected to be reached for pending transactions
     if (
+      currentTx.status === DirectTxStatus.CONFIRMED ||
       currentTx.status === DirectTxStatus.FAILED ||
-      currentTx.status === DirectTxStatus.REVERTED ||
       currentTx.status === DirectTxStatus.CANCELLED
     ) {
-      throw new KeplrError(
-        "direct-tx-executor",
-        107,
-        `Unexpected tx status when executing pending transaction: ${currentTx.status}`
-      );
+      return currentTx.status;
     }
 
     // update the tx index to the current tx index
     batch.txIndex = index;
 
-    // 순서대로 signing -> broadcasting -> checking receipt 순으로 진행된다.
-
-    // 1. signing
     if (
-      currentTx.status === DirectTxStatus.PENDING ||
-      currentTx.status === DirectTxStatus.SIGNING
+      currentTx.status === DirectTxStatus.BLOCKED ||
+      currentTx.status === DirectTxStatus.PENDING
     ) {
-      if (currentTx.status === DirectTxStatus.SIGNING) {
-        // check if the transaction is signed
-        // if not, try sign again...
+      // TODO: check if the condition is met to resume the execution
+      // this will be handled with recent send history tracking to check if the condition is met to resume the execution
+      // check if the current transaction's chainId is included in the chainIds of the recent send history (might enough with this)
+      if (this.checkIfTxIsBlocked(batch, currentTx.chainId)) {
+        currentTx.status = DirectTxStatus.BLOCKED;
+        return currentTx.status;
       } else {
-        // set the transaction status to signing
         currentTx.status = DirectTxStatus.SIGNING;
-      }
-
-      try {
-        // sign the transaction
-
-        // if success, set the transaction status to signed
-        currentTx.status = DirectTxStatus.SIGNED;
-      } catch (error) {
-        currentTx.status = DirectTxStatus.FAILED;
-        currentTx.error = error.message;
       }
     }
 
-    // 2. broadcasting
+    if (currentTx.status === DirectTxStatus.SIGNING) {
+      // if options are provided, temporary set the options to the current transaction
+      if (options?.signedTx && options.signature) {
+        currentTx.signedTx = options.signedTx;
+        currentTx.signature = options.signature;
+      }
+
+      // check if the transaction is signed
+      if (this.checkIfTxIsSigned(currentTx)) {
+        // if already signed, signing -> signed
+        currentTx.status = DirectTxStatus.SIGNED;
+      }
+
+      // if not signed, try sign
+      if (currentTx.status === DirectTxStatus.SIGNING) {
+        try {
+          const { signedTx, signature } = await this.signTx(currentTx);
+
+          currentTx.signedTx = signedTx;
+          currentTx.signature = signature;
+          currentTx.status = DirectTxStatus.SIGNED;
+        } catch (error) {
+          currentTx.status = DirectTxStatus.FAILED;
+          currentTx.error = error.message;
+        }
+      }
+    }
+
     if (
       currentTx.status === DirectTxStatus.SIGNED ||
       currentTx.status === DirectTxStatus.BROADCASTING
     ) {
       if (currentTx.status === DirectTxStatus.BROADCASTING) {
         // check if the transaction is broadcasted
-        // if not, try broadcast again...
+        if (this.checkIfTxIsBroadcasted(currentTx)) {
+          currentTx.status = DirectTxStatus.BROADCASTED;
+        }
       } else {
         // set the transaction status to broadcasting
         currentTx.status = DirectTxStatus.BROADCASTING;
       }
 
       try {
-        // broadcast the transaction
+        const { txHash } = await this.broadcastTx(currentTx);
 
-        // if success, set the transaction status to broadcasted
+        currentTx.txHash = txHash;
         currentTx.status = DirectTxStatus.BROADCASTED;
       } catch (error) {
         currentTx.status = DirectTxStatus.FAILED;
@@ -325,13 +381,11 @@ export class BackgroundTxExecutorService {
       }
     }
 
-    // 3. checking receipt
     if (currentTx.status === DirectTxStatus.BROADCASTED) {
-      // check if the transaction is confirmed
+      // broadcasted -> confirmed
 
       try {
-        const confirmed = true;
-
+        const confirmed = await this.checkIfTxIsConfirmed(currentTx);
         if (confirmed) {
           currentTx.status = DirectTxStatus.CONFIRMED;
         } else {
@@ -344,21 +398,66 @@ export class BackgroundTxExecutorService {
       }
     }
 
-    // TODO: record swap history if needed
+    if (currentTx.status === DirectTxStatus.CONFIRMED) {
+      this.recordHistoryIfNeeded(batch);
+    }
+
+    return currentTx.status;
+  }
+
+  protected checkIfTxIsBlocked(
+    _batch: DirectTxBatch,
+    _chainId: string
+  ): boolean {
+    return false;
+  }
+
+  protected checkIfTxIsSigned(_tx: DirectTx): boolean {
+    return true;
+  }
+
+  protected checkIfTxIsBroadcasted(_tx: DirectTx): boolean {
+    return true;
+  }
+
+  protected async signTx(_tx: DirectTx): Promise<{
+    signedTx: Uint8Array;
+    signature: Uint8Array;
+  }> {
+    return {
+      signedTx: new Uint8Array(),
+      signature: new Uint8Array(),
+    };
+  }
+
+  protected async broadcastTx(_tx: DirectTx): Promise<{
+    txHash: string;
+  }> {
+    return {
+      txHash: "",
+    };
+  }
+
+  protected async checkIfTxIsConfirmed(_tx: DirectTx): Promise<boolean> {
+    return true;
+  }
+
+  protected recordHistoryIfNeeded(_batch: DirectTxBatch): void {
+    throw new Error("Not implemented");
   }
 
   /**
    * Get all recent direct transactions executions
    */
-  getRecentDirectTxsBatches(): DirectTxsBatch[] {
-    return Array.from(this.recentDirectTxsBatchesMap.values());
+  getRecentDirectTxBatches(): DirectTxBatch[] {
+    return Array.from(this.recentDirectTxBatchMap.values());
   }
 
   /**
    * Get execution data by ID
    */
-  getDirectTxsBatch(id: string): DirectTxsBatch | undefined {
-    const batch = this.recentDirectTxsBatchesMap.get(id);
+  getDirectTxBatch(id: string): DirectTxBatch | undefined {
+    const batch = this.recentDirectTxBatchMap.get(id);
     if (!batch) {
       return undefined;
     }
@@ -367,31 +466,11 @@ export class BackgroundTxExecutorService {
   }
 
   /**
-   * Get execution result by execution id
-   */
-  getDirectTxsBatchResult(id: string): DirectTxsBatchResult | undefined {
-    const batch = this.recentDirectTxsBatchesMap.get(id);
-    if (!batch) {
-      return undefined;
-    }
-
-    return {
-      id: batch.id,
-      txs: batch.txs.map((tx) => ({
-        chainId: tx.chainId,
-        txHash: tx.txHash,
-        error: tx.error,
-      })),
-      swapHistoryId: batch.swapHistoryId,
-    };
-  }
-
-  /**
    * Cancel execution by execution id
    */
   @action
   async cancelDirectTxs(id: string): Promise<void> {
-    const batch = this.recentDirectTxsBatchesMap.get(id);
+    const batch = this.recentDirectTxBatchMap.get(id);
     if (!batch) {
       return;
     }
@@ -400,22 +479,22 @@ export class BackgroundTxExecutorService {
 
     // Only pending or processing executions can be cancelled
     if (
-      currentStatus !== DirectTxsBatchStatus.PENDING &&
-      currentStatus !== DirectTxsBatchStatus.PROCESSING
+      currentStatus !== DirectTxBatchStatus.PENDING &&
+      currentStatus !== DirectTxBatchStatus.PROCESSING
     ) {
       return;
     }
 
     // CHECK: cancellation is really needed?
-    batch.status = DirectTxsBatchStatus.CANCELLED;
+    batch.status = DirectTxBatchStatus.CANCELLED;
 
-    if (currentStatus === DirectTxsBatchStatus.PROCESSING) {
+    if (currentStatus === DirectTxBatchStatus.PROCESSING) {
       // TODO: cancel the current transaction execution...
     }
   }
 
   @action
-  protected removeDirectTxsBatch(id: string): void {
-    this.recentDirectTxsBatchesMap.delete(id);
+  protected removeDirectTxBatch(id: string): void {
+    this.recentDirectTxBatchMap.delete(id);
   }
 }

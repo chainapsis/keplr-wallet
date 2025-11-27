@@ -8,9 +8,9 @@ export enum DirectTxStatus {
   BROADCASTING = "broadcasting",
   BROADCASTED = "broadcasted",
   CONFIRMED = "confirmed",
-  REVERTED = "reverted",
-  CANCELLED = "cancelled",
   FAILED = "failed",
+  CANCELLED = "cancelled",
+  BLOCKED = "blocked",
 }
 
 // Transaction type
@@ -35,12 +35,14 @@ export type DirectTxData =
   | EvmTxData // EVM transaction data
   | CosmosTxData; // Cosmos transaction construction data
 
-// Single transaction data
-export interface DirectTx {
-  readonly type: DirectTxType;
+// Base transaction interface
+interface DirectTxBase {
   status: DirectTxStatus; // mutable while executing
   readonly chainId: string;
-  readonly txData: DirectTxData;
+
+  // signed transaction data
+  signedTx?: Uint8Array;
+  signature?: Uint8Array;
 
   // Transaction hash for completed tx
   txHash?: string;
@@ -49,17 +51,35 @@ export interface DirectTx {
   error?: string;
 }
 
-export enum DirectTxsBatchStatus {
+// Single transaction data with discriminated union based on type
+export type DirectTx =
+  | (DirectTxBase & {
+      readonly type: DirectTxType.EVM;
+      readonly txData: EvmTxData;
+    })
+  | (DirectTxBase & {
+      readonly type: DirectTxType.COSMOS;
+      readonly txData: CosmosTxData;
+    });
+
+export enum DirectTxBatchStatus {
   PENDING = "pending",
   PROCESSING = "processing",
+  BLOCKED = "blocked",
   COMPLETED = "completed",
   FAILED = "failed",
   CANCELLED = "cancelled",
 }
 
-export interface DirectTxsBatch {
+export enum DirectTxBatchType {
+  UNDEFINED = "undefined",
+  IBC_TRANSFER = "ibc-transfer",
+  SWAP_V2 = "swap-v2",
+}
+
+export interface DirectTxBatchBase {
   readonly id: string;
-  status: DirectTxsBatchStatus;
+  status: DirectTxBatchStatus;
 
   // keyring vault id
   readonly vaultId: string;
@@ -68,23 +88,26 @@ export interface DirectTxsBatch {
   readonly txs: DirectTx[];
   txIndex: number; // Current transaction being processed
 
-  // swap history id after record swap history
-  swapHistoryId?: string;
-  // TODO: add more required fields for swap history data
-  readonly swapHistoryData?: {
-    readonly chainId: string;
-  };
-
   readonly timestamp: number; // Timestamp when execution started
 }
 
-// Execution result (summary of the execution data)
-export interface DirectTxsBatchResult {
-  readonly id: string;
-  readonly txs: {
-    chainId: string;
-    txHash?: string;
-    error?: string;
-  }[];
-  readonly swapHistoryId?: string;
-}
+export type DirectTxBatch =
+  | (DirectTxBatchBase & {
+      readonly type: DirectTxBatchType.UNDEFINED;
+    })
+  | (DirectTxBatchBase & {
+      readonly type: DirectTxBatchType.SWAP_V2;
+      swapHistoryId?: string;
+      // TODO: add more required fields for swap history data
+      readonly swapHistoryData: {
+        readonly chainId: string;
+      };
+    })
+  | (DirectTxBatchBase & {
+      readonly type: DirectTxBatchType.IBC_TRANSFER;
+      readonly ibcHistoryId?: string;
+      // TODO: add more required fields for ibc history data
+      readonly ibcHistoryData: {
+        readonly chainId: string;
+      };
+    });

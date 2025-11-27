@@ -1,6 +1,6 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { DirectTxsBatch, DirectTxsBatchResult, DirectTx } from "./types";
+import { DirectTxBatch, DirectTx, DirectTxBatchType } from "./types";
 
 /**
  * Record and execute multiple transactions
@@ -15,6 +15,7 @@ export class RecordAndExecuteDirectTxsMsg extends Message<string> {
   //TODO: add history data...
   constructor(
     public readonly vaultId: string,
+    public readonly batchType: DirectTxBatchType,
     public readonly txs: DirectTx[]
   ) {
     super();
@@ -24,6 +25,11 @@ export class RecordAndExecuteDirectTxsMsg extends Message<string> {
     if (!this.vaultId) {
       throw new KeplrError("direct-tx-executor", 101, "vaultId is empty");
     }
+
+    if (!this.batchType) {
+      throw new KeplrError("direct-tx-executor", 102, "batchType is empty");
+    }
+
     if (!this.txs || this.txs.length === 0) {
       throw new KeplrError("direct-tx-executor", 102, "txs is empty");
     }
@@ -95,9 +101,9 @@ export class ResumeDirectTxsMsg extends Message<void> {
 /**
  * Get execution data by execution id
  */
-export class GetDirectTxsBatchMsg extends Message<DirectTxsBatch | undefined> {
+export class GetDirectTxBatchMsg extends Message<DirectTxBatch | undefined> {
   public static type() {
-    return "get-direct-txs-batch";
+    return "get-direct-tx-batch";
   }
 
   constructor(public readonly id: string) {
@@ -119,39 +125,7 @@ export class GetDirectTxsBatchMsg extends Message<DirectTxsBatch | undefined> {
   }
 
   type(): string {
-    return GetDirectTxsBatchMsg.type();
-  }
-}
-
-/**
- * Get execution result by execution id
- */
-export class GetDirectTxsBatchResultMsg extends Message<
-  DirectTxsBatchResult | undefined
-> {
-  public static type() {
-    return "get-direct-txs-batch-result";
-  }
-  constructor(public readonly id: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.id) {
-      throw new KeplrError("direct-tx-executor", 101, "id is empty");
-    }
-  }
-
-  override approveExternal(): boolean {
-    return false;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return GetDirectTxsBatchResultMsg.type();
+    return GetDirectTxBatchMsg.type();
   }
 }
 

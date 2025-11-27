@@ -10,8 +10,7 @@ import {
   RecordAndExecuteDirectTxsMsg,
   ResumeDirectTxsMsg,
   CancelDirectTxsMsg,
-  GetDirectTxsBatchMsg,
-  GetDirectTxsBatchResultMsg,
+  GetDirectTxBatchMsg,
 } from "./messages";
 
 export const getHandler: (service: BackgroundTxExecutorService) => Handler = (
@@ -24,20 +23,15 @@ export const getHandler: (service: BackgroundTxExecutorService) => Handler = (
           env,
           msg as RecordAndExecuteDirectTxsMsg
         );
-      case GetDirectTxsBatchMsg:
-        return handleGetDirectTxsBatchMsg(service)(
+      case GetDirectTxBatchMsg:
+        return handleGetDirectTxBatchMsg(service)(
           env,
-          msg as GetDirectTxsBatchMsg
+          msg as GetDirectTxBatchMsg
         );
       case ResumeDirectTxsMsg:
         return handleResumeDirectTxsMsg(service)(
           env,
           msg as ResumeDirectTxsMsg
-        );
-      case GetDirectTxsBatchResultMsg:
-        return handleGetDirectTxsBatchResultMsg(service)(
-          env,
-          msg as GetDirectTxsBatchResultMsg
         );
       case CancelDirectTxsMsg:
         return handleCancelDirectTxsMsg(service)(
@@ -54,7 +48,12 @@ const handleRecordAndExecuteDirectTxsMsg: (
   service: BackgroundTxExecutorService
 ) => InternalHandler<RecordAndExecuteDirectTxsMsg> = (service) => {
   return (env, msg) => {
-    return service.recordAndExecuteDirectTxs(env, msg.vaultId, msg.txs);
+    return service.recordAndExecuteDirectTxs(
+      env,
+      msg.vaultId,
+      msg.batchType,
+      msg.txs
+    );
   };
 };
 
@@ -72,19 +71,11 @@ const handleResumeDirectTxsMsg: (
   };
 };
 
-const handleGetDirectTxsBatchMsg: (
+const handleGetDirectTxBatchMsg: (
   service: BackgroundTxExecutorService
-) => InternalHandler<GetDirectTxsBatchMsg> = (service) => {
+) => InternalHandler<GetDirectTxBatchMsg> = (service) => {
   return (_env, msg) => {
-    return service.getDirectTxsBatch(msg.id);
-  };
-};
-
-const handleGetDirectTxsBatchResultMsg: (
-  service: BackgroundTxExecutorService
-) => InternalHandler<GetDirectTxsBatchResultMsg> = (service) => {
-  return (_env, msg) => {
-    return service.getDirectTxsBatchResult(msg.id);
+    return service.getDirectTxBatch(msg.id);
   };
 };
 

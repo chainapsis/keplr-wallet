@@ -6,8 +6,7 @@ import {
   RecordAndExecuteDirectTxsMsg,
   ResumeDirectTxsMsg,
   CancelDirectTxsMsg,
-  GetDirectTxsBatchMsg,
-  GetDirectTxsBatchResultMsg,
+  GetDirectTxBatchMsg,
 } from "./messages";
 
 export function init(
@@ -16,8 +15,7 @@ export function init(
 ): void {
   router.registerMessage(RecordAndExecuteDirectTxsMsg);
   router.registerMessage(ResumeDirectTxsMsg);
-  router.registerMessage(GetDirectTxsBatchMsg);
-  router.registerMessage(GetDirectTxsBatchResultMsg);
+  router.registerMessage(GetDirectTxBatchMsg);
   router.registerMessage(CancelDirectTxsMsg);
 
   router.addHandler(ROUTE, getHandler(service));
