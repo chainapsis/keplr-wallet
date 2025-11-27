@@ -52,7 +52,8 @@ const handleRecordAndExecuteDirectTxsMsg: (
       env,
       msg.vaultId,
       msg.batchType,
-      msg.txs
+      msg.txs,
+      msg.executableChainIds
     );
   };
 };
