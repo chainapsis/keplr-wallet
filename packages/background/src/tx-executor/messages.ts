@@ -1,13 +1,18 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { DirectTxBatch, DirectTx, DirectTxBatchType } from "./types";
+import {
+  DirectTxBatch,
+  DirectTx,
+  DirectTxBatchType,
+  DirectTxBatchStatus,
+} from "./types";
 
 /**
  * Record and execute multiple transactions
  * execution id is returned if the transactions are recorded successfully
  * and the execution will be started automatically after the transactions are recorded.
  */
-export class RecordAndExecuteDirectTxsMsg extends Message<string> {
+export class RecordAndExecuteDirectTxsMsg extends Message<DirectTxBatchStatus> {
   public static type() {
     return "record-and-execute-direct-txs";
   }
@@ -61,14 +66,14 @@ export class RecordAndExecuteDirectTxsMsg extends Message<string> {
  * Resume existing direct transactions by execution id and transaction index
  * This message is used to resume the execution of direct transactions that were paused by waiting for the asset to be bridged or other reasons.
  */
-export class ResumeDirectTxsMsg extends Message<void> {
+export class ResumeDirectTxsMsg extends Message<DirectTxBatchStatus> {
   public static type() {
     return "resume-direct-txs";
   }
 
   constructor(
     public readonly id: string,
-    public readonly txIndex: number,
+    public readonly txIndex?: number,
     // NOTE: these fields are optional for hardware wallet cases
     public readonly signedTx?: Uint8Array,
     public readonly signature?: Uint8Array
@@ -81,7 +86,7 @@ export class ResumeDirectTxsMsg extends Message<void> {
       throw new KeplrError("direct-tx-executor", 101, "id is empty");
     }
 
-    if (this.txIndex == null || this.txIndex < 0) {
+    if (this.txIndex != null && this.txIndex < 0) {
       throw new KeplrError("direct-tx-executor", 103, "txIndex is invalid");
     }
 

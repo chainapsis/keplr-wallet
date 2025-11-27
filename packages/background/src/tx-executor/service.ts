@@ -109,17 +109,21 @@ export class BackgroundTxExecutorService {
    * and the execution will be started automatically after the transactions are recorded.
    */
   @action
-  recordAndExecuteDirectTxs(
+  async recordAndExecuteDirectTxs(
     env: Env,
     vaultId: string,
     type: DirectTxBatchType,
     txs: DirectTx[],
     executableChainIds: string[]
-  ): string {
+  ): Promise<DirectTxBatchStatus> {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
 
+    // CHECK: 다중 체인 트랜잭션이 아니라면 굳이 이걸 기록할 필요가 있을까?
+    // 다중 체인 트랜잭션을 기록하는 이유는 자산 브릿징 등 상당한 시간이 걸리는 경우 이 작업을 백그라운드에서 한없이 기다리는 대신
+    // 실행 조건이 만족되었을 때 이어서 실행하기 위함인데, 한 번에 처리가 가능하다면 굳이 이걸 기록할 필요는 없을지도 모른다.
+    // 특히나 ui에서 진행상황을 체크하는 것이 아닌 이상 notification을 통해 진행상황을 알리는 것으로 충분할 수 있다.
     const id = (this.recentDirectTxBatchSeq++).toString();
 
     const batchBase: DirectTxBatchBase = {
@@ -159,9 +163,7 @@ export class BackgroundTxExecutorService {
     }
 
     this.recentDirectTxBatchMap.set(id, batch);
-    this.executeDirectTxs(id);
-
-    return id;
+    return await this.executeDirectTxs(id);
   }
 
   /**
@@ -171,10 +173,10 @@ export class BackgroundTxExecutorService {
   async resumeDirectTxs(
     env: Env,
     id: string,
-    txIndex: number,
+    txIndex?: number,
     signedTx?: Uint8Array,
     signature?: Uint8Array
-  ): Promise<void> {
+  ): Promise<DirectTxBatchStatus> {
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
@@ -196,10 +198,10 @@ export class BackgroundTxExecutorService {
       signedTx?: Uint8Array;
       signature?: Uint8Array;
     }
-  ): Promise<void> {
+  ): Promise<DirectTxBatchStatus> {
     const batch = this.getDirectTxBatch(id);
     if (!batch) {
-      return;
+      throw new KeplrError("direct-tx-executor", 105, "Execution not found");
     }
 
     // Only pending/processing/blocked executions can be executed
@@ -208,7 +210,7 @@ export class BackgroundTxExecutorService {
       batch.status === DirectTxBatchStatus.PROCESSING ||
       batch.status === DirectTxBatchStatus.BLOCKED;
     if (!needResume) {
-      return;
+      return batch.status;
     }
 
     // check if the key is valid
@@ -224,12 +226,7 @@ export class BackgroundTxExecutorService {
       batch.txs.length - 1
     );
 
-    if (
-      batch.status === DirectTxBatchStatus.PENDING ||
-      batch.status === DirectTxBatchStatus.BLOCKED
-    ) {
-      batch.status = DirectTxBatchStatus.PROCESSING;
-    }
+    batch.status = DirectTxBatchStatus.PROCESSING;
 
     for (let i = executionStartIndex; i < batch.txs.length; i++) {
       let txStatus: DirectTxStatus;
@@ -256,13 +253,13 @@ export class BackgroundTxExecutorService {
       if (txStatus === DirectTxStatus.BLOCKED) {
         batch.status = DirectTxBatchStatus.BLOCKED;
         this.recordHistoryIfNeeded(batch);
-        return;
+        return batch.status;
       }
 
       // if the tx is failed, the execution should be stopped
       if (txStatus === DirectTxStatus.FAILED) {
         batch.status = DirectTxBatchStatus.FAILED;
-        return;
+        return batch.status;
       }
 
       // something went wrong, should not happen
@@ -276,6 +273,7 @@ export class BackgroundTxExecutorService {
     // if the execution is completed successfully, update the batch status
     batch.status = DirectTxBatchStatus.COMPLETED;
     this.recordHistoryIfNeeded(batch);
+    return batch.status;
   }
 
   protected async executePendingDirectTx(
