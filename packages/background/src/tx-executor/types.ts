@@ -1,4 +1,5 @@
-import { StdSignDoc, StdSignature } from "@keplr-wallet/types";
+import { UnsignedTransaction } from "@ethersproject/transactions";
+import { StdSignDoc } from "@keplr-wallet/types";
 
 // Transaction status
 export enum DirectTxStatus {
@@ -19,22 +20,6 @@ export enum DirectTxType {
   COSMOS = "cosmos",
 }
 
-// TODO: 뭐가 필요할까...
-export interface CosmosTxData {
-  readonly signDoc: StdSignDoc;
-  readonly signature?: StdSignature;
-}
-
-export interface EvmTxData {
-  readonly tx: Uint8Array;
-  readonly signature?: Uint8Array;
-}
-
-// Transaction data union type
-export type DirectTxData =
-  | EvmTxData // EVM transaction data
-  | CosmosTxData; // Cosmos transaction construction data
-
 // Base transaction interface
 interface DirectTxBase {
   status: DirectTxStatus; // mutable while executing
@@ -53,12 +38,12 @@ interface DirectTxBase {
 
 export interface EVMDirectTx extends DirectTxBase {
   readonly type: DirectTxType.EVM;
-  readonly txData: EvmTxData;
+  readonly txData: UnsignedTransaction;
 }
 
 export interface CosmosDirectTx extends DirectTxBase {
   readonly type: DirectTxType.COSMOS;
-  readonly txData: CosmosTxData;
+  readonly txData: StdSignDoc;
 }
 
 // Single transaction data with discriminated union based on type

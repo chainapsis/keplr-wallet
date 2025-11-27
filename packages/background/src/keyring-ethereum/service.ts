@@ -28,6 +28,7 @@ import {
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { getBasicAccessPermissionType, PermissionService } from "../permission";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
+import { Dec } from "@keplr-wallet/unit";
 import { TokenERC20Service } from "../token-erc20";
 import { validateEVMChainId } from "./helper";
 import { runInAction } from "mobx";
@@ -316,6 +317,95 @@ export class KeyRingEthereumService {
         };
       }
     );
+  }
+
+  async signEthereumDirect(
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array,
+    signType: EthSignType
+  ): Promise<EthereumSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    // if (chainInfo.hideInUI) {
+    //   throw new Error("Can't sign for hidden chain");
+    // }
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+
+    if (!isEthermintLike && !evmInfo) {
+      throw new Error("Not ethermint like and EVM chain");
+    }
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+      throw new Error("Direct signing is not supported for hardware wallets");
+    }
+
+    if (signType === EthSignType.TRANSACTION) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString());
+      if (unsignedTx.authorizationList) {
+        throw new Error("EIP-7702 transactions are not supported.");
+      }
+    }
+
+    try {
+      Bech32Address.validate(signer);
+    } catch {
+      // Ignore mixed-case checksum
+      signer = (
+        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
+      ).toLowerCase();
+    }
+
+    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    if (
+      signer !== key.bech32Address &&
+      signer !== key.ethereumHexAddress.toLowerCase()
+    ) {
+      throw new Error("Signer mismatched");
+    }
+
+    if (signType !== EthSignType.TRANSACTION) {
+      throw new Error(
+        "Direct signing is only supported for transaction for now"
+      );
+    }
+
+    const unsignedTx = await this.fillUnsignedTx(
+      origin,
+      chainId,
+      signer,
+      JSON.parse(Buffer.from(message).toString())
+    );
+
+    const isEIP1559 =
+      !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+    if (isEIP1559) {
+      unsignedTx.type = TransactionTypes.eip1559;
+    }
+
+    const signature = await this.keyRingService.sign(
+      chainId,
+      vaultId,
+      Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
+      "keccak256"
+    );
+
+    return {
+      signingData: Buffer.from(JSON.stringify(unsignedTx), "utf8"),
+      signature: Buffer.concat([
+        signature.r,
+        signature.s,
+        // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+        signature.v ? Buffer.from("1c", "hex") : Buffer.from("1b", "hex"),
+      ]),
+    };
   }
 
   async request<T = any>(
@@ -1217,6 +1307,205 @@ export class KeyRingEthereumService {
     })()) as T;
 
     return result;
+  }
+
+  protected async fillUnsignedTx(
+    origin: string,
+    chainId: string,
+    signer: string,
+    tx: UnsignedTransaction
+  ): Promise<UnsignedTransaction> {
+    // get chain info
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+    if (!evmInfo) {
+      throw new Error("Not EVM chain");
+    }
+
+    const getTransactionCountRequest = {
+      jsonrpc: "2.0",
+      method: "eth_getTransactionCount",
+      params: [signer, "pending"],
+      id: 1,
+    };
+
+    const getBlockRequest = {
+      jsonrpc: "2.0",
+      method: "eth_getBlockByNumber",
+      params: ["latest", false],
+      id: 2,
+    };
+
+    const getFeeHistoryRequest = {
+      jsonrpc: "2.0",
+      method: "eth_feeHistory",
+      params: [20, "latest", [50]],
+      id: 3,
+    };
+
+    const estimateGasRequest = {
+      jsonrpc: "2.0",
+      method: "eth_estimateGas",
+      params: [
+        {
+          from: signer,
+          to: tx.to,
+          value: tx.value,
+          data: tx.data,
+        },
+      ],
+      id: 4,
+    };
+
+    const getMaxPriorityFeePerGasRequest = {
+      jsonrpc: "2.0",
+      method: "eth_maxPriorityFeePerGas",
+      params: [],
+      id: 5,
+    };
+
+    // rpc request in batch (as 2.0 jsonrpc supports batch requests)
+    const batchRequest = [
+      getTransactionCountRequest,
+      getBlockRequest,
+      getFeeHistoryRequest,
+      estimateGasRequest,
+      getMaxPriorityFeePerGasRequest,
+    ];
+
+    const { data: rpcResponses } = await simpleFetch<
+      Array<{
+        jsonrpc: "2.0";
+        id: number;
+        result?: unknown;
+        error?: { code: number; message: string; data?: unknown };
+      }>
+    >(evmInfo.rpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "request-source": origin,
+      },
+      body: JSON.stringify(batchRequest),
+    });
+
+    if (
+      !Array.isArray(rpcResponses) ||
+      rpcResponses.length !== batchRequest.length
+    ) {
+      throw new Error("Invalid batch response format");
+    }
+
+    const getResult = <T = any>(id: number): T => {
+      const res = rpcResponses.find((r) => r.id === id);
+      if (!res) {
+        throw new Error(`No response for id=${id}`);
+      }
+      if (res.error) {
+        throw new Error(
+          `RPC error (id=${id}): ${res.error.code} ${res.error.message}`
+        );
+      }
+      return res.result as T;
+    };
+
+    // find responses by id
+    const nonceHex = getResult<string>(1);
+    const latestBlock = getResult<{ baseFeePerGas?: string }>(2);
+    const feeHistory = getResult<{
+      baseFeePerGas?: string[];
+      gasUsedRatio: number[];
+      oldestBlock: string;
+      reward?: string[][];
+    }>(3);
+    const gasLimitHex = getResult<string>(4);
+    const networkMaxPriorityFeePerGasHex = getResult<string>(5);
+
+    let maxPriorityFeePerGasDec: Dec | undefined;
+    if (feeHistory.reward && feeHistory.reward.length > 0) {
+      // get 50th percentile rewards (index 0 since we requested [50] percentile)
+      const percentileIndex = 0;
+      const rewards = feeHistory.reward
+        .map((block) => block[percentileIndex])
+        .filter((v) => v != null)
+        .map((v) => BigInt(v));
+
+      if (rewards.length > 0) {
+        const sum = rewards.reduce((acc, x) => acc + x, BigInt(0));
+        const mean = sum / BigInt(rewards.length);
+
+        const sortedRewards = [...rewards].sort((a, b) =>
+          a < b ? -1 : a > b ? 1 : 0
+        );
+        const median = sortedRewards[Math.floor(sortedRewards.length / 2)];
+
+        // use 1 Gwei deviation threshold to decide between mean and median
+        const deviationThreshold = BigInt(1 * 10 ** 9); // 1 Gwei
+        const deviation = mean > median ? mean - median : median - mean;
+        const pick =
+          deviation > deviationThreshold
+            ? mean > median
+              ? mean
+              : median
+            : mean;
+
+        maxPriorityFeePerGasDec = new Dec(pick);
+      }
+    }
+
+    if (networkMaxPriorityFeePerGasHex) {
+      const networkMaxPriorityFeePerGasDec = new Dec(
+        BigInt(networkMaxPriorityFeePerGasHex)
+      );
+
+      if (
+        !maxPriorityFeePerGasDec ||
+        (maxPriorityFeePerGasDec &&
+          networkMaxPriorityFeePerGasDec.gt(maxPriorityFeePerGasDec))
+      ) {
+        maxPriorityFeePerGasDec = networkMaxPriorityFeePerGasDec;
+      }
+    }
+
+    if (!maxPriorityFeePerGasDec) {
+      throw new Error(
+        "Failed to calculate maxPriorityFeePerGas to fill unsigned transaction"
+      );
+    }
+
+    if (!latestBlock.baseFeePerGas) {
+      throw new Error(
+        "Failed to get baseFeePerGas to fill unsigned transaction"
+      );
+    }
+
+    const multiplier = new Dec(1.25);
+
+    // Calculate maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas
+    const baseFeePerGasDec = new Dec(BigInt(latestBlock.baseFeePerGas));
+    const maxFeePerGasDec = baseFeePerGasDec
+      .add(maxPriorityFeePerGasDec)
+      .mul(multiplier);
+    const maxFeePerGasHex = `0x${maxFeePerGasDec
+      .truncate()
+      .toBigNumber()
+      .toString(16)}`;
+
+    maxPriorityFeePerGasDec = maxPriorityFeePerGasDec.mul(multiplier);
+    const maxPriorityFeePerGasHex = `0x${maxPriorityFeePerGasDec
+      .truncate()
+      .toBigNumber()
+      .toString(16)}`;
+
+    const newUnsignedTx: UnsignedTransaction = {
+      ...tx,
+      nonce: parseInt(nonceHex, 16),
+      maxFeePerGas: maxFeePerGasHex,
+      maxPriorityFeePerGas: maxPriorityFeePerGasHex,
+      gasLimit: gasLimitHex,
+    };
+
+    return newUnsignedTx;
   }
 
   getNewCurrentChainIdFromRequest(

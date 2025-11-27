@@ -26,7 +26,12 @@ import {
   runInAction,
   toJS,
 } from "mobx";
-import { EthTxStatus } from "@keplr-wallet/types";
+import {
+  EthSignType,
+  EthTxStatus,
+  EthereumSignResponse,
+} from "@keplr-wallet/types";
+import { TransactionTypes, serialize } from "@ethersproject/transactions";
 
 export class BackgroundTxExecutorService {
   @observable
@@ -406,14 +411,7 @@ export class BackgroundTxExecutorService {
   }
 
   protected checkIfTxIsSigned(tx: DirectTx): boolean {
-    const isSigned = tx.signedTx != null && tx.signature != null;
-    if (!isSigned) {
-      return false;
-    }
-
-    // TODO: check if the signature is valid
-
-    return true;
+    return tx.signedTx != null && tx.signature != null;
   }
 
   protected checkIfTxIsBroadcasted(tx: DirectTx): boolean {
@@ -445,28 +443,73 @@ export class BackgroundTxExecutorService {
   }
 
   protected async signEvmTx(
-    _vaultId: string,
-    _chainId: string,
-    _tx: EVMDirectTx,
-    _env?: Env
+    vaultId: string,
+    chainId: string,
+    tx: EVMDirectTx,
+    env?: Env
   ): Promise<{
     signedTx: Uint8Array;
     signature: Uint8Array;
   }> {
     // check key
+    const keyInfo = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
+    const signer = keyInfo.ethereumHexAddress;
+    const origin =
+      typeof browser !== "undefined"
+        ? new URL(browser.runtime.getURL("/")).origin
+        : "extension";
 
-    // check chain
+    let result: EthereumSignResponse;
 
-    // if ledger
-    // - check if env is provided
-    // - sign page로 이동해서 서명 요청
+    if (isHardware) {
+      if (!env) {
+        throw new KeplrError(
+          "direct-tx-executor",
+          109,
+          "Hardware wallet signing should be triggered from user interaction"
+        );
+      }
 
-    // else
-    // - sign directly with stored key
+      result = await this.keyRingEthereumService.signEthereum(
+        env,
+        origin,
+        vaultId,
+        chainId,
+        signer,
+        Buffer.from(JSON.stringify(tx.txData)),
+        EthSignType.TRANSACTION
+      );
+    } else {
+      result = await this.keyRingEthereumService.signEthereumDirect(
+        origin,
+        vaultId,
+        chainId,
+        signer,
+        Buffer.from(JSON.stringify(tx.txData)),
+        EthSignType.TRANSACTION
+      );
+    }
+
+    // CHECK: does balance check need to be done here?
+
+    const unsignedTx = JSON.parse(Buffer.from(result.signingData).toString());
+    const isEIP1559 =
+      !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+    if (isEIP1559) {
+      unsignedTx.type = TransactionTypes.eip1559;
+    }
+
+    delete unsignedTx.from;
+
+    const signedTx = Buffer.from(
+      serialize(unsignedTx, result.signature).replace("0x", ""),
+      "hex"
+    );
 
     return {
-      signedTx: new Uint8Array(),
-      signature: new Uint8Array(),
+      signedTx: signedTx,
+      signature: result.signature,
     };
   }
 
