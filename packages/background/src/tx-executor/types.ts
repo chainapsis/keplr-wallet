@@ -27,7 +27,6 @@ interface DirectTxBase {
 
   // signed transaction data
   signedTx?: Uint8Array;
-  signature?: Uint8Array;
 
   // Transaction hash for completed tx
   txHash?: string;
