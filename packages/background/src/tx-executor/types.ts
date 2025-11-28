@@ -1,5 +1,8 @@
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { AppCurrency, StdSignDoc } from "@keplr-wallet/types";
+import { AppCurrency } from "@keplr-wallet/types";
+import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import { Msg } from "@keplr-wallet/types";
+
 import { SwapProvider } from "../recent-send-history";
 
 // Transaction status
@@ -43,7 +46,22 @@ export interface EVMBackgroundTx extends BackgroundTxBase {
 
 export interface CosmosBackgroundTx extends BackgroundTxBase {
   readonly type: BackgroundTxType.COSMOS;
-  readonly txData: StdSignDoc;
+  readonly txData: {
+    aminoMsgs?: Msg[];
+    protoMsgs: Any[];
+
+    // Add rlp types data if you need to support ethermint with ledger.
+    // Must include `MsgValue`.
+    rlpTypes?: Record<
+      string,
+      Array<{
+        name: string;
+        type: string;
+      }>
+    >;
+
+    memo?: string;
+  };
 }
 
 // Single transaction data with discriminated union based on type

@@ -319,7 +319,7 @@ export class KeyRingEthereumService {
     );
   }
 
-  async signEthereumDirect(
+  async signEthereumPreAuthorized(
     origin: string,
     vaultId: string,
     chainId: string,
@@ -344,7 +344,9 @@ export class KeyRingEthereumService {
     }
 
     if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
-      throw new Error("Direct signing is not supported for hardware wallets");
+      throw new Error(
+        "Pre-authorized signing is not supported for hardware wallets"
+      );
     }
 
     if (signType === EthSignType.TRANSACTION) {
@@ -373,7 +375,7 @@ export class KeyRingEthereumService {
 
     if (signType !== EthSignType.TRANSACTION) {
       throw new Error(
-        "Direct signing is only supported for transaction for now"
+        "Pre-authorized signing is only supported for transaction for now"
       );
     }
 
