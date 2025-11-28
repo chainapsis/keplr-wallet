@@ -5,6 +5,8 @@ import { Msg } from "@keplr-wallet/types";
 
 import { SwapProvider } from "../recent-send-history";
 
+export type FeeType = "low" | "average" | "high";
+
 // Transaction status
 export enum BackgroundTxStatus {
   PENDING = "pending",

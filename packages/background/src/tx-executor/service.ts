@@ -41,9 +41,10 @@ import {
   buildSignedTxFromAminoSignResponse,
   prepareSignDocForAminoSigning,
   simulateCosmosTx,
-  fillUnsignedEVMTx,
-} from "./utils";
-
+  getCosmosGasPrice,
+  calculateCosmosStdFee,
+} from "./utils/cosmos";
+import { fillUnsignedEVMTx } from "./utils/evm";
 export class BackgroundTxExecutorService {
   @observable
   protected recentTxExecutionSeq: number = 0;
@@ -514,11 +515,10 @@ export class BackgroundTxExecutorService {
 
     const aminoMsgs: Msg[] = tx.txData.aminoMsgs ?? [];
     const protoMsgs: Any[] = tx.txData.protoMsgs;
-    const feeCurrency = chainInfo.currencies[0];
     const pseudoFee = {
       amount: [
         {
-          denom: feeCurrency.coinMinimalDenom,
+          denom: chainInfo.currencies[0].coinMinimalDenom,
           amount: "1",
         },
       ],
@@ -647,21 +647,21 @@ export class BackgroundTxExecutorService {
         tx.txData.memo ?? ""
       );
 
+      // TODO: fee token을 사용자가 설정한 것을 사용해야 함
+      const { gasPrice } = await getCosmosGasPrice(chainInfo);
+      const fee = calculateCosmosStdFee(
+        chainInfo.currencies[0],
+        gasUsed,
+        gasPrice,
+        chainInfo.features
+      );
+
       const signDoc = prepareSignDocForAminoSigning({
         chainInfo,
         accountNumber: account.getAccountNumber().toString(),
         sequence: account.getSequence().toString(),
         aminoMsgs: tx.txData.aminoMsgs ?? [],
-        fee: {
-          amount: [
-            {
-              // TODO: fee token 설정이 필요함...
-              denom: feeCurrency.coinMinimalDenom,
-              amount: "100000", // TODO: get gas price
-            },
-          ],
-          gas: Math.floor(gasUsed * 1.4).toString(),
-        },
+        fee,
         memo: tx.txData.memo ?? "",
         eip712Signing: false,
         signer,
