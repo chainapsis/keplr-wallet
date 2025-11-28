@@ -47,7 +47,8 @@ const handleRecordAndExecuteTxsMsg: (
       msg.vaultId,
       msg.executionType,
       msg.txs,
-      msg.executableChainIds
+      msg.executableChainIds,
+      msg.historyData
     );
   };
 };
