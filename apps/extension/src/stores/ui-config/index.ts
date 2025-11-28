@@ -32,6 +32,7 @@ export interface UIConfigOptions {
   showFiatValue: boolean;
   showSearchBar: boolean;
   switchAssetViewModeSuggestion: boolean;
+  switchAssetViewModeSuggestion2: boolean;
   isPrivacyMode: boolean;
   rememberLastFeeOption: boolean;
   lastFeeOption: "low" | "average" | "high" | false;
@@ -64,7 +65,9 @@ export class UIConfigStore {
     rememberLastFeeOption: false,
     lastFeeOption: false,
     show24HChangesInMagePage: true,
+    // switchAssetViewModeSuggestion is deprecated to show the suggestion again
     switchAssetViewModeSuggestion: true,
+    switchAssetViewModeSuggestion2: true,
 
     useWebHIDLedger: false,
   };
@@ -270,12 +273,12 @@ export class UIConfigStore {
   }
 
   get switchAssetViewModeSuggestion(): boolean {
-    return this.options.switchAssetViewModeSuggestion;
+    return this.options.switchAssetViewModeSuggestion2;
   }
 
   @action
   turnOffSwitchAssetViewModeSuggestion() {
-    this.options.switchAssetViewModeSuggestion = false;
+    this.options.switchAssetViewModeSuggestion2 = false;
   }
 
   get useWebHIDLedger(): boolean {
