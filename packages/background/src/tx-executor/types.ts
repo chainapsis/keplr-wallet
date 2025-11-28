@@ -84,6 +84,7 @@ export interface TxExecutionBase {
 
 export interface UndefinedTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.UNDEFINED;
+  readonly historyData?: never;
 }
 
 export interface RecentSendHistoryData {
@@ -107,9 +108,9 @@ export interface RecentSendHistoryData {
 
 export interface SendTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SEND;
+  readonly historyData?: RecentSendHistoryData;
 
   hasRecordedHistory?: boolean;
-  readonly sendHistoryData?: RecentSendHistoryData;
 }
 
 export interface IBCTransferHistoryData {
@@ -135,9 +136,9 @@ export interface IBCTransferHistoryData {
 
 export interface IBCTransferTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.IBC_TRANSFER;
+  readonly historyData?: IBCTransferHistoryData;
 
-  ibcHistoryId?: string;
-  readonly ibcHistoryData?: IBCTransferHistoryData;
+  historyId?: string;
 }
 
 export interface IBCSwapHistoryData {
@@ -169,8 +170,9 @@ export interface IBCSwapHistoryData {
 
 export interface IBCSwapTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.IBC_SWAP;
-  ibcHistoryId?: string;
-  readonly ibcHistoryData?: IBCSwapHistoryData;
+  readonly historyData?: IBCSwapHistoryData;
+
+  historyId?: string;
 }
 
 export interface SwapV2HistoryData {
@@ -203,8 +205,9 @@ export interface SwapV2HistoryData {
 export interface SwapV2TxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SWAP_V2;
 
-  swapHistoryId?: string;
-  readonly swapHistoryData?: SwapV2HistoryData;
+  readonly historyData?: SwapV2HistoryData;
+
+  historyId?: string;
 }
 
 export type HistoryData =
@@ -212,6 +215,14 @@ export type HistoryData =
   | IBCTransferHistoryData
   | IBCSwapHistoryData
   | SwapV2HistoryData;
+
+export type ExecutionTypeToHistoryData = {
+  [TxExecutionType.SWAP_V2]: SwapV2HistoryData;
+  [TxExecutionType.IBC_TRANSFER]: IBCTransferHistoryData;
+  [TxExecutionType.IBC_SWAP]: IBCSwapHistoryData;
+  [TxExecutionType.SEND]: RecentSendHistoryData;
+  [TxExecutionType.UNDEFINED]: undefined;
+};
 
 export type TxExecution =
   | UndefinedTxExecution
