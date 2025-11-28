@@ -7,7 +7,7 @@ import {
   StdSignDoc,
   Coin,
   StdFee,
-  EVMInfo,
+  FeeCurrency,
 } from "@keplr-wallet/types";
 import { Buffer } from "buffer/";
 import { escapeHTML, sortObjectByKey } from "@keplr-wallet/common";
@@ -23,8 +23,8 @@ import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/type
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-import { UnsignedTransaction } from "@ethersproject/transactions";
 import { Dec } from "@keplr-wallet/unit";
+import { FeeType } from "../types";
 
 // NOTE: duplicated with packages/stores/src/account/utils.ts
 export const getEip712TypedDataBasedOnChainInfo = (
@@ -380,188 +380,407 @@ export async function simulateCosmosTx(
   };
 }
 
-export async function fillUnsignedEVMTx(
-  origin: string,
-  evmInfo: EVMInfo,
-  signer: string,
-  tx: UnsignedTransaction
-): Promise<UnsignedTransaction> {
-  const getTransactionCountRequest = {
-    jsonrpc: "2.0",
-    method: "eth_getTransactionCount",
-    params: [signer, "pending"],
-    id: 1,
-  };
+export async function fetchCosmosSpendableBalances(
+  baseURL: string,
+  bech32Address: string,
+  limit = 1000
+): Promise<{ balances: Coin[] }> {
+  const { data } = await simpleFetch<{ balances: Coin[] }>(
+    baseURL,
+    `/cosmos/bank/v1beta1/spendable_balances/${bech32Address}?pagination.limit=${limit}`
+  );
+  return data;
+}
 
-  const getBlockRequest = {
-    jsonrpc: "2.0",
-    method: "eth_getBlockByNumber",
-    params: ["latest", false],
-    id: 2,
-  };
+// Default gas price steps
+const DefaultGasPriceStep = {
+  low: 0.01,
+  average: 0.025,
+  high: 0.04,
+};
 
-  const getFeeHistoryRequest = {
-    jsonrpc: "2.0",
-    method: "eth_feeHistory",
-    params: [20, "latest", [50]],
-    id: 3,
-  };
+// Default multiplication factors for fee market
+const DefaultMultiplication = {
+  low: 1.1,
+  average: 1.2,
+  high: 1.3,
+};
 
-  const estimateGasRequest = {
-    jsonrpc: "2.0",
-    method: "eth_estimateGas",
-    params: [
+export async function getCosmosGasPrice(
+  chainInfo: ChainInfo,
+  feeType: FeeType = "average",
+  feeCurrency?: FeeCurrency
+): Promise<{
+  gasPrice: Dec;
+  source:
+    | "osmosis-base-fee"
+    | "osmosis-txfees"
+    | "feemarket"
+    | "initia-dynamic"
+    | "eip1559"
+    | "default";
+}> {
+  // Use first currency from chainInfo if feeCurrency is not provided
+  const currency = feeCurrency || chainInfo.feeCurrencies[0];
+  if (!currency) {
+    throw new Error("No fee currency is provided and not found for chain");
+  }
+
+  // 1. Try Osmosis base fee (for Osmosis with base-fee-beta feature)
+  if (chainInfo.features?.includes("osmosis-base-fee-beta")) {
+    try {
+      const osmosisResult = await getOsmosisBaseFeeCurrency(
+        chainInfo,
+        currency,
+        feeType
+      );
+      if (!osmosisResult) {
+        throw new Error("Failed to fetch Osmosis base fee currency");
+      }
+
+      if (chainInfo.features?.includes("osmosis-txfees")) {
+        const osmosisTxFeesResult = await getOsmosisTxFeesGasPrice(
+          chainInfo,
+          currency,
+          feeType
+        );
+        if (osmosisTxFeesResult) {
+          return {
+            gasPrice: osmosisTxFeesResult,
+            source: "osmosis-txfees",
+          };
+        }
+      }
+
+      // if osmosis-txfees is not enabled, use the base fee currency
+      return {
+        gasPrice: new Dec(osmosisResult.gasPriceStep![feeType]),
+        source: "osmosis-base-fee",
+      };
+    } catch (error) {
+      console.error("Failed to fetch Osmosis base fee:", error);
+    }
+  }
+
+  // 2. Try Initia Dynamic Fee
+  if (chainInfo.features?.includes("initia-dynamicfee")) {
+    try {
+      const initiaResult = await getInitiaDynamicFeeGasPrice(
+        chainInfo,
+        feeType
+      );
+      if (initiaResult) {
+        return { gasPrice: initiaResult, source: "initia-dynamic" };
+      }
+    } catch (error) {
+      console.error("Failed to fetch Initia dynamic fee:", error);
+    }
+  }
+
+  // 3. Try Fee Market (for chains with feemarket feature)
+  if (chainInfo.features?.includes("feemarket")) {
+    try {
+      const feeMarketResult = await getFeeMarketGasPrice(
+        chainInfo,
+        currency,
+        feeType
+      );
+      if (feeMarketResult) {
+        return { gasPrice: feeMarketResult, source: "feemarket" };
+      }
+    } catch (error) {
+      console.error("Failed to fetch fee market gas price:", error);
+    }
+  }
+
+  // 5. Try EIP-1559 (for EVM chains)
+  if (chainInfo.evm) {
+    try {
+      const eip1559Result = await getEIP1559GasPrice(chainInfo, feeType);
+      if (eip1559Result) {
+        return { gasPrice: eip1559Result, source: "eip1559" };
+      }
+    } catch (error) {
+      console.error("Failed to fetch EIP-1559 gas price:", error);
+    }
+  }
+
+  // 6. Fallback to default gas price step
+  const gasPrice = getDefaultGasPrice(currency, feeType);
+  return { gasPrice, source: "default" };
+}
+
+async function getOsmosisBaseFeeCurrency(
+  chainInfo: ChainInfo,
+  feeCurrency: FeeCurrency,
+  feeType: FeeType
+): Promise<FeeCurrency | null> {
+  // Fetch base fee from Osmosis
+  const baseDenom = "uosmo";
+
+  if (feeCurrency.coinMinimalDenom !== baseDenom) {
+    return null;
+  }
+
+  // Fetch multiplication factors from remote config
+  const remoteConfig = await simpleFetch<{
+    low?: number;
+    average?: number;
+    high?: number;
+  }>(
+    "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json"
+  ).catch(() => ({ data: {} as Record<FeeType, number> }));
+
+  const { data: baseFeeResponse } = await simpleFetch<{ base_fee: string }>(
+    chainInfo.rest,
+    "/osmosis/txfees/v1beta1/cur_eip_base_fee"
+  );
+
+  const multiplier =
+    remoteConfig.data[feeType] || DefaultMultiplication[feeType];
+  return {
+    ...feeCurrency,
+    gasPriceStep: {
+      low: parseFloat(baseFeeResponse.base_fee) * multiplier,
+      average: parseFloat(baseFeeResponse.base_fee) * multiplier,
+      high: parseFloat(baseFeeResponse.base_fee) * multiplier,
+    },
+  };
+}
+
+async function getOsmosisTxFeesGasPrice(
+  chainInfo: ChainInfo,
+  feeCurrency: FeeCurrency,
+  feeType: FeeType
+): Promise<Dec | null> {
+  // Check if it's a fee token
+  const { data: feeTokensResponse } = await simpleFetch<{
+    fee_tokens: Array<{ denom: string; poolID: string }>;
+  }>(chainInfo.rest, "/osmosis/txfees/v1beta1/fee_tokens");
+
+  const isFeeToken = feeTokensResponse.fee_tokens.some(
+    (token) => token.denom === feeCurrency.coinMinimalDenom
+  );
+
+  if (!isFeeToken) {
+    return null;
+  }
+
+  // Get spot price
+  const { data: spotPriceResponse } = await simpleFetch<{ spot_price: string }>(
+    chainInfo.rest,
+    `/osmosis/txfees/v1beta1/spot_price_by_denom?denom=${feeCurrency.coinMinimalDenom}`
+  );
+
+  const spotPrice = new Dec(spotPriceResponse.spot_price);
+  if (spotPrice.lte(new Dec(0))) {
+    return null;
+  }
+
+  const baseGasPrice = getDefaultGasPrice(feeCurrency, feeType);
+  // Add 1% slippage protection
+  return baseGasPrice.quo(spotPrice).mul(new Dec(1.01));
+}
+
+async function getFeeMarketGasPrice(
+  chainInfo: ChainInfo,
+  feeCurrency: FeeCurrency,
+  feeType: FeeType
+): Promise<Dec | null> {
+  try {
+    const gasPricesResponse = await simpleFetch<{
+      prices: Array<{ denom: string; amount: string }>;
+    }>(chainInfo.rest, "/feemarket/v1/gas_prices");
+
+    const gasPrice = gasPricesResponse.data.prices.find(
+      (price) => price.denom === feeCurrency.coinMinimalDenom
+    );
+
+    if (!gasPrice) {
+      return null;
+    }
+
+    // Fetch multiplication config
+    const multiplicationConfig = await simpleFetch<{
+      [chainId: string]: {
+        low: number;
+        average: number;
+        high: number;
+      };
+    }>(
+      "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+      "/feemarket/info.json"
+    ).catch(() => ({
+      data: {} as Record<
+        string,
+        { low: number; average: number; high: number }
+      >,
+    }));
+
+    let multiplication = DefaultMultiplication;
+
+    // Apply default multiplication
+    const defaultConfig = multiplicationConfig.data["__default__"];
+    if (defaultConfig) {
+      multiplication = {
+        low: defaultConfig.low || multiplication.low,
+        average: defaultConfig.average || multiplication.average,
+        high: defaultConfig.high || multiplication.high,
+      };
+    }
+
+    // Apply chain-specific multiplication
+    const chainConfig = multiplicationConfig.data[chainInfo.chainId];
+    if (chainConfig) {
+      multiplication = {
+        low: chainConfig.low || multiplication.low,
+        average: chainConfig.average || multiplication.average,
+        high: chainConfig.high || multiplication.high,
+      };
+    }
+
+    const baseGasPrice = new Dec(gasPrice.amount);
+    return baseGasPrice.mul(new Dec(multiplication[feeType]));
+  } catch (error) {
+    return null;
+  }
+}
+
+async function getInitiaDynamicFeeGasPrice(
+  chainInfo: ChainInfo,
+  feeType: FeeType
+): Promise<Dec | null> {
+  try {
+    const dynamicFeeResponse = await simpleFetch<{
+      params: {
+        base_gas_price: string;
+      };
+    }>(chainInfo.rest, "/initia/dynamicfee/v1/params");
+
+    if (!dynamicFeeResponse.data.params.base_gas_price) {
+      return null;
+    }
+
+    const baseGasPrice = new Dec(dynamicFeeResponse.data.params.base_gas_price);
+
+    // Fetch multiplication config
+    const multiplicationConfig = await simpleFetch<{
+      [str: string]: {
+        low: number;
+        average: number;
+        high: number;
+      };
+    }>(
+      "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws",
+      "/feemarket/info.json"
+    ).catch(() => ({
+      data: {} as Record<
+        string,
+        { low: number; average: number; high: number }
+      >,
+    }));
+
+    let multiplication = DefaultMultiplication;
+
+    // Apply default multiplication
+    const defaultConfig = multiplicationConfig.data["__default__"];
+    if (defaultConfig) {
+      multiplication = {
+        low: defaultConfig.low || multiplication.low,
+        average: defaultConfig.average || multiplication.average,
+        high: defaultConfig.high || multiplication.high,
+      };
+    }
+
+    // Apply chain-specific multiplication
+    const chainConfig = multiplicationConfig.data[chainInfo.chainId];
+    if (chainConfig) {
+      multiplication = {
+        low: chainConfig.low || multiplication.low,
+        average: chainConfig.average || multiplication.average,
+        high: chainConfig.high || multiplication.high,
+      };
+    }
+
+    return baseGasPrice.mul(new Dec(multiplication[feeType]));
+  } catch (error) {
+    return null;
+  }
+}
+
+// TODO: enhance the logic if required...
+async function getEIP1559GasPrice(
+  chainInfo: ChainInfo,
+  feeType: FeeType
+): Promise<Dec | null> {
+  try {
+    // Get latest block for base fee
+    const blockResponse = await simpleFetch<{
+      result: {
+        baseFeePerGas: string;
+      };
+    }>(chainInfo.rpc, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getBlockByNumber",
+        params: ["latest", false],
+        id: 1,
+      }),
+    });
+
+    const baseFeePerGasHex = blockResponse.data.result.baseFeePerGas;
+    if (!baseFeePerGasHex) {
+      return null;
+    }
+
+    const baseFeePerGas = new Dec(parseInt(baseFeePerGasHex, 16));
+
+    // Calculate priority fee (simplified version)
+    const priorityFeeMultipliers = {
+      low: 1.1,
+      average: 1.25,
+      high: 1.5,
+    };
+
+    const maxPriorityFeePerGas = baseFeePerGas.mul(
+      new Dec(priorityFeeMultipliers[feeType] - 1)
+    );
+
+    return baseFeePerGas.add(maxPriorityFeePerGas);
+  } catch (error) {
+    return null;
+  }
+}
+
+export function getDefaultGasPrice(
+  feeCurrency: FeeCurrency,
+  feeType: FeeType
+): Dec {
+  const gasPriceStep = feeCurrency.gasPriceStep || DefaultGasPriceStep;
+  return new Dec(gasPriceStep[feeType]);
+}
+
+export function calculateCosmosStdFee(
+  feeCurrency: FeeCurrency,
+  gasUsed: number,
+  gasPrice: Dec,
+  features: string[] | undefined
+): StdFee {
+  const gasAdjustment = features?.includes("feemarket") ? 1.6 : 1.4;
+
+  const adjustedGas = Math.floor(gasUsed * gasAdjustment);
+
+  const feeAmount = gasPrice.mul(new Dec(adjustedGas)).roundUp();
+
+  return {
+    amount: [
       {
-        from: signer,
-        to: tx.to,
-        value: tx.value,
-        data: tx.data,
+        denom: feeCurrency.coinMinimalDenom,
+        amount: feeAmount.toString(),
       },
     ],
-    id: 4,
+    gas: adjustedGas.toString(),
   };
-
-  const getMaxPriorityFeePerGasRequest = {
-    jsonrpc: "2.0",
-    method: "eth_maxPriorityFeePerGas",
-    params: [],
-    id: 5,
-  };
-
-  // rpc request in batch (as 2.0 jsonrpc supports batch requests)
-  const batchRequest = [
-    getTransactionCountRequest,
-    getBlockRequest,
-    getFeeHistoryRequest,
-    estimateGasRequest,
-    getMaxPriorityFeePerGasRequest,
-  ];
-
-  const { data: rpcResponses } = await simpleFetch<
-    Array<{
-      jsonrpc: "2.0";
-      id: number;
-      result?: unknown;
-      error?: { code: number; message: string; data?: unknown };
-    }>
-  >(evmInfo.rpc, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "request-source": origin,
-    },
-    body: JSON.stringify(batchRequest),
-  });
-
-  if (
-    !Array.isArray(rpcResponses) ||
-    rpcResponses.length !== batchRequest.length
-  ) {
-    throw new Error("Invalid batch response format");
-  }
-
-  const getResult = <T = any>(id: number): T => {
-    const res = rpcResponses.find((r) => r.id === id);
-    if (!res) {
-      throw new Error(`No response for id=${id}`);
-    }
-    if (res.error) {
-      throw new Error(
-        `RPC error (id=${id}): ${res.error.code} ${res.error.message}`
-      );
-    }
-    return res.result as T;
-  };
-
-  // find responses by id
-  const nonceHex = getResult<string>(1);
-  const latestBlock = getResult<{ baseFeePerGas?: string }>(2);
-  const feeHistory = getResult<{
-    baseFeePerGas?: string[];
-    gasUsedRatio: number[];
-    oldestBlock: string;
-    reward?: string[][];
-  }>(3);
-  const gasLimitHex = getResult<string>(4);
-  const networkMaxPriorityFeePerGasHex = getResult<string>(5);
-
-  let maxPriorityFeePerGasDec: Dec | undefined;
-  if (feeHistory.reward && feeHistory.reward.length > 0) {
-    // get 50th percentile rewards (index 0 since we requested [50] percentile)
-    const percentileIndex = 0;
-    const rewards = feeHistory.reward
-      .map((block) => block[percentileIndex])
-      .filter((v) => v != null)
-      .map((v) => BigInt(v));
-
-    if (rewards.length > 0) {
-      const sum = rewards.reduce((acc, x) => acc + x, BigInt(0));
-      const mean = sum / BigInt(rewards.length);
-
-      const sortedRewards = [...rewards].sort((a, b) =>
-        a < b ? -1 : a > b ? 1 : 0
-      );
-      const median = sortedRewards[Math.floor(sortedRewards.length / 2)];
-
-      // use 1 Gwei deviation threshold to decide between mean and median
-      const deviationThreshold = BigInt(1 * 10 ** 9); // 1 Gwei
-      const deviation = mean > median ? mean - median : median - mean;
-      const pick =
-        deviation > deviationThreshold ? (mean > median ? mean : median) : mean;
-
-      maxPriorityFeePerGasDec = new Dec(pick);
-    }
-  }
-
-  if (networkMaxPriorityFeePerGasHex) {
-    const networkMaxPriorityFeePerGasDec = new Dec(
-      BigInt(networkMaxPriorityFeePerGasHex)
-    );
-
-    if (
-      !maxPriorityFeePerGasDec ||
-      (maxPriorityFeePerGasDec &&
-        networkMaxPriorityFeePerGasDec.gt(maxPriorityFeePerGasDec))
-    ) {
-      maxPriorityFeePerGasDec = networkMaxPriorityFeePerGasDec;
-    }
-  }
-
-  if (!maxPriorityFeePerGasDec) {
-    throw new Error(
-      "Failed to calculate maxPriorityFeePerGas to fill unsigned transaction"
-    );
-  }
-
-  if (!latestBlock.baseFeePerGas) {
-    throw new Error("Failed to get baseFeePerGas to fill unsigned transaction");
-  }
-
-  const multiplier = new Dec(1.25);
-
-  // Calculate maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas
-  const baseFeePerGasDec = new Dec(BigInt(latestBlock.baseFeePerGas));
-  const maxFeePerGasDec = baseFeePerGasDec
-    .add(maxPriorityFeePerGasDec)
-    .mul(multiplier);
-  const maxFeePerGasHex = `0x${maxFeePerGasDec
-    .truncate()
-    .toBigNumber()
-    .toString(16)}`;
-
-  maxPriorityFeePerGasDec = maxPriorityFeePerGasDec.mul(multiplier);
-  const maxPriorityFeePerGasHex = `0x${maxPriorityFeePerGasDec
-    .truncate()
-    .toBigNumber()
-    .toString(16)}`;
-
-  const newUnsignedTx: UnsignedTransaction = {
-    ...tx,
-    nonce: parseInt(nonceHex, 16),
-    maxFeePerGas: maxFeePerGasHex,
-    maxPriorityFeePerGas: maxPriorityFeePerGasHex,
-    gasLimit: gasLimitHex,
-  };
-
-  return newUnsignedTx;
 }
