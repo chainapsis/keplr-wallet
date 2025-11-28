@@ -8,15 +8,15 @@ import { BackgroundTxService } from "../tx";
 import { BackgroundTxEthereumService } from "../tx-ethereum";
 import { Env, KeplrError } from "@keplr-wallet/router";
 import {
-  DirectTxBatch,
-  DirectTx,
-  DirectTxBatchStatus,
-  DirectTxStatus,
-  DirectTxBatchType,
-  DirectTxBatchBase,
-  DirectTxType,
-  EVMDirectTx,
-  CosmosDirectTx,
+  TxExecution,
+  TxExecutionStatus,
+  TxExecutionType,
+  TxExecutionBase,
+  BackgroundTx,
+  BackgroundTxStatus,
+  BackgroundTxType,
+  EVMBackgroundTx,
+  CosmosBackgroundTx,
 } from "./types";
 import {
   action,
@@ -35,11 +35,10 @@ import { TransactionTypes, serialize } from "@ethersproject/transactions";
 
 export class BackgroundTxExecutorService {
   @observable
-  protected recentDirectTxBatchSeq: number = 0;
+  protected recentTxExecutionSeq: number = 0;
   // Key: id (sequence, it should be increased by 1 for each)
   @observable
-  protected readonly recentDirectTxBatchMap: Map<string, DirectTxBatch> =
-    new Map();
+  protected readonly recentTxExecutionMap: Map<string, TxExecution> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -55,38 +54,38 @@ export class BackgroundTxExecutorService {
   }
 
   async init(): Promise<void> {
-    const recentDirectTxBatchSeqSaved = await this.kvStore.get<number>(
-      "recentDirectTxBatchSeq"
+    const recentTxExecutionSeqSaved = await this.kvStore.get<number>(
+      "recentTxExecutionSeq"
     );
-    if (recentDirectTxBatchSeqSaved) {
+    if (recentTxExecutionSeqSaved) {
       runInAction(() => {
-        this.recentDirectTxBatchSeq = recentDirectTxBatchSeqSaved;
+        this.recentTxExecutionSeq = recentTxExecutionSeqSaved;
       });
     }
     autorun(() => {
-      const js = toJS(this.recentDirectTxBatchSeq);
-      this.kvStore.set<number>("recentDirectTxBatchSeq", js);
+      const js = toJS(this.recentTxExecutionSeq);
+      this.kvStore.set<number>("recentTxExecutionSeq", js);
     });
 
-    const recentDirectTxBatchMapSaved = await this.kvStore.get<
-      Record<string, DirectTxBatch>
-    >("recentDirectTxBatchMap");
-    if (recentDirectTxBatchMapSaved) {
+    const recentTxExecutionMapSaved = await this.kvStore.get<
+      Record<string, TxExecution>
+    >("recentTxExecutionMap");
+    if (recentTxExecutionMapSaved) {
       runInAction(() => {
-        let entries = Object.entries(recentDirectTxBatchMapSaved);
+        let entries = Object.entries(recentTxExecutionMapSaved);
         entries = entries.sort(([, a], [, b]) => {
           return parseInt(a.id) - parseInt(b.id);
         });
         for (const [key, value] of entries) {
-          this.recentDirectTxBatchMap.set(key, value);
+          this.recentTxExecutionMap.set(key, value);
         }
       });
     }
     autorun(() => {
-      const js = toJS(this.recentDirectTxBatchMap);
+      const js = toJS(this.recentTxExecutionMap);
       const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, DirectTxBatch>>(
-        "recentDirectTxBatchMap",
+      this.kvStore.set<Record<string, TxExecution>>(
+        "recentTxExecutionMap",
         obj
       );
     });
@@ -109,13 +108,13 @@ export class BackgroundTxExecutorService {
    * and the execution will be started automatically after the transactions are recorded.
    */
   @action
-  async recordAndExecuteDirectTxs(
+  async recordAndExecuteTxs(
     env: Env,
     vaultId: string,
-    type: DirectTxBatchType,
-    txs: DirectTx[],
+    type: TxExecutionType,
+    txs: BackgroundTx[],
     executableChainIds: string[]
-  ): Promise<DirectTxBatchStatus> {
+  ): Promise<TxExecutionStatus> {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
@@ -124,11 +123,11 @@ export class BackgroundTxExecutorService {
     // 다중 체인 트랜잭션을 기록하는 이유는 자산 브릿징 등 상당한 시간이 걸리는 경우 이 작업을 백그라운드에서 한없이 기다리는 대신
     // 실행 조건이 만족되었을 때 이어서 실행하기 위함인데, 한 번에 처리가 가능하다면 굳이 이걸 기록할 필요는 없을지도 모른다.
     // 특히나 ui에서 진행상황을 체크하는 것이 아닌 이상 notification을 통해 진행상황을 알리는 것으로 충분할 수 있다.
-    const id = (this.recentDirectTxBatchSeq++).toString();
+    const id = (this.recentTxExecutionSeq++).toString();
 
-    const batchBase: DirectTxBatchBase = {
+    const executionBase: TxExecutionBase = {
       id,
-      status: DirectTxBatchStatus.PENDING,
+      status: TxExecutionStatus.PENDING,
       vaultId: vaultId,
       txs: txs,
       txIndex: -1,
@@ -136,126 +135,126 @@ export class BackgroundTxExecutorService {
       timestamp: Date.now(),
     };
 
-    let batch: DirectTxBatch;
-    if (type === DirectTxBatchType.SWAP_V2) {
-      batch = {
-        ...batchBase,
-        type: DirectTxBatchType.SWAP_V2,
+    let execution: TxExecution;
+    if (type === TxExecutionType.SWAP_V2) {
+      execution = {
+        ...executionBase,
+        type: TxExecutionType.SWAP_V2,
         // TODO: add swap history data...
         swapHistoryData: {
           chainId: txs[0].chainId,
         },
       };
-    } else if (type === DirectTxBatchType.IBC_TRANSFER) {
-      batch = {
-        ...batchBase,
-        type: DirectTxBatchType.IBC_TRANSFER,
+    } else if (type === TxExecutionType.IBC_TRANSFER) {
+      execution = {
+        ...executionBase,
+        type: TxExecutionType.IBC_TRANSFER,
         // TODO: add ibc history data...
         ibcHistoryData: {
           chainId: txs[0].chainId,
         },
       };
     } else {
-      batch = {
-        ...batchBase,
-        type: DirectTxBatchType.UNDEFINED,
+      execution = {
+        ...executionBase,
+        type: TxExecutionType.UNDEFINED,
       };
     }
 
-    this.recentDirectTxBatchMap.set(id, batch);
-    return await this.executeDirectTxs(id);
+    this.recentTxExecutionMap.set(id, execution);
+    return await this.executeTxs(id);
   }
 
   /**
    * Execute blocked transactions by execution id and transaction index
    */
   @action
-  async resumeDirectTxs(
+  async resumeTx(
     env: Env,
     id: string,
     txIndex?: number,
     signedTx?: Uint8Array
-  ): Promise<DirectTxBatchStatus> {
+  ): Promise<TxExecutionStatus> {
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
 
-    return await this.executeDirectTxs(id, {
+    return await this.executeTxs(id, {
       env,
       txIndex,
       signedTx,
     });
   }
 
-  protected async executeDirectTxs(
+  protected async executeTxs(
     id: string,
     options?: {
       env?: Env;
       txIndex?: number;
       signedTx?: Uint8Array;
     }
-  ): Promise<DirectTxBatchStatus> {
-    const batch = this.getDirectTxBatch(id);
-    if (!batch) {
+  ): Promise<TxExecutionStatus> {
+    const execution = this.getTxExecution(id);
+    if (!execution) {
       throw new KeplrError("direct-tx-executor", 105, "Execution not found");
     }
 
     // Only pending/processing/blocked executions can be executed
     const needResume =
-      batch.status === DirectTxBatchStatus.PENDING ||
-      batch.status === DirectTxBatchStatus.PROCESSING ||
-      batch.status === DirectTxBatchStatus.BLOCKED;
+      execution.status === TxExecutionStatus.PENDING ||
+      execution.status === TxExecutionStatus.PROCESSING ||
+      execution.status === TxExecutionStatus.BLOCKED;
     if (!needResume) {
-      return batch.status;
+      return execution.status;
     }
 
     // check if the key is valid
     const keyInfo = this.keyRingCosmosService.keyRingService.getKeyInfo(
-      batch.vaultId
+      execution.vaultId
     );
     if (!keyInfo) {
       throw new KeplrError("direct-tx-executor", 102, "Key info not found");
     }
 
     const executionStartIndex = Math.min(
-      options?.txIndex ?? batch.txIndex < 0 ? 0 : batch.txIndex,
-      batch.txs.length - 1
+      options?.txIndex ?? execution.txIndex < 0 ? 0 : execution.txIndex,
+      execution.txs.length - 1
     );
 
-    batch.status = DirectTxBatchStatus.PROCESSING;
+    execution.status = TxExecutionStatus.PROCESSING;
 
-    for (let i = executionStartIndex; i < batch.txs.length; i++) {
-      let txStatus: DirectTxStatus;
+    for (let i = executionStartIndex; i < execution.txs.length; i++) {
+      let txStatus: BackgroundTxStatus;
 
       if (options?.txIndex != null && i === options.txIndex) {
-        txStatus = await this.executePendingDirectTx(id, i, {
+        txStatus = await this.executePendingTx(id, i, {
           env: options?.env,
           signedTx: options.signedTx,
         });
       } else {
-        txStatus = await this.executePendingDirectTx(id, i, {
+        txStatus = await this.executePendingTx(id, i, {
           env: options?.env,
         });
       }
 
-      if (txStatus === DirectTxStatus.CONFIRMED) {
+      if (txStatus === BackgroundTxStatus.CONFIRMED) {
         continue;
       }
 
       // if the tx is blocked, it means multiple transactions are required to be executed on different chains
       // the execution should be stopped and record the history if needed
       // and the execution should be resumed later when the condition is met
-      if (txStatus === DirectTxStatus.BLOCKED) {
-        batch.status = DirectTxBatchStatus.BLOCKED;
-        this.recordHistoryIfNeeded(batch);
-        return batch.status;
+      if (txStatus === BackgroundTxStatus.BLOCKED) {
+        execution.status = TxExecutionStatus.BLOCKED;
+        this.recordHistoryIfNeeded(execution);
+        return execution.status;
       }
 
       // if the tx is failed, the execution should be stopped
-      if (txStatus === DirectTxStatus.FAILED) {
-        batch.status = DirectTxBatchStatus.FAILED;
-        return batch.status;
+      if (txStatus === BackgroundTxStatus.FAILED) {
+        execution.status = TxExecutionStatus.FAILED;
+        return execution.status;
       }
 
       // something went wrong, should not happen
@@ -267,58 +266,60 @@ export class BackgroundTxExecutorService {
     }
 
     // if the execution is completed successfully, update the batch status
-    batch.status = DirectTxBatchStatus.COMPLETED;
-    this.recordHistoryIfNeeded(batch);
-    return batch.status;
+    execution.status = TxExecutionStatus.COMPLETED;
+    this.recordHistoryIfNeeded(execution);
+    return execution.status;
   }
 
-  protected async executePendingDirectTx(
+  protected async executePendingTx(
     id: string,
     index: number,
     options?: {
       env?: Env;
       signedTx?: Uint8Array;
     }
-  ): Promise<DirectTxStatus> {
-    const batch = this.getDirectTxBatch(id);
-    if (!batch) {
+  ): Promise<BackgroundTxStatus> {
+    const execution = this.getTxExecution(id);
+    if (!execution) {
       throw new KeplrError("direct-tx-executor", 105, "Execution not found");
     }
 
-    const currentTx = batch.txs[index];
+    const currentTx = execution.txs[index];
     if (!currentTx) {
       throw new KeplrError("direct-tx-executor", 106, "Tx not found");
     }
 
     // these statuses are not expected to be reached for pending transactions
     if (
-      currentTx.status === DirectTxStatus.CONFIRMED ||
-      currentTx.status === DirectTxStatus.FAILED ||
-      currentTx.status === DirectTxStatus.CANCELLED
+      currentTx.status === BackgroundTxStatus.CONFIRMED ||
+      currentTx.status === BackgroundTxStatus.FAILED ||
+      currentTx.status === BackgroundTxStatus.CANCELLED
     ) {
       return currentTx.status;
     }
 
     // update the tx index to the current tx index
-    batch.txIndex = index;
+    execution.txIndex = index;
 
     if (
-      currentTx.status === DirectTxStatus.BLOCKED ||
-      currentTx.status === DirectTxStatus.PENDING
+      currentTx.status === BackgroundTxStatus.BLOCKED ||
+      currentTx.status === BackgroundTxStatus.PENDING
     ) {
       // TODO: check if the condition is met to resume the execution
       // this will be handled with recent send history tracking to check if the condition is met to resume the execution
       // check if the current transaction's chainId is included in the chainIds of the recent send history (might enough with this)
-      const isBlocked = !batch.executableChainIds.includes(currentTx.chainId);
+      const isBlocked = !execution.executableChainIds.includes(
+        currentTx.chainId
+      );
       if (isBlocked) {
-        currentTx.status = DirectTxStatus.BLOCKED;
+        currentTx.status = BackgroundTxStatus.BLOCKED;
         return currentTx.status;
       } else {
-        currentTx.status = DirectTxStatus.SIGNING;
+        currentTx.status = BackgroundTxStatus.SIGNING;
       }
     }
 
-    if (currentTx.status === DirectTxStatus.SIGNING) {
+    if (currentTx.status === BackgroundTxStatus.SIGNING) {
       // if options are provided, temporary set the options to the current transaction
       if (options?.signedTx) {
         currentTx.signedTx = options.signedTx;
@@ -326,47 +327,47 @@ export class BackgroundTxExecutorService {
 
       try {
         const { signedTx } = await this.signTx(
-          batch.vaultId,
+          execution.vaultId,
           currentTx.chainId,
           currentTx,
           options?.env
         );
 
         currentTx.signedTx = signedTx;
-        currentTx.status = DirectTxStatus.SIGNED;
+        currentTx.status = BackgroundTxStatus.SIGNED;
       } catch (error) {
-        currentTx.status = DirectTxStatus.FAILED;
+        currentTx.status = BackgroundTxStatus.FAILED;
         currentTx.error = error.message ?? "Transaction signing failed";
       }
     }
 
     if (
-      currentTx.status === DirectTxStatus.SIGNED ||
-      currentTx.status === DirectTxStatus.BROADCASTING
+      currentTx.status === BackgroundTxStatus.SIGNED ||
+      currentTx.status === BackgroundTxStatus.BROADCASTING
     ) {
       try {
         const { txHash } = await this.broadcastTx(currentTx);
 
         currentTx.txHash = txHash;
-        currentTx.status = DirectTxStatus.BROADCASTED;
+        currentTx.status = BackgroundTxStatus.BROADCASTED;
       } catch (error) {
-        currentTx.status = DirectTxStatus.FAILED;
+        currentTx.status = BackgroundTxStatus.FAILED;
         currentTx.error = error.message ?? "Transaction broadcasting failed";
       }
     }
 
-    if (currentTx.status === DirectTxStatus.BROADCASTED) {
+    if (currentTx.status === BackgroundTxStatus.BROADCASTED) {
       // broadcasted -> confirmed
       try {
         const confirmed = await this.traceTx(currentTx);
         if (confirmed) {
-          currentTx.status = DirectTxStatus.CONFIRMED;
+          currentTx.status = BackgroundTxStatus.CONFIRMED;
         } else {
-          currentTx.status = DirectTxStatus.FAILED;
+          currentTx.status = BackgroundTxStatus.FAILED;
           currentTx.error = "Transaction failed";
         }
       } catch (error) {
-        currentTx.status = DirectTxStatus.FAILED;
+        currentTx.status = BackgroundTxStatus.FAILED;
         currentTx.error = error.message ?? "Transaction confirmation failed";
       }
     }
@@ -377,7 +378,7 @@ export class BackgroundTxExecutorService {
   protected async signTx(
     vaultId: string,
     chainId: string,
-    tx: DirectTx,
+    tx: BackgroundTx,
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
@@ -388,7 +389,7 @@ export class BackgroundTxExecutorService {
       };
     }
 
-    if (tx.type === DirectTxType.EVM) {
+    if (tx.type === BackgroundTxType.EVM) {
       return this.signEvmTx(vaultId, chainId, tx, env);
     }
 
@@ -398,7 +399,7 @@ export class BackgroundTxExecutorService {
   private async signEvmTx(
     vaultId: string,
     chainId: string,
-    tx: EVMDirectTx,
+    tx: EVMBackgroundTx,
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
@@ -466,7 +467,7 @@ export class BackgroundTxExecutorService {
   private async signCosmosTx(
     vaultId: string,
     chainId: string,
-    tx: CosmosDirectTx,
+    tx: CosmosBackgroundTx,
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
@@ -524,7 +525,7 @@ export class BackgroundTxExecutorService {
     };
   }
 
-  protected async broadcastTx(tx: DirectTx): Promise<{
+  protected async broadcastTx(tx: BackgroundTx): Promise<{
     txHash: string;
   }> {
     if (tx.txHash != null) {
@@ -536,14 +537,14 @@ export class BackgroundTxExecutorService {
       };
     }
 
-    if (tx.type === DirectTxType.EVM) {
+    if (tx.type === BackgroundTxType.EVM) {
       return this.broadcastEvmTx(tx);
     }
 
     return this.broadcastCosmosTx(tx);
   }
 
-  private async broadcastEvmTx(tx: EVMDirectTx): Promise<{
+  private async broadcastEvmTx(tx: EVMBackgroundTx): Promise<{
     txHash: string;
   }> {
     // check signed tx and signature
@@ -575,7 +576,7 @@ export class BackgroundTxExecutorService {
     };
   }
 
-  private async broadcastCosmosTx(tx: CosmosDirectTx): Promise<{
+  private async broadcastCosmosTx(tx: CosmosBackgroundTx): Promise<{
     txHash: string;
   }> {
     if (!tx.signedTx) {
@@ -598,15 +599,15 @@ export class BackgroundTxExecutorService {
     };
   }
 
-  protected async traceTx(tx: DirectTx): Promise<boolean> {
-    if (tx.type === DirectTxType.EVM) {
+  protected async traceTx(tx: BackgroundTx): Promise<boolean> {
+    if (tx.type === BackgroundTxType.EVM) {
       return this.traceEvmTx(tx);
     }
 
     return this.traceCosmosTx(tx);
   }
 
-  private async traceEvmTx(tx: EVMDirectTx): Promise<boolean> {
+  private async traceEvmTx(tx: EVMBackgroundTx): Promise<boolean> {
     if (!tx.txHash) {
       throw new KeplrError("direct-tx-executor", 108, "Tx hash not found");
     }
@@ -629,7 +630,7 @@ export class BackgroundTxExecutorService {
     return txReceipt.status === EthTxStatus.Success;
   }
 
-  private async traceCosmosTx(tx: CosmosDirectTx): Promise<boolean> {
+  private async traceCosmosTx(tx: CosmosBackgroundTx): Promise<boolean> {
     if (!tx.txHash) {
       throw new KeplrError("direct-tx-executor", 108, "Tx hash not found");
     }
@@ -645,59 +646,59 @@ export class BackgroundTxExecutorService {
     return txResult.code === 0;
   }
 
-  protected recordHistoryIfNeeded(_batch: DirectTxBatch): void {
+  protected recordHistoryIfNeeded(_execution: TxExecution): void {
     throw new Error("Not implemented");
   }
 
   /**
    * Get all recent direct transactions executions
    */
-  getRecentDirectTxBatches(): DirectTxBatch[] {
-    return Array.from(this.recentDirectTxBatchMap.values());
+  getRecentTxExecutions(): TxExecution[] {
+    return Array.from(this.recentTxExecutionMap.values());
   }
 
   /**
    * Get execution data by ID
    */
-  getDirectTxBatch(id: string): DirectTxBatch | undefined {
-    const batch = this.recentDirectTxBatchMap.get(id);
-    if (!batch) {
+  getTxExecution(id: string): TxExecution | undefined {
+    const execution = this.recentTxExecutionMap.get(id);
+    if (!execution) {
       return undefined;
     }
 
-    return batch;
+    return execution;
   }
 
   /**
    * Cancel execution by execution id
    */
   @action
-  async cancelDirectTxs(id: string): Promise<void> {
-    const batch = this.recentDirectTxBatchMap.get(id);
-    if (!batch) {
+  async cancelTxExecution(id: string): Promise<void> {
+    const execution = this.recentTxExecutionMap.get(id);
+    if (!execution) {
       return;
     }
 
-    const currentStatus = batch.status;
+    const currentStatus = execution.status;
 
     // Only pending or processing executions can be cancelled
     if (
-      currentStatus !== DirectTxBatchStatus.PENDING &&
-      currentStatus !== DirectTxBatchStatus.PROCESSING
+      currentStatus !== TxExecutionStatus.PENDING &&
+      currentStatus !== TxExecutionStatus.PROCESSING
     ) {
       return;
     }
 
     // CHECK: cancellation is really needed?
-    batch.status = DirectTxBatchStatus.CANCELLED;
+    execution.status = TxExecutionStatus.CANCELLED;
 
-    if (currentStatus === DirectTxBatchStatus.PROCESSING) {
+    if (currentStatus === TxExecutionStatus.PROCESSING) {
       // TODO: cancel the current transaction execution...
     }
   }
 
   @action
-  protected removeDirectTxBatch(id: string): void {
-    this.recentDirectTxBatchMap.delete(id);
+  protected removeTxExecution(id: string): void {
+    this.recentTxExecutionMap.delete(id);
   }
 }

@@ -2,7 +2,7 @@ import { UnsignedTransaction } from "@ethersproject/transactions";
 import { StdSignDoc } from "@keplr-wallet/types";
 
 // Transaction status
-export enum DirectTxStatus {
+export enum BackgroundTxStatus {
   PENDING = "pending",
   SIGNING = "signing",
   SIGNED = "signed",
@@ -15,14 +15,14 @@ export enum DirectTxStatus {
 }
 
 // Transaction type
-export enum DirectTxType {
+export enum BackgroundTxType {
   EVM = "evm",
   COSMOS = "cosmos",
 }
 
 // Base transaction interface
-interface DirectTxBase {
-  status: DirectTxStatus; // mutable while executing
+interface BackgroundTxBase {
+  status: BackgroundTxStatus; // mutable while executing
   readonly chainId: string;
 
   // signed transaction data
@@ -35,20 +35,20 @@ interface DirectTxBase {
   error?: string;
 }
 
-export interface EVMDirectTx extends DirectTxBase {
-  readonly type: DirectTxType.EVM;
+export interface EVMBackgroundTx extends BackgroundTxBase {
+  readonly type: BackgroundTxType.EVM;
   readonly txData: UnsignedTransaction;
 }
 
-export interface CosmosDirectTx extends DirectTxBase {
-  readonly type: DirectTxType.COSMOS;
+export interface CosmosBackgroundTx extends BackgroundTxBase {
+  readonly type: BackgroundTxType.COSMOS;
   readonly txData: StdSignDoc;
 }
 
 // Single transaction data with discriminated union based on type
-export type DirectTx = EVMDirectTx | CosmosDirectTx;
+export type BackgroundTx = EVMBackgroundTx | CosmosBackgroundTx;
 
-export enum DirectTxBatchStatus {
+export enum TxExecutionStatus {
   PENDING = "pending",
   PROCESSING = "processing",
   BLOCKED = "blocked",
@@ -57,21 +57,21 @@ export enum DirectTxBatchStatus {
   CANCELLED = "cancelled",
 }
 
-export enum DirectTxBatchType {
+export enum TxExecutionType {
   UNDEFINED = "undefined",
   IBC_TRANSFER = "ibc-transfer",
   SWAP_V2 = "swap-v2",
 }
 
-export interface DirectTxBatchBase {
+export interface TxExecutionBase {
   readonly id: string;
-  status: DirectTxBatchStatus;
+  status: TxExecutionStatus;
 
   // keyring vault id
   readonly vaultId: string;
 
   // transactions
-  readonly txs: DirectTx[];
+  readonly txs: BackgroundTx[];
   txIndex: number; // Current transaction being processed
 
   executableChainIds: string[]; // executable chain ids
@@ -79,23 +79,29 @@ export interface DirectTxBatchBase {
   readonly timestamp: number; // Timestamp when execution started
 }
 
-export type DirectTxBatch =
-  | (DirectTxBatchBase & {
-      readonly type: DirectTxBatchType.UNDEFINED;
-    })
-  | (DirectTxBatchBase & {
-      readonly type: DirectTxBatchType.SWAP_V2;
-      swapHistoryId?: string;
-      // TODO: add more required fields for swap history data
-      readonly swapHistoryData: {
-        readonly chainId: string;
-      };
-    })
-  | (DirectTxBatchBase & {
-      readonly type: DirectTxBatchType.IBC_TRANSFER;
-      readonly ibcHistoryId?: string;
-      // TODO: add more required fields for ibc history data
-      readonly ibcHistoryData: {
-        readonly chainId: string;
-      };
-    });
+export interface UndefinedTxExecution extends TxExecutionBase {
+  readonly type: TxExecutionType.UNDEFINED;
+}
+
+export interface IBCTransferTxExecution extends TxExecutionBase {
+  readonly type: TxExecutionType.IBC_TRANSFER;
+  readonly ibcHistoryId?: string;
+  // TODO: add more required fields for ibc history data
+  readonly ibcHistoryData: {
+    readonly chainId: string;
+  };
+}
+
+export interface SwapV2TxExecution extends TxExecutionBase {
+  readonly type: TxExecutionType.SWAP_V2;
+  readonly swapHistoryId?: string;
+  // TODO: add more required fields for swap history data
+  readonly swapHistoryData: {
+    readonly chainId: string;
+  };
+}
+
+export type TxExecution =
+  | UndefinedTxExecution
+  | SwapV2TxExecution
+  | IBCTransferTxExecution;
