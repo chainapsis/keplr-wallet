@@ -1062,7 +1062,8 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    txHash: Uint8Array
+    txHash: Uint8Array,
+    backgroundExecutionId?: string
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
@@ -1087,6 +1088,7 @@ export class RecentSendHistoryService {
       }),
       notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
+      backgroundExecutionId: backgroundExecutionId,
     };
 
     this.recentIBCHistoryMap.set(id, history);
@@ -1120,7 +1122,8 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    txHash: Uint8Array
+    txHash: Uint8Array,
+    backgroundExecutionId?: string
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
@@ -1149,6 +1152,7 @@ export class RecentSendHistoryService {
       resAmount: [],
       notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
+      backgroundExecutionId: backgroundExecutionId,
     };
 
     this.recentIBCHistoryMap.set(id, history);
@@ -2136,7 +2140,8 @@ export class RecentSendHistoryService {
     },
     routeDurationSeconds: number = 0,
     txHash: string,
-    isOnlyUseBridge?: boolean
+    isOnlyUseBridge?: boolean,
+    backgroundExecutionId?: string
   ): string {
     const id = (this.recentSwapV2HistorySeq++).toString();
 
@@ -2160,6 +2165,7 @@ export class RecentSendHistoryService {
       resAmount: [],
       swapRefundInfo: undefined,
       notified: undefined,
+      backgroundExecutionId: backgroundExecutionId,
     };
 
     this.recentSwapV2HistoryMap.set(id, history);

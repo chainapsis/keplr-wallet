@@ -17,6 +17,11 @@ import {
   BackgroundTxType,
   EVMBackgroundTx,
   CosmosBackgroundTx,
+  HistoryData,
+  SwapV2HistoryData,
+  IBCTransferHistoryData,
+  IBCSwapHistoryData,
+  RecentSendHistoryData,
 } from "./types";
 import {
   action,
@@ -113,7 +118,8 @@ export class BackgroundTxExecutorService {
     vaultId: string,
     type: TxExecutionType,
     txs: BackgroundTx[],
-    executableChainIds: string[]
+    executableChainIds: string[],
+    historyData?: HistoryData
   ): Promise<TxExecutionStatus> {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
@@ -136,29 +142,47 @@ export class BackgroundTxExecutorService {
     };
 
     let execution: TxExecution;
-    if (type === TxExecutionType.SWAP_V2) {
-      execution = {
-        ...executionBase,
-        type: TxExecutionType.SWAP_V2,
-        // TODO: add swap history data...
-        swapHistoryData: {
-          chainId: txs[0].chainId,
-        },
-      };
-    } else if (type === TxExecutionType.IBC_TRANSFER) {
-      execution = {
-        ...executionBase,
-        type: TxExecutionType.IBC_TRANSFER,
-        // TODO: add ibc history data...
-        ibcHistoryData: {
-          chainId: txs[0].chainId,
-        },
-      };
-    } else {
-      execution = {
-        ...executionBase,
-        type: TxExecutionType.UNDEFINED,
-      };
+
+    switch (type) {
+      case TxExecutionType.SWAP_V2: {
+        execution = {
+          ...executionBase,
+          type: TxExecutionType.SWAP_V2,
+          swapHistoryData: historyData as SwapV2HistoryData,
+        };
+        break;
+      }
+      case TxExecutionType.IBC_TRANSFER: {
+        execution = {
+          ...executionBase,
+          type: TxExecutionType.IBC_TRANSFER,
+          ibcHistoryData: historyData as IBCTransferHistoryData,
+        };
+        break;
+      }
+      case TxExecutionType.IBC_SWAP: {
+        execution = {
+          ...executionBase,
+          type: TxExecutionType.IBC_SWAP,
+          ibcHistoryData: historyData as IBCSwapHistoryData,
+        };
+        break;
+      }
+      case TxExecutionType.SEND: {
+        execution = {
+          ...executionBase,
+          type: TxExecutionType.SEND,
+          sendHistoryData: historyData as RecentSendHistoryData,
+        };
+        break;
+      }
+      default: {
+        execution = {
+          ...executionBase,
+          type: TxExecutionType.UNDEFINED,
+        };
+        break;
+      }
     }
 
     this.recentTxExecutionMap.set(id, execution);
@@ -646,8 +670,137 @@ export class BackgroundTxExecutorService {
     return txResult.code === 0;
   }
 
-  protected recordHistoryIfNeeded(_execution: TxExecution): void {
-    throw new Error("Not implemented");
+  protected recordHistoryIfNeeded(execution: TxExecution): void {
+    if (execution.type === TxExecutionType.UNDEFINED) {
+      return;
+    }
+
+    if (execution.type === TxExecutionType.SEND) {
+      if (execution.hasRecordedHistory || !execution.sendHistoryData) {
+        return;
+      }
+
+      const sendHistoryData = execution.sendHistoryData;
+
+      this.recentSendHistoryService.addRecentSendHistory(
+        sendHistoryData.chainId,
+        sendHistoryData.historyType,
+        {
+          sender: sendHistoryData.sender,
+          recipient: sendHistoryData.recipient,
+          amount: sendHistoryData.amount,
+          memo: sendHistoryData.memo,
+          ibcChannels: undefined,
+        }
+      );
+
+      execution.hasRecordedHistory = true;
+      return;
+    }
+
+    if (execution.type === TxExecutionType.IBC_TRANSFER) {
+      if (execution.ibcHistoryId != null || !execution.ibcHistoryData) {
+        return;
+      }
+
+      // first tx should be a cosmos tx and it should have a tx hash
+      const tx = execution.txs[0];
+      if (!tx || tx.type !== BackgroundTxType.COSMOS) {
+        return;
+      }
+
+      if (tx.txHash == null) {
+        return;
+      }
+
+      const ibcHistoryData = execution.ibcHistoryData;
+
+      // TODO: 기록할 때 execution id를 넘겨줘야 함
+      const id = this.recentSendHistoryService.addRecentIBCTransferHistory(
+        ibcHistoryData.sourceChainId,
+        ibcHistoryData.destinationChainId,
+        ibcHistoryData.sender,
+        ibcHistoryData.recipient,
+        ibcHistoryData.amount,
+        ibcHistoryData.memo,
+        ibcHistoryData.channels,
+        ibcHistoryData.notificationInfo,
+        Buffer.from(tx.txHash, "hex"),
+        execution.id
+      );
+
+      execution.ibcHistoryId = id;
+      return;
+    }
+
+    if (execution.type === TxExecutionType.IBC_SWAP) {
+      if (execution.ibcHistoryId != null || !execution.ibcHistoryData) {
+        return;
+      }
+
+      // first tx should be a cosmos tx and it should have a tx hash
+      const tx = execution.txs[0];
+      if (!tx || tx.type !== BackgroundTxType.COSMOS) {
+        return;
+      }
+
+      if (tx.txHash == null) {
+        return;
+      }
+
+      const ibcHistoryData = execution.ibcHistoryData;
+
+      const id = this.recentSendHistoryService.addRecentIBCSwapHistory(
+        ibcHistoryData.swapType,
+        ibcHistoryData.chainId,
+        ibcHistoryData.destinationChainId,
+        ibcHistoryData.sender,
+        ibcHistoryData.amount,
+        ibcHistoryData.memo,
+        ibcHistoryData.ibcChannels,
+        ibcHistoryData.destinationAsset,
+        ibcHistoryData.swapChannelIndex,
+        ibcHistoryData.swapReceiver,
+        ibcHistoryData.notificationInfo,
+        Buffer.from(tx.txHash, "hex"),
+        execution.id
+      );
+
+      execution.ibcHistoryId = id;
+      return;
+    }
+
+    if (execution.type === TxExecutionType.SWAP_V2) {
+      if (execution.swapHistoryId != null || !execution.swapHistoryData) {
+        return;
+      }
+
+      // first tx should exist and it should have a tx hash
+      const tx = execution.txs[0];
+      if (!tx || tx.txHash == null) {
+        return;
+      }
+
+      const swapHistoryData = execution.swapHistoryData;
+
+      const id = this.recentSendHistoryService.recordTxWithSwapV2(
+        swapHistoryData.fromChainId,
+        swapHistoryData.toChainId,
+        swapHistoryData.provider,
+        swapHistoryData.destinationAsset,
+        swapHistoryData.simpleRoute,
+        swapHistoryData.sender,
+        swapHistoryData.recipient,
+        swapHistoryData.amount,
+        swapHistoryData.notificationInfo,
+        swapHistoryData.routeDurationSeconds,
+        tx.txHash,
+        swapHistoryData.isOnlyUseBridge,
+        execution.id
+      );
+
+      execution.swapHistoryId = id;
+    }
   }
 
   /**

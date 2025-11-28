@@ -1,5 +1,6 @@
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { StdSignDoc } from "@keplr-wallet/types";
+import { AppCurrency, StdSignDoc } from "@keplr-wallet/types";
+import { SwapProvider } from "../recent-send-history";
 
 // Transaction status
 export enum BackgroundTxStatus {
@@ -59,7 +60,9 @@ export enum TxExecutionStatus {
 
 export enum TxExecutionType {
   UNDEFINED = "undefined",
+  SEND = "send",
   IBC_TRANSFER = "ibc-transfer",
+  IBC_SWAP = "ibc-swap",
   SWAP_V2 = "swap-v2",
 }
 
@@ -83,25 +86,136 @@ export interface UndefinedTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.UNDEFINED;
 }
 
+export interface RecentSendHistoryData {
+  readonly chainId: string;
+  readonly historyType: string;
+  readonly sender: string;
+  readonly recipient: string;
+  readonly amount: {
+    readonly amount: string;
+    readonly denom: string;
+  }[];
+  readonly memo: string;
+  ibcChannels:
+    | {
+        portId: string;
+        channelId: string;
+        counterpartyChainId: string;
+      }[]
+    | undefined;
+}
+
+export interface SendTxExecution extends TxExecutionBase {
+  readonly type: TxExecutionType.SEND;
+
+  hasRecordedHistory?: boolean;
+  readonly sendHistoryData?: RecentSendHistoryData;
+}
+
+export interface IBCTransferHistoryData {
+  readonly historyType: string;
+  readonly sourceChainId: string;
+  readonly destinationChainId: string;
+  readonly channels: {
+    portId: string;
+    channelId: string;
+    counterpartyChainId: string;
+  }[];
+  readonly sender: string;
+  readonly recipient: string;
+  readonly amount: {
+    readonly amount: string;
+    readonly denom: string;
+  }[];
+  readonly memo: string;
+  readonly notificationInfo: {
+    readonly currencies: AppCurrency[];
+  };
+}
+
 export interface IBCTransferTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.IBC_TRANSFER;
-  readonly ibcHistoryId?: string;
-  // TODO: add more required fields for ibc history data
-  readonly ibcHistoryData: {
-    readonly chainId: string;
+
+  ibcHistoryId?: string;
+  readonly ibcHistoryData?: IBCTransferHistoryData;
+}
+
+export interface IBCSwapHistoryData {
+  readonly swapType: "amount-in" | "amount-out";
+  readonly chainId: string;
+  readonly destinationChainId: string;
+  readonly sender: string;
+  readonly amount: {
+    amount: string;
+    denom: string;
+  }[];
+  readonly memo: string;
+  readonly ibcChannels:
+    | {
+        portId: string;
+        channelId: string;
+        counterpartyChainId: string;
+      }[];
+  readonly destinationAsset: {
+    chainId: string;
+    denom: string;
   };
+  readonly swapChannelIndex: number;
+  readonly swapReceiver: string[];
+  readonly notificationInfo: {
+    currencies: AppCurrency[];
+  };
+}
+
+export interface IBCSwapTxExecution extends TxExecutionBase {
+  readonly type: TxExecutionType.IBC_SWAP;
+  ibcHistoryId?: string;
+  readonly ibcHistoryData?: IBCSwapHistoryData;
+}
+
+export interface SwapV2HistoryData {
+  readonly fromChainId: string;
+  readonly toChainId: string;
+  readonly provider: SwapProvider;
+  readonly destinationAsset: {
+    chainId: string;
+    denom: string;
+    expectedAmount: string;
+  };
+  readonly simpleRoute: {
+    isOnlyEvm: boolean;
+    chainId: string;
+    receiver: string;
+  }[];
+  readonly sender: string;
+  readonly recipient: string;
+  readonly amount: {
+    readonly amount: string;
+    readonly denom: string;
+  }[];
+  readonly notificationInfo: {
+    currencies: AppCurrency[];
+  };
+  readonly routeDurationSeconds: number;
+  readonly isOnlyUseBridge?: boolean;
 }
 
 export interface SwapV2TxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SWAP_V2;
-  readonly swapHistoryId?: string;
-  // TODO: add more required fields for swap history data
-  readonly swapHistoryData: {
-    readonly chainId: string;
-  };
+
+  swapHistoryId?: string;
+  readonly swapHistoryData?: SwapV2HistoryData;
 }
+
+export type HistoryData =
+  | RecentSendHistoryData
+  | IBCTransferHistoryData
+  | IBCSwapHistoryData
+  | SwapV2HistoryData;
 
 export type TxExecution =
   | UndefinedTxExecution
-  | SwapV2TxExecution
-  | IBCTransferTxExecution;
+  | SendTxExecution
+  | IBCTransferTxExecution
+  | IBCSwapTxExecution
+  | SwapV2TxExecution;

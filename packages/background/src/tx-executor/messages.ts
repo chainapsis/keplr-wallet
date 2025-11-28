@@ -5,6 +5,7 @@ import {
   TxExecutionType,
   TxExecutionStatus,
   TxExecution,
+  HistoryData,
 } from "./types";
 
 /**
@@ -22,7 +23,8 @@ export class RecordAndExecuteTxsMsg extends Message<TxExecutionStatus> {
     public readonly vaultId: string,
     public readonly executionType: TxExecutionType,
     public readonly txs: BackgroundTx[],
-    public readonly executableChainIds: string[]
+    public readonly executableChainIds: string[],
+    public readonly historyData?: HistoryData
   ) {
     super();
   }
