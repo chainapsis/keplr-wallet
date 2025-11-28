@@ -11,17 +11,12 @@ import {
   TxExecution,
   TxExecutionStatus,
   TxExecutionType,
-  TxExecutionBase,
   BackgroundTx,
   BackgroundTxStatus,
   BackgroundTxType,
   EVMBackgroundTx,
   CosmosBackgroundTx,
-  HistoryData,
-  SwapV2HistoryData,
-  IBCTransferHistoryData,
-  IBCSwapHistoryData,
-  RecentSendHistoryData,
+  ExecutionTypeToHistoryData,
 } from "./types";
 import {
   action,
@@ -113,16 +108,49 @@ export class BackgroundTxExecutorService {
    * and the execution will be started automatically after the transactions are recorded.
    */
   @action
-  async recordAndExecuteTxs(
+  async recordAndExecuteTxs<T extends TxExecutionType>(
     env: Env,
     vaultId: string,
-    type: TxExecutionType,
+    type: T,
     txs: BackgroundTx[],
     executableChainIds: string[],
-    historyData?: HistoryData
+    historyData?: T extends TxExecutionType.UNDEFINED
+      ? undefined
+      : ExecutionTypeToHistoryData[T]
   ): Promise<TxExecutionStatus> {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
+    }
+
+    const keyInfo =
+      this.keyRingCosmosService.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new KeplrError("direct-tx-executor", 102, "Key info not found");
+    }
+
+    // validation for hardware wallets
+    if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+      // at least first tx should be signed with hardware wallet
+      // as signing on background is not supported for hardware wallets
+      const firstTx = txs[0];
+      if (!firstTx) {
+        throw new KeplrError(
+          "direct-tx-executor",
+          103,
+          "First tx is not found"
+        );
+      }
+
+      if (
+        firstTx.signedTx == null ||
+        !executableChainIds.includes(firstTx.chainId)
+      ) {
+        throw new KeplrError(
+          "direct-tx-executor",
+          104,
+          "First tx should be signed and executable"
+        );
+      }
     }
 
     // CHECK: 다중 체인 트랜잭션이 아니라면 굳이 이걸 기록할 필요가 있을까?
@@ -131,7 +159,7 @@ export class BackgroundTxExecutorService {
     // 특히나 ui에서 진행상황을 체크하는 것이 아닌 이상 notification을 통해 진행상황을 알리는 것으로 충분할 수 있다.
     const id = (this.recentTxExecutionSeq++).toString();
 
-    const executionBase: TxExecutionBase = {
+    const execution = {
       id,
       status: TxExecutionStatus.PENDING,
       vaultId: vaultId,
@@ -139,51 +167,9 @@ export class BackgroundTxExecutorService {
       txIndex: -1,
       executableChainIds: executableChainIds,
       timestamp: Date.now(),
-    };
-
-    let execution: TxExecution;
-
-    switch (type) {
-      case TxExecutionType.SWAP_V2: {
-        execution = {
-          ...executionBase,
-          type: TxExecutionType.SWAP_V2,
-          swapHistoryData: historyData as SwapV2HistoryData,
-        };
-        break;
-      }
-      case TxExecutionType.IBC_TRANSFER: {
-        execution = {
-          ...executionBase,
-          type: TxExecutionType.IBC_TRANSFER,
-          ibcHistoryData: historyData as IBCTransferHistoryData,
-        };
-        break;
-      }
-      case TxExecutionType.IBC_SWAP: {
-        execution = {
-          ...executionBase,
-          type: TxExecutionType.IBC_SWAP,
-          ibcHistoryData: historyData as IBCSwapHistoryData,
-        };
-        break;
-      }
-      case TxExecutionType.SEND: {
-        execution = {
-          ...executionBase,
-          type: TxExecutionType.SEND,
-          sendHistoryData: historyData as RecentSendHistoryData,
-        };
-        break;
-      }
-      default: {
-        execution = {
-          ...executionBase,
-          type: TxExecutionType.UNDEFINED,
-        };
-        break;
-      }
-    }
+      type,
+      ...(type !== TxExecutionType.UNDEFINED ? { historyData } : {}),
+    } as TxExecution;
 
     this.recentTxExecutionMap.set(id, execution);
     return await this.executeTxs(id);
@@ -676,20 +662,20 @@ export class BackgroundTxExecutorService {
     }
 
     if (execution.type === TxExecutionType.SEND) {
-      if (execution.hasRecordedHistory || !execution.sendHistoryData) {
+      if (execution.hasRecordedHistory || !execution.historyData) {
         return;
       }
 
-      const sendHistoryData = execution.sendHistoryData;
+      const historyData = execution.historyData;
 
       this.recentSendHistoryService.addRecentSendHistory(
-        sendHistoryData.chainId,
-        sendHistoryData.historyType,
+        historyData.chainId,
+        historyData.historyType,
         {
-          sender: sendHistoryData.sender,
-          recipient: sendHistoryData.recipient,
-          amount: sendHistoryData.amount,
-          memo: sendHistoryData.memo,
+          sender: historyData.sender,
+          recipient: historyData.recipient,
+          amount: historyData.amount,
+          memo: historyData.memo,
           ibcChannels: undefined,
         }
       );
@@ -699,7 +685,7 @@ export class BackgroundTxExecutorService {
     }
 
     if (execution.type === TxExecutionType.IBC_TRANSFER) {
-      if (execution.ibcHistoryId != null || !execution.ibcHistoryData) {
+      if (execution.historyId != null || !execution.historyData) {
         return;
       }
 
@@ -713,28 +699,28 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      const ibcHistoryData = execution.ibcHistoryData;
+      const historyData = execution.historyData;
 
       // TODO: 기록할 때 execution id를 넘겨줘야 함
       const id = this.recentSendHistoryService.addRecentIBCTransferHistory(
-        ibcHistoryData.sourceChainId,
-        ibcHistoryData.destinationChainId,
-        ibcHistoryData.sender,
-        ibcHistoryData.recipient,
-        ibcHistoryData.amount,
-        ibcHistoryData.memo,
-        ibcHistoryData.channels,
-        ibcHistoryData.notificationInfo,
+        historyData.sourceChainId,
+        historyData.destinationChainId,
+        historyData.sender,
+        historyData.recipient,
+        historyData.amount,
+        historyData.memo,
+        historyData.channels,
+        historyData.notificationInfo,
         Buffer.from(tx.txHash, "hex"),
         execution.id
       );
 
-      execution.ibcHistoryId = id;
+      execution.historyId = id;
       return;
     }
 
     if (execution.type === TxExecutionType.IBC_SWAP) {
-      if (execution.ibcHistoryId != null || !execution.ibcHistoryData) {
+      if (execution.historyId != null || !execution.historyData) {
         return;
       }
 
@@ -748,30 +734,30 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      const ibcHistoryData = execution.ibcHistoryData;
+      const historyData = execution.historyData;
 
       const id = this.recentSendHistoryService.addRecentIBCSwapHistory(
-        ibcHistoryData.swapType,
-        ibcHistoryData.chainId,
-        ibcHistoryData.destinationChainId,
-        ibcHistoryData.sender,
-        ibcHistoryData.amount,
-        ibcHistoryData.memo,
-        ibcHistoryData.ibcChannels,
-        ibcHistoryData.destinationAsset,
-        ibcHistoryData.swapChannelIndex,
-        ibcHistoryData.swapReceiver,
-        ibcHistoryData.notificationInfo,
+        historyData.swapType,
+        historyData.chainId,
+        historyData.destinationChainId,
+        historyData.sender,
+        historyData.amount,
+        historyData.memo,
+        historyData.ibcChannels,
+        historyData.destinationAsset,
+        historyData.swapChannelIndex,
+        historyData.swapReceiver,
+        historyData.notificationInfo,
         Buffer.from(tx.txHash, "hex"),
         execution.id
       );
 
-      execution.ibcHistoryId = id;
+      execution.historyId = id;
       return;
     }
 
     if (execution.type === TxExecutionType.SWAP_V2) {
-      if (execution.swapHistoryId != null || !execution.swapHistoryData) {
+      if (execution.historyId != null || !execution.historyData) {
         return;
       }
 
@@ -781,25 +767,25 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      const swapHistoryData = execution.swapHistoryData;
+      const historyData = execution.historyData;
 
       const id = this.recentSendHistoryService.recordTxWithSwapV2(
-        swapHistoryData.fromChainId,
-        swapHistoryData.toChainId,
-        swapHistoryData.provider,
-        swapHistoryData.destinationAsset,
-        swapHistoryData.simpleRoute,
-        swapHistoryData.sender,
-        swapHistoryData.recipient,
-        swapHistoryData.amount,
-        swapHistoryData.notificationInfo,
-        swapHistoryData.routeDurationSeconds,
+        historyData.fromChainId,
+        historyData.toChainId,
+        historyData.provider,
+        historyData.destinationAsset,
+        historyData.simpleRoute,
+        historyData.sender,
+        historyData.recipient,
+        historyData.amount,
+        historyData.notificationInfo,
+        historyData.routeDurationSeconds,
         tx.txHash,
-        swapHistoryData.isOnlyUseBridge,
+        historyData.isOnlyUseBridge,
         execution.id
       );
 
-      execution.swapHistoryId = id;
+      execution.historyId = id;
     }
   }
 

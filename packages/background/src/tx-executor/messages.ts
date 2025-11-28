@@ -5,7 +5,7 @@ import {
   TxExecutionType,
   TxExecutionStatus,
   TxExecution,
-  HistoryData,
+  ExecutionTypeToHistoryData,
 } from "./types";
 
 /**
@@ -13,18 +13,21 @@ import {
  * execution id is returned if the transactions are recorded successfully
  * and the execution will be started automatically after the transactions are recorded.
  */
-export class RecordAndExecuteTxsMsg extends Message<TxExecutionStatus> {
+export class RecordAndExecuteTxsMsg<
+  T extends TxExecutionType = TxExecutionType
+> extends Message<TxExecutionStatus> {
   public static type() {
     return "record-and-execute-txs";
   }
 
-  //TODO: add history data...
   constructor(
     public readonly vaultId: string,
-    public readonly executionType: TxExecutionType,
+    public readonly executionType: T,
     public readonly txs: BackgroundTx[],
     public readonly executableChainIds: string[],
-    public readonly historyData?: HistoryData
+    public readonly historyData?: T extends TxExecutionType.UNDEFINED
+      ? undefined
+      : ExecutionTypeToHistoryData[T]
   ) {
     super();
   }
