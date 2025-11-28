@@ -46,6 +46,7 @@ import {
   calculateCosmosStdFee,
 } from "./utils/cosmos";
 import { fillUnsignedEVMTx } from "./utils/evm";
+import { Subscriber, TxExecutableEvent } from "./internal";
 export class BackgroundTxExecutorService {
   @observable
   protected recentTxExecutionSeq: number = 0;
@@ -61,7 +62,8 @@ export class BackgroundTxExecutorService {
     protected readonly backgroundTxService: BackgroundTxService,
     protected readonly backgroundTxEthereumService: BackgroundTxEthereumService,
     protected readonly analyticsService: AnalyticsService,
-    protected readonly recentSendHistoryService: RecentSendHistoryService
+    protected readonly recentSendHistoryService: RecentSendHistoryService,
+    protected readonly subscriber: Subscriber<TxExecutableEvent>
   ) {
     makeObservable(this);
   }
@@ -103,16 +105,31 @@ export class BackgroundTxExecutorService {
       );
     });
 
-    // TODO: 간단한 메시지 큐를 구현해서 recent send history service에서 multi tx를 처리할 조건이 만족되었을 때
-    // 이 서비스로 메시지를 보내 트랜잭션을 자동으로 실행할 수 있도록 한다. 굳
+    this.subscriber.subscribe(async ({ executionId, executableChainIds }) => {
+      const execution = this.getTxExecution(executionId);
+      if (!execution) {
+        return;
+      }
 
-    // CHECK: 현재 활성화되어 있는 vault에서만 실행할 수 있으면 좋을 듯, how? vaultId 변경 감지? how?
-    // CHECK: 굳이 이걸 백그라운드에서 자동으로 실행할 필요가 있을까?
-    // 불러왔는데 pending 상태거나 오래된 실행이면 사실상 이 작업을 이어가는 것이 의미가 있는지 의문이 든다.
-    // for (const execution of this.getRecentDirectTxsExecutions()) {
+      const newExecutableChainIds = executableChainIds.filter((chainId) =>
+        execution.executableChainIds.includes(chainId)
+      );
 
-    //   this.executeDirectTxs(execution.id);
-    // }
+      if (newExecutableChainIds.length === 0) {
+        return;
+      }
+
+      // update the executable chain ids
+      for (const chainId of newExecutableChainIds) {
+        execution.executableChainIds.push(chainId);
+      }
+
+      // cause new executable chain ids are available, resume the execution
+
+      // CHECK: 현재 활성화되어 있는 vault에서만 실행할 수 있으면 좋을 듯, how? vaultId 변경 감지? how?
+      // 불러왔는데 pending 상태거나 오래된 실행이면 사실상 이 작업을 이어가는 것이 의미가 있는지 의문이 든다.
+      await this.executeTxs(executionId);
+    });
   }
 
   /**
@@ -225,10 +242,17 @@ export class BackgroundTxExecutorService {
       throw new KeplrError("direct-tx-executor", 105, "Execution not found");
     }
 
+    if (execution.status === TxExecutionStatus.PROCESSING) {
+      throw new KeplrError(
+        "direct-tx-executor",
+        108,
+        "Execution is already processing"
+      );
+    }
+
     // Only pending/processing/blocked executions can be executed
     const needResume =
       execution.status === TxExecutionStatus.PENDING ||
-      execution.status === TxExecutionStatus.PROCESSING ||
       execution.status === TxExecutionStatus.BLOCKED;
     if (!needResume) {
       return execution.status;

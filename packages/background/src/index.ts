@@ -293,12 +293,16 @@ export function init(
     keyRingBitcoinService
   );
 
+  const txExecutableMQ =
+    BackgroundTxExecutor.createMessageQueue<BackgroundTxExecutor.TxExecutableEvent>();
+
   const recentSendHistoryService =
     new RecentSendHistory.RecentSendHistoryService(
       storeCreator("recent-send-history"),
       chainsService,
       backgroundTxService,
-      notification
+      notification,
+      txExecutableMQ.publisher
     );
 
   const settingsService = new Settings.SettingsService(
@@ -323,7 +327,8 @@ export function init(
       backgroundTxService,
       backgroundTxEthereumService,
       analyticsService,
-      recentSendHistoryService
+      recentSendHistoryService,
+      txExecutableMQ.subscriber
     );
 
   Interaction.init(router, interactionService);
