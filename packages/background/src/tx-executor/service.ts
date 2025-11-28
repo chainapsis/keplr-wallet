@@ -17,6 +17,7 @@ import {
   EVMBackgroundTx,
   CosmosBackgroundTx,
   ExecutionTypeToHistoryData,
+  ExecutionFeeType,
 } from "./types";
 import {
   action,
@@ -126,6 +127,7 @@ export class BackgroundTxExecutorService {
     type: T,
     txs: BackgroundTx[],
     executableChainIds: string[],
+    feeType: ExecutionFeeType = "average",
     historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
       : ExecutionTypeToHistoryData[T]
@@ -180,6 +182,7 @@ export class BackgroundTxExecutorService {
       executableChainIds: executableChainIds,
       timestamp: Date.now(),
       type,
+      feeType,
       ...(type !== TxExecutionType.UNDEFINED ? { historyData } : {}),
     } as TxExecution;
 
