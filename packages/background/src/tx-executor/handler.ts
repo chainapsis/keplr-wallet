@@ -48,6 +48,7 @@ const handleRecordAndExecuteTxsMsg: (
       msg.executionType,
       msg.txs,
       msg.executableChainIds,
+      msg.feeType,
       msg.historyData
     );
   };

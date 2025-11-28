@@ -5,8 +5,6 @@ import { Msg } from "@keplr-wallet/types";
 
 import { SwapProvider } from "../recent-send-history";
 
-export type FeeType = "low" | "average" | "high";
-
 // Transaction status
 export enum BackgroundTxStatus {
   PENDING = "pending",
@@ -86,6 +84,8 @@ export enum TxExecutionType {
   SWAP_V2 = "swap-v2",
 }
 
+export type ExecutionFeeType = "low" | "average" | "high";
+
 export interface TxExecutionBase {
   readonly id: string;
   status: TxExecutionStatus;
@@ -100,6 +100,8 @@ export interface TxExecutionBase {
   executableChainIds: string[]; // executable chain ids
 
   readonly timestamp: number; // Timestamp when execution started
+
+  readonly feeType: ExecutionFeeType;
 }
 
 export interface UndefinedTxExecution extends TxExecutionBase {
