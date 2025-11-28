@@ -41,6 +41,7 @@ import {
   buildSignedTxFromAminoSignResponse,
   prepareSignDocForAminoSigning,
   simulateCosmosTx,
+  fillUnsignedEVMTx,
 } from "./utils";
 
 export class BackgroundTxExecutorService {
@@ -450,12 +451,24 @@ export class BackgroundTxExecutorService {
         EthSignType.TRANSACTION
       );
     } else {
-      result = await this.keyRingEthereumService.signEthereumPreAuthorized(
+      const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
+      const evmInfo = ChainsService.getEVMInfo(chainInfo);
+      if (!evmInfo) {
+        throw new KeplrError("direct-tx-executor", 113, "Not EVM chain");
+      }
+
+      const unsignedTx = await fillUnsignedEVMTx(
         origin,
+        evmInfo,
+        signer,
+        tx.txData
+      );
+
+      result = await this.keyRingEthereumService.signEthereumPreAuthorized(
         vaultId,
         tx.chainId,
         signer,
-        Buffer.from(JSON.stringify(tx.txData)),
+        Buffer.from(JSON.stringify(unsignedTx)),
         EthSignType.TRANSACTION
       );
     }
