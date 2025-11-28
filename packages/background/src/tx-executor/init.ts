@@ -3,20 +3,20 @@ import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
 import { BackgroundTxExecutorService } from "./service";
 import {
-  RecordAndExecuteDirectTxsMsg,
-  ResumeDirectTxsMsg,
-  CancelDirectTxsMsg,
-  GetDirectTxBatchMsg,
+  RecordAndExecuteTxsMsg,
+  ResumeTxMsg,
+  CancelTxExecutionMsg,
+  GetTxExecutionMsg,
 } from "./messages";
 
 export function init(
   router: Router,
   service: BackgroundTxExecutorService
 ): void {
-  router.registerMessage(RecordAndExecuteDirectTxsMsg);
-  router.registerMessage(ResumeDirectTxsMsg);
-  router.registerMessage(GetDirectTxBatchMsg);
-  router.registerMessage(CancelDirectTxsMsg);
+  router.registerMessage(RecordAndExecuteTxsMsg);
+  router.registerMessage(ResumeTxMsg);
+  router.registerMessage(GetTxExecutionMsg);
+  router.registerMessage(CancelTxExecutionMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

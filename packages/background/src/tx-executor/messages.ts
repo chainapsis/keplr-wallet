@@ -1,10 +1,10 @@
 import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import {
-  DirectTxBatch,
-  DirectTx,
-  DirectTxBatchType,
-  DirectTxBatchStatus,
+  BackgroundTx,
+  TxExecutionType,
+  TxExecutionStatus,
+  TxExecution,
 } from "./types";
 
 /**
@@ -12,16 +12,16 @@ import {
  * execution id is returned if the transactions are recorded successfully
  * and the execution will be started automatically after the transactions are recorded.
  */
-export class RecordAndExecuteDirectTxsMsg extends Message<DirectTxBatchStatus> {
+export class RecordAndExecuteTxsMsg extends Message<TxExecutionStatus> {
   public static type() {
-    return "record-and-execute-direct-txs";
+    return "record-and-execute-txs";
   }
 
   //TODO: add history data...
   constructor(
     public readonly vaultId: string,
-    public readonly batchType: DirectTxBatchType,
-    public readonly txs: DirectTx[],
+    public readonly executionType: TxExecutionType,
+    public readonly txs: BackgroundTx[],
     public readonly executableChainIds: string[]
   ) {
     super();
@@ -32,8 +32,8 @@ export class RecordAndExecuteDirectTxsMsg extends Message<DirectTxBatchStatus> {
       throw new KeplrError("direct-tx-executor", 101, "vaultId is empty");
     }
 
-    if (!this.batchType) {
-      throw new KeplrError("direct-tx-executor", 102, "batchType is empty");
+    if (!this.executionType) {
+      throw new KeplrError("direct-tx-executor", 102, "executionType is empty");
     }
 
     if (!this.txs || this.txs.length === 0) {
@@ -58,7 +58,7 @@ export class RecordAndExecuteDirectTxsMsg extends Message<DirectTxBatchStatus> {
   }
 
   type(): string {
-    return RecordAndExecuteDirectTxsMsg.type();
+    return RecordAndExecuteTxsMsg.type();
   }
 }
 
@@ -66,9 +66,9 @@ export class RecordAndExecuteDirectTxsMsg extends Message<DirectTxBatchStatus> {
  * Resume existing direct transactions by execution id and transaction index
  * This message is used to resume the execution of direct transactions that were paused by waiting for the asset to be bridged or other reasons.
  */
-export class ResumeDirectTxsMsg extends Message<DirectTxBatchStatus> {
+export class ResumeTxMsg extends Message<TxExecutionStatus> {
   public static type() {
-    return "resume-direct-txs";
+    return "resume-tx";
   }
 
   constructor(
@@ -109,16 +109,16 @@ export class ResumeDirectTxsMsg extends Message<DirectTxBatchStatus> {
   }
 
   type(): string {
-    return ResumeDirectTxsMsg.type();
+    return ResumeTxMsg.type();
   }
 }
 
 /**
  * Get execution data by execution id
  */
-export class GetDirectTxBatchMsg extends Message<DirectTxBatch | undefined> {
+export class GetTxExecutionMsg extends Message<TxExecution | undefined> {
   public static type() {
-    return "get-direct-tx-batch";
+    return "get-tx-execution";
   }
 
   constructor(public readonly id: string) {
@@ -140,16 +140,16 @@ export class GetDirectTxBatchMsg extends Message<DirectTxBatch | undefined> {
   }
 
   type(): string {
-    return GetDirectTxBatchMsg.type();
+    return GetTxExecutionMsg.type();
   }
 }
 
 /**
  * Cancel execution by execution id
  */
-export class CancelDirectTxsMsg extends Message<void> {
+export class CancelTxExecutionMsg extends Message<void> {
   public static type() {
-    return "cancel-direct-txs";
+    return "cancel-tx-execution";
   }
 
   constructor(public readonly id: string) {
@@ -171,6 +171,6 @@ export class CancelDirectTxsMsg extends Message<void> {
   }
 
   type(): string {
-    return CancelDirectTxsMsg.type();
+    return CancelTxExecutionMsg.type();
   }
 }
