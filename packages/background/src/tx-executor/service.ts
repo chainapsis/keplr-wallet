@@ -27,11 +27,21 @@ import {
   toJS,
 } from "mobx";
 import {
+  AminoSignResponse,
   EthSignType,
   EthTxStatus,
   EthereumSignResponse,
 } from "@keplr-wallet/types";
 import { TransactionTypes, serialize } from "@ethersproject/transactions";
+import { BaseAccount } from "@keplr-wallet/cosmos";
+import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import { Msg } from "@keplr-wallet/types";
+import {
+  getEip712TypedDataBasedOnChainInfo,
+  buildSignedTxFromAminoSignResponse,
+  prepareSignDocForAminoSigning,
+  simulateCosmosTx,
+} from "./utils";
 
 export class BackgroundTxExecutorService {
   @observable
@@ -338,7 +348,6 @@ export class BackgroundTxExecutorService {
       try {
         const { signedTx } = await this.signTx(
           execution.vaultId,
-          currentTx.chainId,
           currentTx,
           options?.env
         );
@@ -387,7 +396,6 @@ export class BackgroundTxExecutorService {
 
   protected async signTx(
     vaultId: string,
-    chainId: string,
     tx: BackgroundTx,
     env?: Env
   ): Promise<{
@@ -400,21 +408,20 @@ export class BackgroundTxExecutorService {
     }
 
     if (tx.type === BackgroundTxType.EVM) {
-      return this.signEvmTx(vaultId, chainId, tx, env);
+      return this.signEvmTx(vaultId, tx, env);
     }
 
-    return this.signCosmosTx(vaultId, chainId, tx, env);
+    return this.signCosmosTx(vaultId, tx, env);
   }
 
   private async signEvmTx(
     vaultId: string,
-    chainId: string,
     tx: EVMBackgroundTx,
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
   }> {
-    const keyInfo = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
     const signer = keyInfo.ethereumHexAddress;
     const origin =
@@ -437,16 +444,16 @@ export class BackgroundTxExecutorService {
         env,
         origin,
         vaultId,
-        chainId,
+        tx.chainId,
         signer,
         Buffer.from(JSON.stringify(tx.txData)),
         EthSignType.TRANSACTION
       );
     } else {
-      result = await this.keyRingEthereumService.signEthereumDirect(
+      result = await this.keyRingEthereumService.signEthereumPreAuthorized(
         origin,
         vaultId,
-        chainId,
+        tx.chainId,
         signer,
         Buffer.from(JSON.stringify(tx.txData)),
         EthSignType.TRANSACTION
@@ -476,24 +483,56 @@ export class BackgroundTxExecutorService {
 
   private async signCosmosTx(
     vaultId: string,
-    chainId: string,
     tx: CosmosBackgroundTx,
     env?: Env
   ): Promise<{
     signedTx: Uint8Array;
-    signature: Uint8Array;
   }> {
     // check key
-    const keyInfo = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
     const signer = keyInfo.bech32Address;
+    const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
+
     const origin =
       typeof browser !== "undefined"
         ? new URL(browser.runtime.getURL("/")).origin
         : "extension";
 
-    // let result: AminoSignResponse;
+    const aminoMsgs: Msg[] = tx.txData.aminoMsgs ?? [];
+    const protoMsgs: Any[] = tx.txData.protoMsgs;
+    const feeCurrency = chainInfo.currencies[0];
+    const pseudoFee = {
+      amount: [
+        {
+          denom: feeCurrency.coinMinimalDenom,
+          amount: "1",
+        },
+      ],
+      gas: "100000",
+    };
+
+    // NOTE: 백그라운드에서 자동으로 실행하는 것이므로 편의상 amino로 일관되게 처리한다
+    const isDirectSign = aminoMsgs.length === 0;
+    if (isDirectSign) {
+      throw new KeplrError(
+        "direct-tx-executor",
+        110,
+        "Direct signing is not supported for now"
+      );
+    }
+
+    if (protoMsgs.length === 0) {
+      throw new Error("There is no msg to send");
+    }
+
+    if (!isDirectSign && aminoMsgs.length !== protoMsgs.length) {
+      throw new Error("The length of aminoMsgs and protoMsgs are different");
+    }
+
     if (isHardware) {
+      // hardware wallet signing should be triggered from user interaction
+      // so only currently activated key should be used for signing
       if (!env) {
         throw new KeplrError(
           "direct-tx-executor",
@@ -502,37 +541,140 @@ export class BackgroundTxExecutorService {
         );
       }
 
-      await this.keyRingCosmosService.signAmino(
-        env,
-        origin,
-        vaultId,
-        chainId,
+      const useEthereumSign =
+        chainInfo.features?.includes("eth-key-sign") === true;
+      const eip712Signing = useEthereumSign && keyInfo.isNanoLedger;
+      if (eip712Signing && !tx.txData.rlpTypes) {
+        throw new KeplrError(
+          "direct-tx-executor",
+          111,
+          "RLP types information is needed for signing tx for ethermint chain with ledger"
+        );
+      }
+
+      if (eip712Signing && isDirectSign) {
+        throw new KeplrError(
+          "direct-tx-executor",
+          112,
+          "EIP712 signing is not supported for proto signing"
+        );
+      }
+
+      // CHECK: what about keystone?
+
+      const account = await BaseAccount.fetchFromRest(
+        chainInfo.rest,
         signer,
-        tx.txData,
-        {}
+        true
       );
 
-      // experimentalSignEIP712CosmosTx_v0 if eip712Signing
+      const signDoc = prepareSignDocForAminoSigning({
+        chainInfo,
+        accountNumber: account.getAccountNumber().toString(),
+        sequence: account.getSequence().toString(),
+        aminoMsgs: tx.txData.aminoMsgs ?? [],
+        fee: pseudoFee,
+        memo: tx.txData.memo ?? "",
+        eip712Signing,
+        signer,
+      });
+
+      const signResponse: AminoSignResponse = await (async () => {
+        if (!eip712Signing) {
+          return await this.keyRingCosmosService.signAmino(
+            env,
+            origin,
+            vaultId,
+            tx.chainId,
+            signer,
+            signDoc,
+            {}
+          );
+        }
+
+        return await this.keyRingCosmosService.requestSignEIP712CosmosTx_v0(
+          env,
+          vaultId,
+          origin,
+          tx.chainId,
+          signer,
+          getEip712TypedDataBasedOnChainInfo(chainInfo, {
+            aminoMsgs: tx.txData.aminoMsgs ?? [],
+            protoMsgs: tx.txData.protoMsgs,
+            rlpTypes: tx.txData.rlpTypes,
+          }),
+          signDoc,
+          {}
+        );
+      })();
+
+      const signedTx = buildSignedTxFromAminoSignResponse({
+        protoMsgs,
+        signResponse,
+        chainInfo,
+        eip712Signing,
+        useEthereumSign,
+      });
+
+      return {
+        signedTx: signedTx.tx,
+      };
     } else {
-      throw new KeplrError(
-        "direct-tx-executor",
-        110,
-        "Software wallet signing is not supported"
+      const account = await BaseAccount.fetchFromRest(
+        chainInfo.rest,
+        signer,
+        true
       );
-      // result = await this.keyRingCosmosService.signAminoDirect(
-      //   origin,
-      //   vaultId,
-      //   chainId,
-      //   signer,
-      //   tx.txData,
-      //   {}
-      // );
-    }
 
-    return {
-      signedTx: new Uint8Array(),
-      signature: new Uint8Array(),
-    };
+      const { gasUsed } = await simulateCosmosTx(
+        signer,
+        chainInfo,
+        protoMsgs,
+        pseudoFee,
+        tx.txData.memo ?? ""
+      );
+
+      const signDoc = prepareSignDocForAminoSigning({
+        chainInfo,
+        accountNumber: account.getAccountNumber().toString(),
+        sequence: account.getSequence().toString(),
+        aminoMsgs: tx.txData.aminoMsgs ?? [],
+        fee: {
+          amount: [
+            {
+              // TODO: fee token 설정이 필요함...
+              denom: feeCurrency.coinMinimalDenom,
+              amount: "100000", // TODO: get gas price
+            },
+          ],
+          gas: Math.floor(gasUsed * 1.4).toString(),
+        },
+        memo: tx.txData.memo ?? "",
+        eip712Signing: false,
+        signer,
+      });
+
+      const signResponse: AminoSignResponse =
+        await this.keyRingCosmosService.signAminoPreAuthorized(
+          origin,
+          vaultId,
+          tx.chainId,
+          signer,
+          signDoc
+        );
+
+      const signedTx = buildSignedTxFromAminoSignResponse({
+        protoMsgs,
+        signResponse,
+        chainInfo,
+        eip712Signing: false,
+        useEthereumSign: false,
+      });
+
+      return {
+        signedTx: signedTx.tx,
+      };
+    }
   }
 
   protected async broadcastTx(tx: BackgroundTx): Promise<{
