@@ -38,6 +38,7 @@ import {
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { id } from "@ethersproject/hash";
+import { Publisher, TxExecutableEvent } from "../tx-executor/internal";
 
 const SWAP_API_ENDPOINT = process.env["KEPLR_API_ENDPOINT"] ?? "";
 
@@ -70,7 +71,8 @@ export class RecentSendHistoryService {
     protected readonly kvStore: KVStore,
     protected readonly chainsService: ChainsService,
     protected readonly txService: BackgroundTxService,
-    protected readonly notification: Notification
+    protected readonly notification: Notification,
+    protected readonly publisher: Publisher<TxExecutableEvent> // TODO: publish tx executable event when 트래킹 인덱스가 증가되었을 때
   ) {
     makeObservable(this);
   }
@@ -1062,7 +1064,8 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    txHash: Uint8Array
+    txHash: Uint8Array,
+    backgroundExecutionId?: string
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
@@ -1087,6 +1090,7 @@ export class RecentSendHistoryService {
       }),
       notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
+      backgroundExecutionId: backgroundExecutionId,
     };
 
     this.recentIBCHistoryMap.set(id, history);
@@ -1120,7 +1124,8 @@ export class RecentSendHistoryService {
     notificationInfo: {
       currencies: AppCurrency[];
     },
-    txHash: Uint8Array
+    txHash: Uint8Array,
+    backgroundExecutionId?: string
   ): string {
     const id = (this.recentIBCHistorySeq++).toString();
 
@@ -1149,6 +1154,7 @@ export class RecentSendHistoryService {
       resAmount: [],
       notificationInfo,
       txHash: Buffer.from(txHash).toString("hex"),
+      backgroundExecutionId: backgroundExecutionId,
     };
 
     this.recentIBCHistoryMap.set(id, history);
@@ -2136,7 +2142,8 @@ export class RecentSendHistoryService {
     },
     routeDurationSeconds: number = 0,
     txHash: string,
-    isOnlyUseBridge?: boolean
+    isOnlyUseBridge?: boolean,
+    backgroundExecutionId?: string
   ): string {
     const id = (this.recentSwapV2HistorySeq++).toString();
 
@@ -2160,6 +2167,7 @@ export class RecentSendHistoryService {
       resAmount: [],
       swapRefundInfo: undefined,
       notified: undefined,
+      backgroundExecutionId: backgroundExecutionId,
     };
 
     this.recentSwapV2HistoryMap.set(id, history);

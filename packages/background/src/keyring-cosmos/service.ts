@@ -365,6 +365,88 @@ export class KeyRingCosmosService {
     );
   }
 
+  /**
+   * Sign a amino-encoded transaction with pre-authorization
+   * @dev only sign the transaction, not simulate or broadcast
+   */
+  async signAminoPreAuthorized(
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc
+  ): Promise<AminoSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    // if (chainInfo.hideInUI) {
+    //   throw new Error("Can't sign for hidden chain");
+    // }
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+      throw new Error(
+        "Pre-authorized signing is not supported for hardware wallets"
+      );
+    }
+
+    signDoc = {
+      ...signDoc,
+      memo: escapeHTML(signDoc.memo),
+    };
+
+    signDoc = trimAminoSignDoc(signDoc);
+    signDoc = sortObjectByKey(signDoc);
+
+    const key = await this.getKey(vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        ?.bech32PrefixAccAddr ?? "";
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    const isADR36SignDoc = checkAndValidateADR36AminoSignDoc(
+      signDoc,
+      bech32Prefix
+    );
+    if (isADR36SignDoc) {
+      throw new Error("Only transaction signing is supported for now");
+    }
+
+    const signResponse = await this.keyRingService.sign(
+      chainId,
+      vaultId,
+      serializeSignDoc(signDoc),
+      isEthermintLike ? "keccak256" : "sha256"
+    );
+    const signature = new Uint8Array([...signResponse.r, ...signResponse.s]);
+    const msgTypes = signDoc.msgs
+      .filter((msg) => msg.type)
+      .map((msg) => msg.type);
+
+    // CHECK: 필요함?
+    try {
+      this.trackError(chainInfo, signer, signDoc.sequence, {
+        isInternal: true,
+        origin,
+        signMode: "amino",
+        msgTypes,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    return {
+      signed: signDoc,
+      signature: encodeSecp256k1Signature(key.pubKey, signature),
+    };
+  }
+
   async privilegeSignAminoWithdrawRewards(
     env: Env,
     origin: string,
