@@ -405,6 +405,7 @@ export class BackgroundTxExecutorService {
         const { signedTx } = await this.signTx(
           execution.vaultId,
           currentTx,
+          execution.feeType,
           options?.env
         );
 
@@ -465,6 +466,7 @@ export class BackgroundTxExecutorService {
   protected async signTx(
     vaultId: string,
     tx: BackgroundTx,
+    feeType: ExecutionFeeType,
     env?: Env
   ): Promise<{
     signedTx: string;
@@ -476,15 +478,16 @@ export class BackgroundTxExecutorService {
     }
 
     if (tx.type === BackgroundTxType.EVM) {
-      return this.signEvmTx(vaultId, tx, env);
+      return this.signEvmTx(vaultId, tx, feeType, env);
     }
 
-    return this.signCosmosTx(vaultId, tx, env);
+    return this.signCosmosTx(vaultId, tx, feeType, env);
   }
 
   private async signEvmTx(
     vaultId: string,
     tx: EVMBackgroundTx,
+    feeType: ExecutionFeeType,
     env?: Env
   ): Promise<{
     signedTx: string;
@@ -528,7 +531,8 @@ export class BackgroundTxExecutorService {
         origin,
         evmInfo,
         signer,
-        tx.txData
+        tx.txData,
+        feeType
       );
 
       result = await this.keyRingEthereumService.signEthereumPreAuthorized(
@@ -561,6 +565,7 @@ export class BackgroundTxExecutorService {
   private async signCosmosTx(
     vaultId: string,
     tx: CosmosBackgroundTx,
+    feeType: ExecutionFeeType,
     env?: Env
   ): Promise<{
     signedTx: string;
@@ -711,7 +716,7 @@ export class BackgroundTxExecutorService {
       );
 
       // TODO: fee token을 사용자가 설정한 것을 사용해야 함
-      const { gasPrice } = await getCosmosGasPrice(chainInfo);
+      const { gasPrice } = await getCosmosGasPrice(chainInfo, feeType);
       const fee = calculateCosmosStdFee(
         chainInfo.currencies[0],
         gasUsed,
@@ -1087,14 +1092,6 @@ export class BackgroundTxExecutorService {
       if (isOld && isDone) {
         this.recentTxExecutionMap.delete(id);
       }
-    }
-
-    const entries = Array.from(this.recentTxExecutionMap.entries())
-      .filter(([, e]) => completedStatuses.includes(e.status))
-      .sort(([, a], [, b]) => a.timestamp - b.timestamp);
-
-    for (let i = 0; i < entries.length; i++) {
-      this.recentTxExecutionMap.delete(entries[i][0]);
     }
   }
 }

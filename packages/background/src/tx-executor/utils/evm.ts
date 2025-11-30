@@ -2,14 +2,20 @@ import { EVMInfo } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { UnsignedTransaction } from "@ethersproject/transactions";
 import { Dec } from "@keplr-wallet/unit";
+import { ExecutionFeeType } from "../types";
 
-const DEFAULT_MULTIPLIER = 1.25;
+const FEE_MULTIPLIERS: Record<ExecutionFeeType, number> = {
+  low: 1.1,
+  average: 1.25,
+  high: 1.5,
+};
 
 export async function fillUnsignedEVMTx(
   origin: string,
   evmInfo: EVMInfo,
   signer: string,
-  tx: UnsignedTransaction
+  tx: UnsignedTransaction,
+  feeType: ExecutionFeeType = "average"
 ): Promise<UnsignedTransaction> {
   const getTransactionCountRequest = {
     jsonrpc: "2.0",
@@ -162,7 +168,7 @@ export async function fillUnsignedEVMTx(
     throw new Error("Failed to get baseFeePerGas to fill unsigned transaction");
   }
 
-  const multiplier = new Dec(DEFAULT_MULTIPLIER);
+  const multiplier = new Dec(FEE_MULTIPLIERS[feeType]);
 
   // Calculate maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas
   const baseFeePerGasDec = new Dec(BigInt(latestBlock.baseFeePerGas));
