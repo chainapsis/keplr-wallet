@@ -872,11 +872,29 @@ export class RecentSendHistoryService {
                           nextChannel.channelId,
                           index
                         );
+
+                        // publish executable chains
+                        if (history.backgroundExecutionId) {
+                          this.publisher.publish({
+                            executionId: history.backgroundExecutionId,
+                            executableChainIds:
+                              this.getExecutableChainIdsFromIBCHistory(history),
+                          });
+                        }
+
                         onFulfillOnce();
                         this.trackIBCPacketForwardingRecursive(id);
                         break;
                       } else {
                         // Packet received to destination chain.
+                        if (history.backgroundExecutionId) {
+                          this.publisher.publish({
+                            executionId: history.backgroundExecutionId,
+                            executableChainIds:
+                              this.getExecutableChainIdsFromIBCHistory(history),
+                          });
+                        }
+
                         if (history.notificationInfo && !history.notified) {
                           runInAction(() => {
                             history.notified = true;
@@ -1329,6 +1347,7 @@ export class RecentSendHistoryService {
     );
   }
 
+  // TODO: refactor
   protected checkAndTrackSwapTxFulfilledRecursive = (
     type: "skip" | "swap-v2",
     historyId: string,
@@ -2238,39 +2257,13 @@ export class RecentSendHistoryService {
       return;
     }
 
-    const {
-      txHash,
-      fromChainId,
-      toChainId,
-      provider,
-      status,
-      trackDone,
-      routeIndex,
-      simpleRoute,
-    } = history;
-
-    let needRun = true;
-
-    // if the status is partial success or success, and the route index is the last one, then don't need to run
-    if (
-      status === SwapV2TxStatus.PARTIAL_SUCCESS ||
-      status === SwapV2TxStatus.SUCCESS
-    ) {
-      if (routeIndex === simpleRoute.length - 1) {
-        needRun = false;
-      }
-    }
-
-    // if the track done is not true, then need to run
-    if (!trackDone) {
-      needRun = true;
-    }
-
-    // quit if not need to run
-    if (!needRun) {
+    // if already tracked, fulfill
+    if (history.trackDone) {
       onFulfill();
       return;
     }
+
+    const { txHash, fromChainId, toChainId, provider } = history;
 
     const normalizeChainId = (chainId: string): string => {
       return chainId.replace("eip155:", "");
@@ -2295,240 +2288,127 @@ export class RecentSendHistoryService {
       }
     )
       .then((res) => {
-        const { status, steps, asset_location } = res.data;
-
-        // Update the overall status
-        runInAction(() => {
-          history.status = status;
-        });
-
-        // Handle empty steps array
-        if (!steps || steps.length === 0) {
-          if (status !== SwapV2TxStatus.IN_PROGRESS) {
-            runInAction(() => {
-              history.trackDone = true;
-            });
-            onFulfill();
-          } else {
-            onError();
-          }
-          return;
-        }
-
-        // steps 배열에는 현재 진행중이거나 완료/실패된 단계만 포함되므로
-        // simpleRoute와 길이가 다를 수 있음
-        // 따라서 steps의 인덱스와 simpleRoute의 인덱스를 구분해야 함
-
-        // find the next blocking step (in progress or failed)
-        const nextBlockingStepIndex = steps.findIndex((step) => {
-          return (
-            step.status === SwapV2RouteStepStatus.IN_PROGRESS ||
-            step.status === SwapV2RouteStepStatus.FAILED
-          );
-        });
-
-        // Find the current step to process
-        // If there's a blocking step, use it; otherwise use the last step
-        const currentStepIndex =
-          nextBlockingStepIndex >= 0 ? nextBlockingStepIndex : steps.length - 1;
-        const currentStep = steps[currentStepIndex];
-
-        if (!currentStep) {
-          // No step found, mark as done if status is final
-          if (status !== SwapV2TxStatus.IN_PROGRESS) {
-            runInAction(() => {
-              history.trackDone = true;
-            });
-
-            // Handle asset location for failed status
-            if (
-              status === SwapV2TxStatus.FAILED &&
-              asset_location &&
-              asset_location.length > 0
-            ) {
-              const location = asset_location[asset_location.length - 1];
-              const chainId = location.chain_id;
-              const evmLikeChainId = Number(chainId);
-              const isEVMChainId =
-                !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
-
-              history.swapRefundInfo = {
-                chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
-                amount: [
-                  {
-                    amount: location.amount,
-                    denom: location.denom,
-                  },
-                ],
-              };
-            } else if (
-              status === SwapV2TxStatus.SUCCESS ||
-              status === SwapV2TxStatus.PARTIAL_SUCCESS
-            ) {
-              // Track destination asset amount using the last step
-              const lastStep = steps[steps.length - 1];
-              if (lastStep && lastStep.tx_hash) {
-                this.trackSwapV2DestinationAssetAmount(
-                  id,
-                  lastStep.tx_hash,
-                  onFulfill
-                );
-              } else {
-                onFulfill();
-              }
-            } else {
-              onFulfill();
-            }
-          } else {
-            // if the status is not final, then we need to continue tracking
-            onError();
-          }
-          return;
-        }
-
-        // Update routeIndex based on current step's chain_id
-        // Match the step's chain_id with simpleRoute to find the correct routeIndex
-        // steps의 인덱스와 simpleRoute의 인덱스는 다를 수 있으므로 chain_id로 매칭해야 함
-        let updatedRouteIndex = routeIndex < 0 ? 0 : routeIndex;
-        if (currentStep.chain_id) {
-          // Find the routeIndex in simpleRoute that matches the current step's chain_id
-          for (let i = 0; i < simpleRoute.length; i++) {
-            const routeChainId = simpleRoute[i].chainId.replace("eip155:", "");
-            if (
-              routeChainId.toLowerCase() === currentStep.chain_id.toLowerCase()
-            ) {
-              updatedRouteIndex = i;
-              break;
-            }
-          }
-          // If not found, try to find the next route after the current routeIndex
-          if (updatedRouteIndex === (routeIndex < 0 ? 0 : routeIndex)) {
-            // If we couldn't find a match, check if we should advance
-            // Look for routes after the current routeIndex
-            for (
-              let i = (routeIndex < 0 ? 0 : routeIndex) + 1;
-              i < simpleRoute.length;
-              i++
-            ) {
-              const routeChainId = simpleRoute[i].chainId.replace(
-                "eip155:",
-                ""
-              );
-              if (
-                routeChainId.toLowerCase() ===
-                currentStep.chain_id.toLowerCase()
-              ) {
-                updatedRouteIndex = i;
-                break;
-              }
-            }
-          }
-        }
-
-        runInAction(() => {
-          history.routeIndex = updatedRouteIndex;
-          history.trackError = undefined;
-        });
-
-        switch (currentStep.status) {
-          case SwapV2RouteStepStatus.IN_PROGRESS:
-            // Still in progress, continue tracking
-            onError();
-            break;
-
-          case SwapV2RouteStepStatus.SUCCESS:
-            // Current step succeeded
-            if (
-              status === SwapV2TxStatus.SUCCESS ||
-              status === SwapV2TxStatus.PARTIAL_SUCCESS
-            ) {
-              // Check if this is the last route in simpleRoute
-              // steps 배열은 부분 정보이므로 simpleRoute의 마지막 인덱스와 비교해야 함
-              const isLastRoute = updatedRouteIndex >= simpleRoute.length - 1;
-
-              if (isLastRoute) {
-                // This is the final route, track destination asset amount
-                if (currentStep.tx_hash) {
-                  this.trackSwapV2DestinationAssetAmount(
-                    id,
-                    currentStep.tx_hash,
-                    onFulfill
-                  );
-                } else {
-                  runInAction(() => {
-                    history.trackDone = true;
-                  });
-                  onFulfill();
-                }
-              } else {
-                // Not the last route, continue tracking
-                // Update routeIndex to the next route
-                runInAction(() => {
-                  history.routeIndex = updatedRouteIndex;
-                });
-                onError(); // Continue tracking
-              }
-            } else {
-              // Status is still IN_PROGRESS, continue tracking
-              runInAction(() => {
-                history.routeIndex = updatedRouteIndex;
-              });
-              onError();
-            }
-            break;
-
-          case SwapV2RouteStepStatus.FAILED:
-            // Step failed
-            // If overall status is still IN_PROGRESS, this might be a temporary failure
-            // Continue tracking in case it recovers
-            if (status === SwapV2TxStatus.IN_PROGRESS) {
-              // Overall status is still in progress, continue tracking
-              // This might be a temporary failure that could recover
-              runInAction(() => {
-                history.routeIndex = updatedRouteIndex;
-                // Don't set trackError yet, as it might recover
-              });
-              onError(); // Continue tracking
-              break;
-            }
-
-            // Overall status is FAILED or final, mark as done with error
-            // Handle asset location if available
-            if (asset_location && asset_location.length > 0) {
-              const location = asset_location[asset_location.length - 1];
-              const chainId = location.chain_id;
-              const evmLikeChainId = Number(chainId);
-              const isEVMChainId =
-                !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
-
-              runInAction(() => {
-                history.trackDone = true;
-                history.status = SwapV2TxStatus.FAILED;
-                history.swapRefundInfo = {
-                  chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
-                  amount: [
-                    {
-                      amount: location.amount,
-                      denom: location.denom,
-                    },
-                  ],
-                };
-              });
-            } else {
-              runInAction(() => {
-                history.trackDone = true;
-                history.status = SwapV2TxStatus.FAILED;
-              });
-            }
-            onFulfill();
-            break;
-        }
+        this.processSwapV2StatusResponse(id, res.data, onFulfill, onError);
       })
       .catch((e) => {
-        console.error(e);
-
+        console.error("SwapV2 status tracking error:", e);
         onError();
       });
+  }
+
+  @action
+  protected processSwapV2StatusResponse(
+    id: string,
+    response: SwapV2TxStatusResponse,
+    onFulfill: () => void,
+    onError: () => void
+  ): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    const { status, steps, asset_location } = response;
+    const { simpleRoute } = history;
+    const prevRouteIndex = history.routeIndex;
+
+    history.status = status;
+    history.trackError = undefined;
+
+    if (!steps || steps.length === 0) {
+      if (status === SwapV2TxStatus.IN_PROGRESS) {
+        onError();
+      } else {
+        history.trackDone = true;
+        onFulfill();
+      }
+      return;
+    }
+
+    // find current step (in_progress/failed first, otherwise last step)
+    const currentStep =
+      steps.find(
+        (s) =>
+          s.status === SwapV2RouteStepStatus.IN_PROGRESS ||
+          s.status === SwapV2RouteStepStatus.FAILED
+      ) ?? steps[steps.length - 1];
+
+    // calculate routeIndex by matching step.chain_id with simpleRoute
+    let updatedRouteIndex = Math.max(0, history.routeIndex);
+    if (currentStep.chain_id) {
+      const normalizedStepChainId = currentStep.chain_id.toLowerCase();
+      for (let i = 0; i < simpleRoute.length; i++) {
+        const routeChainId = simpleRoute[i].chainId
+          .replace("eip155:", "")
+          .toLowerCase();
+        if (routeChainId === normalizedStepChainId) {
+          updatedRouteIndex = i;
+          break;
+        }
+      }
+    }
+    history.routeIndex = updatedRouteIndex;
+
+    // publish executable chains if routeIndex increased
+    if (updatedRouteIndex > prevRouteIndex && history.backgroundExecutionId) {
+      this.publisher.publish({
+        executionId: history.backgroundExecutionId,
+        executableChainIds:
+          this.getExecutableChainIdsFromSwapV2History(history),
+      });
+    }
+
+    switch (currentStep.status) {
+      case SwapV2RouteStepStatus.IN_PROGRESS:
+        onError();
+        break;
+
+      case SwapV2RouteStepStatus.SUCCESS: {
+        const isLastRoute = updatedRouteIndex >= simpleRoute.length - 1;
+        const isFinalStatus =
+          status === SwapV2TxStatus.SUCCESS ||
+          status === SwapV2TxStatus.PARTIAL_SUCCESS;
+
+        if (isLastRoute && isFinalStatus) {
+          if (currentStep.tx_hash) {
+            this.trackSwapV2DestinationAssetAmount(
+              id,
+              currentStep.tx_hash,
+              onFulfill
+            );
+          } else {
+            history.trackDone = true;
+            onFulfill();
+          }
+        } else {
+          onError();
+        }
+        break;
+      }
+
+      case SwapV2RouteStepStatus.FAILED:
+        if (status === SwapV2TxStatus.IN_PROGRESS) {
+          onError();
+        } else {
+          history.trackDone = true;
+          history.status = SwapV2TxStatus.FAILED;
+          // set refund info from asset_location
+          if (asset_location && asset_location.length > 0) {
+            const location = asset_location[asset_location.length - 1];
+            const chainId = location.chain_id;
+            const evmLikeChainId = Number(chainId);
+            const isEVMChainId =
+              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+            history.swapRefundInfo = {
+              chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
+              amount: [{ amount: location.amount, denom: location.denom }],
+            };
+          }
+          onFulfill();
+        }
+        break;
+    }
   }
 
   protected trackSwapV2DestinationAssetAmount(
@@ -3485,4 +3365,37 @@ export class RecentSendHistoryService {
       }
     });
   };
+
+  protected getExecutableChainIdsFromIBCHistory(history: IBCHistory): string[] {
+    const chainIds: string[] = [history.chainId];
+
+    for (const channel of history.ibcHistory) {
+      if (channel.completed) {
+        chainIds.push(channel.counterpartyChainId);
+        if (channel.dstChannelId) {
+          chainIds.push(channel.dstChannelId);
+        }
+      } else {
+        break;
+      }
+    }
+
+    return chainIds;
+  }
+
+  protected getExecutableChainIdsFromSwapV2History(
+    history: SwapV2History
+  ): string[] {
+    const chainIds: string[] = [];
+
+    for (
+      let i = 0;
+      i <= history.routeIndex && i < history.simpleRoute.length;
+      i++
+    ) {
+      chainIds.push(history.simpleRoute[i].chainId);
+    }
+
+    return chainIds;
+  }
 }
