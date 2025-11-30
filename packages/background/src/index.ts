@@ -294,7 +294,7 @@ export function init(
   );
 
   const txExecutableMQ =
-    BackgroundTxExecutor.createMessageQueue<BackgroundTxExecutor.TxExecutableEvent>();
+    BackgroundTxExecutor.createSingleChannelMessageQueue<BackgroundTxExecutor.TxExecutableEvent>();
 
   const recentSendHistoryService =
     new RecentSendHistory.RecentSendHistoryService(

@@ -1,6 +1,14 @@
 import PQueue from "p-queue";
 
-class MessageQueueCore<T = unknown> {
+interface MessageQueueCore<T = unknown> {
+  enqueue(message: T): void;
+  subscribe(handler: (msg: T) => Promise<void> | void): void;
+  flush(): void;
+}
+
+class SingleChannelMessageQueueCore<T = unknown>
+  implements MessageQueueCore<T>
+{
   public subscriber: ((msg: T) => Promise<void> | void) | null = null;
   public buffer: T[] = [];
   public queue: PQueue;
@@ -15,15 +23,12 @@ class MessageQueueCore<T = unknown> {
     this.flush();
   }
 
-  /**
-   * subscriber 설정
-   */
-  setSubscriber(handler: (msg: T) => Promise<void> | void) {
+  subscribe(handler: (msg: T) => Promise<void> | void) {
     this.subscriber = handler;
     this.flush();
   }
 
-  private flush() {
+  flush() {
     if (this.isFlushing) return;
     if (!this.subscriber) return;
     if (this.buffer.length === 0) return;
@@ -31,15 +36,13 @@ class MessageQueueCore<T = unknown> {
     this.isFlushing = true;
 
     try {
-      console.log("[MessageQueueCore] flush start", this.buffer.length);
-
       while (this.buffer.length > 0) {
         const msg = this.buffer.shift()!;
         this.queue.add(async () => {
           try {
             await this.subscriber!(msg);
           } catch (e) {
-            console.error("[MessageQueueCore] handler error:", e);
+            console.error("error:", e);
           }
         });
       }
@@ -60,12 +63,12 @@ export class Subscriber<T = unknown> {
   constructor(private core: MessageQueueCore<T>) {}
 
   subscribe(handler: (msg: T) => Promise<void> | void) {
-    this.core.setSubscriber(handler);
+    this.core.subscribe(handler);
   }
 }
 
-export function createMessageQueue<T = unknown>(concurrency = 1) {
-  const core = new MessageQueueCore<T>(concurrency);
+export function createSingleChannelMessageQueue<T = unknown>(concurrency = 1) {
+  const core = new SingleChannelMessageQueueCore<T>(concurrency);
   return {
     publisher: new Publisher<T>(core),
     subscriber: new Subscriber<T>(core),

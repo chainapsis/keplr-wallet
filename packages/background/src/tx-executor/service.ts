@@ -94,6 +94,8 @@ export class BackgroundTxExecutorService {
         for (const [key, value] of entries) {
           this.recentTxExecutionMap.set(key, value);
         }
+
+        this.cleanupOldExecutions();
       });
     }
     autorun(() => {
@@ -111,21 +113,31 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      const newExecutableChainIds = executableChainIds.filter((chainId) =>
-        execution.executableChainIds.includes(chainId)
+      const newExecutableChainIds = executableChainIds.filter(
+        (chainId) => !execution.executableChainIds.includes(chainId)
       );
 
       if (newExecutableChainIds.length === 0) {
         return;
       }
 
-      // update the executable chain ids
-      for (const chainId of newExecutableChainIds) {
-        execution.executableChainIds.push(chainId);
+      runInAction(() => {
+        // update the executable chain ids
+        for (const chainId of newExecutableChainIds) {
+          execution.executableChainIds.push(chainId);
+        }
+      });
+
+      // if the key is hardware wallet, do not resume the execution automatically
+      // user should sign the transaction manually
+      const keyInfo = this.keyRingCosmosService.keyRingService.getKeyInfo(
+        execution.vaultId
+      );
+      if (keyInfo?.type === "ledger" || keyInfo?.type === "keystone") {
+        return;
       }
 
       // cause new executable chain ids are available, resume the execution
-
       // CHECK: 현재 활성화되어 있는 vault에서만 실행할 수 있으면 좋을 듯, how? vaultId 변경 감지? how?
       // 불러왔는데 pending 상태거나 오래된 실행이면 사실상 이 작업을 이어가는 것이 의미가 있는지 의문이 든다.
       await this.executeTxs(executionId);
@@ -210,12 +222,11 @@ export class BackgroundTxExecutorService {
   /**
    * Execute blocked transactions by execution id and transaction index
    */
-  @action
   async resumeTx(
     env: Env,
     id: string,
     txIndex?: number,
-    signedTx?: Uint8Array
+    signedTx?: string
   ): Promise<TxExecutionStatus> {
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
@@ -234,7 +245,7 @@ export class BackgroundTxExecutorService {
     options?: {
       env?: Env;
       txIndex?: number;
-      signedTx?: Uint8Array;
+      signedTx?: string;
     }
   ): Promise<TxExecutionStatus> {
     const execution = this.getTxExecution(id);
@@ -267,11 +278,13 @@ export class BackgroundTxExecutorService {
     }
 
     const executionStartIndex = Math.min(
-      options?.txIndex ?? execution.txIndex < 0 ? 0 : execution.txIndex,
+      options?.txIndex ?? (execution.txIndex < 0 ? 0 : execution.txIndex),
       execution.txs.length - 1
     );
 
-    execution.status = TxExecutionStatus.PROCESSING;
+    runInAction(() => {
+      execution.status = TxExecutionStatus.PROCESSING;
+    });
 
     for (let i = executionStartIndex; i < execution.txs.length; i++) {
       let txStatus: BackgroundTxStatus;
@@ -295,14 +308,18 @@ export class BackgroundTxExecutorService {
       // the execution should be stopped and record the history if needed
       // and the execution should be resumed later when the condition is met
       if (txStatus === BackgroundTxStatus.BLOCKED) {
-        execution.status = TxExecutionStatus.BLOCKED;
+        runInAction(() => {
+          execution.status = TxExecutionStatus.BLOCKED;
+        });
         this.recordHistoryIfNeeded(execution);
         return execution.status;
       }
 
       // if the tx is failed, the execution should be stopped
       if (txStatus === BackgroundTxStatus.FAILED) {
-        execution.status = TxExecutionStatus.FAILED;
+        runInAction(() => {
+          execution.status = TxExecutionStatus.FAILED;
+        });
         return execution.status;
       }
 
@@ -315,7 +332,9 @@ export class BackgroundTxExecutorService {
     }
 
     // if the execution is completed successfully, update the batch status
-    execution.status = TxExecutionStatus.COMPLETED;
+    runInAction(() => {
+      execution.status = TxExecutionStatus.COMPLETED;
+    });
     this.recordHistoryIfNeeded(execution);
     return execution.status;
   }
@@ -325,7 +344,7 @@ export class BackgroundTxExecutorService {
     index: number,
     options?: {
       env?: Env;
-      signedTx?: Uint8Array;
+      signedTx?: string;
     }
   ): Promise<BackgroundTxStatus> {
     const execution = this.getTxExecution(id);
@@ -348,7 +367,9 @@ export class BackgroundTxExecutorService {
     }
 
     // update the tx index to the current tx index
-    execution.txIndex = index;
+    runInAction(() => {
+      execution.txIndex = index;
+    });
 
     if (
       currentTx.status === BackgroundTxStatus.BLOCKED ||
@@ -361,17 +382,23 @@ export class BackgroundTxExecutorService {
         currentTx.chainId
       );
       if (isBlocked) {
-        currentTx.status = BackgroundTxStatus.BLOCKED;
+        runInAction(() => {
+          currentTx.status = BackgroundTxStatus.BLOCKED;
+        });
         return currentTx.status;
       } else {
-        currentTx.status = BackgroundTxStatus.SIGNING;
+        runInAction(() => {
+          currentTx.status = BackgroundTxStatus.SIGNING;
+        });
       }
     }
 
     if (currentTx.status === BackgroundTxStatus.SIGNING) {
       // if options are provided, temporary set the options to the current transaction
       if (options?.signedTx) {
-        currentTx.signedTx = options.signedTx;
+        runInAction(() => {
+          currentTx.signedTx = options.signedTx;
+        });
       }
 
       try {
@@ -381,11 +408,15 @@ export class BackgroundTxExecutorService {
           options?.env
         );
 
-        currentTx.signedTx = signedTx;
-        currentTx.status = BackgroundTxStatus.SIGNED;
+        runInAction(() => {
+          currentTx.signedTx = signedTx;
+          currentTx.status = BackgroundTxStatus.SIGNED;
+        });
       } catch (error) {
-        currentTx.status = BackgroundTxStatus.FAILED;
-        currentTx.error = error.message ?? "Transaction signing failed";
+        runInAction(() => {
+          currentTx.status = BackgroundTxStatus.FAILED;
+          currentTx.error = error.message ?? "Transaction signing failed";
+        });
       }
     }
 
@@ -396,11 +427,15 @@ export class BackgroundTxExecutorService {
       try {
         const { txHash } = await this.broadcastTx(currentTx);
 
-        currentTx.txHash = txHash;
-        currentTx.status = BackgroundTxStatus.BROADCASTED;
+        runInAction(() => {
+          currentTx.txHash = txHash;
+          currentTx.status = BackgroundTxStatus.BROADCASTED;
+        });
       } catch (error) {
-        currentTx.status = BackgroundTxStatus.FAILED;
-        currentTx.error = error.message ?? "Transaction broadcasting failed";
+        runInAction(() => {
+          currentTx.status = BackgroundTxStatus.FAILED;
+          currentTx.error = error.message ?? "Transaction broadcasting failed";
+        });
       }
     }
 
@@ -408,15 +443,19 @@ export class BackgroundTxExecutorService {
       // broadcasted -> confirmed
       try {
         const confirmed = await this.traceTx(currentTx);
-        if (confirmed) {
-          currentTx.status = BackgroundTxStatus.CONFIRMED;
-        } else {
-          currentTx.status = BackgroundTxStatus.FAILED;
-          currentTx.error = "Transaction failed";
-        }
+        runInAction(() => {
+          if (confirmed) {
+            currentTx.status = BackgroundTxStatus.CONFIRMED;
+          } else {
+            currentTx.status = BackgroundTxStatus.FAILED;
+            currentTx.error = "Transaction failed";
+          }
+        });
       } catch (error) {
-        currentTx.status = BackgroundTxStatus.FAILED;
-        currentTx.error = error.message ?? "Transaction confirmation failed";
+        runInAction(() => {
+          currentTx.status = BackgroundTxStatus.FAILED;
+          currentTx.error = error.message ?? "Transaction confirmation failed";
+        });
       }
     }
 
@@ -428,7 +467,7 @@ export class BackgroundTxExecutorService {
     tx: BackgroundTx,
     env?: Env
   ): Promise<{
-    signedTx: Uint8Array;
+    signedTx: string;
   }> {
     if (tx.signedTx != null) {
       return {
@@ -448,7 +487,7 @@ export class BackgroundTxExecutorService {
     tx: EVMBackgroundTx,
     env?: Env
   ): Promise<{
-    signedTx: Uint8Array;
+    signedTx: string;
   }> {
     const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
@@ -512,10 +551,7 @@ export class BackgroundTxExecutorService {
 
     delete unsignedTx.from;
 
-    const signedTx = Buffer.from(
-      serialize(unsignedTx, result.signature).replace("0x", ""),
-      "hex"
-    );
+    const signedTx = serialize(unsignedTx, result.signature);
 
     return {
       signedTx: signedTx,
@@ -527,7 +563,7 @@ export class BackgroundTxExecutorService {
     tx: CosmosBackgroundTx,
     env?: Env
   ): Promise<{
-    signedTx: Uint8Array;
+    signedTx: string;
   }> {
     // check key
     const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
@@ -657,7 +693,7 @@ export class BackgroundTxExecutorService {
       });
 
       return {
-        signedTx: signedTx.tx,
+        signedTx: Buffer.from(signedTx.tx).toString("base64"),
       };
     } else {
       const account = await BaseAccount.fetchFromRest(
@@ -711,9 +747,7 @@ export class BackgroundTxExecutorService {
         useEthereumSign: false,
       });
 
-      return {
-        signedTx: signedTx.tx,
-      };
+      return { signedTx: Buffer.from(signedTx.tx).toString("base64") };
     }
   }
 
@@ -753,10 +787,12 @@ export class BackgroundTxExecutorService {
         ? new URL(browser.runtime.getURL("/")).origin
         : "extension";
 
+    const signedTxBytes = Buffer.from(tx.signedTx.replace("0x", ""), "hex");
+
     const txHash = await this.backgroundTxEthereumService.sendEthereumTx(
       origin,
       tx.chainId,
-      tx.signedTx,
+      signedTxBytes,
       {
         silent: true,
         skipTracingTxResult: true,
@@ -775,10 +811,12 @@ export class BackgroundTxExecutorService {
       throw new KeplrError("direct-tx-executor", 108, "Signed tx not found");
     }
 
+    const signedTxBytes = Buffer.from(tx.signedTx, "base64");
+
     // broadcast the tx
     const txHash = await this.backgroundTxService.sendTx(
       tx.chainId,
-      tx.signedTx,
+      signedTxBytes,
       "sync",
       {
         silent: true,
@@ -838,6 +876,7 @@ export class BackgroundTxExecutorService {
     return txResult.code === 0;
   }
 
+  @action
   protected recordHistoryIfNeeded(execution: TxExecution): void {
     if (execution.type === TxExecutionType.UNDEFINED) {
       return;
@@ -1002,10 +1041,11 @@ export class BackgroundTxExecutorService {
 
     const currentStatus = execution.status;
 
-    // Only pending or processing executions can be cancelled
+    // Only pending/processing/blocked executions can be cancelled
     if (
       currentStatus !== TxExecutionStatus.PENDING &&
-      currentStatus !== TxExecutionStatus.PROCESSING
+      currentStatus !== TxExecutionStatus.PROCESSING &&
+      currentStatus !== TxExecutionStatus.BLOCKED
     ) {
       return;
     }
@@ -1021,5 +1061,40 @@ export class BackgroundTxExecutorService {
   @action
   protected removeTxExecution(id: string): void {
     this.recentTxExecutionMap.delete(id);
+  }
+
+  @action
+  protected cleanupOldExecutions(): void {
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7일
+    const now = Date.now();
+
+    const completedStatuses = [
+      TxExecutionStatus.COMPLETED,
+      TxExecutionStatus.FAILED,
+      TxExecutionStatus.CANCELLED,
+    ];
+
+    for (const [id, execution] of this.recentTxExecutionMap) {
+      // 비정상 종료된 PROCESSING 상태 → FAILED 처리
+      // (브라우저 종료, 시스템 재부팅, 익스텐션 업데이트 등)
+      if (execution.status === TxExecutionStatus.PROCESSING) {
+        execution.status = TxExecutionStatus.FAILED;
+      }
+
+      const isOld = now - execution.timestamp > maxAge;
+      const isDone = completedStatuses.includes(execution.status);
+
+      if (isOld && isDone) {
+        this.recentTxExecutionMap.delete(id);
+      }
+    }
+
+    const entries = Array.from(this.recentTxExecutionMap.entries())
+      .filter(([, e]) => completedStatuses.includes(e.status))
+      .sort(([, a], [, b]) => a.timestamp - b.timestamp);
+
+    for (let i = 0; i < entries.length; i++) {
+      this.recentTxExecutionMap.delete(entries[i][0]);
+    }
   }
 }

@@ -82,8 +82,7 @@ export class ResumeTxMsg extends Message<TxExecutionStatus> {
     public readonly id: string,
     public readonly txIndex?: number,
     // NOTE: these fields are optional for hardware wallet cases
-    public readonly signedTx?: Uint8Array,
-    public readonly signature?: Uint8Array
+    public readonly signedTx?: string
   ) {
     super();
   }
@@ -97,13 +96,8 @@ export class ResumeTxMsg extends Message<TxExecutionStatus> {
       throw new KeplrError("direct-tx-executor", 103, "txIndex is invalid");
     }
 
-    // signedTx and signature should be provided together
-    if (this.signedTx && !this.signature) {
-      throw new KeplrError("direct-tx-executor", 104, "signature is empty");
-    }
-
-    if (!this.signedTx && this.signature) {
-      throw new KeplrError("direct-tx-executor", 105, "signedTx is empty");
+    if (this.signedTx != null && this.signedTx.length === 0) {
+      throw new KeplrError("direct-tx-executor", 104, "signedTx is empty");
     }
   }
 

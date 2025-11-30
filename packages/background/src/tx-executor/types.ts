@@ -29,8 +29,8 @@ interface BackgroundTxBase {
   status: BackgroundTxStatus; // mutable while executing
   readonly chainId: string;
 
-  // signed transaction data
-  signedTx?: Uint8Array;
+  // Cosmos: base64 encoded, EVM: hex encoded (0x prefix)
+  signedTx?: string;
 
   // Transaction hash for completed tx
   txHash?: string;
