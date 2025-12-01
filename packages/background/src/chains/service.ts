@@ -1,4 +1,5 @@
 import {
+  convertModularChainInfoToChainInfo,
   DenomHelper,
   KVStore,
   PrefixKVStore,
@@ -1189,19 +1190,23 @@ export class ChainsService {
   ): ModularChainInfo[] {
     return modularChainInfos.map((modularChainInfo) => {
       if ("cosmos" in modularChainInfo) {
-        const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
-        const mergedCosmos = this.mergeChainInfosWithDynamics([cosmos])[0];
+        const chainInfo = convertModularChainInfoToChainInfo(
+          modularChainInfo
+        ) as ChainInfo;
+        const mergedCosmos = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
+        const { evm, ...cosmos } = mergedCosmos;
 
         return {
           chainId: cosmos.chainId,
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           isTestnet: cosmos.isTestnet,
-          isNative: !(mergedCosmos.beta ?? false),
-          cosmos: mergedCosmos,
-          ...(mergedCosmos.evm && {
+          isNative: !mergedCosmos.beta,
+          cosmos,
+          ...(!!evm && {
             evm: {
-              ...mergedCosmos.evm,
+              ...evm,
               currencies: mergedCosmos.currencies,
               feeCurrencies: mergedCosmos.feeCurrencies,
               bip44: mergedCosmos.bip44,
@@ -1346,15 +1351,17 @@ export class ChainsService {
               } as ModularChainInfo;
             }
 
+            const { evm, ...cosmos } = chainInfo;
+
             return {
               chainId: chainInfo.chainId,
               chainName: chainInfo.chainName,
               chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
               isNative: false,
-              cosmos: chainInfo,
-              ...(chainInfo.evm && {
+              cosmos,
+              ...(!!evm && {
                 evm: {
-                  ...chainInfo.evm,
+                  ...evm,
                   currencies: chainInfo.currencies,
                   feeCurrencies: chainInfo.feeCurrencies,
                   bip44: chainInfo.bip44,

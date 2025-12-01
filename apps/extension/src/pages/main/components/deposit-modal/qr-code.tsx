@@ -309,8 +309,7 @@ const AddressDisplay = ({
   const account = accountStore.getAccount(chainId);
   const theme = useTheme();
 
-  const isEVMOnlyChain =
-    "evm" in modularChainInfo && chainStore.isEvmOnlyChain(chainId);
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const displayAddress = useMemo<DisplayAddress>(() => {
     const LENGTH_OF_FIRST_PART = 10;

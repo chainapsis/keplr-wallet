@@ -1774,10 +1774,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
       return new ChainInfoImpl(chainInfo, this);
     });
     this._modularChainInfos = infos.modulrChainInfos.map((chainInfo) => {
-      if ("evm" in chainInfo) {
-        return chainInfo;
-      }
-
       if ("currencies" in chainInfo) {
         const cosmos = infos.chainInfos.find(
           (c) => c.chainId === chainInfo.chainId
@@ -1801,6 +1797,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           }),
         };
       }
+
       return chainInfo;
     });
     this._modularChainInfoImpls = infos.modulrChainInfos.map((chainInfo) => {

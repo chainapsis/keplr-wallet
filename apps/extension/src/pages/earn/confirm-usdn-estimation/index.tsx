@@ -93,12 +93,15 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     }
     if (feeMinimalDenom && feeType) {
       const modularChainInfo = chainStore.getModularChain(NOBLE_CHAIN_ID);
-      const feeCurrency =
-        "cosmos" in modularChainInfo
-          ? modularChainInfo.cosmos.feeCurrencies.find(
-              (feeCurrency) => feeCurrency.coinMinimalDenom === feeMinimalDenom
-            )
-          : undefined;
+
+      if (!("cosmos" in modularChainInfo)) {
+        throw new Error("cosmos module is not supported on this chain");
+      }
+
+      const feeCurrency = modularChainInfo.cosmos.feeCurrencies.find(
+        (feeCurrency) => feeCurrency.coinMinimalDenom === feeMinimalDenom
+      );
+
       if (feeCurrency) {
         nobleEarnAmountConfig.feeConfig.setFee({
           type: feeType as FeeType,

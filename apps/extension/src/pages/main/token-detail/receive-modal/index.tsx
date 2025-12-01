@@ -30,9 +30,7 @@ export const ReceiveModal: FunctionComponent<{
   const isStarknetChain =
     "starknet" in modularChainInfo && modularChainInfo.starknet != null;
   const isEVMOnlyChain =
-    "evm" in modularChainInfo &&
-    modularChainInfo.evm != null &&
-    chainStore.isEvmOnlyChain(chainId);
+    "evm" in modularChainInfo && chainStore.isEvmOnlyChain(chainId);
   const isBitcoin =
     "bitcoin" in modularChainInfo && modularChainInfo.bitcoin != null;
 
@@ -43,7 +41,7 @@ export const ReceiveModal: FunctionComponent<{
     }
 
     if (isEVMOnlyChain) {
-      const hex = `0x${modularChainInfo.evm?.chainId.toString(16)}`;
+      const hex = `0x${modularChainInfo.evm.chainId.toString(16)}`;
       return `ethereum:${account.ethereumHexAddress}@${hex}`;
     }
 

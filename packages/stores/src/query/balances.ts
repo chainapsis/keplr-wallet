@@ -91,14 +91,13 @@ export class ObservableQueryBalancesImplMap {
    */
   @computed
   get balances(): IObservableQueryBalanceImpl[] {
-    const currencies = [];
     const result = [];
 
     const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
       this.chainId
     );
 
-    currencies.push(...modularChainInfoImpl.getCurrencies());
+    const currencies = modularChainInfoImpl.getCurrencies();
 
     for (let i = 0; i < currencies.length; i++) {
       const currency = currencies[i];

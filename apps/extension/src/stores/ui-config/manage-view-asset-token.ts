@@ -109,50 +109,11 @@ export class ManageViewAssetTokenConfig {
         return true;
       }
 
-      if ("cosmos" in modularChainInfo) {
-        for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-          const currency = modularChainInfoImpl.findCurrency(coinMinimalDenom);
-          if (currency) {
-            if (currency.coinDenom.toLowerCase().includes(searchLower)) {
-              return true;
-            }
-          }
-        }
-      }
-      if ("evm" in modularChainInfo) {
-        for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-          const currency = modularChainInfo.evm.currencies.find(
-            (currency) => currency.coinMinimalDenom === coinMinimalDenom
-          );
-          if (currency) {
-            if (currency.coinDenom.toLowerCase().includes(search)) {
-              return true;
-            }
-          }
-        }
-      }
-      if ("bitcoin" in modularChainInfo) {
-        for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-          const currency = modularChainInfo.bitcoin.currencies.find(
-            (currency) => currency.coinMinimalDenom === coinMinimalDenom
-          );
-          if (currency) {
-            if (currency.coinDenom.toLowerCase().includes(search)) {
-              return true;
-            }
-          }
-        }
-      }
-      if ("starknet" in modularChainInfo) {
-        for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
-          const currency = modularChainInfo.starknet.currencies.find(
-            (currency) => currency.coinMinimalDenom === coinMinimalDenom
-          );
-
-          if (currency) {
-            if (currency.coinDenom.toLowerCase().includes(search)) {
-              return true;
-            }
+      for (const coinMinimalDenom of coinMinimaldenomSet.values()) {
+        const currency = modularChainInfoImpl.findCurrency(coinMinimalDenom);
+        if (currency) {
+          if (currency.coinDenom.toLowerCase().includes(searchLower)) {
+            return true;
           }
         }
       }

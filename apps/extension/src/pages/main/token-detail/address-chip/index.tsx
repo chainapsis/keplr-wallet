@@ -20,12 +20,7 @@ export const AddressChip: FunctionComponent<{
   const { accountStore, chainStore } = useStore();
 
   const modularChainInfo = chainStore.getModularChain(chainId);
-  const isEVMOnlyChain = (() => {
-    if (!("cosmos" in modularChainInfo) && "evm" in modularChainInfo) {
-      return true;
-    }
-    return false;
-  })();
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const theme = useTheme();
 

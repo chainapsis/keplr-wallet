@@ -104,7 +104,7 @@ export interface ModularChainInfoBase {
 export type ModularChainInfo = ModularChainInfoBase &
   (
     | {
-        readonly cosmos: ChainInfo;
+        readonly cosmos: Omit<ChainInfo, "evm">;
       }
     | {
         readonly starknet: StarknetChainInfo;
@@ -117,7 +117,7 @@ export type ModularChainInfo = ModularChainInfoBase &
         readonly evm: EVMNativeChainInfo;
       }
     | {
-        readonly cosmos: ChainInfo;
+        readonly cosmos: Omit<ChainInfo, "evm">;
         readonly evm: EVMNativeChainInfo;
       }
   );
