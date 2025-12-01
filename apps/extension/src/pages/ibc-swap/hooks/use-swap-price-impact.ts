@@ -37,7 +37,7 @@ export const useSwapPriceImpact = (
     amountConfig.outCurrency.coinMinimalDenom,
   ]);
 
-  const unableToPopulatePrice = (() => {
+  const unableToPopulatePrices = (() => {
     const r: string[] = [];
 
     const inCurrency = amountConfig.currency;
@@ -157,6 +157,6 @@ export const useSwapPriceImpact = (
 
   return {
     isHighPriceImpact,
-    unableToPopulatePrice,
+    unableToPopulatePrices,
   };
 };

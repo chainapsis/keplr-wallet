@@ -217,7 +217,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   );
 
   const swapFeeBps = useSwapFeeBps(swapConfigs.amountConfig);
-  const { isHighPriceImpact, unableToPopulatePrice } = useSwapPriceImpact(
+  const { isHighPriceImpact, unableToPopulatePrices } = useSwapPriceImpact(
     swapConfigs.amountConfig
   );
 
@@ -575,7 +575,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }[] = [];
           let provider: SwapProvider | undefined;
           let routeDurationSeconds: number | undefined;
-          let isMultiEcosystemSwap: boolean = false;
+          let isInterChainSwap: boolean = false;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // /msgs_direct로도 얻을 순 있지만 따로 데이터를 해석해야되기 때문에 좀 힘들다...
@@ -596,7 +596,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
             // multi-ecosystem swap인지 여부를 확인 (bridge가 필요한 경우)
             const steps = queryRoute.response.data.steps;
-            isMultiEcosystemSwap = steps.some(
+            isInterChainSwap = steps.some(
               (step) => step.type === RouteStepType.BRIDGE
             );
             provider = queryRoute.response.data.provider;
@@ -604,7 +604,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
             // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
             // 문제는 chain_ids에 이미 ibc swap channel이 포함되어 있을 가능성 (아직 확인은 안됨)
-            if (isMultiEcosystemSwap) {
+            if (isInterChainSwap) {
               routeDurationSeconds = queryRoute.response.data.estimated_time;
 
               for (const chainId of queryRoute.response.data
@@ -898,7 +898,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   sendTx: async (chainId, tx, mode) => {
                     if (
                       swapConfigs.amountConfig.type === "transfer" &&
-                      !isMultiEcosystemSwap
+                      !isInterChainSwap
                     ) {
                       const msg: Message<Uint8Array> = new SendTxAndRecordMsg(
                         "ibc-swap/ibc-transfer",
@@ -959,7 +959,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           currencies:
                             chainStore.getChain(outChainId).currencies,
                         },
-                        !isMultiEcosystemSwap // multi-ecosystem swap인 경우, ibc swap history에 추가하는 대신 skip swap history를 추가한다.
+                        !isInterChainSwap // multi-ecosystem swap인 경우, ibc swap history에 추가하는 대신 skip swap history를 추가한다.
                       );
 
                       return await new InExtensionMessageRequester().sendMessage(
@@ -971,7 +971,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 },
                 {
                   onBroadcasted: (txHash) => {
-                    if (isMultiEcosystemSwap) {
+                    if (isInterChainSwap) {
                       const msg = new RecordTxWithSwapV2Msg(
                         inChainId,
                         outChainId,
@@ -1803,7 +1803,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <VerticalCollapseTransition collapsed={shouldTopUp}>
           <WarningGuideBox
-            slippageTolerancePercent={uiConfigStore.ibcSwapConfig.slippageNum}
             showUSDNWarning={showUSDNWarning}
             showCelestiaWarning={showCelestiaWarning}
             amountConfig={swapConfigs.amountConfig}
@@ -1841,14 +1840,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
             forceError={calculatingTxError}
             forceWarning={(() => {
-              if (unableToPopulatePrice.length > 0) {
+              if (unableToPopulatePrices.length > 0) {
                 return new Error(
                   intl.formatMessage(
                     {
                       id: "page.ibc-swap.warning.unable-to-populate-price",
                     },
                     {
-                      assets: unableToPopulatePrice.join(", "),
+                      assets: unableToPopulatePrices.join(", "),
                     }
                   )
                 );
@@ -1924,7 +1923,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 });
 
 const WarningGuideBox: FunctionComponent<{
-  slippageTolerancePercent: number;
   amountConfig: SwapAmountConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
@@ -1937,7 +1935,6 @@ const WarningGuideBox: FunctionComponent<{
   showCelestiaWarning?: boolean;
 }> = observer(
   ({
-    slippageTolerancePercent,
     amountConfig,
     feeConfig,
     gasConfig,
