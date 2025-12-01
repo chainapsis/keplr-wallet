@@ -50,7 +50,7 @@ import { BACKGROUND_PORT, Message } from "@keplr-wallet/router";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { useEffectOnce } from "../../hooks/use-effect-once";
 import { amountToAmbiguousAverage, amountToAmbiguousString } from "../../utils";
-import { Button } from "../../components/button";
+import { HoldButton } from "../../components/hold-button";
 import { TextButtonProps } from "../../components/button-text";
 import {
   UnsignedEVMTransaction,
@@ -1861,8 +1861,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Gutter size="0.75rem" />
 
-        <Button
+        <HoldButton
           type="submit"
+          holdDurationMs={1500}
           disabled={
             interactionBlocked ||
             showUSDNWarning ||
@@ -1873,9 +1874,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             shouldTopUp && remainingText
               ? remainingText
               : intl.formatMessage({
-                  id: "page.ibc-swap.button.next",
+                  id: "page.ibc-swap.button.hold-to-approve",
                 })
           }
+          holdingText={intl.formatMessage({
+            id: "page.ibc-swap.button.keep-holding",
+          })}
           color="primary"
           size="large"
           isLoading={
