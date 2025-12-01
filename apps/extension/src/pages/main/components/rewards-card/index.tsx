@@ -228,6 +228,8 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
   isHover,
   setIsHover,
 }) => {
+  const theme = useTheme();
+
   const [isPressed, setIsPressed] = React.useState(false);
   const [labelWidth, setLabelWidth] = React.useState<number>();
   const claimTextRef = React.useRef<HTMLSpanElement | null>(null);
@@ -315,6 +317,8 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
               color={
                 claimAllDisabled
                   ? ColorPalette["gray-300"]
+                  : theme.mode === "light"
+                  ? ColorPalette["blue-400"]
                   : ColorPalette["blue-300"]
               }
             />
@@ -325,6 +329,8 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
           color={
             claimAllDisabled
               ? ColorPalette["gray-300"]
+              : theme.mode === "light"
+              ? ColorPalette["blue-400"]
               : ColorPalette["blue-300"]
           }
         >
