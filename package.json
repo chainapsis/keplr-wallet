@@ -96,7 +96,7 @@
     "starknet": "^7.4.0",
     "ts-jest": "^29.0.5",
     "typescript": "5.0.4",
-    "zx": "^4.2.0"
+    "zx": "^8.8.5"
   },
   "resolutions": {
     "@types/react": "^18.2.19",
