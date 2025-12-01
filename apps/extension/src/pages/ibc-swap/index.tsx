@@ -239,10 +239,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       // swap일 경우 (osmosis에서 실행될 경우) swap이 몇번 필요한지에 따라 영향을 미칠 것이다.
       let type = "default";
 
-      const queryRoute = swapConfigs.amountConfig
-        .getQuerySwapHelper()
-        ?.getRoute(uiConfigStore.ibcSwapConfig.slippageNum);
-
+      const queryRoute = swapConfigs.amountConfig.getQueryRoute();
       if (queryRoute && queryRoute.response) {
         const routeData = queryRoute.response.data;
         const { steps, provider } = routeData;
@@ -424,10 +421,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
 
   // 10초마다 route query 자동 refresh
-  const querySwapHelper = swapConfigs.amountConfig.getQuerySwapHelper();
-  const queryRoute = querySwapHelper?.getRoute(
-    uiConfigStore.ibcSwapConfig.slippageNum
-  );
+  const queryRoute = swapConfigs.amountConfig.getQueryRoute();
   useEffect(() => {
     if (queryRoute && !queryRoute.isFetching) {
       const timeoutId = setTimeout(() => {
@@ -564,9 +558,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
 
-          const queryRoute = swapConfigs.amountConfig
-            .getQuerySwapHelper()!
-            .getRoute(uiConfigStore.ibcSwapConfig.slippageNum);
+          const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
 
           const channels: {
             portId: string;
@@ -2013,9 +2005,7 @@ const WarningGuideBox: FunctionComponent<{
         return err.message || err.toString();
       }
 
-      const queryError = amountConfig
-        .getQuerySwapHelper()
-        ?.getRoute(slippageTolerancePercent)?.error;
+      const queryError = amountConfig.getQueryRoute()?.error;
       if (queryError) {
         return queryError.message || queryError.toString();
       }

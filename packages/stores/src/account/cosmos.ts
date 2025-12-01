@@ -50,6 +50,7 @@ import {
   ProtoMsgsOrWithAminoMsgs,
 } from "./types";
 import {
+  decodeBase64,
   getEip712TypedDataBasedOnChainInfo,
   txEventsWithPreOnFulfill,
 } from "./utils";
@@ -2197,12 +2198,12 @@ export class CosmosAccountImpl {
               destinationDomain: cctpMsg.value.destination_domain,
               mintRecipient:
                 typeof cctpMsg.value.mint_recipient === "string"
-                  ? this.decodeBase64(cctpMsg.value.mint_recipient)
+                  ? decodeBase64(cctpMsg.value.mint_recipient)
                   : cctpMsg.value.mint_recipient,
               burnToken: cctpMsg.value.burn_token,
               destinationCaller:
                 typeof cctpMsg.value.destination_caller === "string"
-                  ? this.decodeBase64(cctpMsg.value.destination_caller)
+                  ? decodeBase64(cctpMsg.value.destination_caller)
                   : cctpMsg.value.destination_caller,
             }).finish(),
           },
@@ -2256,7 +2257,7 @@ export class CosmosAccountImpl {
                 from: cctpMsg.value.from,
                 amount: cctpMsg.value.amount,
                 destinationDomain: cctpMsg.value.destination_domain,
-                mintRecipient: this.decodeBase64(mintRecipient),
+                mintRecipient: decodeBase64(mintRecipient),
                 burnToken: cctpMsg.value.burn_token,
               })
             ).finish(),
@@ -2275,22 +2276,5 @@ export class CosmosAccountImpl {
 
   protected get queries(): DeepReadonly<QueriesSetBase & CosmosQueries> {
     return this.queriesStore.get(this.chainId);
-  }
-
-  private decodeBase64(base64: string): Uint8Array {
-    try {
-      const bin = atob(base64);
-      const arr = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) {
-        arr[i] = bin.charCodeAt(i);
-      }
-      return arr;
-    } catch (e) {
-      throw new Error(
-        `Failed to decode Base64: ${
-          e instanceof Error ? e.message : "Unknown error"
-        }`
-      );
-    }
   }
 }

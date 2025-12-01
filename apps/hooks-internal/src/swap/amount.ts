@@ -27,6 +27,7 @@ import {
   CosmosTxData,
   EVMTxData,
   SwapProvider,
+  ObservableQueryRouteInnerV2,
 } from "@keplr-wallet/stores-internal";
 import {
   EthereumAccountStore,
@@ -109,11 +110,7 @@ export class SwapAmountConfig extends AmountConfig {
     if (this.fraction > 0) {
       let result = this.maxAmount;
 
-      const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-      const queryRoute = this.getQuerySwapHelper(result)?.getRoute(
-        slippageTolerancePercent
-      );
+      const queryRoute = this.getQueryRoute(result);
       if (queryRoute?.response != null) {
         const bridgeFee = queryRoute.bridgeFees.reduce(
           (acc: CoinPretty, fee: CoinPretty) => {
@@ -154,14 +151,9 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get outAmount(): CoinPretty {
-    const querySwapHelper = this.getQuerySwapHelper();
-    if (!querySwapHelper) {
-      return new CoinPretty(this.outCurrency, "0");
-    }
-
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-    return querySwapHelper.getRoute(slippageTolerancePercent).outAmount;
+    return (
+      this.getQueryRoute()?.outAmount ?? new CoinPretty(this.outCurrency, "0")
+    );
   }
 
   get outChainId(): string {
@@ -181,25 +173,11 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get swapPriceImpact(): RatePretty | undefined {
-    const querySwapHelper = this.getQuerySwapHelper();
-    if (!querySwapHelper) {
-      return undefined;
-    }
-
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-    return querySwapHelper.getRoute(slippageTolerancePercent).swapPriceImpact;
+    return this.getQueryRoute()?.swapPriceImpact;
   }
 
   get provider(): SwapProvider | undefined {
-    const querySwapHelper = this.getQuerySwapHelper();
-    if (!querySwapHelper) {
-      return undefined;
-    }
-
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-    return querySwapHelper.getRoute(slippageTolerancePercent).provider;
+    return this.getQueryRoute()?.provider;
   }
 
   @action
@@ -218,35 +196,25 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get otherFees(): CoinPretty[] {
-    const querySwapHelper = this.getQuerySwapHelper();
-    if (!querySwapHelper) {
-      return [new CoinPretty(this.outCurrency, "0")];
-    }
-
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-    return querySwapHelper.getRoute(slippageTolerancePercent).bridgeFees;
+    return (
+      this.getQueryRoute()?.bridgeFees ?? [
+        new CoinPretty(this.outCurrency, "0"),
+      ]
+    );
   }
 
   async fetch(): Promise<void> {
-    const querySwapHelper = this.getQuerySwapHelper();
-    if (querySwapHelper) {
-      const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-      await querySwapHelper.getRoute(slippageTolerancePercent).fetch();
+    const queryRoute = this.getQueryRoute();
+    if (queryRoute) {
+      await queryRoute.fetch();
     }
   }
 
   get isFetchingInAmount(): boolean {
     if (this.fraction === 1) {
-      const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
       return (
-        this.getQuerySwapHelper(this.maxAmount)?.getRoute(
-          slippageTolerancePercent
-        ).isFetching ??
-        this.getQuerySwapHelper()?.getRoute(slippageTolerancePercent)
-          .isFetching ??
+        this.getQueryRoute(this.maxAmount)?.isFetching ??
+        this.getQueryRoute()?.isFetching ??
         false
       );
     }
@@ -255,27 +223,19 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get isFetchingOutAmount(): boolean {
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-    return (
-      this.getQuerySwapHelper()?.getRoute(slippageTolerancePercent)
-        .isFetching ?? false
-    );
+    return this.getQueryRoute()?.isFetching ?? false;
   }
 
   get type(): "swap" | "transfer" | "not-ready" {
-    const querySwapHelper = this.getQuerySwapHelper();
-    if (!querySwapHelper) {
+    const queryRoute = this.getQueryRoute();
+    if (!queryRoute) {
       return "not-ready";
     }
 
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
-
-    const res = querySwapHelper.getRoute(slippageTolerancePercent).response;
+    const res = queryRoute.response;
     if (!res) {
       return "not-ready";
     }
-
     const containsSwap = res.data.steps.some(
       (step) => step.type === RouteStepType.SWAP
     );
@@ -932,6 +892,32 @@ export class SwapAmountConfig extends AmountConfig {
       fromAddress,
       toAddress
     );
+  }
+
+  getQueryRoute(amount?: CoinPretty): ObservableQueryRouteInnerV2 | undefined {
+    if (!amount && this.amount.length === 0) {
+      return;
+    }
+
+    const amountIn = amount ?? this.amount[0];
+    const fromAddress = this.getAddressSync(this.chainId);
+    const toAddress = this.getAddressSync(this.outChainId);
+    if (!fromAddress || !toAddress) {
+      return;
+    }
+    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+
+    return this.swapQueries.querySwapHelper
+      .getSwapHelper(
+        this.chainId,
+        amountIn.currency.coinMinimalDenom,
+        amountIn.toCoin().amount,
+        this.outChainId,
+        this.outCurrency.coinMinimalDenom,
+        fromAddress,
+        toAddress
+      )
+      .getRoute(slippageTolerancePercent);
   }
 }
 

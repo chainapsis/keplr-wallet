@@ -457,7 +457,7 @@ export const SwapFeeInfo: FunctionComponent<{
             </React.Fragment>
           ) : null}
 
-          {amountConfig instanceof SwapAmountConfig && amountConfig.provider ? (
+          {amountConfig.provider ? (
             <React.Fragment>
               <Gutter size="0.5rem" />
               <XAxis alignY="center">
