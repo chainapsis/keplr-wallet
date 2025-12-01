@@ -2332,9 +2332,21 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           type: "erc20",
           contractAddress:
             "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
-          coinDenom: "USDC",
+          coinDenom: "USDC.e",
           coinMinimalDenom:
             "erc20:0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
+          coinDenom: "USDC",
+          coinMinimalDenom:
+            "erc20:0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
           coinDecimals: 6,
           coinGeckoId: "usd-coin",
           coinImageUrl:
@@ -2443,7 +2455,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
           coinDecimals: 6,
-          coinGeckoId: "usd-coin",
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
         },
