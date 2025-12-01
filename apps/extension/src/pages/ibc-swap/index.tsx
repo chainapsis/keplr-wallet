@@ -299,9 +299,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate tx");
       }
 
-      const tx = swapConfigs.amountConfig.getTxIfReady(
-        uiConfigStore.ibcSwapConfig.slippageNum
-      );
+      const tx = swapConfigs.amountConfig.getTxIfReady();
 
       if (!tx) {
         throw new Error("Not ready to simulate tx");
@@ -870,10 +868,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
 
             const [_tx] = await Promise.all([
-              swapConfigs.amountConfig.getTx(
-                uiConfigStore.ibcSwapConfig.slippageNum,
-                priorOutAmount
-              ),
+              swapConfigs.amountConfig.getTx(undefined, priorOutAmount),
             ]);
 
             tx = _tx;

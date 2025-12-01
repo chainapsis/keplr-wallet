@@ -247,8 +247,16 @@ export class SwapAmountConfig extends AmountConfig {
     return "swap";
   }
 
+  /**
+   * @param slippageTolerancePercent - The maximum slippage tolerance percentage (default: _getSlippageTolerancePercent())
+   * @param priorOutAmount - The prior out amount to check if the price has changed
+   * @param customRecipient - Optional custom recipient override for the destination chain
+   * @returns The constructed transaction
+   * @dev It is recommended to use the default slippageTolerancePercent value
+   *      except when temporarily testing with a very high slippage to search for possible routes.
+   */
   async getTx(
-    slippageTolerancePercent: number,
+    slippageTolerancePercent?: number,
     priorOutAmount?: Int,
     customRecipient?: {
       chainId: string;
@@ -266,7 +274,10 @@ export class SwapAmountConfig extends AmountConfig {
       throw new Error("Address is not set");
     }
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
+    const slippageTolerancePercentToUse =
+      slippageTolerancePercent ?? this._getSlippageTolerancePercent();
+
+    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercentToUse);
 
     await routeQuery.waitResponse();
 
@@ -305,7 +316,7 @@ export class SwapAmountConfig extends AmountConfig {
 
     const txsQuery = querySwapHelper.getTx(
       chainIdsToAddresses,
-      slippageTolerancePercent,
+      slippageTolerancePercentToUse,
       routeResponse.data.provider,
       routeResponse.data.amount_out,
       routeResponse.data.required_chain_ids,
@@ -325,7 +336,10 @@ export class SwapAmountConfig extends AmountConfig {
     }
 
     // TODO: multiple txs support
-    const tx = this.getTxIfReady(slippageTolerancePercent, customRecipient);
+    const tx = this.getTxIfReady(
+      slippageTolerancePercentToUse,
+      customRecipient
+    );
     if (!tx) {
       throw new Error("Tx is not ready");
     }
@@ -355,13 +369,12 @@ export class SwapAmountConfig extends AmountConfig {
    * Synchronously returns a transaction if all required data is currently available,
    * without waiting for any pending queries to complete.
    *
-   * @param slippageTolerancePercent - The maximum slippage tolerance percentage
+   * @param slippageTolerancePercent - The maximum slippage tolerance percentage (default: _getSlippageTolerancePercent())
    * @param customRecipient - Optional custom recipient override for the destination chain
    * @returns The constructed transaction if ready, or `undefined` if data is not yet available
    */
   getTxIfReady(
-    // CHECK: _getSlippageTolerancePercent()를 사용하지 않고 외부에서 전달받을 필요가 있을까?
-    slippageTolerancePercent: number,
+    slippageTolerancePercent?: number,
     customRecipient?: {
       chainId: string;
       recipient: string;
@@ -384,7 +397,10 @@ export class SwapAmountConfig extends AmountConfig {
       return;
     }
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
+    const slippageTolerancePercentToUse =
+      slippageTolerancePercent ?? this._getSlippageTolerancePercent();
+
+    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercentToUse);
 
     const routeResponse = routeQuery.response;
     if (!routeResponse) {
@@ -411,7 +427,7 @@ export class SwapAmountConfig extends AmountConfig {
 
     const txsQuery = querySwapHelper.getTx(
       chainIdsToAddresses,
-      slippageTolerancePercent,
+      slippageTolerancePercentToUse,
       routeResponse.data.provider,
       routeResponse.data.amount_out,
       routeResponse.data.required_chain_ids,
@@ -895,7 +911,10 @@ export class SwapAmountConfig extends AmountConfig {
     );
   }
 
-  getQueryRoute(amount?: CoinPretty): ObservableQueryRouteInnerV2 | undefined {
+  getQueryRoute(
+    amount?: CoinPretty,
+    slippageTolerancePercent?: number
+  ): ObservableQueryRouteInnerV2 | undefined {
     if (!amount && this.amount.length === 0) {
       return;
     }
@@ -906,7 +925,8 @@ export class SwapAmountConfig extends AmountConfig {
     if (!fromAddress || !toAddress) {
       return;
     }
-    const slippageTolerancePercent = this._getSlippageTolerancePercent();
+    const slippageTolerancePercentToUse =
+      slippageTolerancePercent ?? this._getSlippageTolerancePercent();
 
     return this.swapQueries.querySwapHelper
       .getSwapHelper(
@@ -918,7 +938,7 @@ export class SwapAmountConfig extends AmountConfig {
         fromAddress,
         toAddress
       )
-      .getRoute(slippageTolerancePercent);
+      .getRoute(slippageTolerancePercentToUse);
   }
 }
 
