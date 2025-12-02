@@ -24,7 +24,7 @@ import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
-import { ExecutionFeeType } from "../types";
+import { BackgroundTxFeeType } from "../types";
 
 /**
  * Build a signed transaction from an AminoSignResponse
@@ -320,7 +320,7 @@ const DefaultMultiplication = {
 
 export async function getCosmosGasPrice(
   chainInfo: ChainInfo,
-  feeType: ExecutionFeeType = "average",
+  feeType: BackgroundTxFeeType = "average",
   feeCurrency?: FeeCurrency
 ): Promise<{
   gasPrice: Dec;
@@ -425,7 +425,7 @@ export async function getCosmosGasPrice(
 async function getOsmosisBaseFeeCurrency(
   chainInfo: ChainInfo,
   feeCurrency: FeeCurrency,
-  feeType: ExecutionFeeType
+  feeType: BackgroundTxFeeType
 ): Promise<FeeCurrency | null> {
   // Fetch base fee from Osmosis
   const baseDenom = "uosmo";
@@ -441,7 +441,7 @@ async function getOsmosisBaseFeeCurrency(
     high?: number;
   }>(
     "https://gjsttg7mkgtqhjpt3mv5aeuszi0zblbb.lambda-url.us-west-2.on.aws/osmosis/osmosis-base-fee-beta.json"
-  ).catch(() => ({ data: {} as Record<ExecutionFeeType, number> }));
+  ).catch(() => ({ data: {} as Record<BackgroundTxFeeType, number> }));
 
   const { data: baseFeeResponse } = await simpleFetch<{ base_fee: string }>(
     chainInfo.rest,
@@ -463,7 +463,7 @@ async function getOsmosisBaseFeeCurrency(
 async function getOsmosisTxFeesGasPrice(
   chainInfo: ChainInfo,
   feeCurrency: FeeCurrency,
-  feeType: ExecutionFeeType
+  feeType: BackgroundTxFeeType
 ): Promise<Dec | null> {
   // Check if it's a fee token
   const { data: feeTokensResponse } = await simpleFetch<{
@@ -497,7 +497,7 @@ async function getOsmosisTxFeesGasPrice(
 async function getFeeMarketGasPrice(
   chainInfo: ChainInfo,
   feeCurrency: FeeCurrency,
-  feeType: ExecutionFeeType
+  feeType: BackgroundTxFeeType
 ): Promise<Dec | null> {
   try {
     const gasPricesResponse = await simpleFetch<{
@@ -560,7 +560,7 @@ async function getFeeMarketGasPrice(
 
 async function getInitiaDynamicFeeGasPrice(
   chainInfo: ChainInfo,
-  feeType: ExecutionFeeType
+  feeType: BackgroundTxFeeType
 ): Promise<Dec | null> {
   try {
     const dynamicFeeResponse = await simpleFetch<{
@@ -623,7 +623,7 @@ async function getInitiaDynamicFeeGasPrice(
 // TODO: enhance the logic if required...
 async function getEIP1559GasPrice(
   chainInfo: ChainInfo,
-  feeType: ExecutionFeeType
+  feeType: BackgroundTxFeeType
 ): Promise<Dec | null> {
   try {
     // Get latest block for base fee
@@ -650,7 +650,7 @@ async function getEIP1559GasPrice(
     const baseFeePerGas = new Dec(parseInt(baseFeePerGasHex, 16));
 
     // Calculate priority fee (simplified version)
-    const priorityFeeMultipliers: Record<ExecutionFeeType, number> = {
+    const priorityFeeMultipliers: Record<BackgroundTxFeeType, number> = {
       low: 1.1,
       average: 1.25,
       high: 1.5,
@@ -668,7 +668,7 @@ async function getEIP1559GasPrice(
 
 export function getDefaultGasPrice(
   feeCurrency: FeeCurrency,
-  feeType: ExecutionFeeType
+  feeType: BackgroundTxFeeType
 ): Dec {
   const gasPriceStep = feeCurrency.gasPriceStep || DefaultGasPriceStep;
   return new Dec(gasPriceStep[feeType]);

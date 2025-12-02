@@ -17,7 +17,6 @@ import {
   EVMBackgroundTx,
   CosmosBackgroundTx,
   ExecutionTypeToHistoryData,
-  ExecutionFeeType,
 } from "./types";
 import {
   action,
@@ -175,7 +174,6 @@ export class BackgroundTxExecutorService {
     type: T,
     txs: BackgroundTx[],
     executableChainIds: string[],
-    feeType: ExecutionFeeType = "average",
     historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
       : ExecutionTypeToHistoryData[T]
@@ -184,7 +182,6 @@ export class BackgroundTxExecutorService {
       type,
       txCount: txs.length,
       executableChainIds,
-      feeType,
     });
 
     if (!env.isInternalMsg) {
@@ -239,7 +236,6 @@ export class BackgroundTxExecutorService {
       executableChainIds: executableChainIds,
       timestamp: Date.now(),
       type,
-      feeType,
       ...(type !== TxExecutionType.UNDEFINED ? { historyData } : {}),
     } as TxExecution;
 
@@ -604,7 +600,7 @@ export class BackgroundTxExecutorService {
       evmInfo,
       signer,
       tx.txData,
-      "average"
+      tx.feeType ?? "average"
     );
 
     const result = await this.keyRingEthereumService.signEthereumPreAuthorized(
@@ -702,10 +698,18 @@ export class BackgroundTxExecutorService {
       memo
     );
 
-    // TODO: fee token을 사용자가 설정한 것을 사용해야 함
-    const { gasPrice } = await getCosmosGasPrice(chainInfo, "average");
+    const feeCurrency =
+      chainInfo.feeCurrencies.find(
+        (currency) => currency.coinMinimalDenom === tx.feeCurrencyDenom
+      ) ?? chainInfo.currencies[0];
+
+    const { gasPrice } = await getCosmosGasPrice(
+      chainInfo,
+      tx.feeType ?? "average",
+      feeCurrency
+    );
     const fee = calculateCosmosStdFee(
-      chainInfo.currencies[0],
+      feeCurrency,
       gasUsed,
       gasPrice,
       chainInfo.features
@@ -938,6 +942,7 @@ export class BackgroundTxExecutorService {
         Buffer.from(tx.txHash, "hex"),
         execution.id
       );
+      this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
 
       console.log("[TxExecutor] IBC_TRANSFER history recorded, id:", id);
       execution.historyId = id;
@@ -979,7 +984,7 @@ export class BackgroundTxExecutorService {
         Buffer.from(tx.txHash, "hex"),
         execution.id
       );
-      // TODO: track IBC packet forwarding
+      this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
 
       console.log("[TxExecutor] IBC_SWAP history recorded, id:", id);
       execution.historyId = id;

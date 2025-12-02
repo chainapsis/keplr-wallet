@@ -28,6 +28,8 @@ export enum BackgroundTxType {
 interface BackgroundTxBase {
   status: BackgroundTxStatus; // mutable while executing
   readonly chainId: string;
+  readonly feeType?: BackgroundTxFeeType;
+  readonly feeCurrencyDenom?: string;
 
   // Cosmos: base64 encoded, EVM: hex encoded (0x prefix)
   signedTx?: string;
@@ -84,7 +86,7 @@ export enum TxExecutionType {
   SWAP_V2 = "swap-v2",
 }
 
-export type ExecutionFeeType = "low" | "average" | "high";
+export type BackgroundTxFeeType = "low" | "average" | "high";
 
 export interface TxExecutionBase {
   readonly id: string;
@@ -100,8 +102,6 @@ export interface TxExecutionBase {
   executableChainIds: string[]; // executable chain ids
 
   readonly timestamp: number; // Timestamp when execution started
-
-  readonly feeType?: ExecutionFeeType;
 
   readonly preventAutoSign?: boolean;
 }

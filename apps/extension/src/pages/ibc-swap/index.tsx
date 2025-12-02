@@ -1000,6 +1000,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 rlpTypes: msgs.rlpTypes,
                 memo: swapConfigs.memoConfig.memo,
               },
+              feeType:
+                swapConfigs.feeConfig.type === "manual"
+                  ? undefined
+                  : swapConfigs.feeConfig.type,
+              feeCurrencyDenom:
+                swapConfigs.feeConfig.fees[0].currency.coinMinimalDenom,
             });
           } else {
             const ethereumAccount = ethereumAccountStore.getAccount(inChainId);
@@ -1031,6 +1037,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 chainId: inChainId,
                 type: BackgroundTxType.EVM,
                 txData: erc20ApprovalTx,
+                feeType:
+                  swapConfigs.feeConfig.type === "manual"
+                    ? undefined
+                    : swapConfigs.feeConfig.type,
               });
             }
 
@@ -1051,7 +1061,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               executionType,
               backgroundTxs,
               executableChainIds,
-              "average",
               historyData
             );
 

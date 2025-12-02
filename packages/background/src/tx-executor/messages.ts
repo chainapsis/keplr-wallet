@@ -6,7 +6,6 @@ import {
   TxExecutionStatus,
   TxExecution,
   ExecutionTypeToHistoryData,
-  ExecutionFeeType,
 } from "./types";
 
 /**
@@ -26,7 +25,6 @@ export class RecordAndExecuteTxsMsg<
     public readonly executionType: T,
     public readonly txs: BackgroundTx[],
     public readonly executableChainIds: string[],
-    public readonly feeType?: ExecutionFeeType,
     public readonly historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
       : ExecutionTypeToHistoryData[T]

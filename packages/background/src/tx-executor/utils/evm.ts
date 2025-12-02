@@ -2,9 +2,9 @@ import { EVMInfo } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { UnsignedTransaction } from "@ethersproject/transactions";
 import { Dec } from "@keplr-wallet/unit";
-import { ExecutionFeeType } from "../types";
+import { BackgroundTxFeeType } from "../types";
 
-const FEE_MULTIPLIERS: Record<ExecutionFeeType, number> = {
+const FEE_MULTIPLIERS: Record<BackgroundTxFeeType, number> = {
   low: 1.1,
   average: 1.25,
   high: 1.5,
@@ -15,7 +15,7 @@ export async function fillUnsignedEVMTx(
   evmInfo: EVMInfo,
   signer: string,
   tx: UnsignedTransaction,
-  feeType: ExecutionFeeType = "average"
+  feeType: BackgroundTxFeeType = "average"
 ): Promise<UnsignedTransaction> {
   const getTransactionCountRequest = {
     jsonrpc: "2.0",
