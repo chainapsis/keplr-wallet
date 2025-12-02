@@ -31,14 +31,12 @@ import {
   AminoSignResponse,
   EthSignType,
   EthTxStatus,
-  EthereumSignResponse,
 } from "@keplr-wallet/types";
 import { TransactionTypes, serialize } from "@ethersproject/transactions";
 import { BaseAccount } from "@keplr-wallet/cosmos";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import { Msg } from "@keplr-wallet/types";
 import {
-  getEip712TypedDataBasedOnChainInfo,
   buildSignedTxFromAminoSignResponse,
   prepareSignDocForAminoSigning,
   simulateCosmosTx,
@@ -157,8 +155,7 @@ export class BackgroundTxExecutorService {
       }
 
       // cause new executable chain ids are available, resume the execution
-      // CHECK: 현재 활성화되어 있는 vault에서만 실행할 수 있으면 좋을 듯, how? vaultId 변경 감지? how?
-      // 불러왔는데 pending 상태거나 오래된 실행이면 사실상 이 작업을 이어가는 것이 의미가 있는지 의문이 든다.
+      // CHECK: 현재 활성화되어 있는 vault에서만 실행해야 할까, 아니면 모든 vault에서 실행할 수 있어야 할까?
       console.log("[TxExecutor] Auto resuming execution:", executionId);
       await this.executeTxs(executionId);
     });
@@ -486,12 +483,7 @@ export class BackgroundTxExecutorService {
       console.log(`[TxExecutor] tx[${index}] SIGNING`);
 
       try {
-        const { signedTx } = await this.signTx(
-          execution.vaultId,
-          currentTx,
-          execution.feeType ?? "average",
-          options?.env
-        );
+        const { signedTx } = await this.signTx(execution.vaultId, currentTx);
 
         console.log(`[TxExecutor] tx[${index}] signed successfully`);
         runInAction(() => {
@@ -561,9 +553,7 @@ export class BackgroundTxExecutorService {
 
   protected async signTx(
     vaultId: string,
-    tx: BackgroundTx,
-    feeType: ExecutionFeeType,
-    env?: Env
+    tx: BackgroundTx
   ): Promise<{
     signedTx: string;
   }> {
@@ -574,17 +564,15 @@ export class BackgroundTxExecutorService {
     }
 
     if (tx.type === BackgroundTxType.EVM) {
-      return this.signEvmTx(vaultId, tx, feeType, env);
+      return this.signEvmTx(vaultId, tx);
     }
 
-    return this.signCosmosTx(vaultId, tx, feeType, env);
+    return this.signCosmosTx(vaultId, tx);
   }
 
   private async signEvmTx(
     vaultId: string,
-    tx: EVMBackgroundTx,
-    feeType: ExecutionFeeType,
-    env?: Env
+    tx: EVMBackgroundTx
   ): Promise<{
     signedTx: string;
   }> {
@@ -596,62 +584,47 @@ export class BackgroundTxExecutorService {
         ? new URL(browser.runtime.getURL("/")).origin
         : "extension";
 
-    let result: EthereumSignResponse;
-
+    // For hardware wallets, the signedTx must be provided externally when calling resumeTx or recordAndExecuteTxs.
     if (isHardware) {
-      if (!env) {
-        throw new KeplrError(
-          "direct-tx-executor",
-          109,
-          "Hardware wallet signing should be triggered from user interaction"
-        );
-      }
-
-      result = await this.keyRingEthereumService.signEthereum(
-        env,
-        origin,
-        vaultId,
-        tx.chainId,
-        signer,
-        Buffer.from(JSON.stringify(tx.txData)),
-        EthSignType.TRANSACTION
-      );
-    } else {
-      const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
-      const evmInfo = ChainsService.getEVMInfo(chainInfo);
-      if (!evmInfo) {
-        throw new KeplrError("direct-tx-executor", 113, "Not EVM chain");
-      }
-
-      const unsignedTx = await fillUnsignedEVMTx(
-        origin,
-        evmInfo,
-        signer,
-        tx.txData,
-        feeType
-      );
-
-      result = await this.keyRingEthereumService.signEthereumPreAuthorized(
-        vaultId,
-        tx.chainId,
-        signer,
-        Buffer.from(JSON.stringify(unsignedTx)),
-        EthSignType.TRANSACTION
+      throw new KeplrError(
+        "direct-tx-executor",
+        109,
+        "Hardware wallet signing should be triggered from user interaction"
       );
     }
 
-    // CHECK: does balance check need to be done here?
+    const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+    if (!evmInfo) {
+      throw new KeplrError("direct-tx-executor", 113, "Not EVM chain");
+    }
 
-    const unsignedTx = JSON.parse(Buffer.from(result.signingData).toString());
+    const unsignedTx = await fillUnsignedEVMTx(
+      origin,
+      evmInfo,
+      signer,
+      tx.txData,
+      "average"
+    );
+
+    const result = await this.keyRingEthereumService.signEthereumPreAuthorized(
+      vaultId,
+      tx.chainId,
+      signer,
+      Buffer.from(JSON.stringify(unsignedTx)),
+      EthSignType.TRANSACTION
+    );
+
+    const signedTxData = JSON.parse(Buffer.from(result.signingData).toString());
     const isEIP1559 =
-      !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+      !!signedTxData.maxFeePerGas || !!signedTxData.maxPriorityFeePerGas;
     if (isEIP1559) {
-      unsignedTx.type = TransactionTypes.eip1559;
+      signedTxData.type = TransactionTypes.eip1559;
     }
 
-    delete unsignedTx.from;
+    delete signedTxData.from;
 
-    const signedTx = serialize(unsignedTx, result.signature);
+    const signedTx = serialize(signedTxData, result.signature);
 
     return {
       signedTx: signedTx,
@@ -660,9 +633,7 @@ export class BackgroundTxExecutorService {
 
   private async signCosmosTx(
     vaultId: string,
-    tx: CosmosBackgroundTx,
-    feeType: ExecutionFeeType,
-    env?: Env
+    tx: CosmosBackgroundTx
   ): Promise<{
     signedTx: string;
   }> {
@@ -688,6 +659,7 @@ export class BackgroundTxExecutorService {
       ],
       gas: "100000",
     };
+    const memo = tx.txData.memo ?? "";
 
     // NOTE: 백그라운드에서 자동으로 실행하는 것이므로 편의상 amino로 일관되게 처리한다
     const isDirectSign = aminoMsgs.length === 0;
@@ -707,149 +679,67 @@ export class BackgroundTxExecutorService {
       throw new Error("The length of aminoMsgs and protoMsgs are different");
     }
 
+    // For hardware wallets, the signedTx must be provided externally when calling resumeTx or recordAndExecuteTxs.
     if (isHardware) {
-      // hardware wallet signing should be triggered from user interaction
-      // so only currently activated key should be used for signing
-      if (!env) {
-        throw new KeplrError(
-          "direct-tx-executor",
-          109,
-          "Hardware wallet signing should be triggered from user interaction"
-        );
-      }
-
-      const useEthereumSign =
-        chainInfo.features?.includes("eth-key-sign") === true;
-      const eip712Signing = useEthereumSign && keyInfo.isNanoLedger;
-      if (eip712Signing && !tx.txData.rlpTypes) {
-        throw new KeplrError(
-          "direct-tx-executor",
-          111,
-          "RLP types information is needed for signing tx for ethermint chain with ledger"
-        );
-      }
-
-      if (eip712Signing && isDirectSign) {
-        throw new KeplrError(
-          "direct-tx-executor",
-          112,
-          "EIP712 signing is not supported for proto signing"
-        );
-      }
-
-      // CHECK: what about keystone?
-
-      const account = await BaseAccount.fetchFromRest(
-        chainInfo.rest,
-        signer,
-        true
+      throw new KeplrError(
+        "direct-tx-executor",
+        109,
+        "Hardware wallet signing should be triggered from user interaction"
       );
-
-      const signDoc = prepareSignDocForAminoSigning({
-        chainInfo,
-        accountNumber: account.getAccountNumber().toString(),
-        sequence: account.getSequence().toString(),
-        aminoMsgs: tx.txData.aminoMsgs ?? [],
-        fee: pseudoFee,
-        memo: tx.txData.memo ?? "",
-        eip712Signing,
-        signer,
-      });
-
-      const signResponse: AminoSignResponse = await (async () => {
-        if (!eip712Signing) {
-          return await this.keyRingCosmosService.signAmino(
-            env,
-            origin,
-            vaultId,
-            tx.chainId,
-            signer,
-            signDoc,
-            {}
-          );
-        }
-
-        return await this.keyRingCosmosService.requestSignEIP712CosmosTx_v0(
-          env,
-          vaultId,
-          origin,
-          tx.chainId,
-          signer,
-          getEip712TypedDataBasedOnChainInfo(chainInfo, {
-            aminoMsgs: tx.txData.aminoMsgs ?? [],
-            protoMsgs: tx.txData.protoMsgs,
-            rlpTypes: tx.txData.rlpTypes,
-          }),
-          signDoc,
-          {}
-        );
-      })();
-
-      const signedTx = buildSignedTxFromAminoSignResponse({
-        protoMsgs,
-        signResponse,
-        chainInfo,
-        eip712Signing,
-        useEthereumSign,
-      });
-
-      return {
-        signedTx: Buffer.from(signedTx.tx).toString("base64"),
-      };
-    } else {
-      const account = await BaseAccount.fetchFromRest(
-        chainInfo.rest,
-        signer,
-        true
-      );
-
-      const { gasUsed } = await simulateCosmosTx(
-        signer,
-        chainInfo,
-        protoMsgs,
-        pseudoFee,
-        tx.txData.memo ?? ""
-      );
-
-      // TODO: fee token을 사용자가 설정한 것을 사용해야 함
-      const { gasPrice } = await getCosmosGasPrice(chainInfo, feeType);
-      const fee = calculateCosmosStdFee(
-        chainInfo.currencies[0],
-        gasUsed,
-        gasPrice,
-        chainInfo.features
-      );
-
-      const signDoc = prepareSignDocForAminoSigning({
-        chainInfo,
-        accountNumber: account.getAccountNumber().toString(),
-        sequence: account.getSequence().toString(),
-        aminoMsgs: tx.txData.aminoMsgs ?? [],
-        fee,
-        memo: tx.txData.memo ?? "",
-        eip712Signing: false,
-        signer,
-      });
-
-      const signResponse: AminoSignResponse =
-        await this.keyRingCosmosService.signAminoPreAuthorized(
-          origin,
-          vaultId,
-          tx.chainId,
-          signer,
-          signDoc
-        );
-
-      const signedTx = buildSignedTxFromAminoSignResponse({
-        protoMsgs,
-        signResponse,
-        chainInfo,
-        eip712Signing: false,
-        useEthereumSign: false,
-      });
-
-      return { signedTx: Buffer.from(signedTx.tx).toString("base64") };
     }
+
+    const account = await BaseAccount.fetchFromRest(
+      chainInfo.rest,
+      signer,
+      true
+    );
+
+    const { gasUsed } = await simulateCosmosTx(
+      signer,
+      chainInfo,
+      protoMsgs,
+      pseudoFee,
+      memo
+    );
+
+    // TODO: fee token을 사용자가 설정한 것을 사용해야 함
+    const { gasPrice } = await getCosmosGasPrice(chainInfo, "average");
+    const fee = calculateCosmosStdFee(
+      chainInfo.currencies[0],
+      gasUsed,
+      gasPrice,
+      chainInfo.features
+    );
+
+    const signDoc = prepareSignDocForAminoSigning({
+      chainInfo,
+      accountNumber: account.getAccountNumber().toString(),
+      sequence: account.getSequence().toString(),
+      aminoMsgs: tx.txData.aminoMsgs ?? [],
+      fee,
+      memo,
+      eip712Signing: false,
+      signer,
+    });
+
+    const signResponse: AminoSignResponse =
+      await this.keyRingCosmosService.signAminoPreAuthorized(
+        origin,
+        vaultId,
+        tx.chainId,
+        signer,
+        signDoc
+      );
+
+    const signedTx = buildSignedTxFromAminoSignResponse({
+      protoMsgs,
+      signResponse,
+      chainInfo,
+      eip712Signing: false,
+      useEthereumSign: false,
+    });
+
+    return { signedTx: Buffer.from(signedTx.tx).toString("base64") };
   }
 
   protected async broadcastTx(tx: BackgroundTx): Promise<{
@@ -874,11 +764,7 @@ export class BackgroundTxExecutorService {
   private async broadcastEvmTx(tx: EVMBackgroundTx): Promise<{
     txHash: string;
   }> {
-    // check signed tx and signature
-    // do not validate the signed tx and signature here just assume it is valid
-
-    // 이렇게 단순하게 처리할 수는 없을 것 같고,
-    // serialized tx를 decode해서 signature를 넣고 다시 serialize해서 broadcast하는 방식으로 처리해야 할 듯
+    // assume the signed tx is valid if exists
     if (!tx.signedTx) {
       throw new KeplrError("direct-tx-executor", 108, "Signed tx not found");
     }
@@ -1093,6 +979,7 @@ export class BackgroundTxExecutorService {
         Buffer.from(tx.txHash, "hex"),
         execution.id
       );
+      // TODO: track IBC packet forwarding
 
       console.log("[TxExecutor] IBC_SWAP history recorded, id:", id);
       execution.historyId = id;
