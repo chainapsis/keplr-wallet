@@ -960,11 +960,18 @@ export class BackgroundTxExecutorService {
       tx.chainId,
       tx.txHash
     );
-    if (!txResult || txResult.code == null) {
+    if (!txResult) {
       return false;
     }
 
-    return txResult.code === 0;
+    // Tendermint/CometBFT omits the code field when tx is successful (code=0)
+    // If code is present and non-zero, it's a failure
+    if (txResult.code != null && txResult.code !== 0) {
+      return false;
+    }
+
+    // consider success
+    return true;
   }
 
   @action
