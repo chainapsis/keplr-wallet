@@ -101,7 +101,9 @@ export interface TxExecutionBase {
 
   readonly timestamp: number; // Timestamp when execution started
 
-  readonly feeType: ExecutionFeeType;
+  readonly feeType?: ExecutionFeeType;
+
+  readonly preventAutoSign?: boolean;
 }
 
 export interface UndefinedTxExecution extends TxExecutionBase {
@@ -226,7 +228,6 @@ export interface SwapV2HistoryData {
 
 export interface SwapV2TxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SWAP_V2;
-
   readonly historyData?: SwapV2HistoryData;
 
   historyId?: string;

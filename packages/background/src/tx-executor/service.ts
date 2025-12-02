@@ -464,22 +464,32 @@ export class BackgroundTxExecutorService {
       }
     }
 
+    // if signedTx is provided, set the signedTx to the current transaction and set the status to SIGNED
+    if (options?.signedTx) {
+      console.log(`[TxExecutor] tx[${index}] using provided signedTx`);
+      runInAction(() => {
+        currentTx.signedTx = options.signedTx;
+        currentTx.status = BackgroundTxStatus.SIGNED;
+      });
+    }
+
+    // if preventAutoSign is true and the current transaction is not signed,
+    // set the status to BLOCKED and return the status
+    if (execution.preventAutoSign && currentTx.signedTx == null) {
+      runInAction(() => {
+        currentTx.status = BackgroundTxStatus.BLOCKED;
+      });
+      return currentTx.status;
+    }
+
     if (currentTx.status === BackgroundTxStatus.SIGNING) {
       console.log(`[TxExecutor] tx[${index}] SIGNING`);
-
-      // if options are provided, temporary set the options to the current transaction
-      if (options?.signedTx) {
-        console.log(`[TxExecutor] tx[${index}] using provided signedTx`);
-        runInAction(() => {
-          currentTx.signedTx = options.signedTx;
-        });
-      }
 
       try {
         const { signedTx } = await this.signTx(
           execution.vaultId,
           currentTx,
-          execution.feeType,
+          execution.feeType ?? "average",
           options?.env
         );
 
