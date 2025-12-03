@@ -419,12 +419,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
 
+  const [isTxLoading, setIsTxLoading] = useState(false);
+  const [isButtonHolding, setIsButtonHolding] = useState(false);
+
   // 10초마다 route query 자동 refresh
   const queryRoute = swapConfigs.amountConfig.getQueryRoute();
   useEffect(() => {
-    if (queryRoute && !queryRoute.isFetching) {
+    if (
+      queryRoute &&
+      !queryRoute.isFetching &&
+      !isTxLoading &&
+      !isButtonHolding
+    ) {
       const timeoutId = setTimeout(() => {
-        if (!queryRoute.isFetching) {
+        if (!queryRoute.isFetching && !isTxLoading && !isButtonHolding) {
           queryRoute.fetch();
         }
       }, 10000);
@@ -438,7 +446,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
     // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryRoute, queryRoute?.isFetching]);
+  }, [queryRoute, queryRoute?.isFetching, isTxLoading, isButtonHolding]);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -506,8 +514,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const [calculatingTxError, setCalculatingTxError] = useState<
     Error | undefined
   >();
-
-  const [isTxLoading, setIsTxLoading] = useState(false);
 
   // const { logSwapSignOpened, logEvent, quoteIdRef } = useSwapAnalytics({
   //   inChainId: inChainId,
@@ -2126,6 +2132,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isTxLoading ||
             accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
           }
+          onHoldStart={() => setIsButtonHolding(true)}
+          onHoldEnd={() => setIsButtonHolding(false)}
         />
 
         <Gutter size="0.75rem" />
