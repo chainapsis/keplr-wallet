@@ -50,15 +50,26 @@ export function useTopUp({
 
   const remainingText = (() => {
     if (remainingTimeMs === undefined) return undefined;
-    const minutes = Math.floor(remainingTimeMs / 60000);
-    const seconds = Math.floor((remainingTimeMs % 60000) / 1000);
-    return intl.formatMessage(
-      { id: "components.top-up.wait-time" },
-      {
-        minutes: minutes.toString(),
-        seconds: seconds.toString().padStart(2, "0"),
-      }
-    );
+
+    const HOUR_MS = 60 * 60 * 1000;
+    const MINUTE_MS = 60 * 1000;
+    let time: string;
+
+    if (remainingTimeMs >= HOUR_MS) {
+      const hours = Math.floor(remainingTimeMs / HOUR_MS);
+      const minutes = Math.floor((remainingTimeMs % HOUR_MS) / MINUTE_MS);
+      time = `${hours.toString().padStart(2, "0")}h ${minutes
+        .toString()
+        .padStart(2, "0")}m`;
+    } else {
+      const minutes = Math.floor(remainingTimeMs / MINUTE_MS);
+      const seconds = Math.floor((remainingTimeMs % MINUTE_MS) / 1000);
+      time = `${minutes.toString().padStart(2, "0")}m ${seconds
+        .toString()
+        .padStart(2, "0")}s`;
+    }
+
+    return intl.formatMessage({ id: "components.top-up.wait-time" }, { time });
   })();
 
   useEffect(() => {
