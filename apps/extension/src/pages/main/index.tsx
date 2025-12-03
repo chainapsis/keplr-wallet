@@ -488,6 +488,7 @@ export const MainPage: FunctionComponent<{
                         }
                       : undefined,
                   paragraph: scene.paragraph,
+                  links: scene.links,
                   isSidePanelBeta: info.isSidePanelBeta,
                 });
               }

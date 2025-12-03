@@ -1173,7 +1173,8 @@ export class HugeQueriesStore {
   //    - 토큰의 recommendedSymbol이 이미 존재하는 그룹의 coinDenom과 일치하면(ERC20 그룹) 해당 그룹에 추가
   //    - 일치하는 그룹이 없으면 recommendedSymbol을 키로 새 그룹 생성
   // 3. BTC 토큰들은 linkedChainKey를 키로 그룹화
-  // 4. 나머지 Unknown 토큰들은 단일 그룹으로 처리
+  // 4. Starknet 메인넷 토큰들은 coinGeckoId로 그룹화
+  // 5. 나머지 Unknown 토큰들은 단일 그룹으로 처리
   @computed
   get groupedTokensMap(): Map<string, ViewToken[]> {
     const tokensMap = new Map<string, ViewToken[]>();
@@ -1256,6 +1257,29 @@ export class HugeQueriesStore {
           if (!tokensMap.has(groupKey)) {
             tokensMap.set(groupKey, []);
           }
+
+          this.addTokenToGroup(groupKey, viewToken, tokensMap);
+          processedTokens.set(viewToken, true);
+        }
+      }
+    }
+
+    // Starknet
+    for (const viewToken of allKnownBalances) {
+      if (processedTokens.has(viewToken)) {
+        continue;
+      }
+
+      const modularChainInfo = viewToken.chainInfo;
+
+      if ("starknet" in modularChainInfo && !modularChainInfo.isTestnet) {
+        const currency = viewToken.token.currency;
+
+        if (currency.coinGeckoId) {
+          const groupKey = this.findGroupKeyByCoinGeckoId(
+            currency.coinGeckoId,
+            tokensMap
+          );
 
           this.addTokenToGroup(groupKey, viewToken, tokensMap);
           processedTokens.set(viewToken, true);
@@ -1426,6 +1450,21 @@ export class HugeQueriesStore {
     }
 
     return `erc20:${recommendedSymbol}/${coinGeckoId}`;
+  }
+
+  protected findGroupKeyByCoinGeckoId(
+    coinGeckoId: string,
+    tokensMap: Map<string, ViewToken[]>
+  ): string {
+    for (const [key, viewTokens] of tokensMap.entries()) {
+      if (viewTokens.length === 0) continue;
+
+      if (viewTokens[0].token.currency.coinGeckoId === coinGeckoId) {
+        return key;
+      }
+    }
+
+    return coinGeckoId;
   }
 
   protected addTokenToGroup(

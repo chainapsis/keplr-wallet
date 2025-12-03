@@ -1262,38 +1262,45 @@ export class ChainsService {
     const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
 
     {
-      const newChainInfos = this.updatedChainInfos.slice();
-      newChainInfos.filter(
-        (chainInfo) =>
-          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
-      );
+      const newChainInfos = this.updatedChainInfos
+        .slice()
+        .filter(
+          (chainInfo) =>
+            ChainIdHelper.parse(chainInfo.chainId).identifier !==
+            chainIdentifier
+        );
       this.updatedChainInfos = newChainInfos;
     }
 
     {
-      const newChainInfos = this.suggestedChainInfos.slice();
-      newChainInfos.filter(
-        (chainInfo) =>
-          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
-      );
+      const newChainInfos = this.suggestedChainInfos
+        .slice()
+        .filter(
+          (chainInfo) =>
+            ChainIdHelper.parse(chainInfo.chainId).identifier !==
+            chainIdentifier
+        );
       this.suggestedChainInfos = newChainInfos;
     }
 
     {
-      const newChainInfos = this.repoChainInfos.slice();
-      newChainInfos.filter(
-        (chainInfo) =>
-          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
-      );
+      const newChainInfos = this.repoChainInfos
+        .slice()
+        .filter(
+          (chainInfo) =>
+            ChainIdHelper.parse(chainInfo.chainId).identifier !==
+            chainIdentifier
+        );
       this.repoChainInfos = newChainInfos;
     }
 
     {
-      const newEndpoints = this.endpoints.slice();
-      newEndpoints.filter(
-        (endpoint) =>
-          ChainIdHelper.parse(endpoint.chainId).identifier !== chainIdentifier
-      );
+      const newEndpoints = this.endpoints
+        .slice()
+        .filter(
+          (endpoint) =>
+            ChainIdHelper.parse(endpoint.chainId).identifier !== chainIdentifier
+        );
       this.endpoints = newEndpoints;
     }
 

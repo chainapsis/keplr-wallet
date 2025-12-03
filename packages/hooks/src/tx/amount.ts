@@ -110,7 +110,13 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
         const subFee = this.feeConfig.fees[0].mul(
           new Dec(this._fractionSubFeeWeight)
         );
-        return maxValue.sub(subFee).toString();
+        const finalValue = maxValue.sub(subFee);
+
+        if (finalValue.toDec().lte(new Dec(0))) {
+          return "0";
+        }
+
+        return finalValue.toString();
       }
 
       return maxValue.toString();
