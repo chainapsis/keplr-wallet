@@ -180,6 +180,15 @@ export class SwapAmountConfig extends AmountConfig {
     return this.getQueryRoute()?.provider;
   }
 
+  get requiresMultipleTxs(): boolean {
+    const txs = this.getTxsIfReady();
+    if (!txs) {
+      return false;
+    }
+
+    return txs.length > 1;
+  }
+
   @action
   setOutChainId(chainId: string): void {
     this._outChainId = chainId;
@@ -255,14 +264,21 @@ export class SwapAmountConfig extends AmountConfig {
    * @dev It is recommended to use the default slippageTolerancePercent value
    *      except when temporarily testing with a very high slippage to search for possible routes.
    */
-  async getTx(
+  async getTxs(
     slippageTolerancePercent?: number,
     priorOutAmount?: Int,
     customRecipient?: {
       chainId: string;
       recipient: string;
     }
-  ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
+  ): Promise<
+    (
+      | (MakeTxResponse & {
+          chainId: string;
+        })
+      | UnsignedEVMTransactionWithErc20Approvals
+    )[]
+  > {
     const querySwapHelper = this.getQuerySwapHelper();
     if (!querySwapHelper) {
       throw new Error("Query Swap Helper is not initialized");
@@ -335,13 +351,12 @@ export class SwapAmountConfig extends AmountConfig {
       throw new Error(txsQuery.error.message);
     }
 
-    // TODO: multiple txs support
-    const tx = this.getTxIfReady(
+    const txs = this.getTxsIfReady(
       slippageTolerancePercentToUse,
       customRecipient
     );
-    if (!tx) {
-      throw new Error("Tx is not ready");
+    if (!txs || txs.length === 0) {
+      throw new Error("Txs are not ready");
     }
 
     if (priorOutAmount) {
@@ -362,24 +377,31 @@ export class SwapAmountConfig extends AmountConfig {
       }
     }
 
-    return tx;
+    return txs;
   }
 
   /**
-   * Synchronously returns a transaction if all required data is currently available,
+   * Synchronously returns transactions if all required data is currently available,
    * without waiting for any pending queries to complete.
    *
    * @param slippageTolerancePercent - The maximum slippage tolerance percentage (default: _getSlippageTolerancePercent())
    * @param customRecipient - Optional custom recipient override for the destination chain
    * @returns The constructed transaction if ready, or `undefined` if data is not yet available
    */
-  getTxIfReady(
+  getTxsIfReady(
     slippageTolerancePercent?: number,
     customRecipient?: {
       chainId: string;
       recipient: string;
     }
-  ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
+  ):
+    | (
+        | (MakeTxResponse & {
+            chainId: string;
+          })
+        | UnsignedEVMTransactionWithErc20Approvals
+      )[]
+    | undefined {
     if (!this.currency) {
       return;
     }
@@ -441,23 +463,15 @@ export class SwapAmountConfig extends AmountConfig {
       return;
     }
 
-    // TODO: multiple txs support
-    if (transactions.length > 1) {
-      return;
-    }
-
-    const firstTx = transactions[0];
-
-    try {
-      if (firstTx.chain_type === SwapChainType.COSMOS) {
-        return this.buildCosmosTx(firstTx.tx_data);
+    const txs = transactions.map((tx) => {
+      if (tx.chain_type === SwapChainType.COSMOS) {
+        return this.buildCosmosTx(tx.tx_data);
       } else {
-        return this.buildEVMTx(firstTx.tx_data);
+        return this.buildEVMTx(tx.tx_data);
       }
-    } catch (error) {
-      console.error(error);
-      return;
-    }
+    });
+
+    return txs;
   }
 
   private getAddressSync(chainId: string): string | undefined {
@@ -502,7 +516,9 @@ export class SwapAmountConfig extends AmountConfig {
     return isChainEVMOnly ? account.ethereumHexAddress : account.bech32Address;
   }
 
-  private buildCosmosTx(txData: CosmosTxData): MakeTxResponse {
+  private buildCosmosTx(
+    txData: CosmosTxData
+  ): MakeTxResponse & { chainId: string } {
     const sourceAccount = this.accountStore.getAccount(this.chainId);
 
     if (txData.msgs.length === 0) {
@@ -510,10 +526,11 @@ export class SwapAmountConfig extends AmountConfig {
     }
 
     const msg = txData.msgs[0];
+    let tx: MakeTxResponse;
 
     switch (msg.type) {
       case "cosmos-sdk/MsgTransfer": {
-        const tx = sourceAccount.cosmos.makeIBCTransferTx(
+        tx = sourceAccount.cosmos.makeIBCTransferTx(
           {
             portId: msg.value.source_port,
             channelId: msg.value.source_channel,
@@ -525,26 +542,27 @@ export class SwapAmountConfig extends AmountConfig {
           msg.value.memo
         );
         tx.ui.overrideType("ibc-swap");
-        return tx;
+        break;
       }
       case "wasm/MsgExecuteContract": {
-        const tx = sourceAccount.cosmwasm.makeExecuteContractTx(
+        tx = sourceAccount.cosmwasm.makeExecuteContractTx(
           "unknown",
           msg.value.contract,
           msg.value.msg,
           msg.value.funds
         );
         tx.ui.overrideType("ibc-swap");
-        return tx;
+        break;
       }
       case "cctp/DepositForBurn": {
-        return sourceAccount.cosmos.makeCCTPDepositForBurnTx(
+        tx = sourceAccount.cosmos.makeCCTPDepositForBurnTx(
           msg.value.from,
           msg.value.amount,
           msg.value.destination_domain,
           msg.value.mint_recipient,
           msg.value.burn_token
         );
+        break;
       }
       case "cctp/DepositForBurnWithCaller": {
         // DepositForBurnWithCaller and MsgSend should be together on skip
@@ -577,14 +595,17 @@ export class SwapAmountConfig extends AmountConfig {
           amount: sendMsg.value.amount,
         };
 
-        return sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(
+        tx = sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(
           JSON.stringify(cctpMsgValue),
           JSON.stringify(sendMsgValue)
         );
+        break;
       }
       default:
         throw new Error("Unsupported message type");
     }
+
+    return { ...tx, chainId: txData.chain_id };
   }
 
   private buildEVMTx(
@@ -648,7 +669,7 @@ export class SwapAmountConfig extends AmountConfig {
         };
       }
 
-      // TODO: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
+      // CHECK: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
       const routeError = routeQuery.error;
       if (routeError) {
         const CCTP_BRIDGE_FEE_ERROR_MESSAGE =
@@ -724,7 +745,7 @@ export class SwapAmountConfig extends AmountConfig {
       };
     }
 
-    // TODO: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
+    // CHECK: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
     const routeError = routeQuery.error;
     if (routeError) {
       const CCTP_BRIDGE_FEE_ERROR_MESSAGE =

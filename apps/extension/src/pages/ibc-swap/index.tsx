@@ -297,11 +297,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate tx");
       }
 
-      const tx = swapConfigs.amountConfig.getTxIfReady();
+      const txs = swapConfigs.amountConfig.getTxsIfReady();
 
-      if (!tx) {
+      if (!txs || txs.length === 0) {
         throw new Error("Not ready to simulate tx");
       }
+
+      // TODO: handle multiple txs scenario here
+      const tx = txs[0];
 
       if ("send" in tx) {
         return tx;
@@ -552,7 +555,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           setIsTxLoading(true);
 
-          let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
+          let txs: (
+            | (MakeTxResponse & {
+                chainId: string;
+              })
+            | UnsignedEVMTransactionWithErc20Approvals
+          )[];
 
           const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
 
@@ -631,6 +639,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   );
                 }
 
+                // NOTE: For a more concise route display, avoid adding the chain if it's the same as the last chain in simpleRoute.
                 simpleRoute.push({
                   isOnlyEvm: isEVMChainId,
                   chainId: chainIdInKeplr,
@@ -856,12 +865,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               }
             }
 
-            // TODO: multiple txs support
-            const [_tx] = await Promise.all([
-              swapConfigs.amountConfig.getTx(undefined, priorOutAmount),
+            const [_txs] = await Promise.all([
+              swapConfigs.amountConfig.getTxs(undefined, priorOutAmount),
             ]);
 
-            tx = _tx;
+            if (_txs.length === 0) {
+              throw new Error("Txs are not ready");
+            }
+
+            txs = _txs;
           } catch (e) {
             setCalculatingTxError(e);
             setIsTxLoading(false);
@@ -985,75 +997,107 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           const backgroundTxs: BackgroundTx[] = [];
 
-          if ("send" in tx) {
-            const msgs = await tx.msgs();
+          const requiresMultipleTxs = txs.length > 1;
+          const isHardwareWallet =
+            keyRingStore.selectedKeyInfo.type === "ledger" ||
+            keyRingStore.selectedKeyInfo.type === "keystone";
 
-            // TODO: handle getShouldTopUpSignOptions?
+          for (const [txIndex, tx] of txs.entries()) {
+            if ("send" in tx) {
+              const msgs = await tx.msgs();
 
-            backgroundTxs.push({
-              status: BackgroundTxStatus.PENDING,
-              chainId: inChainId,
-              type: BackgroundTxType.COSMOS,
-              txData: {
-                aminoMsgs: msgs.aminoMsgs,
-                protoMsgs: msgs.protoMsgs,
-                rlpTypes: msgs.rlpTypes,
-                memo: swapConfigs.memoConfig.memo,
-              },
-              feeType:
-                swapConfigs.feeConfig.type === "manual"
-                  ? undefined
-                  : swapConfigs.feeConfig.type,
-              feeCurrencyDenom:
-                swapConfigs.feeConfig.fees[0].currency.coinMinimalDenom,
-            });
-          } else {
-            const ethereumAccount = ethereumAccountStore.getAccount(inChainId);
-            const isErc20InCurrency =
-              ("type" in inCurrency && inCurrency.type === "erc20") ||
-              inCurrency.coinMinimalDenom.startsWith("erc20:");
-            const erc20Approval = tx.requiredErc20Approvals?.[0];
-            const erc20ApprovalTx =
-              erc20Approval && isErc20InCurrency
-                ? ethereumAccount.makeErc20ApprovalTx(
-                    {
-                      ...inCurrency,
-                      type: "erc20",
-                      contractAddress: inCurrency.coinMinimalDenom.replace(
-                        "erc20:",
-                        ""
-                      ),
-                    },
-                    erc20Approval.spender,
-                    erc20Approval.amount
-                  )
-                : undefined;
+              // TODO: handle getShouldTopUpSignOptions?
 
-            delete tx.requiredErc20Approvals;
-
-            if (erc20ApprovalTx) {
-              backgroundTxs.push({
+              const backgroundTx: BackgroundTx = {
                 status: BackgroundTxStatus.PENDING,
-                chainId: inChainId,
-                type: BackgroundTxType.EVM,
-                txData: erc20ApprovalTx,
+                chainId: tx.chainId,
+                type: BackgroundTxType.COSMOS,
+                txData: {
+                  aminoMsgs: msgs.aminoMsgs,
+                  protoMsgs: msgs.protoMsgs,
+                  rlpTypes: msgs.rlpTypes,
+                  memo: swapConfigs.memoConfig.memo,
+                },
+                // NOTE: Only the first transaction contains fee type and fee currency denom.
+                // A Cosmos transaction can contain multiple messages, so in the case of multi-tx routes,
+                // it's sufficient to execute only the first transaction for now.
+                // The remaining transactions will be signed later according to each user's preference.
                 feeType:
-                  swapConfigs.feeConfig.type === "manual"
-                    ? undefined
-                    : swapConfigs.feeConfig.type,
-              });
+                  txIndex === 0
+                    ? swapConfigs.feeConfig.type === "manual"
+                      ? undefined
+                      : swapConfigs.feeConfig.type
+                    : undefined,
+                feeCurrencyDenom:
+                  txIndex === 0
+                    ? swapConfigs.feeConfig.fees[0].currency.coinMinimalDenom
+                    : undefined,
+              };
+
+              if (requiresMultipleTxs || isHardwareWallet) {
+                // check chain id is in executableChainIds
+                // if not, skip signing
+                // if so, sign the tx (only sign the tx and serialize it to signedTx)
+                if (executableChainIds.includes(backgroundTx.chainId)) {
+                  backgroundTx.signedTx = "TODO: signed tx here";
+                }
+              }
+
+              backgroundTxs.push(backgroundTx);
+            } else {
+              // CHECK: unsignedTx.chainId should not be null
+              const chainId = tx.chainId ? `eip155:${tx.chainId}` : "eip155:1";
+
+              const ethereumAccount = ethereumAccountStore.getAccount(chainId);
+              const isErc20InCurrency =
+                ("type" in inCurrency && inCurrency.type === "erc20") ||
+                inCurrency.coinMinimalDenom.startsWith("erc20:");
+              const erc20Approval = tx.requiredErc20Approvals?.[0];
+              const erc20ApprovalTx =
+                erc20Approval && isErc20InCurrency
+                  ? ethereumAccount.makeErc20ApprovalTx(
+                      {
+                        ...inCurrency,
+                        type: "erc20",
+                        contractAddress: inCurrency.coinMinimalDenom.replace(
+                          "erc20:",
+                          ""
+                        ),
+                      },
+                      erc20Approval.spender,
+                      erc20Approval.amount
+                    )
+                  : undefined;
+
+              delete tx.requiredErc20Approvals;
+
+              const evmTxs = erc20ApprovalTx ? [erc20ApprovalTx, tx] : [tx];
+
+              for (const evmTx of evmTxs) {
+                const backgroundTx: BackgroundTx = {
+                  status: BackgroundTxStatus.PENDING,
+                  chainId: chainId,
+                  type: BackgroundTxType.EVM,
+                  txData: evmTx,
+                  feeType:
+                    swapConfigs.feeConfig.type === "manual"
+                      ? undefined
+                      : swapConfigs.feeConfig.type,
+                };
+
+                if (requiresMultipleTxs || isHardwareWallet) {
+                  // check chain id is in executableChainIds
+                  // if not, skip signing
+                  // if so, sign the tx (only sign the tx and serialize it to signedTx)
+                  if (executableChainIds.includes(backgroundTx.chainId)) {
+                    backgroundTx.signedTx = "TODO: signed tx here";
+                  }
+                }
+
+                backgroundTxs.push(backgroundTx);
+              }
             }
-
-            backgroundTxs.push({
-              status: BackgroundTxStatus.PENDING,
-              chainId: inChainId,
-              type: BackgroundTxType.EVM,
-              txData: tx,
-            });
           }
-
-          // TODO: check if the key is hardware wallet,
-          // if so, sign the txs and set it to the background tx
 
           try {
             const executeTxMsg = new RecordAndExecuteTxsMsg(
