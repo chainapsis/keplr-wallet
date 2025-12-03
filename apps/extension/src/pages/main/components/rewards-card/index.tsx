@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { useIntl, IntlShape } from "react-intl";
 import { Box } from "../../../../components/box";
@@ -39,9 +39,49 @@ export const RewardsCard: FunctionComponent<{
     isLedger,
     isKeystone,
     claimAllIsCompleted,
-    count,
-    claimCountText,
+    succeededCount,
+    totalClaimTokenCount,
   } = useRewards();
+
+  const [showCompletionUI, setShowCompletionUI] = useState(false);
+  const [count, setCount] = useState(0);
+  const prevClaimAllIsLoadingRef = useRef(claimAllIsLoading);
+
+  useEffect(() => {
+    const wasLoading = prevClaimAllIsLoadingRef.current;
+    prevClaimAllIsLoadingRef.current = claimAllIsLoading;
+
+    if (wasLoading && claimAllIsCompleted && !claimAllIsLoading) {
+      setShowCompletionUI(true);
+      setCount(6);
+
+      const interval = setInterval(() => {
+        setCount((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setShowCompletionUI(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [claimAllIsCompleted, claimAllIsLoading]);
+
+  const claimCountText =
+    totalClaimTokenCount === 0
+      ? ""
+      : `${succeededCount}/${totalClaimTokenCount}`;
+
+  const handleClaimAll = () => {
+    setShowCompletionUI(false);
+    setCount(0);
+    claimAll();
+  };
 
   const navigateToStake = React.useCallback(() => {
     mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
@@ -119,7 +159,7 @@ export const RewardsCard: FunctionComponent<{
                 id: "page.main.components.rewards-card.view-button",
               })}
             </Body3>
-          ) : claimAllIsLoading || claimAllIsCompleted ? (
+          ) : claimAllIsLoading || showCompletionUI ? (
             <YAxis alignX="right">
               <XAxis alignY="center">
                 <Body3
@@ -179,13 +219,12 @@ export const RewardsCard: FunctionComponent<{
             <ClaimAllButton
               intl={intl}
               claimAllDisabled={claimAllDisabled}
-              claimAllIsLoading={claimAllIsLoading}
               claimAllIsCompleted={claimAllIsCompleted}
               claimCountText={claimCountText}
               count={count}
               isLedger={!!isLedger}
               isKeystone={!!isKeystone}
-              onClaimAll={claimAll}
+              onClaimAll={handleClaimAll}
               onNavigateToStake={navigateToStake}
               isHover={isClaimAllHover}
               setIsHover={setIsClaimAllHover}
@@ -202,7 +241,6 @@ export const RewardsCard: FunctionComponent<{
 type ClaimAllButtonProps = {
   intl: IntlShape;
   claimAllDisabled: boolean;
-  claimAllIsLoading: boolean;
   claimAllIsCompleted: boolean;
   claimCountText: string;
   count: number;
@@ -217,9 +255,7 @@ type ClaimAllButtonProps = {
 const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
   intl,
   claimAllDisabled,
-  claimAllIsLoading,
   claimAllIsCompleted,
-  claimCountText,
   count,
   isLedger,
   isKeystone,
@@ -241,8 +277,7 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
     id: "button.approve",
   });
 
-  const shouldDimClaimAllButton =
-    !claimAllDisabled && !claimAllIsLoading && isPressed;
+  const shouldDimClaimAllButton = !claimAllDisabled && isPressed;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -251,12 +286,7 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
       return;
     }
 
-    if (
-      isLedger ||
-      isKeystone ||
-      claimAllIsLoading ||
-      (claimAllIsCompleted && count >= 1)
-    ) {
+    if (isLedger || isKeystone || (claimAllIsCompleted && count >= 1)) {
       onNavigateToStake();
       return;
     }
@@ -265,15 +295,11 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
   };
 
   const updateLabelWidth = React.useCallback(() => {
-    if (claimAllIsLoading) {
-      setLabelWidth(undefined);
-      return;
-    }
     const target = isHover ? approveTextRef.current : claimTextRef.current;
     if (target) {
       setLabelWidth(target.offsetWidth);
     }
-  }, [isHover, claimAllIsLoading]);
+  }, [isHover]);
 
   React.useLayoutEffect(() => {
     updateLabelWidth();
@@ -290,7 +316,7 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
   return (
     <Box
       onHoverStateChange={(hovered) => {
-        if (claimAllDisabled || claimAllIsLoading) {
+        if (claimAllDisabled) {
           return;
         }
         if (!hovered) {
@@ -301,7 +327,7 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
       cursor={claimAllDisabled ? "not-allowed" : "pointer"}
       opacity={shouldDimClaimAllButton ? COMMON_HOVER_OPACITY : undefined}
       onMouseDown={() => {
-        if (claimAllDisabled || claimAllIsLoading) {
+        if (claimAllDisabled) {
           return;
         }
         setIsPressed(true);
@@ -334,18 +360,14 @@ const ClaimAllButton: FunctionComponent<ClaimAllButtonProps> = ({
               : ColorPalette["blue-300"]
           }
         >
-          {claimAllIsLoading ? (
-            claimCountText
-          ) : (
-            <ClaimTextWrapper $width={labelWidth}>
-              <ClaimAllText ref={claimTextRef} $visible={!isHover}>
-                {claimLabel}
-              </ClaimAllText>
-              <ApproveText ref={approveTextRef} $visible={isHover}>
-                {approveLabel}
-              </ApproveText>
-            </ClaimTextWrapper>
-          )}
+          <ClaimTextWrapper $width={labelWidth}>
+            <ClaimAllText ref={claimTextRef} $visible={!isHover}>
+              {claimLabel}
+            </ClaimAllText>
+            <ApproveText ref={approveTextRef} $visible={isHover}>
+              {approveLabel}
+            </ApproveText>
+          </ClaimTextWrapper>
         </Subtitle3>
       </XAxis>
     </Box>
