@@ -34,6 +34,8 @@ import {
   UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 
+const DEFAULT_PROVIDERS = [SwapProvider.SQUID, SwapProvider.SKIP];
+
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;
 
@@ -293,7 +295,10 @@ export class SwapAmountConfig extends AmountConfig {
     const slippageTolerancePercentToUse =
       slippageTolerancePercent ?? this._getSlippageTolerancePercent();
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercentToUse);
+    const routeQuery = querySwapHelper.getRoute(
+      slippageTolerancePercentToUse,
+      DEFAULT_PROVIDERS
+    );
 
     await routeQuery.waitResponse();
 
@@ -422,7 +427,10 @@ export class SwapAmountConfig extends AmountConfig {
     const slippageTolerancePercentToUse =
       slippageTolerancePercent ?? this._getSlippageTolerancePercent();
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercentToUse);
+    const routeQuery = querySwapHelper.getRoute(
+      slippageTolerancePercentToUse,
+      DEFAULT_PROVIDERS
+    );
 
     const routeResponse = routeQuery.response;
     if (!routeResponse) {
@@ -661,7 +669,10 @@ export class SwapAmountConfig extends AmountConfig {
 
       const slippageTolerancePercent = this._getSlippageTolerancePercent();
 
-      const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
+      const routeQuery = querySwapHelper.getRoute(
+        slippageTolerancePercent,
+        DEFAULT_PROVIDERS
+      );
       if (routeQuery.isFetching) {
         return {
           ...prev,
@@ -737,7 +748,10 @@ export class SwapAmountConfig extends AmountConfig {
 
     const slippageTolerancePercent = this._getSlippageTolerancePercent();
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
+    const routeQuery = querySwapHelper.getRoute(
+      slippageTolerancePercent,
+      DEFAULT_PROVIDERS
+    );
     if (routeQuery.isFetching) {
       return {
         ...prev,
@@ -959,7 +973,7 @@ export class SwapAmountConfig extends AmountConfig {
         fromAddress,
         toAddress
       )
-      .getRoute(slippageTolerancePercentToUse);
+      .getRoute(slippageTolerancePercentToUse, DEFAULT_PROVIDERS);
   }
 }
 

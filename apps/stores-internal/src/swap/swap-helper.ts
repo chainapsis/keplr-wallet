@@ -26,7 +26,10 @@ export class ObservableQuerySwapHelperInner {
     public readonly toAddress: string
   ) {}
 
-  getRoute(slippage: number): ObservableQueryRouteInnerV2 {
+  getRoute(
+    slippage: number,
+    providers?: SwapProvider[]
+  ): ObservableQueryRouteInnerV2 {
     return this.queryRoute.getRoute(
       this.fromChainId,
       this.fromDenom,
@@ -35,7 +38,8 @@ export class ObservableQuerySwapHelperInner {
       this.toDenom,
       this.fromAddress,
       this.toAddress,
-      slippage
+      slippage,
+      providers
     );
   }
 
