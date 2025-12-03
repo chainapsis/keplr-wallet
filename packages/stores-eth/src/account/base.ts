@@ -249,6 +249,79 @@ export class EthereumAccountBase {
     };
   }
 
+  /**
+   * Sign an Ethereum transaction.
+   * @param sender - The sender address.
+   * @param unsignedTx - The unsigned transaction to sign.
+   * @param options - The options for the transaction.
+   * @returns The signed transaction in serialized format.
+   */
+  async signEthereumTx(
+    sender: string,
+    unsignedTx: UnsignedTransaction,
+    options?: {
+      nonceMethod?: "pending" | "latest";
+      pendingTxs?: UnsignedTransaction[];
+    }
+  ) {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM info provided");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+
+    const pendingTxs =
+      options?.pendingTxs?.map((tx) => ({
+        to: tx.to,
+        data: tx.data,
+        value: tx.value,
+      })) ?? [];
+
+    // prevent invalid to address in pending transactions (deploy contract not supported here)
+    if (pendingTxs.some((tx) => tx.to == null || tx.to === "0x")) {
+      throw new Error("Invalid pending transaction: to is required");
+    }
+
+    const transactionCount = await keplr.ethereum.request<string>({
+      method: "eth_getTransactionCount",
+      params: [sender, options?.nonceMethod || "pending"],
+      chainId: this.chainId,
+    });
+
+    unsignedTx = {
+      ...unsignedTx,
+      nonce: parseInt(transactionCount) + (pendingTxs?.length ?? 0),
+    };
+
+    const messagePayload =
+      pendingTxs.length > 0
+        ? {
+            ...unsignedTx,
+            pendingTxs,
+          }
+        : unsignedTx;
+
+    const signEthereum = keplr.signEthereum.bind(keplr);
+
+    const signature = await signEthereum(
+      this.chainId,
+      sender,
+      JSON.stringify(messagePayload),
+      EthSignType.TRANSACTION
+    );
+
+    const isEIP1559 =
+      !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+    if (isEIP1559) {
+      unsignedTx.type = TransactionTypes.eip1559;
+    }
+
+    return serialize(unsignedTx, signature);
+  }
+
   async sendEthereumTx(
     sender: string,
     unsignedTx: UnsignedTransaction,

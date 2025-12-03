@@ -885,13 +885,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             setIsTxLoading(false);
             return;
           }
+
           setCalculatingTxError(undefined);
 
-          // prepare txs to execute
-          const vaultId = keyRingStore.selectedKeyInfo?.id;
-          if (!vaultId) {
-            throw new Error("vaultId is undefined");
+          const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+          if (!selectedKeyInfo) {
+            throw new Error("selectedKeyInfo is undefined");
           }
+
+          // prepare txs to execute
+          const vaultId = selectedKeyInfo.id;
+          const isHardwareWallet =
+            selectedKeyInfo.type === "ledger" ||
+            selectedKeyInfo.type === "keystone";
 
           let executionType: TxExecutionType;
           let historyData:
@@ -1004,15 +1010,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           const backgroundTxs: BackgroundTx[] = [];
 
           const requiresMultipleTxs = txs.length > 1;
-          const isHardwareWallet =
-            keyRingStore.selectedKeyInfo.type === "ledger" ||
-            keyRingStore.selectedKeyInfo.type === "keystone";
+
+          // TODO: handle getShouldTopUpSignOptions?
 
           for (const [txIndex, tx] of txs.entries()) {
             if ("send" in tx) {
               const msgs = await tx.msgs();
-
-              // TODO: handle getShouldTopUpSignOptions?
 
               const backgroundTx: BackgroundTx = {
                 status: BackgroundTxStatus.PENDING,
@@ -1079,7 +1082,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               const evmTxs = erc20ApprovalTx ? [erc20ApprovalTx, tx] : [tx];
 
-              for (const evmTx of evmTxs) {
+              for (const [evmTxIndex, evmTx] of evmTxs.entries()) {
                 const backgroundTx: BackgroundTx = {
                   status: BackgroundTxStatus.PENDING,
                   chainId: chainId,
@@ -1092,11 +1095,25 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 };
 
                 if (requiresMultipleTxs || isHardwareWallet) {
-                  // check chain id is in executableChainIds
-                  // if not, skip signing
-                  // if so, sign the tx (only sign the tx and serialize it to signedTx)
+                  // TODO: set first tx's gas limit and gas price if needed
+
                   if (executableChainIds.includes(backgroundTx.chainId)) {
-                    backgroundTx.signedTx = "TODO: signed tx here";
+                    const signedTx = await ethereumAccount.signEthereumTx(
+                      swapConfigs.senderConfig.sender,
+                      evmTx,
+                      {
+                        nonceMethod: "pending",
+                        pendingTxs:
+                          evmTxIndex > 0
+                            ? evmTxs.slice(0, evmTxIndex).map((tx) => ({
+                                to: tx.to,
+                                data: tx.data,
+                                value: tx.value,
+                              }))
+                            : undefined,
+                      }
+                    );
+                    backgroundTx.signedTx = signedTx;
                   }
                 }
 
