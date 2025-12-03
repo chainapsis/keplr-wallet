@@ -472,10 +472,7 @@ export const SpendableAssetView: FunctionComponent<{
       chainSearchFields
     ).filter(({ chainInfo }) => {
       if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-        if ("evm" in chainInfo) {
-          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-            chainInfo.chainId
-          );
+        if (chainStore.isEvmOnlyChain(chainInfo.chainId)) {
           return true;
         }
 

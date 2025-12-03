@@ -31,7 +31,7 @@ export function useStakedTotalPrice() {
   const stakedTotalPriceEmbedOnlyUSD = useMemo(() => {
     let result: PricePretty | undefined;
     for (const bal of hugeQueriesStore.delegations) {
-      if (!("cosmos" in bal.chainInfo)) {
+      if (!("cosmos" in bal.chainInfo) || !bal.chainInfo.isNative) {
         continue;
       }
       if (bal.price) {
@@ -46,7 +46,7 @@ export function useStakedTotalPrice() {
       }
     }
     for (const bal of hugeQueriesStore.unbondings) {
-      if (!("cosmos" in bal.chainInfo)) {
+      if (!("cosmos" in bal.chainInfo) || !bal.chainInfo.isNative) {
         continue;
       }
       if (bal.price) {

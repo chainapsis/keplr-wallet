@@ -125,20 +125,11 @@ export function useTopUp({
       const rpc = (() => {
         const modularChainInfo = chainStore.getModularChain(feeConfig.chainId);
 
-        if ("cosmos" in modularChainInfo) {
-          return modularChainInfo.cosmos.rpc;
-        }
-        if ("evm" in modularChainInfo) {
-          return modularChainInfo.evm.rpc;
-        }
-        if ("starknet" in modularChainInfo) {
-          return modularChainInfo.starknet.rpc;
-        }
-        if ("bitcoin" in modularChainInfo) {
-          return modularChainInfo.bitcoin.rpc;
+        if (!("cosmos" in modularChainInfo)) {
+          throw new Error("Topup is not supported for this chain");
         }
 
-        throw new Error("RPC is not found");
+        return modularChainInfo.cosmos.rpc;
       })();
 
       const tracer = new TendermintTxTracer(rpc, "/websocket");

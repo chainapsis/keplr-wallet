@@ -351,6 +351,7 @@ export class AccountSetBase {
     const chainInfo = this.chainGetter.getModularChain(this.chainId);
     return (
       ("evm" in chainInfo && chainInfo.evm != null) ||
+      // The condition below is needed, since some chain infos possibily do not have the `evm` field, but have a coin type of 60 and use Ethereum addresses. (e.g. Initia)
       ("cosmos" in chainInfo &&
         (chainInfo.cosmos.bip44.coinType === 60 ||
           !!chainInfo.cosmos.features?.includes("eth-address-gen") ||

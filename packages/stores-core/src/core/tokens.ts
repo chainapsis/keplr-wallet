@@ -111,13 +111,13 @@ export class TokensStore {
         this.prevTokenMap.get(chainIdentifier.identifier) ?? [];
 
       const module =
-        "evm" in modularChainInfoImpl.embedded
-          ? "evm"
+        "cosmos" in modularChainInfoImpl.embedded
+          ? "cosmos"
           : "starknet" in modularChainInfoImpl.embedded
           ? "starknet"
           : "bitcoin" in modularChainInfoImpl.embedded
           ? "bitcoin"
-          : "cosmos";
+          : "evm";
 
       if (modularChainInfoImpl.matchModule(module)) {
         modularChainInfoImpl.removeCurrencies(
