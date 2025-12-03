@@ -13,7 +13,10 @@ import {
   useSceneEvents,
   useSceneTransition,
 } from "../../../components/transition";
-import { WalletStatus } from "@keplr-wallet/stores";
+import {
+  IObservableQueryBalanceImpl,
+  WalletStatus,
+} from "@keplr-wallet/stores";
 import AnimCreating from "../../../public/assets/lottie/register/creating.json";
 import AnimCreatingLight from "../../../public/assets/lottie/register/creating-light.json";
 import lottie from "lottie-web";
@@ -22,6 +25,7 @@ import { MultiAccounts } from "@keystonehq/keystone-sdk";
 import { useTheme } from "styled-components";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { INITIA_CHAIN_ID } from "../../../config.ui";
+import { AppCurrency } from "@keplr-wallet/types";
 
 /**
  * FinalizeKeyScene is used to create the key (account).
@@ -283,7 +287,10 @@ export const FinalizeKeyScene: FunctionComponent<{
                 }
               })()
             );
-          } else if ("bitcoin" in modularChainInfo) {
+          } else if (
+            "bitcoin" in modularChainInfo ||
+            "evm" in modularChainInfo
+          ) {
             const account = accountStore.getAccount(modularChainInfo.chainId);
             promises.push(
               (async () => {
@@ -308,13 +315,28 @@ export const FinalizeKeyScene: FunctionComponent<{
         (async () => {
           const promises: Promise<unknown>[] = [];
 
-          // 스타크넷, 비트코인 관련 체인들은 `candidateAddresses`에 추가되지 않으므로 여기서 처리한다.
+          // Cosmos 외 chain들은 `candidateAddresses`에 추가되지 않으므로 여기서 처리한다.
           for (const modularChainInfo of chainStore.modularChainInfosInListUI) {
-            if ("starknet" in modularChainInfo) {
-              const account = accountStore.getAccount(modularChainInfo.chainId);
-              const mainCurrency = modularChainInfo.starknet.currencies[0];
+            const account = accountStore.getAccount(modularChainInfo.chainId);
 
-              const queryBalance = starknetQueriesStore
+            let mainCurrency: AppCurrency | undefined;
+            let queryBalance: IObservableQueryBalanceImpl | undefined;
+
+            if ("cosmos" in modularChainInfo) {
+              continue;
+            }
+
+            if ("evm" in modularChainInfo) {
+              mainCurrency = modularChainInfo.evm.currencies[0];
+              queryBalance = queriesStore
+                .get(modularChainInfo.chainId)
+                .queryBalances.getQueryEthereumHexAddress(
+                  account.ethereumHexAddress
+                )
+                .getBalance(mainCurrency);
+            } else if ("starknet" in modularChainInfo) {
+              mainCurrency = modularChainInfo.starknet.currencies[0];
+              queryBalance = starknetQueriesStore
                 .get(modularChainInfo.chainId)
                 .queryStarknetERC20Balance.getBalance(
                   modularChainInfo.chainId,
@@ -322,20 +344,9 @@ export const FinalizeKeyScene: FunctionComponent<{
                   account.starknetHexAddress,
                   mainCurrency.coinMinimalDenom
                 );
-
-              if (queryBalance) {
-                promises.push(queryBalance.waitFreshResponse());
-
-                if (mainCurrency.coinGeckoId) {
-                  // Push coingecko id to priceStore.
-                  priceStore.getPrice(mainCurrency.coinGeckoId);
-                }
-              }
             } else if ("bitcoin" in modularChainInfo) {
-              const account = accountStore.getAccount(modularChainInfo.chainId);
-              const mainCurrency = modularChainInfo.bitcoin.currencies[0];
-
-              const queryBalance = bitcoinQueriesStore
+              mainCurrency = modularChainInfo.bitcoin.currencies[0];
+              queryBalance = bitcoinQueriesStore
                 .get(modularChainInfo.chainId)
                 .queryBitcoinBalance.getBalance(
                   modularChainInfo.chainId,
@@ -343,70 +354,56 @@ export const FinalizeKeyScene: FunctionComponent<{
                   account.bitcoinAddress?.bech32Address ?? "",
                   mainCurrency.coinMinimalDenom
                 );
+            }
 
-              if (queryBalance) {
-                promises.push(queryBalance.waitFreshResponse());
+            if (queryBalance) {
+              promises.push(queryBalance.waitFreshResponse());
 
-                if (mainCurrency.coinGeckoId) {
-                  // Push coingecko id to priceStore.
-                  priceStore.getPrice(mainCurrency.coinGeckoId);
-                }
+              if (mainCurrency?.coinGeckoId) {
+                // Push coingecko id to priceStore.
+                priceStore.getPrice(mainCurrency.coinGeckoId);
               }
             }
           }
 
           for (const candidateAddress of candidateAddresses) {
-            const account = accountStore.getAccount(candidateAddress.chainId);
             const queries = queriesStore.get(candidateAddress.chainId);
-            const isEVMOnlyChain = chainStore.isEvmOnlyChain(
-              candidateAddress.chainId
-            );
             for (const bech32Address of candidateAddress.bech32Addresses) {
               // Prepare queries state to avoid UI flicker on next scene.
-              if (!isEVMOnlyChain) {
-                promises.push(
-                  queries.cosmos.queryAccount
-                    .getQueryBech32Address(bech32Address.address)
-                    .waitFreshResponse()
-                );
-              }
+              promises.push(
+                queries.cosmos.queryAccount
+                  .getQueryBech32Address(bech32Address.address)
+                  .waitFreshResponse()
+              );
+
               promises.push(
                 (async () => {
                   const chainInfo = chainStore.getModularChainInfoImpl(
                     candidateAddress.chainId
                   );
 
-                  const bal = isEVMOnlyChain
-                    ? queries.queryBalances
-                        .getQueryEthereumHexAddress(account.ethereumHexAddress)
-                        .getBalance(
-                          chainInfo.stakeCurrency ||
-                            chainInfo.getCurrencies()[0]
-                        )
-                    : queries.queryBalances
-                        .getQueryBech32Address(bech32Address.address)
-                        .getBalance(
-                          chainInfo.stakeCurrency ||
-                            chainInfo.getCurrencies()[0]
-                        );
+                  const bal = queries.queryBalances
+                    .getQueryBech32Address(bech32Address.address)
+                    .getBalance(
+                      chainInfo.stakeCurrency || chainInfo.getCurrencies()[0]
+                    );
 
                   if (bal) {
                     await bal.waitFreshResponse();
                   }
                 })()
               );
-              if (!isEVMOnlyChain) {
-                const isInitia = candidateAddress.chainId === INITIA_CHAIN_ID;
-                promises.push(
-                  isInitia
-                    ? queries.cosmos.queryInitiaDelegations
-                        .getQueryBech32Address(bech32Address.address)
-                        .waitFreshResponse()
-                    : queries.cosmos.queryDelegations
-                        .getQueryBech32Address(bech32Address.address)
-                        .waitFreshResponse()
-                );
-              }
+
+              const isInitia = candidateAddress.chainId === INITIA_CHAIN_ID;
+              promises.push(
+                isInitia
+                  ? queries.cosmos.queryInitiaDelegations
+                      .getQueryBech32Address(bech32Address.address)
+                      .waitFreshResponse()
+                  : queries.cosmos.queryDelegations
+                      .getQueryBech32Address(bech32Address.address)
+                      .waitFreshResponse()
+              );
             }
 
             const chainInfo = chainStore.getModularChainInfoImpl(

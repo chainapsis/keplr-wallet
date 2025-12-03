@@ -243,7 +243,10 @@ export const EnableChainsScene: FunctionComponent<{
                   }
                 })()
               );
-            } else if ("bitcoin" in modularChainInfo) {
+            } else if (
+              "bitcoin" in modularChainInfo ||
+              "evm" in modularChainInfo
+            ) {
               const account = accountStore.getAccount(modularChainInfo.chainId);
               promises.push(
                 (async () => {
@@ -416,10 +419,37 @@ export const EnableChainsScene: FunctionComponent<{
           enableAllChains = true;
         }
 
-        // modular chain들은 `candidateAddresses`에 추가되지 않으므로 여기서 enable 할지 판단한다.
+        // Cosmos 외 chain들은 `candidateAddresses`에 추가되지 않으므로 여기서 enable 할지 판단한다.
         for (const modularChainInfo of chainStore.modularChainInfosInListUI) {
+          const account = accountStore.getAccount(modularChainInfo.chainId);
+
+          if ("cosmos" in modularChainInfo) {
+            continue;
+          }
+
+          if ("evm" in modularChainInfo) {
+            const mainCurrency = modularChainInfo.evm.currencies[0];
+
+            const queryBalance = queriesStore
+              .get(modularChainInfo.chainId)
+              .queryBalances.getQueryEthereumHexAddress(
+                account.ethereumHexAddress
+              );
+
+            const balance = queryBalance.getBalance(mainCurrency);
+
+            if (
+              balance?.response?.data &&
+              balance.balance.toDec().gt(new Dec(0))
+            ) {
+              enableAllChains = false;
+              enabledChainIdentifiers.push(
+                ChainIdHelper.parse(modularChainInfo.chainId).identifier
+              );
+            }
+          }
+
           if ("starknet" in modularChainInfo) {
-            const account = accountStore.getAccount(modularChainInfo.chainId);
             const mainCurrency = modularChainInfo.starknet.currencies[0];
 
             const queryBalance = starknetQueriesStore
@@ -441,7 +471,6 @@ export const EnableChainsScene: FunctionComponent<{
 
           if ("bitcoin" in modularChainInfo) {
             const mainCurrency = modularChainInfo.bitcoin.currencies[0];
-            const account = accountStore.getAccount(modularChainInfo.chainId);
 
             const queryBalance = bitcoinQueriesStore
               .get(modularChainInfo.chainId)
@@ -520,14 +549,9 @@ export const EnableChainsScene: FunctionComponent<{
           for (const bech32Address of candidateAddress.bech32Addresses) {
             // Check that the account has some assets or delegations.
             // If so, enable it by default
-            const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainInfo.chainId);
-            const queryBalance = isEVMOnlyChain
-              ? queries.queryBalances.getQueryEthereumHexAddress(
-                  account.ethereumHexAddress
-                )
-              : queries.queryBalances.getQueryBech32Address(
-                  account.bech32Address
-                );
+            const queryBalance = queries.queryBalances.getQueryBech32Address(
+              account.bech32Address
+            );
             const balance = queryBalance.getBalance(mainCurrency);
 
             const chainIdentifier = ChainIdHelper.parse(
@@ -560,28 +584,20 @@ export const EnableChainsScene: FunctionComponent<{
                 enabledChainIdentifiers.push(chainIdentifier);
                 break;
               }
-
-              if (isEVMOnlyChain && balance.balance.toDec().gt(new Dec(0))) {
-                enableAllChains = false;
-                enabledChainIdentifiers.push(chainIdentifier);
-                break;
-              }
             }
 
-            if (!isEVMOnlyChain) {
-              const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
-              const queryDelegations = isInitia
-                ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
-                    bech32Address.address
-                  )
-                : queries.cosmos.queryDelegations.getQueryBech32Address(
-                    bech32Address.address
-                  );
-              if (queryDelegations.delegationBalances.length > 0) {
-                enableAllChains = false;
-                enabledChainIdentifiers.push(chainIdentifier);
-                break;
-              }
+            const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
+            const queryDelegations = isInitia
+              ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
+                  bech32Address.address
+                )
+              : queries.cosmos.queryDelegations.getQueryBech32Address(
+                  bech32Address.address
+                );
+            if (queryDelegations.delegationBalances.length > 0) {
+              enableAllChains = false;
+              enabledChainIdentifiers.push(chainIdentifier);
+              break;
             }
           }
         }
