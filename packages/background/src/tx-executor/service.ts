@@ -227,10 +227,11 @@ export class BackgroundTxExecutorService {
     // 특히나 ui에서 진행상황을 체크하는 것이 아닌 이상 notification을 통해 진행상황을 알리는 것으로 충분할 수 있다.
     const id = (this.recentTxExecutionSeq++).toString();
 
-    // if any of the transactions are not executable, set the preventAutoSign to true
-    const preventAutoSign = txs.some(
-      (tx) => !executableChainIds.includes(tx.chainId)
-    );
+    // if any of the transactions are not executable or the key is hardware wallet, set the preventAutoSign to true
+    const preventAutoSign =
+      txs.some((tx) => !executableChainIds.includes(tx.chainId)) ||
+      keyInfo.type === "ledger" ||
+      keyInfo.type === "keystone";
 
     const execution = {
       id,
