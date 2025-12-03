@@ -103,7 +103,27 @@ export const EthereumSignTxView: FunctionComponent<{
     gasConfig
   );
 
-  const [signingDataBuff, setSigningDataBuff] = useState(Buffer.from(message));
+  const [_pendingTxs] = useState<UnsignedTransaction[]>(() => {
+    const parsed = JSON.parse(Buffer.from(message).toString("utf8"));
+    if (
+      parsed.pendingTxs &&
+      Array.isArray(parsed.pendingTxs) &&
+      parsed.pendingTxs.length > 0
+    ) {
+      return parsed.pendingTxs;
+    }
+    return [];
+  });
+
+  const [signingDataBuff, setSigningDataBuff] = useState(() => {
+    const parsed = JSON.parse(Buffer.from(message).toString("utf8"));
+    if (parsed.pendingTxs) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { pendingTxs: _pendingTxs, ...txWithoutPendingTxs } = parsed;
+      return Buffer.from(JSON.stringify(txWithoutPendingTxs), "utf8");
+    }
+    return Buffer.from(message);
+  });
   const [preferNoSetFee, setPreferNoSetFee] = useState<boolean>(false);
 
   const gasSimulator = useGasSimulator(
