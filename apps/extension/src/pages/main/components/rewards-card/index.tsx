@@ -73,12 +73,6 @@ export const RewardsCard: FunctionComponent<{
     }
   }, [claimAllIsCompleted, claimAllIsLoading]);
 
-  useEffect(() => {
-    if (!claimAllIsLoading && !showCompletionUI && snapshotCount > 0) {
-      setSnapshotCount(0);
-    }
-  }, [claimAllIsLoading, showCompletionUI, snapshotCount]);
-
   const claimCountText = (() => {
     if (snapshotCount === 0) return "";
     return `${succeededCount}/${snapshotCount}`;
