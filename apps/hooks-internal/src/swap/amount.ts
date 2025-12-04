@@ -34,7 +34,8 @@ import {
   UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
 
-const DEFAULT_PROVIDERS = [SwapProvider.SQUID, SwapProvider.SKIP];
+// TODO: remove after testing, leave the providers field empty
+const DEFAULT_PROVIDERS = [SwapProvider.SKIP];
 
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;
@@ -487,13 +488,18 @@ export class SwapAmountConfig extends AmountConfig {
       return;
     }
 
-    const txs = transactions.map((tx) => {
+    const txs: (
+      | (MakeTxResponse & { chainId: string })
+      | UnsignedEVMTransactionWithErc20Approvals
+    )[] = [];
+
+    for (const tx of transactions) {
       if (tx.chain_type === SwapChainType.COSMOS) {
-        return this.buildCosmosTx(tx.tx_data);
+        txs.push(this.buildCosmosTx(tx.tx_data));
       } else {
-        return this.buildEVMTx(tx.tx_data);
+        txs.push(this.buildEVMTx(tx.tx_data));
       }
-    });
+    }
 
     return txs;
   }
@@ -543,25 +549,30 @@ export class SwapAmountConfig extends AmountConfig {
   private buildCosmosTx(
     txData: CosmosTxData
   ): MakeTxResponse & { chainId: string } {
-    const sourceAccount = this.accountStore.getAccount(this.chainId);
-
     if (txData.msgs.length === 0) {
       throw new Error("No messages in transaction");
     }
+
+    const chainId = txData.chain_id;
+    const account = this.accountStore.getAccount(chainId);
 
     const msg = txData.msgs[0];
     let tx: MakeTxResponse;
 
     switch (msg.type) {
       case "cosmos-sdk/MsgTransfer": {
-        tx = sourceAccount.cosmos.makeIBCTransferTx(
+        const currency = this.chainGetter
+          .getChain(chainId)
+          .forceFindCurrency(msg.value.token.denom);
+
+        tx = account.cosmos.makeIBCTransferTx(
           {
             portId: msg.value.source_port,
             channelId: msg.value.source_channel,
             counterpartyChainId: "", // NOTE: counterpartyChainId is not included in the server response
           },
-          this.amount[0].toDec().toString(),
-          this.amount[0].currency,
+          msg.value.token.amount,
+          currency,
           msg.value.receiver,
           msg.value.memo
         );
@@ -569,7 +580,7 @@ export class SwapAmountConfig extends AmountConfig {
         break;
       }
       case "wasm/MsgExecuteContract": {
-        tx = sourceAccount.cosmwasm.makeExecuteContractTx(
+        tx = account.cosmwasm.makeExecuteContractTx(
           "unknown",
           msg.value.contract,
           msg.value.msg,
@@ -579,7 +590,7 @@ export class SwapAmountConfig extends AmountConfig {
         break;
       }
       case "cctp/DepositForBurn": {
-        tx = sourceAccount.cosmos.makeCCTPDepositForBurnTx(
+        tx = account.cosmos.makeCCTPDepositForBurnTx(
           msg.value.from,
           msg.value.amount,
           msg.value.destination_domain,
@@ -619,7 +630,7 @@ export class SwapAmountConfig extends AmountConfig {
           amount: sendMsg.value.amount,
         };
 
-        tx = sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(
+        tx = account.cosmos.makeCCTPDepositForBurnWithCallerTx(
           JSON.stringify(cctpMsgValue),
           JSON.stringify(sendMsgValue)
         );
@@ -635,7 +646,11 @@ export class SwapAmountConfig extends AmountConfig {
   private buildEVMTx(
     txData: EVMTxData
   ): UnsignedEVMTransactionWithErc20Approvals {
-    const ethereumAccount = this.ethereumAccountStore.getAccount(this.chainId);
+    const chainId = txData.chain_id.startsWith("eip155:")
+      ? txData.chain_id
+      : `eip155:${txData.chain_id}`;
+
+    const account = this.ethereumAccountStore.getAccount(chainId);
     const hexValue = txData.value.startsWith("0x")
       ? txData.value
       : `0x${BigInt(txData.value).toString(16)}`;
@@ -643,7 +658,7 @@ export class SwapAmountConfig extends AmountConfig {
       ? txData.data
       : `0x${txData.data}`;
 
-    const tx = ethereumAccount.makeTx(txData.to, hexValue, hexData);
+    const tx = account.makeTx(txData.to, hexValue, hexData);
 
     return {
       ...tx,

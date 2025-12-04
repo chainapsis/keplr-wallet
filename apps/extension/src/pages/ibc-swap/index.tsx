@@ -67,6 +67,7 @@ import {
   RouteStepType,
   SwapProvider,
 } from "@keplr-wallet/stores-internal/build/swap/types";
+import { Button } from "../../components/button";
 // import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
@@ -178,6 +179,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const isInChainEVMOnly = chainStore.isEvmOnlyChain(inChainId);
   const inChainAccount = accountStore.getAccount(inChainId);
+  const isHardwareWallet =
+    inChainAccount.isNanoLedger || inChainAccount.isKeystone;
 
   // nonce method for EVM chain to handle pending tx
   const [nonceMethod, setNonceMethod] = useState<"latest" | "pending">(
@@ -445,7 +448,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
     // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
     // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryRoute, queryRoute?.isFetching, isTxLoading, isButtonHolding]);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
@@ -525,6 +527,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // });
 
   const isSwap = swapConfigs.amountConfig.type === "swap";
+  const isOneClickSwapDisabled =
+    swapConfigs.amountConfig.requiresMultipleTxs || isHardwareWallet;
 
   const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
     swapConfigs.amountConfig.currency,
@@ -534,6 +538,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     uiConfigStore.ibcSwapConfig.celestiaDisabled
   );
 
+  /**
+   * Topup related below
+   */
   const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
     feeConfig: swapConfigs.feeConfig,
     senderConfig: swapConfigs.senderConfig,
@@ -2142,34 +2149,59 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Gutter size="0.75rem" />
 
-        <HoldButton
-          type="submit"
-          holdDurationMs={1500}
-          disabled={
-            interactionBlocked ||
-            showUSDNWarning ||
-            showCelestiaWarning ||
-            (shouldTopUp && !isTopUpAvailable)
-          }
-          text={
-            shouldTopUp && remainingText
-              ? remainingText
-              : intl.formatMessage({
-                  id: "page.ibc-swap.button.hold-to-approve",
-                })
-          }
-          holdingText={intl.formatMessage({
-            id: "page.ibc-swap.button.keep-holding",
-          })}
-          color="primary"
-          size="large"
-          isLoading={
-            isTxLoading ||
-            accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
-          }
-          onHoldStart={() => setIsButtonHolding(true)}
-          onHoldEnd={() => setIsButtonHolding(false)}
-        />
+        {isOneClickSwapDisabled ? (
+          <Button
+            type="submit"
+            disabled={
+              interactionBlocked ||
+              showUSDNWarning ||
+              showCelestiaWarning ||
+              (shouldTopUp && !isTopUpAvailable)
+            }
+            text={
+              shouldTopUp && remainingText
+                ? remainingText
+                : intl.formatMessage({
+                    id: "page.ibc-swap.title.swap",
+                  })
+            }
+            color="primary"
+            size="large"
+            isLoading={
+              isTxLoading ||
+              accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+            }
+          />
+        ) : (
+          <HoldButton
+            type="submit"
+            holdDurationMs={1500}
+            disabled={
+              interactionBlocked ||
+              showUSDNWarning ||
+              showCelestiaWarning ||
+              (shouldTopUp && !isTopUpAvailable)
+            }
+            text={
+              shouldTopUp && remainingText
+                ? remainingText
+                : intl.formatMessage({
+                    id: "page.ibc-swap.button.hold-to-approve",
+                  })
+            }
+            holdingText={intl.formatMessage({
+              id: "page.ibc-swap.button.keep-holding",
+            })}
+            color="primary"
+            size="large"
+            isLoading={
+              isTxLoading ||
+              accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+            }
+            onHoldStart={() => setIsButtonHolding(true)}
+            onHoldEnd={() => setIsButtonHolding(false)}
+          />
+        )}
 
         <Gutter size="0.75rem" />
 
