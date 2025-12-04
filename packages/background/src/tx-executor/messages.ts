@@ -27,7 +27,8 @@ export class RecordAndExecuteTxsMsg<
     public readonly executableChainIds: string[],
     public readonly historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
-      : ExecutionTypeToHistoryData[T]
+      : ExecutionTypeToHistoryData[T],
+    public readonly historyTxIndex?: number
   ) {
     super();
   }
@@ -50,6 +51,14 @@ export class RecordAndExecuteTxsMsg<
         "direct-tx-executor",
         103,
         "executableChainIds is empty"
+      );
+    }
+
+    if (this.historyTxIndex != null && this.historyTxIndex < 0) {
+      throw new KeplrError(
+        "direct-tx-executor",
+        104,
+        "historyTxIndex is invalid"
       );
     }
   }

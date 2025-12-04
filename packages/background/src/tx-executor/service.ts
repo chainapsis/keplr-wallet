@@ -176,12 +176,15 @@ export class BackgroundTxExecutorService {
     executableChainIds: string[],
     historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
-      : ExecutionTypeToHistoryData[T]
+      : ExecutionTypeToHistoryData[T],
+    historyTxIndex?: number
   ): Promise<TxExecutionStatus> {
     console.log("[TxExecutor] recordAndExecuteTxs called:", {
       type,
       txCount: txs.length,
       executableChainIds,
+      historyData,
+      historyTxIndex,
     });
 
     if (!env.isInternalMsg) {
@@ -243,6 +246,7 @@ export class BackgroundTxExecutorService {
       timestamp: Date.now(),
       type,
       preventAutoSign,
+      historyTxIndex,
       ...(type !== TxExecutionType.UNDEFINED ? { historyData } : {}),
     } as TxExecution;
 
@@ -881,6 +885,26 @@ export class BackgroundTxExecutorService {
     return true;
   }
 
+  /**
+   * Find the index of the most recent confirmed transaction with executable chain ids.
+   * Returns -1 if not found.
+   */
+  private findHistoryTxIndex(execution: TxExecution): number {
+    if (execution.historyTxIndex != null) {
+      return execution.historyTxIndex;
+    }
+    for (let i = execution.txs.length - 1; i >= 0; i--) {
+      const tx = execution.txs[i];
+      if (
+        execution.executableChainIds.includes(tx.chainId) &&
+        tx.status === BackgroundTxStatus.CONFIRMED
+      ) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   @action
   protected recordHistoryIfNeeded(execution: TxExecution): void {
     console.log("[TxExecutor] recordHistoryIfNeeded:", {
@@ -925,8 +949,14 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      // first tx should be a cosmos tx and it should have a tx hash
-      const tx = execution.txs[0];
+      const historyTxIndex = this.findHistoryTxIndex(execution);
+      if (historyTxIndex < 0) {
+        return;
+      }
+
+      const tx = execution.txs[historyTxIndex];
+
+      // if the tx is not found or not a cosmos tx, skip recording history
       if (!tx || tx.type !== BackgroundTxType.COSMOS) {
         return;
       }
@@ -964,8 +994,15 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      // first tx should be a cosmos tx and it should have a tx hash
-      const tx = execution.txs[0];
+      const historyTxIndex = this.findHistoryTxIndex(execution);
+      if (historyTxIndex < 0) {
+        return;
+      }
+
+      const tx = execution.txs[historyTxIndex];
+
+      // if the tx is not found or not a cosmos tx, skip recording history
+      // CHECK: swap on single evm chain should be recorded as history?
       if (!tx || tx.type !== BackgroundTxType.COSMOS) {
         return;
       }
@@ -1006,8 +1043,12 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      // first tx should exist and it should have a tx hash
-      const tx = execution.txs[0];
+      const historyTxIndex = this.findHistoryTxIndex(execution);
+      if (historyTxIndex < 0) {
+        return;
+      }
+
+      const tx = execution.txs[historyTxIndex];
       if (!tx || tx.txHash == null) {
         return;
       }

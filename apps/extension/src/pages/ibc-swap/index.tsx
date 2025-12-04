@@ -1011,6 +1011,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           const requiresMultipleTxs = txs.length > 1;
 
+          // find the index of the tx to be recorded as history
+          let historyTxIndex: number;
+          if ("send" in txs[0]) {
+            historyTxIndex = 0;
+          } else {
+            historyTxIndex = txs[0].requiredErc20Approvals?.length ?? 0;
+          }
+
           // TODO: handle getShouldTopUpSignOptions?
 
           for (const [txIndex, tx] of txs.entries()) {
@@ -1128,7 +1136,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               executionType,
               backgroundTxs,
               executableChainIds,
-              historyData
+              historyData,
+              historyTxIndex
             );
 
             const executeTxStatus =

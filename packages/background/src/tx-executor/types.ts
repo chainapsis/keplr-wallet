@@ -104,6 +104,8 @@ export interface TxExecutionBase {
   readonly timestamp: number; // Timestamp when execution started
 
   readonly preventAutoSign?: boolean;
+
+  readonly historyTxIndex?: number;
 }
 
 export interface UndefinedTxExecution extends TxExecutionBase {
