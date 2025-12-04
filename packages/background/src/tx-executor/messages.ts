@@ -23,7 +23,7 @@ export class RecordAndExecuteTxsMsg<
   constructor(
     public readonly vaultId: string,
     public readonly executionType: T,
-    public readonly txs: BackgroundTx[],
+    public readonly txs: Omit<BackgroundTx, "status">[],
     public readonly executableChainIds: string[],
     public readonly historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
@@ -88,7 +88,7 @@ export class ResumeTxMsg extends Message<TxExecutionResult> {
   constructor(
     public readonly id: string,
     public readonly txIndex?: number,
-    // NOTE: these fields are optional for hardware wallet cases
+    // NOTE: these fields are optional for hardware wallet or multiple txs cases
     public readonly signedTx?: string
   ) {
     super();

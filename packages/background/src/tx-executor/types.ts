@@ -8,13 +8,8 @@ import { SwapProvider } from "../recent-send-history";
 // Transaction status
 export enum BackgroundTxStatus {
   PENDING = "pending",
-  SIGNING = "signing",
-  SIGNED = "signed",
-  BROADCASTING = "broadcasting",
-  BROADCASTED = "broadcasted",
   CONFIRMED = "confirmed",
   FAILED = "failed",
-  CANCELLED = "cancelled",
   BLOCKED = "blocked",
 }
 

@@ -181,7 +181,7 @@ export class BackgroundTxExecutorService {
     env: Env,
     vaultId: string,
     type: T,
-    txs: BackgroundTx[],
+    txs: Omit<BackgroundTx, "status">[],
     executableChainIds: string[],
     historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
@@ -246,7 +246,7 @@ export class BackgroundTxExecutorService {
       id,
       status: TxExecutionStatus.PENDING,
       vaultId: vaultId,
-      txs: txs,
+      txs: txs.map((tx) => ({ ...tx, status: BackgroundTxStatus.PENDING })),
       txIndex: -1,
       executableChainIds: executableChainIds,
       timestamp: Date.now(),
@@ -317,7 +317,7 @@ export class BackgroundTxExecutorService {
       );
     }
 
-    // Only pending/processing/blocked executions can be executed
+    // Only pending or blocked executions can be executed
     const needResume =
       execution.status === TxExecutionStatus.PENDING ||
       execution.status === TxExecutionStatus.BLOCKED;
@@ -406,19 +406,16 @@ export class BackgroundTxExecutorService {
           delete execution.historyData;
         });
         return {
-          status: execution.status,
+          status: TxExecutionStatus.BLOCKED,
         };
       }
 
       if (result.status === BackgroundTxStatus.FAILED) {
         console.log("[TxExecutor] Execution FAILED at tx index:", i);
-        runInAction(() => {
-          execution.status = TxExecutionStatus.FAILED;
-          this.removeTxExecution(id);
-        });
+        this.removeTxExecution(id);
 
         return {
-          status: execution.status,
+          status: TxExecutionStatus.FAILED,
           error: result.error,
         };
       }
@@ -431,16 +428,13 @@ export class BackgroundTxExecutorService {
       );
     }
 
-    // if the execution is completed successfully, update the batch status
+    // if the execution is completed successfully, record the history and remove the execution
     console.log("[TxExecutor] Execution COMPLETED");
-    runInAction(() => {
-      execution.status = TxExecutionStatus.COMPLETED;
-      this.recordHistoryIfNeeded(execution);
-      this.removeTxExecution(id);
-    });
+    this.recordHistoryIfNeeded(execution);
+    this.removeTxExecution(id);
 
     return {
-      status: execution.status,
+      status: TxExecutionStatus.COMPLETED,
     };
   }
 
@@ -465,35 +459,22 @@ export class BackgroundTxExecutorService {
     // Already in final state
     if (
       status === BackgroundTxStatus.CONFIRMED ||
-      status === BackgroundTxStatus.FAILED ||
-      status === BackgroundTxStatus.CANCELLED
+      status === BackgroundTxStatus.FAILED
     ) {
       console.log(`[TxExecutor] tx already in final state:`, status);
       return { status, signedTx, txHash, error };
     }
 
     // Check if blocked
-    if (
-      status === BackgroundTxStatus.BLOCKED ||
-      status === BackgroundTxStatus.PENDING
-    ) {
-      const isBlocked = !executableChainIds.includes(tx.chainId);
-      console.log(`[TxExecutor] tx blocked check:`, {
-        chainId: tx.chainId,
-        executableChainIds,
-        isBlocked,
-      });
+    const isBlocked = !executableChainIds.includes(tx.chainId);
+    console.log(`[TxExecutor] tx blocked check:`, {
+      chainId: tx.chainId,
+      executableChainIds,
+      isBlocked,
+    });
 
-      if (isBlocked) {
-        return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
-      }
-      status = BackgroundTxStatus.SIGNING;
-    }
-
-    // If signedTx is already provided, skip to SIGNED
-    if (signedTx) {
-      console.log(`[TxExecutor] tx using provided signedTx`);
-      status = BackgroundTxStatus.SIGNED;
+    if (isBlocked) {
+      return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
     }
 
     // If preventAutoSign and not signed, block
@@ -502,79 +483,62 @@ export class BackgroundTxExecutorService {
     }
 
     // SIGNING
-    if (status === BackgroundTxStatus.SIGNING) {
-      console.log(`[TxExecutor] tx SIGNING`);
-
-      try {
-        const result = await this.signTx(vaultId, tx);
-        signedTx = result.signedTx;
-        status = BackgroundTxStatus.SIGNED;
-        console.log(`[TxExecutor] tx signed successfully`);
-      } catch (e) {
-        console.error(`[TxExecutor] tx signing failed:`, e);
-        return {
-          status: BackgroundTxStatus.FAILED,
-          signedTx,
-          txHash,
-          error: e.message ?? "Transaction signing failed",
-        };
-      }
+    try {
+      const result = await this.signTx(vaultId, tx);
+      signedTx = result.signedTx;
+      console.log(`[TxExecutor] tx signed successfully`);
+    } catch (e) {
+      console.error(`[TxExecutor] tx signing failed:`, e);
+      return {
+        status: BackgroundTxStatus.FAILED,
+        signedTx,
+        txHash,
+        error: e.message ?? "Transaction signing failed",
+      };
     }
 
     // BROADCASTING
-    if (
-      status === BackgroundTxStatus.SIGNED ||
-      status === BackgroundTxStatus.BROADCASTING
-    ) {
-      console.log(`[TxExecutor] tx BROADCASTING`);
-
-      try {
-        // Create a tx copy with signedTx for broadcast
-        const txWithSignedTx = { ...tx, signedTx };
-        const result = await this.broadcastTx(txWithSignedTx);
-        txHash = result.txHash;
-        status = BackgroundTxStatus.BROADCASTED;
-        console.log(`[TxExecutor] tx broadcasted, txHash:`, txHash);
-      } catch (e) {
-        console.error(`[TxExecutor] tx broadcast failed:`, e);
-        return {
-          status: BackgroundTxStatus.FAILED,
-          signedTx,
-          txHash,
-          error: e.message ?? "Transaction broadcasting failed",
-        };
-      }
+    try {
+      // Create a tx copy with signedTx for broadcast
+      const txWithSignedTx = { ...tx, signedTx };
+      const result = await this.broadcastTx(txWithSignedTx);
+      txHash = result.txHash;
+      console.log(`[TxExecutor] tx broadcasted, txHash:`, txHash);
+    } catch (e) {
+      console.error(`[TxExecutor] tx broadcast failed:`, e);
+      return {
+        status: BackgroundTxStatus.FAILED,
+        signedTx,
+        txHash,
+        error: e.message ?? "Transaction broadcasting failed",
+      };
     }
 
     // TRACING
-    if (status === BackgroundTxStatus.BROADCASTED) {
-      console.log(`[TxExecutor] tx TRACING`);
+    try {
+      // Create a tx copy with txHash for trace
+      const txWithHash = { ...tx, txHash };
+      const confirmed = await this.traceTx(txWithHash);
+      console.log(`[TxExecutor] tx trace result:`, confirmed);
 
-      try {
-        // Create a tx copy with txHash for trace
-        const txWithHash = { ...tx, txHash };
-        const confirmed = await this.traceTx(txWithHash);
-        console.log(`[TxExecutor] tx trace result:`, confirmed);
-
-        if (confirmed) {
-          status = BackgroundTxStatus.CONFIRMED;
-        } else {
-          return {
-            status: BackgroundTxStatus.FAILED,
-            signedTx,
-            txHash,
-            error: "Transaction failed",
-          };
-        }
-      } catch (e) {
-        console.error(`[TxExecutor] tx trace failed:`, e);
+      if (confirmed) {
+        status = BackgroundTxStatus.CONFIRMED;
+      } else {
         return {
           status: BackgroundTxStatus.FAILED,
           signedTx,
           txHash,
-          error: e.message ?? "Transaction confirmation failed",
+          error: "Transaction failed",
         };
       }
+    } catch (e) {
+      console.error(`[TxExecutor] tx trace failed:`, e);
+      return {
+        status: BackgroundTxStatus.FAILED,
+        signedTx,
+        txHash,
+        error: e.message ?? "Transaction confirmation failed",
+      };
     }
 
     console.log(`[TxExecutor] tx final status:`, status);

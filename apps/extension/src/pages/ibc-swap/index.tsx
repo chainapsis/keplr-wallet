@@ -41,7 +41,6 @@ import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
   BackgroundTx,
-  BackgroundTxStatus,
   BackgroundTxType,
   IBCTransferHistoryData,
   IBCSwapHistoryData,
@@ -1022,7 +1021,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           const executableChainIds = [inChainId];
 
-          const backgroundTxs: BackgroundTx[] = [];
+          const backgroundTxs: Omit<BackgroundTx, "status">[] = [];
 
           const requiresMultipleTxs = txs.length > 1;
 
@@ -1038,8 +1037,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if ("send" in tx) {
               const msgs = await tx.msgs();
 
-              const backgroundTx: BackgroundTx = {
-                status: BackgroundTxStatus.PENDING,
+              const backgroundTx: Omit<BackgroundTx, "status"> = {
                 chainId: tx.chainId,
                 type: BackgroundTxType.COSMOS,
                 txData: {
@@ -1124,8 +1122,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               const evmTxs = erc20ApprovalTx ? [erc20ApprovalTx, tx] : [tx];
 
               for (const [evmTxIndex, evmTx] of evmTxs.entries()) {
-                const backgroundTx: BackgroundTx = {
-                  status: BackgroundTxStatus.PENDING,
+                const backgroundTx: Omit<BackgroundTx, "status"> = {
                   chainId: chainId,
                   type: BackgroundTxType.EVM,
                   txData: evmTx,
