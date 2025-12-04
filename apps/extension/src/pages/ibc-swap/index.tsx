@@ -4,6 +4,7 @@ import React, {
   useLayoutEffect,
   useState,
 } from "react";
+import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../components/box";
 import { useStore } from "../../stores";
@@ -136,6 +137,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
   const notification = useNotification();
+  const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -1081,6 +1083,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     }
                   );
 
+                  // 서명 화면에서 빠져나오기
+                  // TODO: 이게 맞냐
+                  navigate(-1);
+
                   backgroundTx.signedTx = Buffer.from(result.tx).toString(
                     "base64"
                   );
@@ -1152,6 +1158,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                             : undefined,
                       }
                     );
+
+                    navigate(-1);
+
                     backgroundTx.signedTx = signedTx;
                   }
                 }
