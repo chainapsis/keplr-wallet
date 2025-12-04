@@ -3,9 +3,9 @@ import { ROUTE } from "./constants";
 import {
   BackgroundTx,
   TxExecutionType,
-  TxExecutionStatus,
   TxExecution,
   ExecutionTypeToHistoryData,
+  TxExecutionResult,
 } from "./types";
 
 /**
@@ -15,7 +15,7 @@ import {
  */
 export class RecordAndExecuteTxsMsg<
   T extends TxExecutionType = TxExecutionType
-> extends Message<TxExecutionStatus> {
+> extends Message<TxExecutionResult> {
   public static type() {
     return "record-and-execute-txs";
   }
@@ -80,7 +80,7 @@ export class RecordAndExecuteTxsMsg<
  * Resume existing direct transactions by execution id and transaction index
  * This message is used to resume the execution of direct transactions that were paused by waiting for the asset to be bridged or other reasons.
  */
-export class ResumeTxMsg extends Message<TxExecutionStatus> {
+export class ResumeTxMsg extends Message<TxExecutionResult> {
   public static type() {
     return "resume-tx";
   }

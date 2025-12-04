@@ -255,3 +255,8 @@ export type TxExecution =
   | IBCTransferTxExecution
   | IBCSwapTxExecution
   | SwapV2TxExecution;
+
+export interface TxExecutionResult {
+  status: TxExecutionStatus;
+  error?: string;
+}

@@ -1020,6 +1020,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }
 
           // TODO: handle getShouldTopUpSignOptions?
+          // if one-click swap, topup here
+          // if not, topup in the sign page
 
           for (const [txIndex, tx] of txs.entries()) {
             if ("send" in tx) {
@@ -1140,15 +1142,16 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               historyTxIndex
             );
 
-            const executeTxStatus =
-              await new InExtensionMessageRequester().sendMessage(
-                BACKGROUND_PORT,
-                executeTxMsg
-              );
-            if (executeTxStatus === TxExecutionStatus.FAILED) {
-              throw new Error("Transaction execution failed");
+            const result = await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              executeTxMsg
+            );
+            if (result.status === TxExecutionStatus.FAILED) {
+              throw new Error(result.error ?? "Transaction execution failed");
             }
 
+            // Treat blocked state as successful for now (since this is a multi-tx case),
+            // and guide the user to resume the transaction later through history tracking ui.
             notification.show(
               "success",
               intl.formatMessage({ id: "notification.transaction-success" }),

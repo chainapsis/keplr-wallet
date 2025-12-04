@@ -17,6 +17,7 @@ import {
   EVMBackgroundTx,
   CosmosBackgroundTx,
   ExecutionTypeToHistoryData,
+  TxExecutionResult,
 } from "./types";
 import {
   action,
@@ -178,7 +179,7 @@ export class BackgroundTxExecutorService {
       ? undefined
       : ExecutionTypeToHistoryData[T],
     historyTxIndex?: number
-  ): Promise<TxExecutionStatus> {
+  ): Promise<TxExecutionResult> {
     console.log("[TxExecutor] recordAndExecuteTxs called:", {
       type,
       txCount: txs.length,
@@ -264,7 +265,7 @@ export class BackgroundTxExecutorService {
     id: string,
     txIndex?: number,
     signedTx?: string
-  ): Promise<TxExecutionStatus> {
+  ): Promise<TxExecutionResult> {
     console.log("[TxExecutor] resumeTx called:", {
       id,
       txIndex,
@@ -277,7 +278,6 @@ export class BackgroundTxExecutorService {
     }
 
     return await this.executeTxs(id, {
-      env,
       txIndex,
       signedTx,
     });
@@ -286,11 +286,10 @@ export class BackgroundTxExecutorService {
   protected async executeTxs(
     id: string,
     options?: {
-      env?: Env;
       txIndex?: number;
       signedTx?: string;
     }
-  ): Promise<TxExecutionStatus> {
+  ): Promise<TxExecutionResult> {
     console.log("[TxExecutor] executeTxs started:", { id, options });
 
     const execution = this.getTxExecution(id);
@@ -319,7 +318,9 @@ export class BackgroundTxExecutorService {
       execution.status === TxExecutionStatus.BLOCKED;
     if (!needResume) {
       console.log("[TxExecutor] No need to resume, status:", execution.status);
-      return execution.status;
+      return {
+        status: execution.status,
+      };
     }
 
     // check if the key is valid
@@ -352,13 +353,10 @@ export class BackgroundTxExecutorService {
 
       if (options?.txIndex != null && i === options.txIndex) {
         txStatus = await this.executePendingTx(id, i, {
-          env: options?.env,
           signedTx: options.signedTx,
         });
       } else {
-        txStatus = await this.executePendingTx(id, i, {
-          env: options?.env,
-        });
+        txStatus = await this.executePendingTx(id, i);
       }
 
       console.log(`[TxExecutor] tx[${i}] result:`, txStatus);
@@ -376,7 +374,9 @@ export class BackgroundTxExecutorService {
           execution.status = TxExecutionStatus.BLOCKED;
         });
         this.recordHistoryIfNeeded(execution);
-        return execution.status;
+        return {
+          status: execution.status,
+        };
       }
 
       // if the tx is failed, the execution should be stopped
@@ -385,7 +385,10 @@ export class BackgroundTxExecutorService {
         runInAction(() => {
           execution.status = TxExecutionStatus.FAILED;
         });
-        return execution.status;
+        return {
+          status: execution.status,
+          error: this.extractErrorFromExecution(execution),
+        };
       }
 
       // something went wrong, should not happen
@@ -402,14 +405,15 @@ export class BackgroundTxExecutorService {
       execution.status = TxExecutionStatus.COMPLETED;
     });
     this.recordHistoryIfNeeded(execution);
-    return execution.status;
+    return {
+      status: execution.status,
+    };
   }
 
   protected async executePendingTx(
     id: string,
     index: number,
     options?: {
-      env?: Env;
       signedTx?: string;
     }
   ): Promise<BackgroundTxStatus> {
@@ -883,6 +887,19 @@ export class BackgroundTxExecutorService {
 
     // consider success
     return true;
+  }
+
+  /**
+   * Extract error message from failed transaction in execution.
+   * Returns undefined if no failed transaction found.
+   */
+  private extractErrorFromExecution(
+    execution: TxExecution
+  ): string | undefined {
+    const failedTx = execution.txs.find(
+      (tx) => tx.status === BackgroundTxStatus.FAILED
+    );
+    return failedTx?.error;
   }
 
   /**
