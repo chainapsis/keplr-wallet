@@ -60,7 +60,7 @@ import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { getSwapWarnings } from "./utils/swap-warnings";
 import { FeeCoverageDescription } from "../../components/top-up";
 import { useTopUp } from "../../hooks/use-topup";
-// import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
+import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 import { useSwapFeeBps } from "./hooks/use-swap-fee-bps";
 import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
 import {
@@ -1032,10 +1032,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             historyTxIndex = txs[0].requiredErc20Approvals?.length ?? 0;
           }
 
-          // TODO: handle getShouldTopUpSignOptions?
-          // if one-click swap, topup here
-          // if not, topup in the sign page
-
           for (const [txIndex, tx] of txs.entries()) {
             if ("send" in tx) {
               const msgs = await tx.msgs();
@@ -1067,11 +1063,27 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               };
 
               if (requiresMultipleTxs || isHardwareWallet) {
-                // check chain id is in executableChainIds
+                // check chain id is in executableChainIds and it's the first tx
                 // if not, skip signing
                 // if so, sign the tx (only sign the tx and serialize it to signedTx)
-                if (executableChainIds.includes(backgroundTx.chainId)) {
-                  backgroundTx.signedTx = "TODO: signed tx here";
+                if (
+                  executableChainIds.includes(backgroundTx.chainId) &&
+                  txIndex === 0
+                ) {
+                  const result = await tx.sign(
+                    swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                      swapConfigs.feeConfig.toStdFee(),
+                    swapConfigs.memoConfig.memo,
+                    {
+                      preferNoSetFee: true,
+                      preferNoSetMemo: false,
+                      ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
+                    }
+                  );
+
+                  backgroundTx.signedTx = Buffer.from(result.tx).toString(
+                    "base64"
+                  );
                 }
               }
 
@@ -1120,7 +1132,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 if (requiresMultipleTxs || isHardwareWallet) {
                   // TODO: set first tx's gas limit and gas price if needed
 
-                  if (executableChainIds.includes(backgroundTx.chainId)) {
+                  // check chain id is in executableChainIds and it's the first tx
+                  if (
+                    executableChainIds.includes(backgroundTx.chainId) &&
+                    txIndex === 0
+                  ) {
                     const signedTx = await ethereumAccount.signEthereumTx(
                       swapConfigs.senderConfig.sender,
                       evmTx,

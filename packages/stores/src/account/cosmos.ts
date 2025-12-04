@@ -394,18 +394,21 @@ export class CosmosAccountImpl {
     });
   }
 
-  // Return the tx hash.
-  protected async broadcastMsgs(
-    msgs: ProtoMsgsOrWithAminoMsgs,
+  protected async signMsgs(
+    msgs:
+      | ProtoMsgsOrWithAminoMsgs
+      | (() => Promise<ProtoMsgsOrWithAminoMsgs> | ProtoMsgsOrWithAminoMsgs),
     fee: StdFee,
     memo: string = "",
-    signOptions?: KeplrSignOptionsWithAltSignMethods
-  ): Promise<{
-    txHash: Uint8Array;
-    signDoc: StdSignDoc | SignDoc;
-  }> {
+    signOptions?: KeplrSignOptionsWithAltSignMethods,
+    keplrClient?: Keplr
+  ) {
     if (this.base.walletStatus !== WalletStatus.Loaded) {
       throw new Error(`Wallet is not loaded: ${this.base.walletStatus}`);
+    }
+
+    if (typeof msgs === "function") {
+      msgs = await msgs();
     }
 
     const isDirectSign = !msgs.aminoMsgs || msgs.aminoMsgs.length === 0;
@@ -447,10 +450,9 @@ export class CosmosAccountImpl {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const keplr = (await this.base.getKeplr())!;
+    const keplr = keplrClient ?? (await this.base.getKeplr())!;
 
-    // NOTE: CHECK THIS LOGIC FOR BACKGROUND TX EXECUTOR
-    const signedTx = await (async () => {
+    return await (async () => {
       if (isDirectSign) {
         return await this.createSignedTxWithDirectSign(
           keplr,
@@ -652,6 +654,22 @@ export class CosmosAccountImpl {
         };
       }
     })();
+  }
+
+  // Return the tx hash.
+  protected async broadcastMsgs(
+    msgs: ProtoMsgsOrWithAminoMsgs,
+    fee: StdFee,
+    memo: string = "",
+    signOptions?: KeplrSignOptionsWithAltSignMethods
+  ): Promise<{
+    txHash: Uint8Array;
+    signDoc: StdSignDoc | SignDoc;
+  }> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.base.getKeplr())!;
+
+    const signedTx = await this.signMsgs(msgs, fee, memo, signOptions, keplr);
 
     // Should use bind to avoid "this" problem
     let sendTx = keplr.sendTx.bind(keplr);
@@ -993,6 +1011,16 @@ export class CosmosAccountImpl {
           this.base.setTxTypeInProgress("");
           throw e;
         }
+      },
+      sign: async (
+        fee: StdFee,
+        memo: string = "",
+        signOptions?: KeplrSignOptionsWithAltSignMethods
+      ): Promise<{
+        tx: Uint8Array;
+        signDoc: StdSignDoc | SignDoc;
+      }> => {
+        return this.signMsgs(msgs, fee, memo, signOptions);
       },
       send: async (
         fee: StdFee,
