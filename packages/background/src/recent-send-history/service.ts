@@ -2411,7 +2411,12 @@ export class RecentSendHistoryService {
           history.swapRefundInfo = {
             chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
             amount: [
-              { amount: asset_location.amount, denom: asset_location.denom },
+              {
+                amount: asset_location.amount,
+                denom: isEVMChainId
+                  ? `erc20:${asset_location.denom}`
+                  : asset_location.denom,
+              },
             ],
           };
         }
