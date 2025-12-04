@@ -1563,10 +1563,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   }
 
   get modularChainInfos(): ModularChainInfo[] {
-    console.log(
-      "ChainStore modularChainInfos getter:",
-      this._modularChainInfos
-    );
     return this._modularChainInfos;
   }
 
@@ -1750,11 +1746,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
       return new ModularChainInfoImpl(modularChainInfo, this);
     });
-
-    console.log(
-      "setEmbeddedChainInfos 완료:",
-      this._modularChainInfoImpls.map((impl) => impl.embedded)
-    );
   }
 
   @action
@@ -1819,8 +1810,6 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
       return new ModularChainInfoImpl(modularChainInfo, this);
     });
-
-    console.log("setEmbeddedChainInfosV2 완료:", this._modularChainInfos);
   }
 
   getCurrencyRegistrar(
