@@ -5,7 +5,7 @@ import {
   UIProperties,
 } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec, Int, RatePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -564,6 +564,9 @@ export class SwapAmountConfig extends AmountConfig {
         const currency = this.chainGetter
           .getChain(chainId)
           .forceFindCurrency(msg.value.token.denom);
+        const normalizedAmount = new Dec(msg.value.token.amount)
+          .quo(DecUtils.getPrecisionDec(currency.coinDecimals))
+          .toString();
 
         tx = account.cosmos.makeIBCTransferTx(
           {
@@ -571,7 +574,7 @@ export class SwapAmountConfig extends AmountConfig {
             channelId: msg.value.source_channel,
             counterpartyChainId: "", // NOTE: counterpartyChainId is not included in the server response
           },
-          msg.value.token.amount,
+          normalizedAmount,
           currency,
           msg.value.receiver,
           msg.value.memo
