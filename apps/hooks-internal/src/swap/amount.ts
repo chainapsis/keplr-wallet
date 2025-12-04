@@ -322,12 +322,20 @@ export class SwapAmountConfig extends AmountConfig {
     const chainIdsToAddresses: Record<string, string> = {};
 
     for (const chainId of requiredChainIds) {
+      const normalizedChainId = normalizeChainId(chainId);
+
+      // required_chain_ids can contain duplicated chain ids,
+      // so avoid adding the chain if it's already in the map
+      if (chainIdsToAddresses[normalizedChainId]) {
+        continue;
+      }
+
       const address = await this.getAddressAsync(chainId);
       if (!address) {
         throw new Error("Address is not set");
       }
 
-      chainIdsToAddresses[normalizeChainId(chainId)] = address;
+      chainIdsToAddresses[normalizedChainId] = address;
     }
 
     if (customRecipient) {
@@ -442,12 +450,20 @@ export class SwapAmountConfig extends AmountConfig {
     const chainIdsToAddresses: Record<string, string> = {};
 
     for (const chainId of requiredChainIds) {
+      const normalizedChainId = normalizeChainId(chainId);
+
+      // required_chain_ids can contain duplicated chain ids,
+      // so avoid adding the chain if it's already in the map
+      if (chainIdsToAddresses[normalizedChainId]) {
+        continue;
+      }
+
       const address = this.getAddressSync(chainId);
       if (!address) {
         return;
       }
 
-      chainIdsToAddresses[normalizeChainId(chainId)] = address;
+      chainIdsToAddresses[normalizedChainId] = address;
     }
 
     if (customRecipient) {

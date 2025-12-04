@@ -645,14 +645,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   );
                 }
 
-                // NOTE: For a more concise route display, avoid adding the chain if it's the same as the last chain in simpleRoute.
-                simpleRoute.push({
-                  isOnlyEvm: isEVMChainId,
-                  chainId: chainIdInKeplr,
-                  receiver: isEVMChainId
-                    ? receiverAccount.ethereumHexAddress
-                    : receiverAccount.bech32Address,
-                });
+                // required_chain_ids can contain duplicated chain ids,
+                // so avoid adding the chain if it's the same as the last chain in simpleRoute.
+                if (
+                  simpleRoute.length === 0 ||
+                  simpleRoute[simpleRoute.length - 1].chainId !== chainIdInKeplr
+                ) {
+                  simpleRoute.push({
+                    isOnlyEvm: isEVMChainId,
+                    chainId: chainIdInKeplr,
+                    receiver: isEVMChainId
+                      ? receiverAccount.ethereumHexAddress
+                      : receiverAccount.bech32Address,
+                  });
+                }
               }
             } else {
               // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.
