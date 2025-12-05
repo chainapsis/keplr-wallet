@@ -1110,35 +1110,6 @@ export class BackgroundTxExecutorService {
     return execution;
   }
 
-  /**
-   * Cancel execution by execution id
-   */
-  @action
-  async cancelTxExecution(id: string): Promise<void> {
-    const execution = this.recentTxExecutionMap.get(id);
-    if (!execution) {
-      return;
-    }
-
-    const currentStatus = execution.status;
-
-    // Only pending/processing/blocked executions can be cancelled
-    if (
-      currentStatus !== TxExecutionStatus.PENDING &&
-      currentStatus !== TxExecutionStatus.PROCESSING &&
-      currentStatus !== TxExecutionStatus.BLOCKED
-    ) {
-      return;
-    }
-
-    // CHECK: cancellation is really needed?
-    execution.status = TxExecutionStatus.CANCELLED;
-
-    if (currentStatus === TxExecutionStatus.PROCESSING) {
-      // TODO: cancel the current transaction execution...
-    }
-  }
-
   @action
   protected removeTxExecution(id: string): void {
     this.recentTxExecutionMap.delete(id);
@@ -1152,7 +1123,6 @@ export class BackgroundTxExecutorService {
     const completedStatuses = [
       TxExecutionStatus.COMPLETED,
       TxExecutionStatus.FAILED,
-      TxExecutionStatus.CANCELLED,
     ];
 
     for (const [id, execution] of this.recentTxExecutionMap) {

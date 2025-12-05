@@ -151,34 +151,3 @@ export class GetTxExecutionMsg extends Message<TxExecution | undefined> {
     return GetTxExecutionMsg.type();
   }
 }
-
-/**
- * Cancel execution by execution id
- */
-export class CancelTxExecutionMsg extends Message<void> {
-  public static type() {
-    return "cancel-tx-execution";
-  }
-
-  constructor(public readonly id: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.id) {
-      throw new KeplrError("direct-tx-executor", 101, "id is empty");
-    }
-  }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return CancelTxExecutionMsg.type();
-  }
-}

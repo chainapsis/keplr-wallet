@@ -70,7 +70,6 @@ export enum TxExecutionStatus {
   BLOCKED = "blocked",
   COMPLETED = "completed",
   FAILED = "failed",
-  CANCELLED = "cancelled",
 }
 
 export enum TxExecutionType {

@@ -5,7 +5,6 @@ import { BackgroundTxExecutorService } from "./service";
 import {
   RecordAndExecuteTxsMsg,
   ResumeTxMsg,
-  CancelTxExecutionMsg,
   GetTxExecutionMsg,
 } from "./messages";
 
@@ -16,7 +15,6 @@ export function init(
   router.registerMessage(RecordAndExecuteTxsMsg);
   router.registerMessage(ResumeTxMsg);
   router.registerMessage(GetTxExecutionMsg);
-  router.registerMessage(CancelTxExecutionMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }
