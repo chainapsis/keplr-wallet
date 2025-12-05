@@ -36,7 +36,7 @@ const AtomoneMintPhotonMessagePretty: FunctionComponent<{
 }> = observer(({ chainId }) => {
   const { chainStore } = useStore();
 
-  const chainName = chainStore.getChain(chainId).chainName;
+  const chainName = chainStore.getModularChain(chainId).chainName;
 
   return (
     <FormattedMessage

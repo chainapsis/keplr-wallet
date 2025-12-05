@@ -17,7 +17,7 @@ export class ObservableQueryIbcPfmTransfer {
     (chainId: string, coinMinimalDenom: string): NoneIBCBridgeInfo[] => {
       const res: NoneIBCBridgeInfo[] = [];
 
-      const chainInfo = this.chainStore.getChain(chainId);
+      const chainInfo = this.chainStore.getModularChain(chainId);
 
       const candidateChainIds = this.queryChains.chains
         .filter((c) => {
@@ -52,7 +52,7 @@ export class ObservableQueryIbcPfmTransfer {
 
         if (candidateAsset) {
           const currencyFound = this.chainStore
-            .getChain(chainId)
+            .getModularChainInfoImpl(chainId)
             .findCurrencyWithoutReaction(candidateAsset.denom);
 
           if (currencyFound) {
@@ -68,13 +68,20 @@ export class ObservableQueryIbcPfmTransfer {
     }
   );
 
+  isSwappableChain = computedFn((chainId: string): boolean => {
+    return this.chainStore
+      .getModularChainInfoImpl(chainId)
+      .matchModules({ or: ["cosmos", "evm"] });
+  });
+
   getIBCChannels = computedFn(
     (chainId: string, denom: string): IBCChannel[] => {
-      if (!this.chainStore.hasChain(chainId)) {
-        return [];
-      }
-
-      if (!this.chainStore.getChain(chainId).hasFeature("ibc-transfer")) {
+      if (
+        !this.isSwappableChain(chainId) ||
+        !this.chainStore
+          .getModularChainInfoImpl(chainId)
+          .hasFeature("ibc-transfer")
+      ) {
         return [];
       }
 
@@ -103,7 +110,7 @@ export class ObservableQueryIbcPfmTransfer {
       }[] = [];
 
       for (const assetChainId of Object.keys(assetsFromSource)) {
-        if (this.chainStore.hasChain(assetChainId)) {
+        if (this.isSwappableChain(assetChainId)) {
           const assets = assetsFromSource[assetChainId]!.assets;
           // TODO: 미래에는 assets가 두개 이상이 될수도 있다고 한다.
           //       근데 지금은 한개로만 고정되어 있다고 한다...
@@ -112,10 +119,12 @@ export class ObservableQueryIbcPfmTransfer {
             const asset = assets[0];
             if (
               asset.chainId === assetChainId &&
-              this.chainStore.hasChain(asset.chainId) &&
-              this.chainStore.hasChain(asset.originChainId)
+              this.isSwappableChain(asset.chainId) &&
+              this.isSwappableChain(asset.originChainId)
             ) {
-              if (!this.chainStore.isInChainInfosInListUI(asset.chainId)) {
+              if (
+                !this.chainStore.isInModularChainInfosInListUI(asset.chainId)
+              ) {
                 continue;
               }
 
@@ -127,10 +136,10 @@ export class ObservableQueryIbcPfmTransfer {
               }[] = [];
 
               const currency = this.chainStore
-                .getChain(chainId)
+                .getModularChainInfoImpl(chainId)
                 .findCurrencyWithoutReaction(denom);
               const destinationCurrency = this.chainStore
-                .getChain(asset.chainId)
+                .getModularChainInfoImpl(asset.chainId)
                 .findCurrencyWithoutReaction(asset.denom);
 
               if (
@@ -143,7 +152,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !currency.originChainId ||
                     !currency.originCurrency ||
-                    !this.chainStore.hasChain(currency.originChainId)
+                    !this.isSwappableChain(currency.originChainId)
                   ) {
                     continue;
                   }
@@ -164,7 +173,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainStore.hasChain(path.clientChainId)
+                        !this.isSwappableChain(path.clientChainId)
                       );
                     })
                   ) {
@@ -195,7 +204,7 @@ export class ObservableQueryIbcPfmTransfer {
                   if (
                     !destinationCurrency.originChainId ||
                     !destinationCurrency.originCurrency ||
-                    !this.chainStore.hasChain(destinationCurrency.originChainId)
+                    !this.isSwappableChain(destinationCurrency.originChainId)
                   ) {
                     continue;
                   }
@@ -217,7 +226,7 @@ export class ObservableQueryIbcPfmTransfer {
                         !path.counterpartyPortId ||
                         !path.counterpartyChannelId ||
                         !path.clientChainId ||
-                        !this.chainStore.hasChain(path.clientChainId)
+                        !this.isSwappableChain(path.clientChainId)
                       );
                     })
                   ) {
@@ -247,7 +256,9 @@ export class ObservableQueryIbcPfmTransfer {
                 // (If channel is only one, no need to check packet forwarding because it is direct transfer)
                 if (channels.length > 1) {
                   if (
-                    !this.chainStore.getChain(chainId).hasFeature("ibc-go") ||
+                    !this.chainStore
+                      .getModularChainInfoImpl(chainId)
+                      .hasFeature("ibc-go") ||
                     !this.queryChains.isSupportsMemo(chainId)
                   ) {
                     pfmPossibility = false;
@@ -258,7 +269,7 @@ export class ObservableQueryIbcPfmTransfer {
                       const channel = channels[i];
                       if (
                         !this.chainStore
-                          .getChain(channel.counterpartyChainId)
+                          .getModularChainInfoImpl(channel.counterpartyChainId)
                           .hasFeature("ibc-go") ||
                         !this.queryChains.isSupportsMemo(
                           channel.counterpartyChainId
@@ -303,10 +314,12 @@ export class ObservableQueryIbcPfmTransfer {
         .sort((a, b) => {
           // Sort by chain name.
           return this.chainStore
-            .getChain(a.destinationChainId)
+            .getModularChain(a.destinationChainId)
             .chainName.trim()
             .localeCompare(
-              this.chainStore.getChain(b.destinationChainId).chainName.trim()
+              this.chainStore
+                .getModularChain(b.destinationChainId)
+                .chainName.trim()
             );
         });
     }

@@ -71,8 +71,11 @@ export class AddressBookConfig {
     // Sync and clear the config if the chain is removed.
     autorun(() => {
       const chainIdentifierMap = new Map<string, boolean>();
-      for (const chainInfo of this.chainStore.chainInfos) {
-        chainIdentifierMap.set(chainInfo.chainIdentifier, true);
+      for (const chainInfo of this.chainStore.modularChainInfos) {
+        chainIdentifierMap.set(
+          ChainIdHelper.parse(chainInfo.chainId).identifier,
+          true
+        );
       }
       for (const starknetChainInfo of this.chainStore.modularChainInfos.filter(
         (modularChainInfo) => "starknet" in modularChainInfo
@@ -252,13 +255,16 @@ export class AddressBookConfig {
   }
 
   protected async migrateLegacy(): Promise<void> {
-    for (const chainInfo of this.chainStore.chainInfos) {
+    for (const chainInfo of this.chainStore.modularChainInfos) {
       const addressBook = await this.legacyKVStore.get<AddressBookData[]>(
         // 초기버전에서 이걸 chain name으로 했었는데 이건 잘못된 선택이였음.
         chainInfo.chainName
       );
       if (addressBook) {
-        this.addressBookMap.set(chainInfo.chainIdentifier, addressBook);
+        this.addressBookMap.set(
+          ChainIdHelper.parse(chainInfo.chainId).identifier,
+          addressBook
+        );
       }
     }
   }

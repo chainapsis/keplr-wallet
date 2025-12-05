@@ -84,8 +84,9 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
           const isStarknet = "starknet" in viewToken.chainInfo;
           const stakingUrl = isStarknet
             ? "https://dashboard.endur.fi/stake"
-            : "walletUrlForStaking" in viewToken.chainInfo
-            ? viewToken.chainInfo.walletUrlForStaking
+            : "cosmos" in viewToken.chainInfo &&
+              !!viewToken.chainInfo.cosmos.walletUrlForStaking
+            ? viewToken.chainInfo.cosmos.walletUrlForStaking
             : undefined;
 
           const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);

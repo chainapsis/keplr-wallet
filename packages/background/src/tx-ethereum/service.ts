@@ -32,7 +32,7 @@ export class BackgroundTxEthereumService {
     }
 
     try {
-      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+      const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
       const evmInfo = ChainsService.getEVMInfo(chainInfo);
       if (!evmInfo) {
         throw new Error("No EVM info provided");

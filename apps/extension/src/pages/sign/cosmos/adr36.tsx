@@ -234,13 +234,19 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
               const signDocWrapper =
                 signInteractionStore.waitingData.data.signDocWrapper;
 
+              const modularChainInfo = chainStore.getModularChain(
+                signInteractionStore.waitingData.data.chainId
+              );
+
+              if (!("cosmos" in modularChainInfo)) {
+                throw new Error("Not a cosmos chain");
+              }
+
               if (
                 signDocWrapper.mode !== "amino" ||
                 !checkAndValidateADR36AminoSignDoc(
                   signDocWrapper.aminoSignDoc,
-                  chainStore.getChain(
-                    signInteractionStore.waitingData.data.chainId
-                  ).bech32Config?.bech32PrefixAccAddr
+                  modularChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
                 )
               ) {
                 throw new Error("Invalid sign doc for adr36");
@@ -253,7 +259,9 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 presignOptions = {
                   useWebHID: uiConfigStore.useWebHIDLedger,
                   signEthPlainJSON: chainStore
-                    .getChain(signInteractionStore.waitingData.data.chainId)
+                    .getModularChainInfoImpl(
+                      signInteractionStore.waitingData.data.chainId
+                    )
                     .hasFeature("evm-ledger-sign-plain-json"),
                 };
               } else if (
@@ -262,7 +270,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
                 setIsKeystoneInteracting(true);
                 setKeystoneInteractingError(undefined);
                 const isEthSigning = KeyRingService.isEthermintLike(
-                  chainStore.getChain(
+                  chainStore.getModularChain(
                     signInteractionStore.waitingData.data.chainId
                   )
                 );
@@ -343,7 +351,7 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
         {chainId && (
           <ArbitraryMsgWalletDetails
             walletName={signerInfo.name}
-            chainInfo={chainStore.getChain(chainId)}
+            chainInfo={chainStore.getModularChain(chainId)}
             addressInfo={{
               type: "bech32",
               address: signerInfo.address,

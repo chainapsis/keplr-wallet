@@ -174,7 +174,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                 <FormattedMessage id="page.permission.basic-access.select-chain-title" />
               </Body2>
               <Dropdown
-                items={chainStore.chainInfos
+                items={chainStore.modularChainInfos
                   .filter((chainInfo) =>
                     chainStore.isEvmChain(chainInfo.chainId)
                   )
@@ -222,7 +222,7 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
                       : ColorPalette["gray-50"]
                   }
                 >
-                  {chainStore.getChain(data.chainIds[0]).chainName}
+                  {chainStore.getModularChain(data.chainIds[0]).chainName}
                 </Subtitle3>
               </Box>
               <Box
