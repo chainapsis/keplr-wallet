@@ -38,12 +38,12 @@ interface BackgroundTxBase {
 
 export interface EVMBackgroundTx extends BackgroundTxBase {
   readonly type: BackgroundTxType.EVM;
-  readonly txData: UnsignedTransaction;
+  txData: UnsignedTransaction;
 }
 
 export interface CosmosBackgroundTx extends BackgroundTxBase {
   readonly type: BackgroundTxType.COSMOS;
-  readonly txData: {
+  txData: {
     aminoMsgs?: Msg[];
     protoMsgs: Any[];
 
