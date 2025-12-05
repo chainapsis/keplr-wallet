@@ -2,6 +2,7 @@ import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import {
   BackgroundTx,
+  BackgroundTxStatus,
   TxExecutionType,
   TxExecution,
   ExecutionTypeToHistoryData,
@@ -23,7 +24,9 @@ export class RecordAndExecuteTxsMsg<
   constructor(
     public readonly vaultId: string,
     public readonly executionType: T,
-    public readonly txs: Omit<BackgroundTx, "status">[],
+    public readonly txs: (BackgroundTx & {
+      status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
+    })[],
     public readonly executableChainIds: string[],
     public readonly historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined

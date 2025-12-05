@@ -198,7 +198,9 @@ export class BackgroundTxExecutorService {
     env: Env,
     vaultId: string,
     type: T,
-    txs: Omit<BackgroundTx, "status">[],
+    txs: (BackgroundTx & {
+      status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
+    })[],
     executableChainIds: string[],
     historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
@@ -263,7 +265,7 @@ export class BackgroundTxExecutorService {
       id,
       status: TxExecutionStatus.PENDING,
       vaultId: vaultId,
-      txs: txs.map((tx) => ({ ...tx, status: BackgroundTxStatus.PENDING })),
+      txs,
       txIndex: -1,
       executableChainIds: executableChainIds,
       timestamp: Date.now(),

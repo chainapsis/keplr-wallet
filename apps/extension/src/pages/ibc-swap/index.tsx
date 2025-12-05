@@ -41,6 +41,7 @@ import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
 import {
   BackgroundTx,
+  BackgroundTxStatus,
   BackgroundTxType,
   IBCTransferHistoryData,
   IBCSwapHistoryData,
@@ -68,6 +69,7 @@ import {
   SwapProvider,
 } from "@keplr-wallet/stores-internal/build/swap/types";
 import { Button } from "../../components/button";
+import { EVMGasSimulateKind } from "@keplr-wallet/types";
 // import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
@@ -1023,7 +1025,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           const executableChainIds = [inChainId];
 
-          const backgroundTxs: Omit<BackgroundTx, "status">[] = [];
+          const backgroundTxs: (BackgroundTx & {
+            status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
+          })[] = [];
 
           const requiresMultipleTxs = txs.length > 1;
 
@@ -1039,9 +1043,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if ("send" in tx) {
               const msgs = await tx.msgs();
 
-              const backgroundTx: Omit<BackgroundTx, "status"> = {
+              const backgroundTx: BackgroundTx & {
+                status:
+                  | BackgroundTxStatus.PENDING
+                  | BackgroundTxStatus.CONFIRMED;
+              } = {
                 chainId: tx.chainId,
                 type: BackgroundTxType.COSMOS,
+                status: BackgroundTxStatus.PENDING,
                 txData: {
                   aminoMsgs: msgs.aminoMsgs,
                   protoMsgs: msgs.protoMsgs,
@@ -1123,13 +1132,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               const evmTxs = erc20ApprovalTx ? [erc20ApprovalTx, tx] : [tx];
 
-              // TODO: if evmSimulateKind가 bundle인데 callback으로 erc20 approval만 계산되었다면,
-              // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음
-              // swap 트랜잭션의 서명을 처리해줘야만 한다.
-              // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵하도록 해야한다.
-
               for (const [evmTxIndex, evmTx] of evmTxs.entries()) {
-                const backgroundTx: Omit<BackgroundTx, "status"> = {
+                const backgroundTx: BackgroundTx & {
+                  status:
+                    | BackgroundTxStatus.PENDING
+                    | BackgroundTxStatus.CONFIRMED;
+                } = {
                   chainId: chainId,
                   type: BackgroundTxType.EVM,
                   txData: evmTx,
@@ -1137,7 +1145,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     swapConfigs.feeConfig.type === "manual"
                       ? undefined
                       : swapConfigs.feeConfig.type,
+                  status: BackgroundTxStatus.PENDING,
                 };
+
+                const isFirstAndApprovalTx =
+                  evmTxIndex === 0 && erc20ApprovalTx != null;
+
+                // TODO: if evmSimulateKind가 bundle인데 callback으로 erc20 approval만 계산되었다면,
+                // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음 swap 트랜잭션의 서명을 처리해줘야만 한다.
+                // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵한다.
+                if (
+                  isFirstAndApprovalTx &&
+                  evmSimulateKind === EVMGasSimulateKind.APPROVAL_ONLY_SIMULATED
+                ) {
+                }
 
                 if (requiresMultipleTxs || isHardwareWallet) {
                   // TODO: set first tx's gas limit and gas price if needed
@@ -1150,17 +1171,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   ) {
                     const signedTx = await ethereumAccount.signEthereumTx(
                       swapConfigs.senderConfig.sender,
-                      evmTx,
+                      {
+                        ...evmTx,
+                        ...(evmTxIndex !== 0 && erc20Approval != null
+                          ? { requiredErc20Approvals: [erc20Approval] }
+                          : {}),
+                      },
                       {
                         nonceMethod: "pending",
-                        pendingTxs:
-                          evmTxIndex > 0
-                            ? evmTxs.slice(0, evmTxIndex).map((tx) => ({
-                                to: tx.to,
-                                data: tx.data,
-                                value: tx.value,
-                              }))
-                            : undefined,
                       }
                     );
 
@@ -1200,6 +1218,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               intl.formatMessage({ id: "notification.transaction-success" }),
               ""
             );
+
+            // TODO: inChainId에서 필요한 상태 업데이트
 
             // if ("send" in tx) {
             //   await tx.send(
