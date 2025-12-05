@@ -4,6 +4,7 @@ import {
   GetIBCHistoriesMsg,
   GetSkipHistoriesMsg,
   GetSwapV2HistoriesMsg,
+  HideSwapV2HistoryMsg,
   IBCHistory,
   RemoveIBCHistoryMsg,
   RemoveSkipHistoryMsg,
@@ -333,12 +334,18 @@ export const IbcHistoryView: FunctionComponent<{
               history={history}
               removeHistory={(id) => {
                 const requester = new InExtensionMessageRequester();
-                const msg = new RemoveSwapV2HistoryMsg(id);
-                requester
-                  .sendMessage(BACKGROUND_PORT, msg)
-                  .then((histories) => {
-                    setSwapV2Histories(histories);
-                  });
+                if (history.requiresNextTransaction && !history.trackDone) {
+                  // do not remove the history before the tracking is done
+                  const msg = new HideSwapV2HistoryMsg(id);
+                  requester.sendMessage(BACKGROUND_PORT, msg);
+                } else {
+                  const msg = new RemoveSwapV2HistoryMsg(id);
+                  requester
+                    .sendMessage(BACKGROUND_PORT, msg)
+                    .then((histories) => {
+                      setSwapV2Histories(histories);
+                    });
+                }
               }}
             />
           );
@@ -1435,6 +1442,10 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return history.simpleRoute[failedRouteIndex];
     }
   })();
+
+  if (history.hidden) {
+    return null;
+  }
 
   return (
     <Box

@@ -2162,6 +2162,7 @@ export class RecentSendHistoryService {
     routeDurationSeconds: number = 0,
     txHash: string,
     isOnlyUseBridge?: boolean,
+    requiresNextTransaction?: boolean,
     backgroundExecutionId?: string
   ): string {
     const id = (this.recentSwapV2HistorySeq++).toString();
@@ -2187,6 +2188,7 @@ export class RecentSendHistoryService {
       swapRefundInfo: undefined,
       notified: undefined,
       backgroundExecutionId: backgroundExecutionId,
+      requiresNextTransaction,
     };
 
     this.recentSwapV2HistoryMap.set(id, history);
@@ -2668,10 +2670,38 @@ export class RecentSendHistoryService {
     );
   }
 
+  @action
+  hideRecentSwapV2History(id: string): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+
+    if (!history.requiresNextTransaction) {
+      return false;
+    }
+
+    // only hide if the history requires next transaction
+    history.hidden = true;
+    return true;
+  }
+
+  @action
+  showRecentSwapV2History(id: string): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+    history.hidden = false;
+    return true;
+  }
+
+  @action
   removeRecentSwapV2History(id: string): boolean {
     return this.recentSwapV2HistoryMap.delete(id);
   }
 
+  @action
   clearAllRecentSwapV2History(): void {
     this.recentSwapV2HistoryMap.clear();
   }

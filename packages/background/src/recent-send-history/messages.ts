@@ -576,7 +576,8 @@ export class RecordTxWithSwapV2Msg extends Message<string> {
     },
     public readonly routeDurationSeconds: number,
     public readonly txHash: string,
-    public readonly isOnlyUseBridge?: boolean
+    public readonly isOnlyUseBridge?: boolean,
+    public readonly requiresNextTransaction?: boolean
   ) {
     super();
   }
@@ -664,6 +665,28 @@ export class ClearAllSwapV2HistoryMsg extends Message<void> {
   }
 
   constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllSwapV2HistoryMsg.type();
+  }
+}
+
+export class HideSwapV2HistoryMsg extends Message<void> {
+  public static type() {
+    return "hide-swap-v2-history";
+  }
+
+  constructor(public readonly id: string) {
     super();
   }
 

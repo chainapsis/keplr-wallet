@@ -150,6 +150,23 @@ export class BackgroundTxExecutorService {
         for (const chainId of newExecutableChainIds) {
           execution.executableChainIds.push(chainId);
         }
+
+        // if there is a pending tx that is executable, force display the swap v2 history
+        if (
+          execution.type === TxExecutionType.SWAP_V2 &&
+          execution.historyId != null
+        ) {
+          const hasPendingExecutableTx = execution.txs.some(
+            (tx) =>
+              tx.status === BackgroundTxStatus.PENDING &&
+              execution.executableChainIds.includes(tx.chainId)
+          );
+          if (hasPendingExecutableTx) {
+            this.recentSendHistoryService.showRecentSwapV2History(
+              execution.historyId
+            );
+          }
+        }
       });
 
       // if the key is hardware wallet, do not resume the execution automatically
@@ -1042,6 +1059,16 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
+      // if there is a tx that is not executable, we need to record the history with requiresNextTransaction
+      // so that the history can be displayed again once the tx is executable
+      const requiresNextTransaction = execution.txs.some(
+        (tx) => !execution.executableChainIds.includes(tx.chainId)
+      );
+      console.log(
+        "[TxExecutor] requiresNextTransaction:",
+        requiresNextTransaction
+      );
+
       const id = this.recentSendHistoryService.recordTxWithSwapV2(
         historyData.fromChainId,
         historyData.toChainId,
@@ -1055,6 +1082,7 @@ export class BackgroundTxExecutorService {
         historyData.routeDurationSeconds,
         tx.txHash,
         historyData.isOnlyUseBridge,
+        requiresNextTransaction,
         execution.id
       );
 

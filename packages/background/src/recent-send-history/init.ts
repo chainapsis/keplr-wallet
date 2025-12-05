@@ -16,6 +16,7 @@ import {
   GetSwapV2HistoriesMsg,
   RemoveSwapV2HistoryMsg,
   ClearAllSwapV2HistoryMsg,
+  HideSwapV2HistoryMsg,
 } from "./messages";
 import { ROUTE } from "./constants";
 import { getHandler } from "./handler";
@@ -38,6 +39,7 @@ export function init(router: Router, service: RecentSendHistoryService): void {
   router.registerMessage(GetSwapV2HistoriesMsg);
   router.registerMessage(RemoveSwapV2HistoryMsg);
   router.registerMessage(ClearAllSwapV2HistoryMsg);
+  router.registerMessage(HideSwapV2HistoryMsg);
 
   router.addHandler(ROUTE, getHandler(service));
 }

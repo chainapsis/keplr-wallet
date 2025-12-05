@@ -22,6 +22,7 @@ import {
   GetSwapV2HistoriesMsg,
   RemoveSwapV2HistoryMsg,
   ClearAllSwapV2HistoryMsg,
+  HideSwapV2HistoryMsg,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
 
@@ -109,6 +110,11 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
         return handleClearAllSwapV2HistoryMsg(service)(
           env,
           msg as ClearAllSwapV2HistoryMsg
+        );
+      case HideSwapV2HistoryMsg:
+        return handleHideSwapV2HistoryMsg(service)(
+          env,
+          msg as HideSwapV2HistoryMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -294,7 +300,8 @@ const handleRecordTxWithSwapV2Msg: (
       msg.notificationInfo,
       msg.routeDurationSeconds,
       msg.txHash,
-      msg.isOnlyUseBridge
+      msg.isOnlyUseBridge,
+      msg.requiresNextTransaction
     );
   };
 };
@@ -321,5 +328,13 @@ const handleClearAllSwapV2HistoryMsg: (
 ) => InternalHandler<ClearAllSwapV2HistoryMsg> = (service) => {
   return (_env, _msg) => {
     service.clearAllRecentSwapV2History();
+  };
+};
+
+const handleHideSwapV2HistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<HideSwapV2HistoryMsg> = (service) => {
+  return (_env, msg) => {
+    service.hideRecentSwapV2History(msg.id);
   };
 };
