@@ -3952,6 +3952,65 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     ],
     features: [],
   },
+  {
+    chainId: "zigchain-1",
+    chainName: "ZIGChain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/chain.png",
+    rpc: "https://rpc-zigchain.keplr.app",
+    rest: "https://lcd-zigchain.keplr.app",
+    bip44: { coinType: 118 },
+    bech32Config: {
+      bech32PrefixAccAddr: "zig",
+      bech32PrefixAccPub: "zigpub",
+      bech32PrefixValAddr: "zigvaloper",
+      bech32PrefixValPub: "zigvaloperpub",
+      bech32PrefixConsAddr: "zigvalcons",
+      bech32PrefixConsPub: "zigvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "ZIG",
+        coinMinimalDenom: "uzig",
+        coinDecimals: 6,
+        coinGeckoId: "zignaly",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
+      },
+      {
+        coinDenom: "stzig",
+        coinMinimalDenom:
+          "coin.zig109f7g2rzl2aqee7z6gffn8kfe9cpqx0mjkk7ethmx8m2hq4xpe9snmaam2.stzig",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/stzig.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ZIG",
+        coinMinimalDenom: "uzig",
+        coinDecimals: 6,
+        coinGeckoId: "zignaly",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
+        gasPriceStep: {
+          low: 0.0025,
+          average: 0.025,
+          high: 0.05,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "ZIG",
+      coinMinimalDenom: "uzig",
+      coinDecimals: 6,
+      coinGeckoId: "zignaly",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
+    },
+    features: ["cosmwasm"],
+  },
 ];
 
 // The origins that are able to pass any permission that external webpages can have.

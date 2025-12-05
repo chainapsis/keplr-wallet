@@ -15,6 +15,7 @@ import { ModalProps } from "./types";
 import Color from "color";
 import SimpleBar from "simplebar-react";
 import { ColorPalette } from "../../styles";
+import { useTheme } from "styled-components";
 
 const AnimatedSimpleBar = animated(SimpleBar);
 
@@ -133,6 +134,7 @@ const ModalChild: FunctionComponent<
   forceNotOverflowAuto,
   disableBackdrop,
 }) => {
+  const theme = useTheme();
   const onCloseTransitionEndRef = useRef(onCloseTransitionEnd);
   onCloseTransitionEndRef.current = onCloseTransitionEnd;
   useLayoutEffect(() => {
@@ -204,7 +206,11 @@ const ModalChild: FunctionComponent<
         backgroundColor: disableBackdrop
           ? "rgba(0,0,0,0)"
           : transition.to((t) =>
-              Color(ColorPalette["gray-550"])
+              Color(
+                theme.mode === "light"
+                  ? ColorPalette["gray-550"]
+                  : ColorPalette["gray-700"]
+              )
                 .alpha(t * 0.55)
                 .string()
             ),
