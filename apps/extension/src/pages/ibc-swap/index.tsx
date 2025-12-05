@@ -307,7 +307,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate tx");
       }
 
-      // TODO: handle multiple txs scenario here
+      // only estimate gas for the first tx
       const tx = txs[0];
 
       if ("send" in tx) {
@@ -318,33 +318,16 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         );
         const sender = swapConfigs.senderConfig.sender;
 
-        const isErc20InCurrency =
-          ("type" in inCurrency && inCurrency.type === "erc20") ||
-          inCurrency.coinMinimalDenom.startsWith("erc20:");
-        const erc20Approval = tx.requiredErc20Approvals?.[0];
-        const erc20ApprovalTx =
-          erc20Approval && isErc20InCurrency
-            ? ethereumAccount.makeErc20ApprovalTx(
-                {
-                  ...inCurrency,
-                  type: "erc20",
-                  contractAddress: inCurrency.coinMinimalDenom.replace(
-                    "erc20:",
-                    ""
-                  ),
-                },
-                erc20Approval.spender,
-                erc20Approval.amount
-              )
-            : undefined;
-
-        delete tx.requiredErc20Approvals;
-
         return {
           simulate: () =>
             ethereumAccount
-              .simulateGas(sender, erc20ApprovalTx ?? tx)
-              .then(({ gasUsed }) => {
+              .simulateGasWithPendingErc20Approval(sender, tx)
+              .then(({ gasUsed, erc20ApprovalGasUsed, ...rest }) => {
+                // TODO: gas estimation 결과에 대한 처리 로직 추가
+                console.log("gasUsed", gasUsed);
+                console.log("erc20ApprovalGasUsed", erc20ApprovalGasUsed);
+                console.log("rest", rest);
+
                 if (
                   chainStore
                     .getChain(inChainId)
@@ -362,11 +345,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       swapConfigs.feeConfig.setL1DataFee(
                         new Dec(BigInt(l1DataFee))
                       );
-                      return { gasUsed };
+                      return {
+                        gasUsed: gasUsed
+                          ? gasUsed + (erc20ApprovalGasUsed ?? 0)
+                          : erc20ApprovalGasUsed ?? 0,
+                      };
                     });
                 }
 
-                return { gasUsed };
+                return {
+                  gasUsed: gasUsed
+                    ? gasUsed + (erc20ApprovalGasUsed ?? 0)
+                    : erc20ApprovalGasUsed ?? 0,
+                };
               }),
         };
       }
