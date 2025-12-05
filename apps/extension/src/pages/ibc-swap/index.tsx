@@ -594,6 +594,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           let provider: SwapProvider | undefined;
           let routeDurationSeconds: number | undefined;
           let isInterChainSwap: boolean = false;
+          let isSingleEVMChainOperation: boolean = false;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // swapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하므로 굳이 여기서 또 하지 않는다.
@@ -609,11 +610,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isInterChainSwap = steps.some(
               (step) => step.type === RouteStepType.BRIDGE
             );
+            isSingleEVMChainOperation =
+              isInChainEVMOnly && inChainId === outChainId && !isInterChainSwap;
             provider = queryRoute.response.data.provider;
 
             // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
             // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
-            if (isInterChainSwap) {
+            // 단일 evm 체인 위에서의 스왑인 경우에는 history data 구성을 위해 여기서 처리한다.
+            if (isInterChainSwap || isSingleEVMChainOperation) {
               routeDurationSeconds = queryRoute.response.data.estimated_time;
 
               for (const chainId of queryRoute.response.data
@@ -919,7 +923,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             | IBCSwapHistoryData
             | SwapV2HistoryData
             | undefined;
-          if (isInterChainSwap) {
+          if (isInterChainSwap || isSingleEVMChainOperation) {
             executionType = TxExecutionType.SWAP_V2;
             historyData = {
               fromChainId: inChainId,
