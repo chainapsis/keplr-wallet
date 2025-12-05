@@ -1450,7 +1450,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
   return (
     <Box
       padding="1.25rem"
-      borderRadius="0.375rem"
+      borderRadius="1.25rem"
       backgroundColor={
         theme.mode === "light" ? ColorPalette.white : ColorPalette["gray-600"]
       }
@@ -1618,7 +1618,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               );
             }
 
-            // skip history의 amount에는 [sourceChain의 amount, destinationChain의 expected amount]가 들어있으므로
+            // swap v2 history의 amount에는 [sourceChain의 amount, destinationChain의 expected amount]가 들어있으므로
             // 첫 번째 amount만 사용
             const assets = (() => {
               const amount = history.amount[0];

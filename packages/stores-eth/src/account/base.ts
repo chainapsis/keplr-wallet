@@ -265,29 +265,14 @@ export class EthereumAccountBase {
 
     const erc20ApprovalTx = erc20ApprovalTxs[0];
 
+    // First, estimate gas for the ERC20 approval tx itself.
+    // This result is reused whether the bundle simulation with state diff succeeds or falls back.
+    const erc20ApprovalSimResult = await this.simulateGas(
+      sender,
+      erc20ApprovalTx
+    );
+
     try {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const keplr = (await this.getKeplr())!;
-
-      const erc20ApprovalGasEstimated = await keplr.ethereum.request<
-        string | undefined
-      >({
-        method: "eth_estimateGas",
-        params: [
-          {
-            from: sender,
-            to: erc20ApprovalTx.to,
-            value: erc20ApprovalTx.value,
-            data: erc20ApprovalTx.data,
-          },
-        ],
-        chainId: this.chainId,
-      });
-
-      if (!erc20ApprovalGasEstimated) {
-        throw new Error("Failed to estimate gas for ERC20 approval");
-      }
-
       // State diff tracing for the ERC20 approval transaction
       const approvalStateDiff = await traceCallWithDiff(chainInfo.rpc, {
         from: sender,
@@ -321,16 +306,14 @@ export class EthereumAccountBase {
       return {
         kind: EVMGasSimulateKind.TX_BUNDLE_SIMULATED,
         gasUsed: result.gasUsed,
-        erc20ApprovalGasUsed: parseInt(erc20ApprovalGasEstimated),
+        erc20ApprovalGasUsed: erc20ApprovalSimResult.gasUsed,
       };
     } catch (e) {
       console.error("Failed to simulate gas with pending ERC20 approval", e);
 
-      // fallback to simulate only the erc20 approval tx
-      const result = await this.simulateGas(sender, erc20ApprovalTx);
       return {
         kind: EVMGasSimulateKind.APPROVAL_ONLY_SIMULATED,
-        erc20ApprovalGasUsed: result.gasUsed,
+        erc20ApprovalGasUsed: erc20ApprovalSimResult.gasUsed,
       };
     }
   }
@@ -467,6 +450,8 @@ export class EthereumAccountBase {
     unsignedTx: UnsignedEVMTransactionWithErc20Approvals,
     options?: {
       nonceMethod?: "pending" | "latest";
+      // Whether to offset nonce by the number of required ERC20 approvals
+      considerRequiredErc20ApprovalsForNonce?: boolean;
     }
   ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
@@ -488,7 +473,9 @@ export class EthereumAccountBase {
       ...unsignedTx,
       nonce:
         parseInt(transactionCount) +
-        (unsignedTx.requiredErc20Approvals?.length ?? 0),
+        (options?.considerRequiredErc20ApprovalsForNonce
+          ? unsignedTx.requiredErc20Approvals?.length ?? 0
+          : 0),
     };
 
     const signEthereum = keplr.signEthereum.bind(keplr);

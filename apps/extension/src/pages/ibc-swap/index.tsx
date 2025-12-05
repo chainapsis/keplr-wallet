@@ -1362,6 +1362,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       },
                       {
                         nonceMethod: "pending",
+                        considerRequiredErc20ApprovalsForNonce:
+                          evmTxIndex !== 0 && erc20Approval != null,
                       }
                     );
 
