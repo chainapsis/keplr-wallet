@@ -46,6 +46,7 @@ export const RewardsCard: FunctionComponent<{
   const [showCompletionUI, setShowCompletionUI] = useState(false);
   const [count, setCount] = useState(0);
   const prevClaimAllIsLoadingRef = useRef(claimAllIsLoading);
+  const [snapshotCount, setSnapshotCount] = useState(0);
 
   useEffect(() => {
     const wasLoading = prevClaimAllIsLoadingRef.current;
@@ -72,14 +73,15 @@ export const RewardsCard: FunctionComponent<{
     }
   }, [claimAllIsCompleted, claimAllIsLoading]);
 
-  const claimCountText =
-    totalClaimTokenCount === 0
-      ? ""
-      : `${succeededCount}/${totalClaimTokenCount}`;
+  const claimCountText = (() => {
+    if (snapshotCount === 0) return "";
+    return `${succeededCount}/${snapshotCount}`;
+  })();
 
   const handleClaimAll = () => {
     setShowCompletionUI(false);
     setCount(0);
+    setSnapshotCount(totalClaimTokenCount);
     claimAll();
   };
 
