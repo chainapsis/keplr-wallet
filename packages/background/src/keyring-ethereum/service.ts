@@ -11,6 +11,7 @@ import {
   ChainInfo,
   EthereumSignResponse,
   EthSignType,
+  JsonRpcResponse,
 } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -1300,12 +1301,7 @@ export class KeyRingEthereumService {
             this.chainsService.getEVMInfoOrThrow(currentChainId);
 
           return (
-            await simpleFetch<{
-              jsonrpc: string;
-              id: number;
-              result: any;
-              error?: Error;
-            }>(currentChainEVMInfo.rpc, {
+            await simpleFetch<JsonRpcResponse<any>>(currentChainEVMInfo.rpc, {
               method: "POST",
               headers: {
                 "content-type": "application/json",
