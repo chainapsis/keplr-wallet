@@ -449,6 +449,7 @@ export class CosmosAccountImpl {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.base.getKeplr())!;
 
+    // NOTE: CHECK THIS LOGIC FOR BACKGROUND TX EXECUTOR
     const signedTx = await (async () => {
       if (isDirectSign) {
         return await this.createSignedTxWithDirectSign(

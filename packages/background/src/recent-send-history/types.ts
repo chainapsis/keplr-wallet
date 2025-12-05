@@ -34,6 +34,8 @@ export type IBCHistory = {
 
   txHash: string;
 
+  backgroundExecutionId?: string;
+
   txFulfilled?: boolean;
   txError?: string;
   packetTimeout?: boolean;
@@ -563,6 +565,8 @@ export interface SwapV2History {
       denom: string;
     }[];
   };
+
+  backgroundExecutionId?: string;
 
   trackDone?: boolean; // status tracking이 완료되었는지 여부
   trackError?: string; // status tracking 중 에러가 발생했는지 여부
