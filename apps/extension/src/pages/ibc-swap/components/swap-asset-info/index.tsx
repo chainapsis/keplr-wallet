@@ -785,12 +785,11 @@ const SelectDestinationChainModal: FunctionComponent<{
   const channels: {
     chainId: string;
     denom: string;
-  }[] = swapQueriesStore.queryRelatedAssets
-    .getObservableQueryRelatedAssets(
-      amountConfig.outChainId,
-      amountConfig.outCurrency.coinMinimalDenom
-    )
-    .currencies.map((c) => ({ chainId: c.chainId, denom: c.coinMinimalDenom }));
+  }[] =
+    swapQueriesStore.querySwapHelper.getSwapDestinationCurrencyAlternativeChains(
+      chainStore.getChain(amountConfig.outChainId),
+      amountConfig.outCurrency
+    );
 
   const filteredChannels = (() => {
     const trim = search.trim().toLowerCase();
