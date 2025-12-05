@@ -434,7 +434,9 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "채널 ID를 입력하세요.",
 
   "page.ibc-swap.title.swap": "토큰 교환",
-  "page.ibc-swap.button.swap": "스왑",
+  "page.ibc-swap.button.next": "스왑",
+  "page.ibc-swap.button.hold-to-approve": "꾹 눌러서 승인 & 스왑",
+  "page.ibc-swap.button.keep-holding": "계속 누르세요...",
   "page.ibc-swap.error.no-route-found": "이 교환에 맞는 경로가 검색되지 않습니다.",
   "page.ibc-swap.warning.unable-to-populate-price": "{assets}의 가격을 알 수 없습니다. \"스왑\"을 누르기 전에 각각 통화 가치를 확인하십시오.",
   "page.ibc-swap.warning.high-price-impact-title": "{inPrice} ({srcChain}) → {outPrice} ({dstChain})",
@@ -789,6 +791,7 @@
   "components.bitcoin-guide-box.paragraph.none-of-the-inputs-belong-to-this-wallet": "보안상의 이유로 이 지갑에 속한 입력값에 대해서만 서명이 가능합니다.",
 
   "components.fee-info.bridge-fee": "브릿지 수수료",
+  "components.fee-info.swap-provider": "제공자",
 
   "components.top-up.description.no-fees": "수수료가 없나요? 걱정 마세요! ✨",
   "components.top-up.description.we-cover": "케플러팀이 대신 내드릴게요 :)",

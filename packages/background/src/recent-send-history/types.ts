@@ -34,6 +34,8 @@ export type IBCHistory = {
 
   txHash: string;
 
+  backgroundExecutionId?: string;
+
   txFulfilled?: boolean;
   txError?: string;
   packetTimeout?: boolean;
@@ -474,3 +476,111 @@ export type TransferEvent =
   | { go_fast_transfer: GoFastTransferInfo }
   | { stargate_transfer: StargateTransferInfo }
   | { eureka_transfer: EurekaTransferInfo };
+
+export enum SwapV2RouteStepStatus {
+  IN_PROGRESS = "in_progress",
+  SUCCESS = "success",
+  FAILED = "failed",
+}
+
+export enum SwapV2TxStatus {
+  IN_PROGRESS = "in_progress",
+  SUCCESS = "success",
+  PARTIAL_SUCCESS = "partial_success",
+  FAILED = "failed",
+}
+
+export interface SwapV2TxStatusStep {
+  chain_id: string;
+  status: SwapV2RouteStepStatus;
+  tx_hash?: string;
+  explorer_url?: string;
+}
+
+export interface SwapV2AssetLocation {
+  chain_id: string;
+  denom: string;
+  amount: string;
+}
+
+// NOTE: duplicate with @keplr-wallet/stores-internal/src/swap/types.ts
+export enum SwapProvider {
+  SKIP = "skip",
+  SQUID = "squid",
+}
+
+export interface SwapV2TxStatusRequest {
+  provider: SwapProvider;
+  from_chain: string;
+  to_chain?: string; // optional, used by Squid
+  tx_hash: string;
+}
+
+export interface SwapV2TxStatusResponse {
+  provider: SwapProvider;
+  status: SwapV2TxStatus;
+  steps: SwapV2TxStatusStep[];
+  asset_location?: SwapV2AssetLocation | null;
+}
+
+export interface SwapV2History {
+  id: string;
+  fromChainId: string;
+  toChainId: string;
+  provider: SwapProvider;
+  timestamp: number;
+  sender: string;
+  recipient: string;
+
+  amount: {
+    amount: string;
+    denom: string;
+  }[]; // [fromChain asset, toChain asset] 형태로 저장
+  txHash: string;
+
+  status: SwapV2TxStatus;
+  simpleRoute: {
+    isOnlyEvm: boolean;
+    chainId: string;
+    receiver: string;
+  }[]; // 세부적인 채널 정보를 제외, 덩어리 경로 정보만 저장
+  routeIndex: number; // 현재까지 진행된 라우팅 인덱스
+  routeDurationSeconds: number; // 라우팅에 걸리는 예상 시간
+
+  destinationAsset: {
+    chainId: string;
+    denom: string;
+    expectedAmount: string;
+  }; // 최종 목적지의 asset 정보
+
+  resAmount: {
+    amount: string;
+    denom: string;
+  }[][];
+
+  swapRefundInfo?: {
+    chainId: string;
+    amount: {
+      amount: string;
+      denom: string;
+    }[];
+  };
+
+  backgroundExecutionId?: string;
+
+  trackDone?: boolean; // status tracking이 완료되었는지 여부
+  trackError?: string; // status tracking 중 에러가 발생했는지 여부
+  finalizationRetryCount?: number; // success/partial_success/failed 상태에서 currentStep이 진행 중일 때 추가 polling 횟수
+
+  notified?: boolean;
+  notificationInfo?: {
+    currencies: AppCurrency[];
+  };
+
+  isOnlyUseBridge?: boolean;
+
+  hidden?: boolean;
+  // 멀티 tx swap의 경우, 모든 트랜잭션이 서명되지 않아 hidden 처리되었더라도
+  // 다음 트랜잭션 처리가 필요한 경우 강제로 다시 display하기 위한 플래그
+  requiresNextTransaction?: boolean;
+}

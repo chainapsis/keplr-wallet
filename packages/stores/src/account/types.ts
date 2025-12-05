@@ -6,6 +6,8 @@ import {
   KeplrSignOptions,
   Msg,
   StdFee,
+  SignDoc,
+  StdSignDoc,
 } from "@keplr-wallet/types";
 
 export type ProtoMsgsOrWithAminoMsgs = {
@@ -63,6 +65,14 @@ export interface MakeTxResponse {
           onFulfill?: (tx: any) => void;
         }
   ): Promise<void>;
+  sign(
+    fee: StdFee,
+    memo?: string,
+    signOptions?: KeplrSignOptionsWithAltSignMethods
+  ): Promise<{
+    tx: Uint8Array;
+    signDoc: StdSignDoc | SignDoc;
+  }>;
   send(
     fee: StdFee,
     memo?: string,

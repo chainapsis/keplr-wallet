@@ -457,7 +457,7 @@ export class ObservableQueryRouteInner extends ObservableQuery<
     const validated = Schema.validate(result.data);
 
     if (validated.error) {
-      console.log("Failed to validate route response", validated.error);
+      console.error("Failed to validate route response", validated.error);
       throw validated.error;
     }
 
