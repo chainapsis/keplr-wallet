@@ -322,17 +322,21 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           simulate: () =>
             ethereumAccount
               .simulateGasWithPendingErc20Approval(sender, tx)
-              .then(({ gasUsed, erc20ApprovalGasUsed, ...rest }) => {
-                // TODO: gas estimation 결과에 대한 처리 로직 추가
-                console.log("gasUsed", gasUsed);
-                console.log("erc20ApprovalGasUsed", erc20ApprovalGasUsed);
-                console.log("rest", rest);
+              .then((result) => {
+                const { kind, gasUsed, erc20ApprovalGasUsed } = result;
+
+                const totalGasUsed =
+                  (gasUsed ?? 0) + (erc20ApprovalGasUsed ?? 0);
+                if (totalGasUsed <= 0) {
+                  throw new Error("Gas used is not positive");
+                }
 
                 if (
                   chainStore
                     .getChain(inChainId)
                     .features.includes("op-stack-l1-data-fee")
                 ) {
+                  // TODO: bundle인 경우에 대한 L1 data fee 계산...
                   return ethereumAccount
                     .simulateOpStackL1Fee({
                       to: tx?.to,
@@ -346,17 +350,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         new Dec(BigInt(l1DataFee))
                       );
                       return {
-                        gasUsed: gasUsed
-                          ? gasUsed + (erc20ApprovalGasUsed ?? 0)
-                          : erc20ApprovalGasUsed ?? 0,
+                        gasUsed: totalGasUsed,
+                        evmSimulateKind: kind,
                       };
                     });
                 }
 
                 return {
-                  gasUsed: gasUsed
-                    ? gasUsed + (erc20ApprovalGasUsed ?? 0)
-                    : erc20ApprovalGasUsed ?? 0,
+                  gasUsed: totalGasUsed,
+                  evmSimulateKind: kind,
                 };
               }),
         };
@@ -568,6 +570,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           )[];
 
           const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
+          const evmSimulateKind = gasSimulator.evmSimulateKind;
+          if (isInChainEVMOnly && evmSimulateKind == null) {
+            // it should be set by the gas simulator
+            throw new Error("EVM gas simulate kind is not set");
+          }
 
           const channels: {
             portId: string;
@@ -1116,6 +1123,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               const evmTxs = erc20ApprovalTx ? [erc20ApprovalTx, tx] : [tx];
 
+              // TODO: if evmSimulateKind가 bundle인데 callback으로 erc20 approval만 계산되었다면,
+              // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음
+              // swap 트랜잭션의 서명을 처리해줘야만 한다.
+              // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵하도록 해야한다.
+
               for (const [evmTxIndex, evmTx] of evmTxs.entries()) {
                 const backgroundTx: Omit<BackgroundTx, "status"> = {
                   chainId: chainId,
@@ -1129,6 +1141,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 if (requiresMultipleTxs || isHardwareWallet) {
                   // TODO: set first tx's gas limit and gas price if needed
+                  // 사실 이건 굳이 필요없을 것 같다.
 
                   // check chain id is in executableChainIds and it's the first tx
                   if (

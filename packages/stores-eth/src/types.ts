@@ -1,4 +1,5 @@
 import { UnsignedTransaction } from "@ethersproject/transactions";
+import { EVMGasSimulateKind } from "@keplr-wallet/types";
 
 export type UnsignedEVMTransaction = UnsignedTransaction;
 
@@ -23,28 +24,11 @@ export interface AccountStateDiffTracerResult {
   post: Record<string, AccountState>;
 }
 
-export type SimulateGasWithPendingErc20ApprovalResult =
-  | {
-      kind: "no-pending-approval";
-      hasPendingErc20Approval: false;
-      mainTxSimulated: true;
-      gasUsed: number;
-      erc20ApprovalGasUsed?: undefined;
-    }
-  | {
-      kind: "tx-bundle-simulated";
-      hasPendingErc20Approval: true;
-      mainTxSimulated: true;
-      gasUsed: number;
-      erc20ApprovalGasUsed: number;
-    }
-  | {
-      kind: "tx-bundle-tracing-fallback";
-      hasPendingErc20Approval: true;
-      mainTxSimulated: false;
-      gasUsed: number;
-      erc20ApprovalGasUsed: number;
-    };
+export interface SimulateGasWithPendingErc20ApprovalResult {
+  kind: EVMGasSimulateKind;
+  gasUsed?: number;
+  erc20ApprovalGasUsed?: number;
+}
 
 export interface StateOverrideAccountState {
   balance?: string;
