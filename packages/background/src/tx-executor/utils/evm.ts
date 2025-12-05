@@ -3,6 +3,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { UnsignedTransaction } from "@ethersproject/transactions";
 import { Dec } from "@keplr-wallet/unit";
 import { BackgroundTxFeeType } from "../types";
+import { JsonRpcResponse } from "@keplr-wallet/types";
 
 const FEE_MULTIPLIERS: Record<BackgroundTxFeeType, number> = {
   low: 1.1,
@@ -69,12 +70,7 @@ export async function fillUnsignedEVMTx(
   ];
 
   const { data: rpcResponses } = await simpleFetch<
-    Array<{
-      jsonrpc: "2.0";
-      id: number;
-      result?: unknown;
-      error?: { code: number; message: string; data?: unknown };
-    }>
+    Array<JsonRpcResponse<unknown>>
   >(evmInfo.rpc, {
     method: "POST",
     headers: {

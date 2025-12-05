@@ -2162,6 +2162,7 @@ export class RecentSendHistoryService {
     routeDurationSeconds: number = 0,
     txHash: string,
     isOnlyUseBridge?: boolean,
+    requiresNextTransaction?: boolean,
     backgroundExecutionId?: string
   ): string {
     const id = (this.recentSwapV2HistorySeq++).toString();
@@ -2187,6 +2188,7 @@ export class RecentSendHistoryService {
       swapRefundInfo: undefined,
       notified: undefined,
       backgroundExecutionId: backgroundExecutionId,
+      requiresNextTransaction,
     };
 
     this.recentSwapV2HistoryMap.set(id, history);
@@ -2228,6 +2230,7 @@ export class RecentSendHistoryService {
                   });
                 },
                 {
+                  // CHECK: Consider increasing maxRetries for long-running swaps (30~40 minutes)
                   maxRetries: 50,
                   waitMsAfterError: 500,
                   maxWaitMsAfterError: 15000,
@@ -2316,23 +2319,23 @@ export class RecentSendHistoryService {
     history.status = status;
     history.trackError = undefined;
 
+    // This might be the state where tracking has just started,
+    // so handle the error and retry
     if (!steps || steps.length === 0) {
       if (status === SwapV2TxStatus.IN_PROGRESS) {
         onError();
       } else {
+        // CHECK: what if partial success?
         history.trackDone = true;
         onFulfill();
       }
       return;
     }
 
-    // find current step (in_progress/failed first, otherwise last step)
+    // find current step (not success first, otherwise last step)
     const currentStep =
-      steps.find(
-        (s) =>
-          s.status === SwapV2RouteStepStatus.IN_PROGRESS ||
-          s.status === SwapV2RouteStepStatus.FAILED
-      ) ?? steps[steps.length - 1];
+      steps.find((s) => s.status !== SwapV2RouteStepStatus.SUCCESS) ??
+      steps[steps.length - 1];
 
     // calculate routeIndex by matching step.chain_id with simpleRoute
     let updatedRouteIndex = Math.max(0, history.routeIndex);
@@ -2359,54 +2362,67 @@ export class RecentSendHistoryService {
       });
     }
 
-    switch (currentStep.status) {
-      case SwapV2RouteStepStatus.IN_PROGRESS:
+    switch (status) {
+      case SwapV2TxStatus.IN_PROGRESS:
+        // Continue polling
         onError();
         break;
 
-      case SwapV2RouteStepStatus.SUCCESS: {
-        const isLastRoute = updatedRouteIndex >= simpleRoute.length - 1;
-        const isFinalStatus =
-          status === SwapV2TxStatus.SUCCESS ||
-          status === SwapV2TxStatus.PARTIAL_SUCCESS;
+      case SwapV2TxStatus.SUCCESS:
+      case SwapV2TxStatus.PARTIAL_SUCCESS:
+      case SwapV2TxStatus.FAILED:
+        // If current step is still in progress, retry a few more times before finalizing
+        if (currentStep.status === SwapV2RouteStepStatus.IN_PROGRESS) {
+          const maxRetries = 3;
+          const retryCount = history.finalizationRetryCount ?? 0;
 
-        if (isLastRoute && isFinalStatus) {
-          if (currentStep.tx_hash) {
-            this.trackSwapV2DestinationAssetAmount(
-              id,
-              currentStep.tx_hash,
-              onFulfill
-            );
-          } else {
-            history.trackDone = true;
-            onFulfill();
+          if (retryCount < maxRetries) {
+            history.finalizationRetryCount = retryCount + 1;
+            onError();
+            break;
           }
-        } else {
-          onError();
+          // Max retries reached, fall through to finalize
         }
-        break;
-      }
 
-      case SwapV2RouteStepStatus.FAILED:
-        if (status === SwapV2TxStatus.IN_PROGRESS) {
-          onError();
-        } else {
-          history.trackDone = true;
-          history.status = SwapV2TxStatus.FAILED;
-          // set refund info from asset_location
-          if (asset_location && asset_location.length > 0) {
-            const location = asset_location[asset_location.length - 1];
-            const chainId = location.chain_id;
-            const evmLikeChainId = Number(chainId);
-            const isEVMChainId =
-              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
-            history.swapRefundInfo = {
-              chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
-              amount: [{ amount: location.amount, denom: location.denom }],
-            };
-          }
-          onFulfill();
+        // Move routeIndex to the end for success
+        if (status === SwapV2TxStatus.SUCCESS) {
+          history.routeIndex = simpleRoute.length - 1;
         }
+
+        // Track destination amount if tx_hash exists
+        if (currentStep.tx_hash && status === SwapV2TxStatus.SUCCESS) {
+          this.trackSwapV2DestinationAssetAmount(
+            id,
+            currentStep.tx_hash,
+            onFulfill
+          );
+          break;
+        }
+
+        // Finalize: check for refunded assets (for partial_success/failed)
+        history.trackDone = true;
+        if (
+          (status === SwapV2TxStatus.PARTIAL_SUCCESS ||
+            status === SwapV2TxStatus.FAILED) &&
+          asset_location
+        ) {
+          const chainId = asset_location.chain_id;
+          const evmLikeChainId = Number(chainId);
+          const isEVMChainId =
+            !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+          history.swapRefundInfo = {
+            chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
+            amount: [
+              {
+                amount: asset_location.amount,
+                denom: isEVMChainId
+                  ? `erc20:${asset_location.denom}`
+                  : asset_location.denom,
+              },
+            ],
+          };
+        }
+        onFulfill();
         break;
     }
   }
@@ -2654,10 +2670,38 @@ export class RecentSendHistoryService {
     );
   }
 
+  @action
+  hideRecentSwapV2History(id: string): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+
+    if (!history.requiresNextTransaction) {
+      return false;
+    }
+
+    // only hide if the history requires next transaction
+    history.hidden = true;
+    return true;
+  }
+
+  @action
+  showRecentSwapV2History(id: string): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+    history.hidden = false;
+    return true;
+  }
+
+  @action
   removeRecentSwapV2History(id: string): boolean {
     return this.recentSwapV2HistoryMap.delete(id);
   }
 
+  @action
   clearAllRecentSwapV2History(): void {
     this.recentSwapV2HistoryMap.clear();
   }

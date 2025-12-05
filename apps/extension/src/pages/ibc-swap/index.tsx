@@ -4,6 +4,7 @@ import React, {
   useLayoutEffect,
   useState,
 } from "react";
+import { useNavigate } from "react-router";
 import { observer } from "mobx-react-lite";
 import { Box } from "../../components/box";
 import { useStore } from "../../stores";
@@ -49,6 +50,7 @@ import {
   RecordAndExecuteTxsMsg,
   TxExecutionType,
   TxExecutionStatus,
+  EVMBackgroundTx,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -60,13 +62,15 @@ import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { getSwapWarnings } from "./utils/swap-warnings";
 import { FeeCoverageDescription } from "../../components/top-up";
 import { useTopUp } from "../../hooks/use-topup";
-// import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
+import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 import { useSwapFeeBps } from "./hooks/use-swap-fee-bps";
 import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
 import {
   RouteStepType,
   SwapProvider,
 } from "@keplr-wallet/stores-internal/build/swap/types";
+import { Button } from "../../components/button";
+import { EVMGasSimulateKind, EthTxStatus } from "@keplr-wallet/types";
 // import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
@@ -135,6 +139,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const intl = useIntl();
   const notification = useNotification();
+  const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -178,6 +183,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const isInChainEVMOnly = chainStore.isEvmOnlyChain(inChainId);
   const inChainAccount = accountStore.getAccount(inChainId);
+  const isHardwareWallet =
+    inChainAccount.isNanoLedger || inChainAccount.isKeystone;
 
   // nonce method for EVM chain to handle pending tx
   const [nonceMethod, setNonceMethod] = useState<"latest" | "pending">(
@@ -297,11 +304,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         throw new Error("Not ready to simulate tx");
       }
 
-      const tx = swapConfigs.amountConfig.getTxIfReady();
+      const txs = swapConfigs.amountConfig.getTxsIfReady();
 
-      if (!tx) {
+      if (!txs || txs.length === 0) {
         throw new Error("Not ready to simulate tx");
       }
+
+      // only estimate gas for the first tx
+      const tx = txs[0];
 
       if ("send" in tx) {
         return tx;
@@ -311,38 +321,25 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         );
         const sender = swapConfigs.senderConfig.sender;
 
-        const isErc20InCurrency =
-          ("type" in inCurrency && inCurrency.type === "erc20") ||
-          inCurrency.coinMinimalDenom.startsWith("erc20:");
-        const erc20Approval = tx.requiredErc20Approvals?.[0];
-        const erc20ApprovalTx =
-          erc20Approval && isErc20InCurrency
-            ? ethereumAccount.makeErc20ApprovalTx(
-                {
-                  ...inCurrency,
-                  type: "erc20",
-                  contractAddress: inCurrency.coinMinimalDenom.replace(
-                    "erc20:",
-                    ""
-                  ),
-                },
-                erc20Approval.spender,
-                erc20Approval.amount
-              )
-            : undefined;
-
-        delete tx.requiredErc20Approvals;
-
         return {
           simulate: () =>
             ethereumAccount
-              .simulateGas(sender, erc20ApprovalTx ?? tx)
-              .then(({ gasUsed }) => {
+              .simulateGasWithPendingErc20Approval(sender, tx)
+              .then((result) => {
+                const { kind, gasUsed, erc20ApprovalGasUsed } = result;
+
+                const totalGasUsed =
+                  (gasUsed ?? 0) + (erc20ApprovalGasUsed ?? 0);
+                if (totalGasUsed <= 0) {
+                  throw new Error("Gas used is not positive");
+                }
+
                 if (
                   chainStore
                     .getChain(inChainId)
                     .features.includes("op-stack-l1-data-fee")
                 ) {
+                  // TODO: bundle인 경우에 대한 L1 data fee 계산...
                   return ethereumAccount
                     .simulateOpStackL1Fee({
                       to: tx?.to,
@@ -355,11 +352,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       swapConfigs.feeConfig.setL1DataFee(
                         new Dec(BigInt(l1DataFee))
                       );
-                      return { gasUsed };
+                      return {
+                        gasUsed: totalGasUsed,
+                        evmSimulateKind: kind,
+                      };
                     });
                 }
 
-                return { gasUsed };
+                return {
+                  gasUsed: totalGasUsed,
+                  evmSimulateKind: kind,
+                };
               }),
         };
       }
@@ -416,12 +419,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
 
+  const [isTxLoading, setIsTxLoading] = useState(false);
+  const [isButtonHolding, setIsButtonHolding] = useState(false);
+
   // 10초마다 route query 자동 refresh
   const queryRoute = swapConfigs.amountConfig.getQueryRoute();
   useEffect(() => {
-    if (queryRoute && !queryRoute.isFetching) {
+    if (
+      queryRoute &&
+      !queryRoute.isFetching &&
+      !isTxLoading &&
+      !isButtonHolding
+    ) {
       const timeoutId = setTimeout(() => {
-        if (!queryRoute.isFetching) {
+        if (!queryRoute.isFetching && !isTxLoading && !isButtonHolding) {
           queryRoute.fetch();
         }
       }, 10000);
@@ -434,8 +445,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
     // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
     // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryRoute, queryRoute?.isFetching]);
+  }, [queryRoute, queryRoute?.isFetching, isTxLoading, isButtonHolding]);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -504,8 +514,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     Error | undefined
   >();
 
-  const [isTxLoading, setIsTxLoading] = useState(false);
-
   // const { logSwapSignOpened, logEvent, quoteIdRef } = useSwapAnalytics({
   //   inChainId: inChainId,
   //   inCurrency: inCurrency,
@@ -516,6 +524,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // });
 
   const isSwap = swapConfigs.amountConfig.type === "swap";
+  const isOneClickSwapDisabled =
+    swapConfigs.amountConfig.requiresMultipleTxs || isHardwareWallet;
 
   const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
     swapConfigs.amountConfig.currency,
@@ -525,6 +535,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     uiConfigStore.ibcSwapConfig.celestiaDisabled
   );
 
+  /**
+   * Topup related below
+   */
   const { shouldTopUp, isTopUpAvailable, remainingText } = useTopUp({
     feeConfig: swapConfigs.feeConfig,
     senderConfig: swapConfigs.senderConfig,
@@ -552,9 +565,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           setIsTxLoading(true);
 
-          let tx: MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals;
+          let txs: (
+            | (MakeTxResponse & {
+                chainId: string;
+              })
+            | UnsignedEVMTransactionWithErc20Approvals
+          )[];
 
           const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
+          const evmSimulateKind = gasSimulator.evmSimulateKind;
+          if (isInChainEVMOnly && evmSimulateKind == null) {
+            // it should be set by the gas simulator
+            throw new Error("EVM gas simulate kind is not set");
+          }
 
           const channels: {
             portId: string;
@@ -572,6 +595,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           let provider: SwapProvider | undefined;
           let routeDurationSeconds: number | undefined;
           let isInterChainSwap: boolean = false;
+          let isSingleEVMChainOperation: boolean = false;
 
           // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
           // swapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하므로 굳이 여기서 또 하지 않는다.
@@ -587,11 +611,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isInterChainSwap = steps.some(
               (step) => step.type === RouteStepType.BRIDGE
             );
+            isSingleEVMChainOperation =
+              isInChainEVMOnly && inChainId === outChainId && !isInterChainSwap;
             provider = queryRoute.response.data.provider;
 
             // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
             // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
-            if (isInterChainSwap) {
+            // 단일 evm 체인 위에서의 스왑인 경우에는 history data 구성을 위해 여기서 처리한다.
+            if (isInterChainSwap || isSingleEVMChainOperation) {
               routeDurationSeconds = queryRoute.response.data.estimated_time;
 
               for (const chainId of queryRoute.response.data
@@ -631,13 +658,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   );
                 }
 
-                simpleRoute.push({
-                  isOnlyEvm: isEVMChainId,
-                  chainId: chainIdInKeplr,
-                  receiver: isEVMChainId
-                    ? receiverAccount.ethereumHexAddress
-                    : receiverAccount.bech32Address,
-                });
+                // required_chain_ids can contain duplicated chain ids,
+                // so avoid adding the chain if it's the same as the last chain in simpleRoute.
+                if (
+                  simpleRoute.length === 0 ||
+                  simpleRoute[simpleRoute.length - 1].chainId !== chainIdInKeplr
+                ) {
+                  simpleRoute.push({
+                    isOnlyEvm: isEVMChainId,
+                    chainId: chainIdInKeplr,
+                    receiver: isEVMChainId
+                      ? receiverAccount.ethereumHexAddress
+                      : receiverAccount.bech32Address,
+                  });
+                }
               }
             } else {
               // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.
@@ -856,24 +890,33 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               }
             }
 
-            // TODO: multiple txs support
-            const [_tx] = await Promise.all([
-              swapConfigs.amountConfig.getTx(undefined, priorOutAmount),
+            const [_txs] = await Promise.all([
+              swapConfigs.amountConfig.getTxs(undefined, priorOutAmount),
             ]);
 
-            tx = _tx;
+            if (_txs.length === 0) {
+              throw new Error("Txs are not ready");
+            }
+
+            txs = _txs;
           } catch (e) {
             setCalculatingTxError(e);
             setIsTxLoading(false);
             return;
           }
+
           setCalculatingTxError(undefined);
 
-          // prepare txs to execute
-          const vaultId = keyRingStore.selectedKeyInfo?.id;
-          if (!vaultId) {
-            throw new Error("vaultId is undefined");
+          const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+          if (!selectedKeyInfo) {
+            throw new Error("selectedKeyInfo is undefined");
           }
+
+          // prepare txs to execute
+          const vaultId = selectedKeyInfo.id;
+          const isHardwareWallet =
+            selectedKeyInfo.type === "ledger" ||
+            selectedKeyInfo.type === "keystone";
 
           let executionType: TxExecutionType;
           let historyData:
@@ -881,7 +924,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             | IBCSwapHistoryData
             | SwapV2HistoryData
             | undefined;
-          if (isInterChainSwap) {
+          if (isInterChainSwap || isSingleEVMChainOperation) {
             executionType = TxExecutionType.SWAP_V2;
             historyData = {
               fromChainId: inChainId,
@@ -983,77 +1026,359 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           const executableChainIds = [inChainId];
 
-          const backgroundTxs: BackgroundTx[] = [];
+          const backgroundTxs: (BackgroundTx & {
+            status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
+          })[] = [];
 
-          if ("send" in tx) {
-            const msgs = await tx.msgs();
+          const requiresMultipleTxs = txs.length > 1;
 
-            // TODO: handle getShouldTopUpSignOptions?
-
-            backgroundTxs.push({
-              status: BackgroundTxStatus.PENDING,
-              chainId: inChainId,
-              type: BackgroundTxType.COSMOS,
-              txData: {
-                aminoMsgs: msgs.aminoMsgs,
-                protoMsgs: msgs.protoMsgs,
-                rlpTypes: msgs.rlpTypes,
-                memo: swapConfigs.memoConfig.memo,
-              },
-              feeType:
-                swapConfigs.feeConfig.type === "manual"
-                  ? undefined
-                  : swapConfigs.feeConfig.type,
-              feeCurrencyDenom:
-                swapConfigs.feeConfig.fees[0].currency.coinMinimalDenom,
-            });
+          // find the index of the tx to be recorded as history
+          let historyTxIndex: number;
+          if ("send" in txs[0]) {
+            historyTxIndex = 0;
           } else {
-            const ethereumAccount = ethereumAccountStore.getAccount(inChainId);
-            const isErc20InCurrency =
-              ("type" in inCurrency && inCurrency.type === "erc20") ||
-              inCurrency.coinMinimalDenom.startsWith("erc20:");
-            const erc20Approval = tx.requiredErc20Approvals?.[0];
-            const erc20ApprovalTx =
-              erc20Approval && isErc20InCurrency
-                ? ethereumAccount.makeErc20ApprovalTx(
-                    {
-                      ...inCurrency,
-                      type: "erc20",
-                      contractAddress: inCurrency.coinMinimalDenom.replace(
-                        "erc20:",
-                        ""
-                      ),
-                    },
-                    erc20Approval.spender,
-                    erc20Approval.amount
-                  )
-                : undefined;
-
-            delete tx.requiredErc20Approvals;
-
-            if (erc20ApprovalTx) {
-              backgroundTxs.push({
-                status: BackgroundTxStatus.PENDING,
-                chainId: inChainId,
-                type: BackgroundTxType.EVM,
-                txData: erc20ApprovalTx,
-                feeType:
-                  swapConfigs.feeConfig.type === "manual"
-                    ? undefined
-                    : swapConfigs.feeConfig.type,
-              });
-            }
-
-            backgroundTxs.push({
-              status: BackgroundTxStatus.PENDING,
-              chainId: inChainId,
-              type: BackgroundTxType.EVM,
-              txData: tx,
-            });
+            historyTxIndex = txs[0].requiredErc20Approvals?.length ?? 0;
           }
 
-          // TODO: check if the key is hardware wallet,
-          // if so, sign the txs and set it to the background tx
+          for (const [txIndex, tx] of txs.entries()) {
+            if ("send" in tx) {
+              const msgs = await tx.msgs();
+
+              const backgroundTx: BackgroundTx & {
+                status:
+                  | BackgroundTxStatus.PENDING
+                  | BackgroundTxStatus.CONFIRMED;
+              } = {
+                chainId: tx.chainId,
+                type: BackgroundTxType.COSMOS,
+                status: BackgroundTxStatus.PENDING,
+                txData: {
+                  aminoMsgs: msgs.aminoMsgs,
+                  protoMsgs: msgs.protoMsgs,
+                  rlpTypes: msgs.rlpTypes,
+                  memo: swapConfigs.memoConfig.memo,
+                },
+                // NOTE: Only the first transaction contains fee type and fee currency denom.
+                // A Cosmos transaction can contain multiple messages, so in the case of multi-tx routes,
+                // it's sufficient to execute only the first transaction for now.
+                // The remaining transactions will be signed later according to each user's preference.
+                feeType:
+                  txIndex === 0
+                    ? swapConfigs.feeConfig.type === "manual"
+                      ? undefined
+                      : swapConfigs.feeConfig.type
+                    : undefined,
+                feeCurrencyDenom:
+                  txIndex === 0
+                    ? swapConfigs.feeConfig.fees[0].currency.coinMinimalDenom
+                    : undefined,
+              };
+
+              if (requiresMultipleTxs || isHardwareWallet) {
+                // check chain id is in executableChainIds and it's the first tx
+                // if not, skip signing
+                // if so, sign the tx (only sign the tx and serialize it to signedTx)
+                if (
+                  executableChainIds.includes(backgroundTx.chainId) &&
+                  txIndex === 0
+                ) {
+                  const result = await tx.sign(
+                    swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                      swapConfigs.feeConfig.toStdFee(),
+                    swapConfigs.memoConfig.memo,
+                    {
+                      preferNoSetFee: true,
+                      preferNoSetMemo: false,
+                      ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
+                    }
+                  );
+
+                  // 서명 화면에서 빠져나오기
+                  // TODO: 이게 맞냐
+                  navigate(-1);
+
+                  backgroundTx.signedTx = Buffer.from(result.tx).toString(
+                    "base64"
+                  );
+                }
+              } else {
+                // TODO: top-up이 필요한데 서명페이지까지 가지 않는 경우에 대한 처리
+              }
+
+              backgroundTxs.push(backgroundTx);
+            } else {
+              const chainId = `eip155:${tx.chainId!}`;
+              const ethereumAccount = ethereumAccountStore.getAccount(chainId);
+              const sender = swapConfigs.senderConfig.sender;
+              const isErc20InCurrency =
+                ("type" in inCurrency && inCurrency.type === "erc20") ||
+                inCurrency.coinMinimalDenom.startsWith("erc20:");
+              const erc20Approval = tx.requiredErc20Approvals?.[0];
+              const erc20ApprovalTx =
+                erc20Approval && isErc20InCurrency
+                  ? ethereumAccount.makeErc20ApprovalTx(
+                      {
+                        ...inCurrency,
+                        type: "erc20",
+                        contractAddress: inCurrency.coinMinimalDenom.replace(
+                          "erc20:",
+                          ""
+                        ),
+                      },
+                      erc20Approval.spender,
+                      erc20Approval.amount
+                    )
+                  : undefined;
+
+              delete tx.requiredErc20Approvals;
+
+              const evmTxs = erc20ApprovalTx ? [erc20ApprovalTx, tx] : [tx];
+              const evmBackgroundTxs: (EVMBackgroundTx & {
+                status:
+                  | BackgroundTxStatus.PENDING
+                  | BackgroundTxStatus.CONFIRMED;
+              })[] = [];
+
+              for (const [evmTxIndex, evmTx] of evmTxs.entries()) {
+                const backgroundTx: BackgroundTx & {
+                  status:
+                    | BackgroundTxStatus.PENDING
+                    | BackgroundTxStatus.CONFIRMED;
+                } = {
+                  chainId: chainId,
+                  type: BackgroundTxType.EVM,
+                  txData: evmTx,
+                  feeType:
+                    swapConfigs.feeConfig.type === "manual"
+                      ? undefined
+                      : swapConfigs.feeConfig.type,
+                  status: BackgroundTxStatus.PENDING,
+                };
+
+                const isFirstAndApprovalTx =
+                  evmTxIndex === 0 &&
+                  evmTxs.length > 1 &&
+                  erc20ApprovalTx != null;
+
+                // TODO: if evmSimulateKind가 bundle인데 callback으로 erc20 approval만 계산되었다면,
+                // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음 swap 트랜잭션의 서명을 처리해줘야만 한다.
+                // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵한다.
+                if (
+                  isFirstAndApprovalTx &&
+                  evmSimulateKind === EVMGasSimulateKind.APPROVAL_ONLY_SIMULATED
+                ) {
+                  const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+                    swapConfigs.feeConfig.getEIP1559TxFees(
+                      swapConfigs.feeConfig.type
+                    );
+
+                  const feeObject =
+                    maxFeePerGas && maxPriorityFeePerGas
+                      ? {
+                          type: 2,
+                          maxFeePerGas: `0x${BigInt(
+                            maxFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          maxPriorityFeePerGas: `0x${BigInt(
+                            maxPriorityFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${swapConfigs.gasConfig.gas.toString(
+                            16
+                          )}`, // Since this is APPROVAL_ONLY_SIMULATED, we are intentionally using the gas limit as calculated for the ERC20 approval tx.
+                        }
+                      : {
+                          gasPrice: `0x${BigInt(
+                            gasPrice.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${swapConfigs.gasConfig.gas.toString(
+                            16
+                          )}`,
+                        };
+
+                  ethereumAccount.setIsSendingTx(true);
+
+                  // wait for the erc20 approval tx to be executed and confirmed
+                  // before signing the swap tx
+                  const erc20ApprovalTxHash = await new Promise<string>(
+                    (resolve, reject) => {
+                      ethereumAccount
+                        .sendEthereumTx(
+                          sender,
+                          {
+                            ...evmTx,
+                            ...feeObject,
+                          },
+                          {
+                            onBroadcastFailed: (e) => {
+                              if (
+                                erc20ApprovalTx &&
+                                e?.message === "Request rejected"
+                              ) {
+                                // logEvent("erc20_approve_sign_canceled", {
+                                //   quote_id: quoteIdRef.current,
+                                // });
+                              }
+
+                              reject(e ?? new Error("Broadcast failed"));
+                            },
+                            onBroadcasted: () => {
+                              // logEvent("erc20_approve_tx_submitted", {
+                              //   quote_id: quoteIdRef.current,
+                              // });
+                            },
+                            onFulfill: (txReceipt) => {
+                              try {
+                                const queryBalances = queriesStore.get(
+                                  swapConfigs.amountConfig.chainId
+                                ).queryBalances;
+                                queryBalances
+                                  .getQueryEthereumHexAddress(sender)
+                                  .balances.forEach((balance) => {
+                                    if (
+                                      balance.currency.coinMinimalDenom ===
+                                        swapConfigs.amountConfig.currency
+                                          .coinMinimalDenom ||
+                                      swapConfigs.feeConfig.fees.some(
+                                        (fee) =>
+                                          fee.currency.coinMinimalDenom ===
+                                          balance.currency.coinMinimalDenom
+                                      )
+                                    ) {
+                                      balance.fetch();
+                                    }
+                                  });
+
+                                if (txReceipt.status === EthTxStatus.Success) {
+                                  resolve(txReceipt.transactionHash);
+                                } else {
+                                  reject(new Error("Transaction failed"));
+                                }
+                              } catch (e) {
+                                reject(e as Error);
+                              }
+                            },
+                          }
+                        )
+                        .catch(reject)
+                        .finally(() => {
+                          ethereumAccount.setIsSendingTx(false);
+                        });
+                    }
+                  );
+
+                  // update the backgroundTx with the erc20 approval tx hash
+                  backgroundTx.status = BackgroundTxStatus.CONFIRMED;
+                  backgroundTx.txData = {
+                    ...backgroundTx.txData,
+                    ...feeObject,
+                  };
+                  backgroundTx.txHash = erc20ApprovalTxHash;
+
+                  evmBackgroundTxs.push(backgroundTx);
+                  continue;
+                }
+
+                if (requiresMultipleTxs || isHardwareWallet) {
+                  /**
+                   * {
+                   *   "code": -32000,
+                   *   "message": "max fee per gas less than block base fee: address 0x7F7E...b216, maxFeePerGas: 120154000 baseFee: 135423000"
+                   * }
+                   * TODO: handle this error
+                   */
+                  const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
+                    swapConfigs.feeConfig.getEIP1559TxFees(
+                      swapConfigs.feeConfig.type
+                    );
+
+                  let gasLimit: number;
+                  if (
+                    evmSimulateKind === EVMGasSimulateKind.TX_SIMULATED &&
+                    evmTxs.length === 1
+                  ) {
+                    gasLimit = swapConfigs.gasConfig.gas;
+                  } else if (
+                    evmSimulateKind ===
+                      EVMGasSimulateKind.TX_BUNDLE_SIMULATED &&
+                    evmTxs.length === 2
+                  ) {
+                    if (evmTxIndex === 0) {
+                      // erc20 approval tx gas를 새로 계산해야 한다
+                      const approvalGasLimit =
+                        await ethereumAccount.simulateGas(
+                          sender,
+                          erc20ApprovalTx!
+                        );
+                      gasLimit = approvalGasLimit.gasUsed; // TODO: add margin
+                    } else {
+                      // 이전 backgroundTx의 gasLimit을 사용한다
+                      const approvalGasLimit =
+                        evmBackgroundTxs[0].txData.gasLimit;
+                      gasLimit =
+                        swapConfigs.gasConfig.gas -
+                        parseInt(approvalGasLimit?.toString() ?? "0");
+                    }
+                  } else {
+                    // TODO: ???
+                    gasLimit = swapConfigs.gasConfig.gas;
+                  }
+
+                  const feeObject =
+                    maxFeePerGas && maxPriorityFeePerGas
+                      ? {
+                          type: 2,
+                          maxFeePerGas: `0x${BigInt(
+                            maxFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          maxPriorityFeePerGas: `0x${BigInt(
+                            maxPriorityFeePerGas.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${gasLimit.toString(16)}`,
+                        }
+                      : {
+                          gasPrice: `0x${BigInt(
+                            gasPrice.truncate().toString()
+                          ).toString(16)}`,
+                          gasLimit: `0x${swapConfigs.gasConfig.gas.toString(
+                            16
+                          )}`,
+                        };
+
+                  // check chain id is in executableChainIds and it's the first tx
+                  if (
+                    executableChainIds.includes(backgroundTx.chainId) &&
+                    txIndex === 0
+                  ) {
+                    const signedTx = await ethereumAccount.signEthereumTx(
+                      swapConfigs.senderConfig.sender,
+                      {
+                        ...evmTx,
+                        ...feeObject,
+                        ...(evmTxIndex !== 0 && erc20Approval != null
+                          ? { requiredErc20Approvals: [erc20Approval] }
+                          : {}),
+                      },
+                      {
+                        nonceMethod: "pending",
+                      }
+                    );
+
+                    navigate(-1);
+
+                    backgroundTx.signedTx = signedTx;
+                    backgroundTx.txData = {
+                      ...backgroundTx.txData,
+                      ...feeObject,
+                    };
+                  }
+                }
+
+                evmBackgroundTxs.push(backgroundTx);
+              }
+
+              backgroundTxs.push(...evmBackgroundTxs);
+            }
+          }
 
           try {
             const executeTxMsg = new RecordAndExecuteTxsMsg(
@@ -1061,735 +1386,175 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               executionType,
               backgroundTxs,
               executableChainIds,
-              historyData
+              historyData,
+              historyTxIndex
             );
 
-            const executeTxStatus =
-              await new InExtensionMessageRequester().sendMessage(
-                BACKGROUND_PORT,
-                executeTxMsg
-              );
-            if (executeTxStatus === TxExecutionStatus.FAILED) {
-              throw new Error("Transaction execution failed");
+            const result = await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              executeTxMsg
+            );
+            if (result.status === TxExecutionStatus.FAILED) {
+              throw new Error(result.error ?? "Transaction execution failed");
             }
 
+            if (
+              !chainStore.isEnabledChain(swapConfigs.amountConfig.outChainId)
+            ) {
+              chainStore.enableChainInfoInUI(
+                swapConfigs.amountConfig.outChainId
+              );
+
+              if (keyRingStore.selectedKeyInfo) {
+                const outChainInfo = chainStore.getChain(
+                  swapConfigs.amountConfig.outChainId
+                );
+                if (
+                  keyRingStore.needKeyCoinTypeFinalize(
+                    keyRingStore.selectedKeyInfo.id,
+                    outChainInfo
+                  )
+                ) {
+                  keyRingStore.finalizeKeyCoinType(
+                    keyRingStore.selectedKeyInfo.id,
+                    outChainInfo.chainId,
+                    outChainInfo.bip44.coinType
+                  );
+                }
+              }
+            }
+
+            // Treat blocked state as successful for now (since this is a multi-tx case),
+            // and guide the user to resume the transaction later through history tracking ui.
             notification.show(
               "success",
               intl.formatMessage({ id: "notification.transaction-success" }),
               ""
             );
 
-            // if ("send" in tx) {
-            //   await tx.send(
-            //     swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
-            //       swapConfigs.feeConfig.toStdFee(),
-            //     swapConfigs.memoConfig.memo,
-            //     {
-            //       preferNoSetFee: true,
-            //       preferNoSetMemo: false,
-            //       ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
+            // TODO: inChainId에서 필요한 상태 업데이트
 
-            //       sendTx: async (chainId, tx, mode) => {
-            //         if (
-            //           swapConfigs.amountConfig.type === "transfer" &&
-            //           !isInterChainSwap
-            //         ) {
-            //           const msg: Message<Uint8Array> = new SendTxAndRecordMsg(
-            //             "ibc-swap/ibc-transfer",
-            //             chainId,
-            //             outChainId,
-            //             tx,
-            //             mode,
-            //             false,
-            //             swapConfigs.senderConfig.sender,
-            //             accountStore.getAccount(outChainId).bech32Address,
-            //             swapConfigs.amountConfig.amount.map((amount) => {
-            //               return {
-            //                 amount: DecUtils.getTenExponentN(
-            //                   amount.currency.coinDecimals
-            //                 )
-            //                   .mul(amount.toDec())
-            //                   .toString(),
-            //                 denom: amount.currency.coinMinimalDenom,
-            //               };
-            //             }),
-            //             swapConfigs.memoConfig.memo,
-            //             true
-            //           ).withIBCPacketForwarding(channels, {
-            //             currencies: chainStore.getChain(chainId).currencies,
-            //           });
-            //           return await new InExtensionMessageRequester().sendMessage(
-            //             BACKGROUND_PORT,
-            //             msg
-            //           );
-            //         } else {
-            //           const msg = new SendTxAndRecordWithIBCSwapMsg(
-            //             "amount-in",
-            //             chainId,
-            //             outChainId,
-            //             tx,
-            //             channels,
-            //             {
-            //               chainId: outChainId,
-            //               denom: outCurrency.coinMinimalDenom,
-            //             },
-            //             swapChannelIndex,
-            //             swapReceiver,
-            //             mode,
-            //             false,
-            //             swapConfigs.senderConfig.sender,
-            //             swapConfigs.amountConfig.amount.map((amount) => {
-            //               return {
-            //                 amount: DecUtils.getTenExponentN(
-            //                   amount.currency.coinDecimals
-            //                 )
-            //                   .mul(amount.toDec())
-            //                   .toString(),
-            //                 denom: amount.currency.coinMinimalDenom,
-            //               };
-            //             }),
-            //             swapConfigs.memoConfig.memo,
-            //             {
-            //               currencies:
-            //                 chainStore.getChain(outChainId).currencies,
-            //             },
-            //             !isInterChainSwap // multi-ecosystem swap인 경우, ibc swap history에 추가하는 대신 skip swap history를 추가한다.
-            //           );
-
-            //           return await new InExtensionMessageRequester().sendMessage(
-            //             BACKGROUND_PORT,
-            //             msg
-            //           );
-            //         }
-            //       },
-            //     },
-            //     {
-            //       onBroadcasted: (txHash) => {
-            //         if (isInterChainSwap) {
-            //           const msg = new RecordTxWithSwapV2Msg(
-            //             inChainId,
-            //             outChainId,
-            //             provider!,
-            //             {
-            //               chainId: outChainId,
-            //               denom: outCurrency.coinMinimalDenom,
-            //               expectedAmount: swapConfigs.amountConfig.outAmount
-            //                 .toDec()
-            //                 .toString(),
-            //             },
-            //             simpleRoute,
-            //             swapConfigs.senderConfig.sender,
-            //             chainStore.isEvmOnlyChain(outChainId)
-            //               ? accountStore.getAccount(outChainId)
-            //                   .ethereumHexAddress
-            //               : accountStore.getAccount(outChainId).bech32Address,
-            //             [
-            //               ...swapConfigs.amountConfig.amount.map((amount) => {
-            //                 return {
-            //                   amount: DecUtils.getTenExponentN(
-            //                     amount.currency.coinDecimals
-            //                   )
-            //                     .mul(amount.toDec())
-            //                     .toString(),
-            //                   denom: amount.currency.coinMinimalDenom,
-            //                 };
-            //               }),
-            //               {
-            //                 amount: DecUtils.getTenExponentN(
-            //                   swapConfigs.amountConfig.outAmount.currency
-            //                     .coinDecimals
-            //                 )
-            //                   .mul(swapConfigs.amountConfig.outAmount.toDec())
-            //                   .toString(),
-            //                 denom:
-            //                   swapConfigs.amountConfig.outAmount.currency
-            //                     .coinMinimalDenom,
-            //               },
-            //             ],
-            //             {
-            //               currencies:
-            //                 chainStore.getChain(outChainId).currencies,
-            //             },
-            //             routeDurationSeconds ?? 0,
-            //             Buffer.from(txHash).toString("hex")
-            //           );
-
-            //           new InExtensionMessageRequester().sendMessage(
-            //             BACKGROUND_PORT,
-            //             msg
-            //           );
-
-            //           if (
-            //             !chainStore.isEnabledChain(
-            //               swapConfigs.amountConfig.outChainId
-            //             )
-            //           ) {
-            //             chainStore.enableChainInfoInUI(
-            //               swapConfigs.amountConfig.outChainId
-            //             );
-
-            //             if (keyRingStore.selectedKeyInfo) {
-            //               const outChainInfo = chainStore.getChain(
-            //                 swapConfigs.amountConfig.outChainId
-            //               );
-            //               if (
-            //                 keyRingStore.needKeyCoinTypeFinalize(
-            //                   keyRingStore.selectedKeyInfo.id,
-            //                   outChainInfo
-            //                 )
-            //               ) {
-            //                 keyRingStore.finalizeKeyCoinType(
-            //                   keyRingStore.selectedKeyInfo.id,
-            //                   outChainInfo.chainId,
-            //                   outChainInfo.bip44.coinType
-            //                 );
-            //               }
-            //             }
-            //           }
-            //         }
-
-            //         if (isSwap) {
-            //           // logEvent("swap_tx_submitted", {
-            //           //   quote_id: quoteIdRef.current,
-            //           // });
-            //         }
-
-            //         const params: Record<
-            //           string,
-            //           | number
-            //           | string
-            //           | boolean
-            //           | number[]
-            //           | string[]
-            //           | undefined
-            //         > = {
-            //           inChainId: inChainId,
-            //           inChainIdentifier:
-            //             ChainIdHelper.parse(inChainId).identifier,
-            //           inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
-            //           inCurrencyDenom: inCurrency.coinDenom,
-            //           inCurrencyCommonMinimalDenom: inCurrency.coinMinimalDenom,
-            //           inCurrencyCommonDenom: inCurrency.coinDenom,
-            //           outChainId: outChainId,
-            //           outChainIdentifier:
-            //             ChainIdHelper.parse(outChainId).identifier,
-            //           outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
-            //           outCurrencyDenom: outCurrency.coinDenom,
-            //           outCurrencyCommonMinimalDenom:
-            //             outCurrency.coinMinimalDenom,
-            //           outCurrencyCommonDenom: outCurrency.coinDenom,
-            //           swapType: swapConfigs.amountConfig.type,
-            //         };
-            //         if (
-            //           "originChainId" in inCurrency &&
-            //           inCurrency.originChainId
-            //         ) {
-            //           const originChainId = inCurrency.originChainId;
-            //           params["inOriginChainId"] = originChainId;
-            //           params["inOriginChainIdentifier"] =
-            //             ChainIdHelper.parse(originChainId).identifier;
-
-            //           params["inToDifferentChain"] = true;
-            //         }
-            //         if (
-            //           "originCurrency" in inCurrency &&
-            //           inCurrency.originCurrency
-            //         ) {
-            //           params["inCurrencyCommonMinimalDenom"] =
-            //             inCurrency.originCurrency.coinMinimalDenom;
-            //           params["inCurrencyCommonDenom"] =
-            //             inCurrency.originCurrency.coinDenom;
-            //         }
-            //         if (
-            //           "originChainId" in outCurrency &&
-            //           outCurrency.originChainId
-            //         ) {
-            //           const originChainId = outCurrency.originChainId;
-            //           params["outOriginChainId"] = originChainId;
-            //           params["outOriginChainIdentifier"] =
-            //             ChainIdHelper.parse(originChainId).identifier;
-
-            //           params["outToDifferentChain"] = true;
-            //         }
-            //         if (
-            //           "originCurrency" in outCurrency &&
-            //           outCurrency.originCurrency
-            //         ) {
-            //           params["outCurrencyCommonMinimalDenom"] =
-            //             outCurrency.originCurrency.coinMinimalDenom;
-            //           params["outCurrencyCommonDenom"] =
-            //             outCurrency.originCurrency.coinDenom;
-            //         }
-            //         params["inRange"] = amountToAmbiguousString(
-            //           swapConfigs.amountConfig.amount[0]
-            //         );
-            //         params["outRange"] = amountToAmbiguousString(
-            //           swapConfigs.amountConfig.outAmount
-            //         );
-
-            //         // UI 상에서 in currency의 가격은 in input에서 표시되고
-            //         // out currency의 가격은 swap fee에서 표시된다.
-            //         // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
-            //         const inCurrencyPrice = priceStore.calculatePrice(
-            //           swapConfigs.amountConfig.amount[0],
-            //           "usd"
-            //         );
-            //         if (inCurrencyPrice) {
-            //           params["inFiatRange"] =
-            //             amountToAmbiguousString(inCurrencyPrice);
-            //           params["inFiatAvg"] =
-            //             amountToAmbiguousAverage(inCurrencyPrice);
-            //         }
-            //         const outCurrencyPrice = priceStore.calculatePrice(
-            //           swapConfigs.amountConfig.outAmount,
-            //           "usd"
-            //         );
-            //         if (outCurrencyPrice) {
-            //           params["outFiatRange"] =
-            //             amountToAmbiguousString(outCurrencyPrice);
-            //           params["outFiatAvg"] =
-            //             amountToAmbiguousAverage(outCurrencyPrice);
-            //         }
-
-            //         new InExtensionMessageRequester().sendMessage(
-            //           BACKGROUND_PORT,
-            //           new LogAnalyticsEventMsg("ibc_swap", params)
-            //         );
-
-            //         analyticsStore.logEvent("swap_occurred", {
-            //           in_chain_id: inChainId,
-            //           in_chain_identifier:
-            //             ChainIdHelper.parse(inChainId).identifier,
-            //           in_currency_minimal_denom: inCurrency.coinMinimalDenom,
-            //           in_currency_denom: inCurrency.coinDenom,
-            //           out_chain_id: outChainId,
-            //           out_chain_identifier:
-            //             ChainIdHelper.parse(outChainId).identifier,
-            //           out_currency_minimal_denom: outCurrency.coinMinimalDenom,
-            //           out_currency_denom: outCurrency.coinDenom,
-            //         });
-
-            //         navigate("/", {
-            //           replace: true,
-            //         });
-            //       },
-            //       onFulfill: (tx: any) => {
-            //         if (tx.code != null && tx.code !== 0) {
-            //           if (isSwap) {
-            //             // logEvent("swap_tx_failed", {
-            //             //   quote_id: quoteIdRef.current,
-            //             // });
-            //           }
-            //           console.log(tx.log ?? tx.raw_log);
-
-            //           notification.show(
-            //             "failed",
-            //             intl.formatMessage({ id: "error.transaction-failed" }),
-            //             ""
-            //           );
-            //           return;
-            //         }
-
-            //         if (isSwap) {
-            //           // logEvent("swap_tx_success", {
-            //           //   quote_id: quoteIdRef.current,
-            //           // });
-            //         }
-
-            //         notification.show(
-            //           "success",
-            //           intl.formatMessage({
-            //             id: "notification.transaction-success",
-            //           }),
-            //           ""
-            //         );
-            //       },
-            //     }
-            //   );
-            // } else {
-            //   const ethereumAccount = ethereumAccountStore.getAccount(
-            //     swapConfigs.amountConfig.chainId
-            //   );
-
-            //   const sender = swapConfigs.senderConfig.sender;
-
-            //   const isErc20InCurrency =
-            //     ("type" in inCurrency && inCurrency.type === "erc20") ||
-            //     inCurrency.coinMinimalDenom.startsWith("erc20:");
-            //   const erc20Approval = tx.requiredErc20Approvals?.[0];
-            //   const erc20ApprovalTx =
-            //     erc20Approval && isErc20InCurrency
-            //       ? ethereumAccount.makeErc20ApprovalTx(
-            //           {
-            //             ...inCurrency,
-            //             type: "erc20",
-            //             contractAddress: inCurrency.coinMinimalDenom.replace(
-            //               "erc20:",
-            //               ""
-            //             ),
-            //           },
-            //           erc20Approval.spender,
-            //           erc20Approval.amount
-            //         )
-            //       : undefined;
-
-            //   delete (tx as UnsignedEVMTransactionWithErc20Approvals)
-            //     .requiredErc20Approvals;
-
-            //   const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
-            //     swapConfigs.feeConfig.getEIP1559TxFees(
-            //       swapConfigs.feeConfig.type
-            //     );
-
-            //   const feeObject =
-            //     maxFeePerGas && maxPriorityFeePerGas
-            //       ? {
-            //           type: 2,
-            //           maxFeePerGas: `0x${BigInt(
-            //             maxFeePerGas.truncate().toString()
-            //           ).toString(16)}`,
-            //           maxPriorityFeePerGas: `0x${BigInt(
-            //             maxPriorityFeePerGas.truncate().toString()
-            //           ).toString(16)}`,
-            //           gasLimit: `0x${swapConfigs.gasConfig.gas.toString(16)}`,
-            //         }
-            //       : {
-            //           gasPrice: `0x${BigInt(
-            //             gasPrice.truncate().toString()
-            //           ).toString(16)}`,
-            //           gasLimit: `0x${swapConfigs.gasConfig.gas.toString(16)}`,
-            //         };
-
-            //   ethereumAccount.setIsSendingTx(true);
-
-            //   if (erc20ApprovalTx) {
-            //     // logEvent("erc20_approve_sign_opened", {
+            //   if (isSwap) {
+            //     // logEvent("swap_tx_submitted", {
             //     //   quote_id: quoteIdRef.current,
             //     // });
             //   }
 
-            //   await ethereumAccount.sendEthereumTx(
-            //     sender,
-            //     {
-            //       ...(erc20ApprovalTx ?? tx),
-            //       ...feeObject,
-            //     },
-            //     {
-            //       onBroadcastFailed: (e) => {
-            //         if (erc20ApprovalTx && e?.message === "Request rejected") {
-            //           // logEvent("erc20_approve_sign_canceled", {
-            //           //   quote_id: quoteIdRef.current,
-            //           // });
-            //         }
-            //       },
-            //       onBroadcasted: (txHash) => {
-            //         if (erc20ApprovalTx) {
-            //           // logEvent("erc20_approve_tx_submitted", {
-            //           //   quote_id: quoteIdRef.current,
-            //           // });
-            //         }
+            //   const params: Record<
+            //     string,
+            //     | number
+            //     | string
+            //     | boolean
+            //     | number[]
+            //     | string[]
+            //     | undefined
+            //   > = {
+            //     inChainId: inChainId,
+            //     inChainIdentifier:
+            //       ChainIdHelper.parse(inChainId).identifier,
+            //     inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+            //     inCurrencyDenom: inCurrency.coinDenom,
+            //     inCurrencyCommonMinimalDenom: inCurrency.coinMinimalDenom,
+            //     inCurrencyCommonDenom: inCurrency.coinDenom,
+            //     outChainId: outChainId,
+            //     outChainIdentifier:
+            //       ChainIdHelper.parse(outChainId).identifier,
+            //     outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+            //     outCurrencyDenom: outCurrency.coinDenom,
+            //     outCurrencyCommonMinimalDenom:
+            //       outCurrency.coinMinimalDenom,
+            //     outCurrencyCommonDenom: outCurrency.coinDenom,
+            //     swapType: swapConfigs.amountConfig.type,
+            //   };
+            //   if (
+            //     "originChainId" in inCurrency &&
+            //     inCurrency.originChainId
+            //   ) {
+            //     const originChainId = inCurrency.originChainId;
+            //     params["inOriginChainId"] = originChainId;
+            //     params["inOriginChainIdentifier"] =
+            //       ChainIdHelper.parse(originChainId).identifier;
 
-            //         if (!erc20ApprovalTx) {
-            //           if (isSwap) {
-            //             // logEvent("swap_tx_submitted", {
-            //             //   quote_id: quoteIdRef.current,
-            //             // });
-            //           }
-            //           ethereumAccount.setIsSendingTx(false);
+            //     params["inToDifferentChain"] = true;
+            //   }
+            //   if (
+            //     "originCurrency" in inCurrency &&
+            //     inCurrency.originCurrency
+            //   ) {
+            //     params["inCurrencyCommonMinimalDenom"] =
+            //       inCurrency.originCurrency.coinMinimalDenom;
+            //     params["inCurrencyCommonDenom"] =
+            //       inCurrency.originCurrency.coinDenom;
+            //   }
+            //   if (
+            //     "originChainId" in outCurrency &&
+            //     outCurrency.originChainId
+            //   ) {
+            //     const originChainId = outCurrency.originChainId;
+            //     params["outOriginChainId"] = originChainId;
+            //     params["outOriginChainIdentifier"] =
+            //       ChainIdHelper.parse(originChainId).identifier;
 
-            //           const msg = new RecordTxWithSwapV2Msg(
-            //             inChainId,
-            //             outChainId,
-            //             provider!,
-            //             {
-            //               chainId: outChainId,
-            //               denom: outCurrency.coinMinimalDenom,
-            //               expectedAmount: swapConfigs.amountConfig.outAmount
-            //                 .toDec()
-            //                 .toString(),
-            //             },
-            //             simpleRoute,
-            //             sender,
-            //             chainStore.isEvmOnlyChain(outChainId)
-            //               ? accountStore.getAccount(outChainId)
-            //                   .ethereumHexAddress
-            //               : accountStore.getAccount(outChainId).bech32Address,
-            //             [
-            //               ...swapConfigs.amountConfig.amount.map((amount) => {
-            //                 return {
-            //                   amount: DecUtils.getTenExponentN(
-            //                     amount.currency.coinDecimals
-            //                   )
-            //                     .mul(amount.toDec())
-            //                     .toString(),
-            //                   denom: amount.currency.coinMinimalDenom,
-            //                 };
-            //               }),
-            //               {
-            //                 amount: DecUtils.getTenExponentN(
-            //                   swapConfigs.amountConfig.outAmount.currency
-            //                     .coinDecimals
-            //                 )
-            //                   .mul(swapConfigs.amountConfig.outAmount.toDec())
-            //                   .toString(),
-            //                 denom:
-            //                   swapConfigs.amountConfig.outAmount.currency
-            //                     .coinMinimalDenom,
-            //               },
-            //             ],
-            //             {
-            //               currencies:
-            //                 chainStore.getChain(outChainId).currencies,
-            //             },
-            //             routeDurationSeconds ?? 0,
-            //             txHash
-            //           );
-
-            //           new InExtensionMessageRequester().sendMessage(
-            //             BACKGROUND_PORT,
-            //             msg
-            //           );
-
-            //           navigate("/", {
-            //             replace: true,
-            //           });
-            //         }
-            //       },
-            //       onFulfill: (txReceipt) => {
-            //         const queryBalances = queriesStore.get(
-            //           swapConfigs.amountConfig.chainId
-            //         ).queryBalances;
-            //         queryBalances
-            //           .getQueryEthereumHexAddress(sender)
-            //           .balances.forEach((balance) => {
-            //             if (
-            //               balance.currency.coinMinimalDenom ===
-            //                 swapConfigs.amountConfig.currency
-            //                   .coinMinimalDenom ||
-            //               swapConfigs.feeConfig.fees.some(
-            //                 (fee) =>
-            //                   fee.currency.coinMinimalDenom ===
-            //                   balance.currency.coinMinimalDenom
-            //               )
-            //             ) {
-            //               balance.fetch();
-            //             }
-            //           });
-
-            //         if (txReceipt.status === EthTxStatus.Success) {
-            //           notification.show(
-            //             "success",
-            //             intl.formatMessage({
-            //               id: "notification.transaction-success",
-            //             }),
-            //             ""
-            //           );
-
-            //           if (erc20ApprovalTx) {
-            //             // logEvent("erc20_approve_tx_success", {
-            //             //   quote_id: quoteIdRef.current,
-            //             // });
-
-            //             ethereumAccount.setIsSendingTx(true);
-            //             ethereumAccount
-            //               .simulateGas(sender, tx as UnsignedEVMTransaction)
-            //               .then(({ gasUsed }) => {
-            //                 const {
-            //                   maxFeePerGas,
-            //                   maxPriorityFeePerGas,
-            //                   gasPrice,
-            //                 } = swapConfigs.feeConfig.getEIP1559TxFees(
-            //                   swapConfigs.feeConfig.type
-            //                 );
-
-            //                 const feeObject =
-            //                   maxFeePerGas && maxPriorityFeePerGas
-            //                     ? {
-            //                         type: 2,
-            //                         maxFeePerGas: `0x${BigInt(
-            //                           maxFeePerGas.truncate().toString()
-            //                         ).toString(16)}`,
-            //                         maxPriorityFeePerGas: `0x${BigInt(
-            //                           maxPriorityFeePerGas.truncate().toString()
-            //                         ).toString(16)}`,
-            //                         gasLimit: `0x${gasUsed.toString(16)}`,
-            //                       }
-            //                     : {
-            //                         gasPrice: `0x${BigInt(
-            //                           gasPrice.truncate().toString()
-            //                         ).toString(16)}`,
-            //                         gasLimit: `0x${gasUsed.toString(16)}`,
-            //                       };
-
-            //                 ethereumAccount.sendEthereumTx(
-            //                   sender,
-            //                   {
-            //                     ...(tx as UnsignedEVMTransactionWithErc20Approvals),
-            //                     ...feeObject,
-            //                   },
-            //                   {
-            //                     onBroadcasted: (txHash) => {
-            //                       if (isSwap) {
-            //                         // logEvent("swap_tx_submitted", {
-            //                         //   quote_id: quoteIdRef.current,
-            //                         // });
-            //                       }
-
-            //                       ethereumAccount.setIsSendingTx(false);
-
-            //                       const msg = new RecordTxWithSwapV2Msg(
-            //                         inChainId,
-            //                         outChainId,
-            //                         provider!,
-            //                         {
-            //                           chainId: outChainId,
-            //                           denom: outCurrency.coinMinimalDenom,
-            //                           expectedAmount:
-            //                             swapConfigs.amountConfig.outAmount
-            //                               .toDec()
-            //                               .toString(),
-            //                         },
-            //                         simpleRoute,
-            //                         sender,
-            //                         chainStore.isEvmOnlyChain(outChainId)
-            //                           ? accountStore.getAccount(outChainId)
-            //                               .ethereumHexAddress
-            //                           : accountStore.getAccount(outChainId)
-            //                               .bech32Address,
-            //                         [
-            //                           ...swapConfigs.amountConfig.amount.map(
-            //                             (amount) => {
-            //                               return {
-            //                                 amount: DecUtils.getTenExponentN(
-            //                                   amount.currency.coinDecimals
-            //                                 )
-            //                                   .mul(amount.toDec())
-            //                                   .toString(),
-            //                                 denom:
-            //                                   amount.currency.coinMinimalDenom,
-            //                               };
-            //                             }
-            //                           ),
-            //                           {
-            //                             amount: DecUtils.getTenExponentN(
-            //                               swapConfigs.amountConfig.outAmount
-            //                                 .currency.coinDecimals
-            //                             )
-            //                               .mul(
-            //                                 swapConfigs.amountConfig.outAmount.toDec()
-            //                               )
-            //                               .toString(),
-            //                             denom:
-            //                               swapConfigs.amountConfig.outAmount
-            //                                 .currency.coinMinimalDenom,
-            //                           },
-            //                         ],
-            //                         {
-            //                           currencies:
-            //                             chainStore.getChain(outChainId)
-            //                               .currencies,
-            //                         },
-            //                         routeDurationSeconds ?? 0,
-            //                         txHash
-            //                       );
-
-            //                       new InExtensionMessageRequester().sendMessage(
-            //                         BACKGROUND_PORT,
-            //                         msg
-            //                       );
-
-            //                       navigate("/", {
-            //                         replace: true,
-            //                       });
-            //                     },
-            //                     onFulfill: (txReceipt) => {
-            //                       const queryBalances = queriesStore.get(
-            //                         swapConfigs.amountConfig.chainId
-            //                       ).queryBalances;
-            //                       queryBalances
-            //                         .getQueryEthereumHexAddress(sender)
-            //                         .balances.forEach((balance) => {
-            //                           if (
-            //                             balance.currency.coinMinimalDenom ===
-            //                               swapConfigs.amountConfig.currency
-            //                                 .coinMinimalDenom ||
-            //                             swapConfigs.feeConfig.fees.some(
-            //                               (fee) =>
-            //                                 fee.currency.coinMinimalDenom ===
-            //                                 balance.currency.coinMinimalDenom
-            //                             )
-            //                           ) {
-            //                             balance.fetch();
-            //                           }
-            //                         });
-
-            //                       if (
-            //                         txReceipt.status === EthTxStatus.Success
-            //                       ) {
-            //                         if (isSwap) {
-            //                           // logEvent("swap_tx_success", {
-            //                           //   quote_id: quoteIdRef.current,
-            //                           // });
-            //                         }
-
-            //                         notification.show(
-            //                           "success",
-            //                           intl.formatMessage({
-            //                             id: "notification.transaction-success",
-            //                           }),
-            //                           ""
-            //                         );
-            //                       } else {
-            //                         if (isSwap) {
-            //                           // logEvent("swap_tx_failed", {
-            //                           //   quote_id: quoteIdRef.current,
-            //                           // });
-            //                         }
-
-            //                         notification.show(
-            //                           "failed",
-            //                           intl.formatMessage({
-            //                             id: "error.transaction-failed",
-            //                           }),
-            //                           ""
-            //                         );
-            //                       }
-            //                     },
-            //                   }
-            //                 );
-            //               })
-            //               .catch((e) => {
-            //                 console.error(e);
-            //                 // logEvent("swap_tx_client_error", {
-            //                 //   quote_id: quoteIdRef.current,
-            //                 //   error_message: e?.message,
-            //                 // });
-
-            //                 ethereumAccount.setIsSendingTx(false);
-            //                 setCalculatingTxError(e);
-            //                 setIsTxLoading(false);
-            //               });
-            //           }
-            //         } else {
-            //           if (erc20ApprovalTx) {
-            //             // logEvent("erc20_approve_tx_failed", {
-            //             //   quote_id: quoteIdRef.current,
-            //             // });
-            //           }
-
-            //           notification.show(
-            //             "failed",
-            //             intl.formatMessage({ id: "error.transaction-failed" }),
-            //             ""
-            //           );
-            //         }
-            //       },
-            //     },
-            //     {
-            //       nonceMethod,
-            //     }
+            //     params["outToDifferentChain"] = true;
+            //   }
+            //   if (
+            //     "originCurrency" in outCurrency &&
+            //     outCurrency.originCurrency
+            //   ) {
+            //     params["outCurrencyCommonMinimalDenom"] =
+            //       outCurrency.originCurrency.coinMinimalDenom;
+            //     params["outCurrencyCommonDenom"] =
+            //       outCurrency.originCurrency.coinDenom;
+            //   }
+            //   params["inRange"] = amountToAmbiguousString(
+            //     swapConfigs.amountConfig.amount[0]
             //   );
-            // }
+            //   params["outRange"] = amountToAmbiguousString(
+            //     swapConfigs.amountConfig.outAmount
+            //   );
+
+            //   // UI 상에서 in currency의 가격은 in input에서 표시되고
+            //   // out currency의 가격은 swap fee에서 표시된다.
+            //   // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+            //   const inCurrencyPrice = priceStore.calculatePrice(
+            //     swapConfigs.amountConfig.amount[0],
+            //     "usd"
+            //   );
+            //   if (inCurrencyPrice) {
+            //     params["inFiatRange"] =
+            //       amountToAmbiguousString(inCurrencyPrice);
+            //     params["inFiatAvg"] =
+            //       amountToAmbiguousAverage(inCurrencyPrice);
+            //   }
+            //   const outCurrencyPrice = priceStore.calculatePrice(
+            //     swapConfigs.amountConfig.outAmount,
+            //     "usd"
+            //   );
+            //   if (outCurrencyPrice) {
+            //     params["outFiatRange"] =
+            //       amountToAmbiguousString(outCurrencyPrice);
+            //     params["outFiatAvg"] =
+            //       amountToAmbiguousAverage(outCurrencyPrice);
+            //   }
+
+            //   new InExtensionMessageRequester().sendMessage(
+            //     BACKGROUND_PORT,
+            //     new LogAnalyticsEventMsg("ibc_swap", params)
+            //   );
+
+            //   analyticsStore.logEvent("swap_occurred", {
+            //     in_chain_id: inChainId,
+            //     in_chain_identifier:
+            //       ChainIdHelper.parse(inChainId).identifier,
+            //     in_currency_minimal_denom: inCurrency.coinMinimalDenom,
+            //     in_currency_denom: inCurrency.coinDenom,
+            //     out_chain_id: outChainId,
+            //     out_chain_identifier:
+            //       ChainIdHelper.parse(outChainId).identifier,
+            //     out_currency_minimal_denom: outCurrency.coinMinimalDenom,
+            //     out_currency_denom: outCurrency.coinDenom,
+            //   });
+            // },
           } catch (e) {
             if (e?.message === "Request rejected") {
               if (isSwap) {
@@ -2057,32 +1822,59 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Gutter size="0.75rem" />
 
-        <HoldButton
-          type="submit"
-          holdDurationMs={1500}
-          disabled={
-            interactionBlocked ||
-            showUSDNWarning ||
-            showCelestiaWarning ||
-            (shouldTopUp && !isTopUpAvailable)
-          }
-          text={
-            shouldTopUp && remainingText
-              ? remainingText
-              : intl.formatMessage({
-                  id: "page.ibc-swap.button.hold-to-approve",
-                })
-          }
-          holdingText={intl.formatMessage({
-            id: "page.ibc-swap.button.keep-holding",
-          })}
-          color="primary"
-          size="large"
-          isLoading={
-            isTxLoading ||
-            accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
-          }
-        />
+        {isOneClickSwapDisabled ? (
+          <Button
+            type="submit"
+            disabled={
+              interactionBlocked ||
+              showUSDNWarning ||
+              showCelestiaWarning ||
+              (shouldTopUp && !isTopUpAvailable)
+            }
+            text={
+              shouldTopUp && remainingText
+                ? remainingText
+                : intl.formatMessage({
+                    id: "page.ibc-swap.title.swap",
+                  })
+            }
+            color="primary"
+            size="large"
+            isLoading={
+              isTxLoading ||
+              accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+            }
+          />
+        ) : (
+          <HoldButton
+            type="submit"
+            holdDurationMs={1500}
+            disabled={
+              interactionBlocked ||
+              showUSDNWarning ||
+              showCelestiaWarning ||
+              (shouldTopUp && !isTopUpAvailable)
+            }
+            text={
+              shouldTopUp && remainingText
+                ? remainingText
+                : intl.formatMessage({
+                    id: "page.ibc-swap.button.hold-to-approve",
+                  })
+            }
+            holdingText={intl.formatMessage({
+              id: "page.ibc-swap.button.keep-holding",
+            })}
+            color="primary"
+            size="large"
+            isLoading={
+              isTxLoading ||
+              accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+            }
+            onHoldStart={() => setIsButtonHolding(true)}
+            onHoldEnd={() => setIsButtonHolding(false)}
+          />
+        )}
 
         <Gutter size="0.75rem" />
 

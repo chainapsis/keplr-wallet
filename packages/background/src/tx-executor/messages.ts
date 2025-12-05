@@ -2,10 +2,11 @@ import { KeplrError, Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
 import {
   BackgroundTx,
+  BackgroundTxStatus,
   TxExecutionType,
-  TxExecutionStatus,
   TxExecution,
   ExecutionTypeToHistoryData,
+  TxExecutionResult,
 } from "./types";
 
 /**
@@ -15,7 +16,7 @@ import {
  */
 export class RecordAndExecuteTxsMsg<
   T extends TxExecutionType = TxExecutionType
-> extends Message<TxExecutionStatus> {
+> extends Message<TxExecutionResult> {
   public static type() {
     return "record-and-execute-txs";
   }
@@ -23,11 +24,14 @@ export class RecordAndExecuteTxsMsg<
   constructor(
     public readonly vaultId: string,
     public readonly executionType: T,
-    public readonly txs: BackgroundTx[],
+    public readonly txs: (BackgroundTx & {
+      status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
+    })[],
     public readonly executableChainIds: string[],
     public readonly historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
-      : ExecutionTypeToHistoryData[T]
+      : ExecutionTypeToHistoryData[T],
+    public readonly historyTxIndex?: number
   ) {
     super();
   }
@@ -52,6 +56,14 @@ export class RecordAndExecuteTxsMsg<
         "executableChainIds is empty"
       );
     }
+
+    if (this.historyTxIndex != null && this.historyTxIndex < 0) {
+      throw new KeplrError(
+        "direct-tx-executor",
+        104,
+        "historyTxIndex is invalid"
+      );
+    }
   }
 
   override approveExternal(): boolean {
@@ -71,7 +83,7 @@ export class RecordAndExecuteTxsMsg<
  * Resume existing direct transactions by execution id and transaction index
  * This message is used to resume the execution of direct transactions that were paused by waiting for the asset to be bridged or other reasons.
  */
-export class ResumeTxMsg extends Message<TxExecutionStatus> {
+export class ResumeTxMsg extends Message<TxExecutionResult> {
   public static type() {
     return "resume-tx";
   }
@@ -79,7 +91,7 @@ export class ResumeTxMsg extends Message<TxExecutionStatus> {
   constructor(
     public readonly id: string,
     public readonly txIndex?: number,
-    // NOTE: these fields are optional for hardware wallet cases
+    // NOTE: these fields are optional for hardware wallet or multiple txs cases
     public readonly signedTx?: string
   ) {
     super();
@@ -140,36 +152,5 @@ export class GetTxExecutionMsg extends Message<TxExecution | undefined> {
 
   type(): string {
     return GetTxExecutionMsg.type();
-  }
-}
-
-/**
- * Cancel execution by execution id
- */
-export class CancelTxExecutionMsg extends Message<void> {
-  public static type() {
-    return "cancel-tx-execution";
-  }
-
-  constructor(public readonly id: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.id) {
-      throw new KeplrError("direct-tx-executor", 101, "id is empty");
-    }
-  }
-
-  override approveExternal(): boolean {
-    return true;
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return CancelTxExecutionMsg.type();
   }
 }

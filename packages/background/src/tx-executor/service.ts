@@ -17,6 +17,8 @@ import {
   EVMBackgroundTx,
   CosmosBackgroundTx,
   ExecutionTypeToHistoryData,
+  TxExecutionResult,
+  PendingTxExecutionResult,
 } from "./types";
 import {
   action,
@@ -102,7 +104,14 @@ export class BackgroundTxExecutorService {
       });
     }
     autorun(() => {
-      const js = toJS(this.recentTxExecutionMap);
+      // Only persist executions that may be blocked (preventAutoSign is true)
+      const persistableExecutions = new Map<string, TxExecution>();
+      for (const [key, value] of this.recentTxExecutionMap) {
+        if (value.preventAutoSign) {
+          persistableExecutions.set(key, value);
+        }
+      }
+      const js = toJS(persistableExecutions);
       const obj = Object.fromEntries(js);
       this.kvStore.set<Record<string, TxExecution>>(
         "recentTxExecutionMap",
@@ -141,6 +150,23 @@ export class BackgroundTxExecutorService {
         for (const chainId of newExecutableChainIds) {
           execution.executableChainIds.push(chainId);
         }
+
+        // if there is a pending tx that is executable, force display the swap v2 history
+        if (
+          execution.type === TxExecutionType.SWAP_V2 &&
+          execution.historyId != null
+        ) {
+          const hasPendingExecutableTx = execution.txs.some(
+            (tx) =>
+              tx.status === BackgroundTxStatus.PENDING &&
+              execution.executableChainIds.includes(tx.chainId)
+          );
+          if (hasPendingExecutableTx) {
+            this.recentSendHistoryService.showRecentSwapV2History(
+              execution.historyId
+            );
+          }
+        }
       });
 
       // if the key is hardware wallet, do not resume the execution automatically
@@ -172,16 +198,21 @@ export class BackgroundTxExecutorService {
     env: Env,
     vaultId: string,
     type: T,
-    txs: BackgroundTx[],
+    txs: (BackgroundTx & {
+      status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
+    })[],
     executableChainIds: string[],
     historyData?: T extends TxExecutionType.UNDEFINED
       ? undefined
-      : ExecutionTypeToHistoryData[T]
-  ): Promise<TxExecutionStatus> {
+      : ExecutionTypeToHistoryData[T],
+    historyTxIndex?: number
+  ): Promise<TxExecutionResult> {
     console.log("[TxExecutor] recordAndExecuteTxs called:", {
       type,
       txCount: txs.length,
       executableChainIds,
+      historyData,
+      historyTxIndex,
     });
 
     if (!env.isInternalMsg) {
@@ -196,10 +227,15 @@ export class BackgroundTxExecutorService {
 
     console.log("[TxExecutor] Key type:", keyInfo.type);
 
-    // validation for hardware wallets
-    if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
-      // at least first tx should be signed with hardware wallet
-      // as signing on background is not supported for hardware wallets
+    // If any of the transactions are not executable or the key is hardware wallet,
+    // set preventAutoSign to true. This also determines if the execution needs persistence.
+    const preventAutoSign =
+      txs.some((tx) => !executableChainIds.includes(tx.chainId)) ||
+      keyInfo.type === "ledger" ||
+      keyInfo.type === "keystone";
+
+    // at least first tx should be signed if preventAutoSign is true
+    if (preventAutoSign) {
       const firstTx = txs[0];
       if (!firstTx) {
         throw new KeplrError(
@@ -221,21 +257,21 @@ export class BackgroundTxExecutorService {
       }
     }
 
-    // CHECK: 다중 체인 트랜잭션이 아니라면 굳이 이걸 기록할 필요가 있을까?
-    // 다중 체인 트랜잭션을 기록하는 이유는 자산 브릿징 등 상당한 시간이 걸리는 경우 이 작업을 백그라운드에서 한없이 기다리는 대신
-    // 실행 조건이 만족되었을 때 이어서 실행하기 위함인데, 한 번에 처리가 가능하다면 굳이 이걸 기록할 필요는 없을지도 모른다.
-    // 특히나 ui에서 진행상황을 체크하는 것이 아닌 이상 notification을 통해 진행상황을 알리는 것으로 충분할 수 있다.
     const id = (this.recentTxExecutionSeq++).toString();
+
+    console.log("[TxExecutor] preventAutoSign:", preventAutoSign);
 
     const execution = {
       id,
       status: TxExecutionStatus.PENDING,
       vaultId: vaultId,
-      txs: txs,
+      txs,
       txIndex: -1,
       executableChainIds: executableChainIds,
       timestamp: Date.now(),
       type,
+      preventAutoSign,
+      historyTxIndex,
       ...(type !== TxExecutionType.UNDEFINED ? { historyData } : {}),
     } as TxExecution;
 
@@ -253,7 +289,7 @@ export class BackgroundTxExecutorService {
     id: string,
     txIndex?: number,
     signedTx?: string
-  ): Promise<TxExecutionStatus> {
+  ): Promise<TxExecutionResult> {
     console.log("[TxExecutor] resumeTx called:", {
       id,
       txIndex,
@@ -266,7 +302,6 @@ export class BackgroundTxExecutorService {
     }
 
     return await this.executeTxs(id, {
-      env,
       txIndex,
       signedTx,
     });
@@ -275,11 +310,10 @@ export class BackgroundTxExecutorService {
   protected async executeTxs(
     id: string,
     options?: {
-      env?: Env;
       txIndex?: number;
       signedTx?: string;
     }
-  ): Promise<TxExecutionStatus> {
+  ): Promise<TxExecutionResult> {
     console.log("[TxExecutor] executeTxs started:", { id, options });
 
     const execution = this.getTxExecution(id);
@@ -302,13 +336,15 @@ export class BackgroundTxExecutorService {
       );
     }
 
-    // Only pending/processing/blocked executions can be executed
+    // Only pending or blocked executions can be executed
     const needResume =
       execution.status === TxExecutionStatus.PENDING ||
       execution.status === TxExecutionStatus.BLOCKED;
     if (!needResume) {
       console.log("[TxExecutor] No need to resume, status:", execution.status);
-      return execution.status;
+      return {
+        status: execution.status,
+      };
     }
 
     // check if the key is valid
@@ -331,220 +367,201 @@ export class BackgroundTxExecutorService {
     });
 
     for (let i = executionStartIndex; i < execution.txs.length; i++) {
+      const currentTx = execution.txs[i];
       console.log(`[TxExecutor] Processing tx[${i}]:`, {
-        chainId: execution.txs[i].chainId,
-        type: execution.txs[i].type,
-        status: execution.txs[i].status,
+        chainId: currentTx.chainId,
+        type: currentTx.type,
+        status: currentTx.status,
       });
 
-      let txStatus: BackgroundTxStatus;
+      const providedSignedTx =
+        options?.txIndex != null && i === options.txIndex
+          ? options.signedTx
+          : undefined;
 
-      if (options?.txIndex != null && i === options.txIndex) {
-        txStatus = await this.executePendingTx(id, i, {
-          env: options?.env,
-          signedTx: options.signedTx,
-        });
-      } else {
-        txStatus = await this.executePendingTx(id, i, {
-          env: options?.env,
-        });
-      }
+      const result = await this.executePendingTx(
+        execution.vaultId,
+        currentTx,
+        execution.executableChainIds,
+        execution.preventAutoSign ?? false,
+        providedSignedTx
+      );
 
-      console.log(`[TxExecutor] tx[${i}] result:`, txStatus);
+      // Apply result in a single runInAction to minimize autorun triggers
+      runInAction(() => {
+        execution.txIndex = i;
+        currentTx.status = result.status;
+        // NOTE: no need to set signedTx as it's already consumed,
+        // just set the result of pending tx execution
+        if (result.txHash != null) {
+          currentTx.txHash = result.txHash;
+        }
+        if (result.error != null) {
+          currentTx.error = result.error;
+        }
+      });
 
-      if (txStatus === BackgroundTxStatus.CONFIRMED) {
+      console.log(`[TxExecutor] tx[${i}] result:`, result.status);
+
+      if (result.status === BackgroundTxStatus.CONFIRMED) {
         continue;
       }
 
-      // if the tx is blocked, it means multiple transactions are required to be executed on different chains
-      // the execution should be stopped and record the history if needed
-      // and the execution should be resumed later when the condition is met
-      if (txStatus === BackgroundTxStatus.BLOCKED) {
+      /**
+       * If the tx is BLOCKED, it means multiple transactions are required
+       * to be executed on different chains.
+       *
+       * - The execution should be stopped here,
+       * - Record the history if needed,
+       * - The execution should be resumed later when the condition is met.
+       */
+      if (result.status === BackgroundTxStatus.BLOCKED) {
         console.log("[TxExecutor] Execution BLOCKED at tx index:", i);
         runInAction(() => {
           execution.status = TxExecutionStatus.BLOCKED;
+          this.recordHistoryIfNeeded(execution);
+
+          // no need to keep the history data anymore
+          delete execution.historyData;
         });
-        this.recordHistoryIfNeeded(execution);
-        return execution.status;
+        return {
+          status: TxExecutionStatus.BLOCKED,
+        };
       }
 
-      // if the tx is failed, the execution should be stopped
-      if (txStatus === BackgroundTxStatus.FAILED) {
+      if (result.status === BackgroundTxStatus.FAILED) {
         console.log("[TxExecutor] Execution FAILED at tx index:", i);
-        runInAction(() => {
-          execution.status = TxExecutionStatus.FAILED;
-        });
-        return execution.status;
+        this.removeTxExecution(id);
+
+        return {
+          status: TxExecutionStatus.FAILED,
+          error: result.error,
+        };
       }
 
       // something went wrong, should not happen
       throw new KeplrError(
         "direct-tx-executor",
         107,
-        "Unexpected tx status: " + txStatus
+        "Unexpected tx status: " + result.status
       );
     }
 
-    // if the execution is completed successfully, update the batch status
+    // if the execution is completed successfully, record the history and remove the execution
     console.log("[TxExecutor] Execution COMPLETED");
-    runInAction(() => {
-      execution.status = TxExecutionStatus.COMPLETED;
-    });
     this.recordHistoryIfNeeded(execution);
-    return execution.status;
+    this.removeTxExecution(id);
+
+    return {
+      status: TxExecutionStatus.COMPLETED,
+    };
   }
 
+  /**
+   * Execute a pending transaction without modifying observable state.
+   * Returns the result which should be applied by the caller using runInAction.
+   * This reduces autorun trigger count by batching state updates.
+   */
   protected async executePendingTx(
-    id: string,
-    index: number,
-    options?: {
-      env?: Env;
-      signedTx?: string;
-    }
-  ): Promise<BackgroundTxStatus> {
-    const execution = this.getTxExecution(id);
-    if (!execution) {
-      throw new KeplrError("direct-tx-executor", 105, "Execution not found");
-    }
+    vaultId: string,
+    tx: BackgroundTx,
+    executableChainIds: string[],
+    preventAutoSign: boolean,
+    providedSignedTx?: string
+  ): Promise<PendingTxExecutionResult> {
+    // Track mutable state locally without touching observable
+    let status = tx.status;
+    let signedTx = tx.signedTx ?? providedSignedTx;
+    let txHash = tx.txHash;
+    let error: string | undefined;
 
-    const currentTx = execution.txs[index];
-    if (!currentTx) {
-      throw new KeplrError("direct-tx-executor", 106, "Tx not found");
-    }
-
-    // these statuses are not expected to be reached for pending transactions
+    // Already in final state
     if (
-      currentTx.status === BackgroundTxStatus.CONFIRMED ||
-      currentTx.status === BackgroundTxStatus.FAILED ||
-      currentTx.status === BackgroundTxStatus.CANCELLED
+      status === BackgroundTxStatus.CONFIRMED ||
+      status === BackgroundTxStatus.FAILED
     ) {
-      console.log(
-        `[TxExecutor] tx[${index}] already in final state:`,
-        currentTx.status
-      );
-      return currentTx.status;
+      console.log(`[TxExecutor] tx already in final state:`, status);
+      return { status, signedTx, txHash, error };
     }
 
-    // update the tx index to the current tx index
-    runInAction(() => {
-      execution.txIndex = index;
+    // Check if blocked
+    const isBlocked = !executableChainIds.includes(tx.chainId);
+    console.log(`[TxExecutor] tx blocked check:`, {
+      chainId: tx.chainId,
+      executableChainIds,
+      isBlocked,
     });
 
-    if (
-      currentTx.status === BackgroundTxStatus.BLOCKED ||
-      currentTx.status === BackgroundTxStatus.PENDING
-    ) {
-      // this will be handled with recent send history tracking to check if the condition is met to resume the execution
-      // check if the current transaction's chainId is included in the chainIds of the recent send history (might enough with this)
-      const isBlocked = !execution.executableChainIds.includes(
-        currentTx.chainId
-      );
-      console.log(`[TxExecutor] tx[${index}] blocked check:`, {
-        chainId: currentTx.chainId,
-        executableChainIds: execution.executableChainIds,
-        isBlocked,
-      });
+    if (isBlocked) {
+      return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
+    }
 
-      if (isBlocked) {
-        runInAction(() => {
-          currentTx.status = BackgroundTxStatus.BLOCKED;
-        });
-        return currentTx.status;
+    // If preventAutoSign and not signed, block
+    if (preventAutoSign && signedTx == null) {
+      return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
+    }
+
+    // SIGNING
+    try {
+      const result = await this.signTx(vaultId, tx);
+      signedTx = result.signedTx;
+      console.log(`[TxExecutor] tx signed successfully`);
+    } catch (e) {
+      console.error(`[TxExecutor] tx signing failed:`, e);
+      return {
+        status: BackgroundTxStatus.FAILED,
+        signedTx,
+        txHash,
+        error: e.message ?? "Transaction signing failed",
+      };
+    }
+
+    // BROADCASTING
+    try {
+      // Create a tx copy with signedTx for broadcast
+      const txWithSignedTx = { ...tx, signedTx };
+      const result = await this.broadcastTx(txWithSignedTx);
+      txHash = result.txHash;
+      console.log(`[TxExecutor] tx broadcasted, txHash:`, txHash);
+    } catch (e) {
+      console.error(`[TxExecutor] tx broadcast failed:`, e);
+      return {
+        status: BackgroundTxStatus.FAILED,
+        signedTx,
+        txHash,
+        error: e.message ?? "Transaction broadcasting failed",
+      };
+    }
+
+    // TRACING
+    try {
+      // Create a tx copy with txHash for trace
+      const txWithHash = { ...tx, txHash };
+      const confirmed = await this.traceTx(txWithHash);
+      console.log(`[TxExecutor] tx trace result:`, confirmed);
+
+      if (confirmed) {
+        status = BackgroundTxStatus.CONFIRMED;
       } else {
-        runInAction(() => {
-          currentTx.status = BackgroundTxStatus.SIGNING;
-        });
+        return {
+          status: BackgroundTxStatus.FAILED,
+          signedTx,
+          txHash,
+          error: "Transaction failed",
+        };
       }
+    } catch (e) {
+      console.error(`[TxExecutor] tx trace failed:`, e);
+      return {
+        status: BackgroundTxStatus.FAILED,
+        signedTx,
+        txHash,
+        error: e.message ?? "Transaction confirmation failed",
+      };
     }
 
-    // if signedTx is provided, set the signedTx to the current transaction and set the status to SIGNED
-    if (options?.signedTx) {
-      console.log(`[TxExecutor] tx[${index}] using provided signedTx`);
-      runInAction(() => {
-        currentTx.signedTx = options.signedTx;
-        currentTx.status = BackgroundTxStatus.SIGNED;
-      });
-    }
-
-    // if preventAutoSign is true and the current transaction is not signed,
-    // set the status to BLOCKED and return the status
-    if (execution.preventAutoSign && currentTx.signedTx == null) {
-      runInAction(() => {
-        currentTx.status = BackgroundTxStatus.BLOCKED;
-      });
-      return currentTx.status;
-    }
-
-    if (currentTx.status === BackgroundTxStatus.SIGNING) {
-      console.log(`[TxExecutor] tx[${index}] SIGNING`);
-
-      try {
-        const { signedTx } = await this.signTx(execution.vaultId, currentTx);
-
-        console.log(`[TxExecutor] tx[${index}] signed successfully`);
-        runInAction(() => {
-          currentTx.signedTx = signedTx;
-          currentTx.status = BackgroundTxStatus.SIGNED;
-        });
-      } catch (error) {
-        console.error(`[TxExecutor] tx[${index}] signing failed:`, error);
-        runInAction(() => {
-          currentTx.status = BackgroundTxStatus.FAILED;
-          currentTx.error = error.message ?? "Transaction signing failed";
-        });
-      }
-    }
-
-    if (
-      currentTx.status === BackgroundTxStatus.SIGNED ||
-      currentTx.status === BackgroundTxStatus.BROADCASTING
-    ) {
-      console.log(`[TxExecutor] tx[${index}] BROADCASTING`);
-
-      try {
-        const { txHash } = await this.broadcastTx(currentTx);
-
-        console.log(`[TxExecutor] tx[${index}] broadcasted, txHash:`, txHash);
-        runInAction(() => {
-          currentTx.txHash = txHash;
-          currentTx.status = BackgroundTxStatus.BROADCASTED;
-        });
-      } catch (error) {
-        console.error(`[TxExecutor] tx[${index}] broadcast failed:`, error);
-        runInAction(() => {
-          currentTx.status = BackgroundTxStatus.FAILED;
-          currentTx.error = error.message ?? "Transaction broadcasting failed";
-        });
-      }
-    }
-
-    if (currentTx.status === BackgroundTxStatus.BROADCASTED) {
-      console.log(`[TxExecutor] tx[${index}] TRACING`);
-
-      // broadcasted -> confirmed
-      try {
-        const confirmed = await this.traceTx(currentTx);
-        console.log(`[TxExecutor] tx[${index}] trace result:`, confirmed);
-
-        runInAction(() => {
-          if (confirmed) {
-            currentTx.status = BackgroundTxStatus.CONFIRMED;
-          } else {
-            currentTx.status = BackgroundTxStatus.FAILED;
-            currentTx.error = "Transaction failed";
-          }
-        });
-      } catch (error) {
-        console.error(`[TxExecutor] tx[${index}] trace failed:`, error);
-        runInAction(() => {
-          currentTx.status = BackgroundTxStatus.FAILED;
-          currentTx.error = error.message ?? "Transaction confirmation failed";
-        });
-      }
-    }
-
-    console.log(`[TxExecutor] tx[${index}] final status:`, currentTx.status);
-    return currentTx.status;
+    console.log(`[TxExecutor] tx final status:`, status);
+    return { status, signedTx, txHash, error };
   }
 
   protected async signTx(
@@ -874,6 +891,26 @@ export class BackgroundTxExecutorService {
     return true;
   }
 
+  /**
+   * Find the index of the most recent confirmed transaction with executable chain ids.
+   * Returns -1 if not found.
+   */
+  private findHistoryTxIndex(execution: TxExecution): number {
+    if (execution.historyTxIndex != null) {
+      return execution.historyTxIndex;
+    }
+    for (let i = execution.txs.length - 1; i >= 0; i--) {
+      const tx = execution.txs[i];
+      if (
+        execution.executableChainIds.includes(tx.chainId) &&
+        tx.status === BackgroundTxStatus.CONFIRMED
+      ) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   @action
   protected recordHistoryIfNeeded(execution: TxExecution): void {
     console.log("[TxExecutor] recordHistoryIfNeeded:", {
@@ -918,8 +955,14 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      // first tx should be a cosmos tx and it should have a tx hash
-      const tx = execution.txs[0];
+      const historyTxIndex = this.findHistoryTxIndex(execution);
+      if (historyTxIndex < 0) {
+        return;
+      }
+
+      const tx = execution.txs[historyTxIndex];
+
+      // if the tx is not found or not a cosmos tx, skip recording history
       if (!tx || tx.type !== BackgroundTxType.COSMOS) {
         return;
       }
@@ -957,8 +1000,15 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      // first tx should be a cosmos tx and it should have a tx hash
-      const tx = execution.txs[0];
+      const historyTxIndex = this.findHistoryTxIndex(execution);
+      if (historyTxIndex < 0) {
+        return;
+      }
+
+      const tx = execution.txs[historyTxIndex];
+
+      // if the tx is not found or not a cosmos tx, skip recording history
+      // CHECK: swap on single evm chain should be recorded as history?
       if (!tx || tx.type !== BackgroundTxType.COSMOS) {
         return;
       }
@@ -999,13 +1049,27 @@ export class BackgroundTxExecutorService {
         return;
       }
 
-      // first tx should exist and it should have a tx hash
-      const tx = execution.txs[0];
+      const historyTxIndex = this.findHistoryTxIndex(execution);
+      if (historyTxIndex < 0) {
+        return;
+      }
+
+      const tx = execution.txs[historyTxIndex];
       if (!tx || tx.txHash == null) {
         return;
       }
 
       const historyData = execution.historyData;
+
+      // if there is a tx that is not executable, we need to record the history with requiresNextTransaction
+      // so that the history can be displayed again once the tx is executable
+      const requiresNextTransaction = execution.txs.some(
+        (tx) => !execution.executableChainIds.includes(tx.chainId)
+      );
+      console.log(
+        "[TxExecutor] requiresNextTransaction:",
+        requiresNextTransaction
+      );
 
       const id = this.recentSendHistoryService.recordTxWithSwapV2(
         historyData.fromChainId,
@@ -1020,6 +1084,7 @@ export class BackgroundTxExecutorService {
         historyData.routeDurationSeconds,
         tx.txHash,
         historyData.isOnlyUseBridge,
+        requiresNextTransaction,
         execution.id
       );
 
@@ -1047,35 +1112,6 @@ export class BackgroundTxExecutorService {
     return execution;
   }
 
-  /**
-   * Cancel execution by execution id
-   */
-  @action
-  async cancelTxExecution(id: string): Promise<void> {
-    const execution = this.recentTxExecutionMap.get(id);
-    if (!execution) {
-      return;
-    }
-
-    const currentStatus = execution.status;
-
-    // Only pending/processing/blocked executions can be cancelled
-    if (
-      currentStatus !== TxExecutionStatus.PENDING &&
-      currentStatus !== TxExecutionStatus.PROCESSING &&
-      currentStatus !== TxExecutionStatus.BLOCKED
-    ) {
-      return;
-    }
-
-    // CHECK: cancellation is really needed?
-    execution.status = TxExecutionStatus.CANCELLED;
-
-    if (currentStatus === TxExecutionStatus.PROCESSING) {
-      // TODO: cancel the current transaction execution...
-    }
-  }
-
   @action
   protected removeTxExecution(id: string): void {
     this.recentTxExecutionMap.delete(id);
@@ -1089,7 +1125,6 @@ export class BackgroundTxExecutorService {
     const completedStatuses = [
       TxExecutionStatus.COMPLETED,
       TxExecutionStatus.FAILED,
-      TxExecutionStatus.CANCELLED,
     ];
 
     for (const [id, execution] of this.recentTxExecutionMap) {

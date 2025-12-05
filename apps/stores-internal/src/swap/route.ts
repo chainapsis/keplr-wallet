@@ -82,7 +82,8 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     public readonly toDenom: string,
     public readonly fromAddress: string,
     public readonly toAddress: string,
-    public readonly slippage: number
+    public readonly slippage: number,
+    public readonly providers?: SwapProvider[]
   ) {
     super(sharedContext, baseURL, "/v2/swap/route");
     makeObservable(this);
@@ -134,12 +135,15 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     // merge same denom fees
     const feeMap = new Map<string, CoinPretty>();
     for (const fee of fees) {
-      const chainId =
-        fee.fee_token.type === SwapChainType.EVM
-          ? `eip155:${fee.fee_token.chain_id}`
-          : fee.fee_token.chain_id;
+      const evmLikeChainId = Number(fee.fee_token.chain_id);
+      const isEVMLikeChainId =
+        !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+      const chainId = isEVMLikeChainId
+        ? `eip155:${evmLikeChainId}`
+        : fee.fee_token.chain_id;
       const denom = (() => {
-        if (fee.fee_token.type === SwapChainType.EVM) {
+        if (isEVMLikeChainId) {
           if (
             fee.fee_token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
           ) {
@@ -195,6 +199,7 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
       from_address: this.fromAddress,
       to_address: this.toAddress,
       slippage: this.slippage,
+      providers: this.providers,
     };
 
     const _result = await simpleFetch<RouteResponseV2>(this.baseURL, this.url, {
@@ -261,7 +266,8 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
         parsed.toDenom,
         parsed.fromAddress,
         parsed.toAddress,
-        parsed.slippage
+        parsed.slippage,
+        parsed.providers
       );
     });
   }
@@ -274,7 +280,8 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
     toDenom: string,
     fromAddress: string,
     toAddress: string,
-    slippage: number
+    slippage: number,
+    providers?: SwapProvider[]
   ): ObservableQueryRouteInnerV2 {
     const str = JSON.stringify({
       fromChainId,
@@ -285,6 +292,7 @@ export class ObservableQueryRouteV2 extends HasMapStore<ObservableQueryRouteInne
       fromAddress,
       toAddress,
       slippage,
+      providers,
     });
 
     return this.get(str);

@@ -96,6 +96,7 @@ export interface RouteRequestV2 {
   from_address: string; // from chain user address
   to_address: string; // to chain user address
   slippage: number; // minimum 0, maximum 100
+  providers?: SwapProvider[];
 }
 
 export interface SwapFeeToken {

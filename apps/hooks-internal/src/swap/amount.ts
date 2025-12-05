@@ -5,7 +5,7 @@ import {
   UIProperties,
 } from "@keplr-wallet/hooks";
 import { AppCurrency } from "@keplr-wallet/types";
-import { CoinPretty, Dec, Int, RatePretty } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int, RatePretty } from "@keplr-wallet/unit";
 import {
   ChainGetter,
   CosmosAccount,
@@ -33,6 +33,9 @@ import {
   EthereumAccountStore,
   UnsignedEVMTransactionWithErc20Approvals,
 } from "@keplr-wallet/stores-eth";
+
+// TODO: remove after testing, leave the providers field empty
+const DEFAULT_PROVIDERS = [SwapProvider.SKIP];
 
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;
@@ -180,6 +183,15 @@ export class SwapAmountConfig extends AmountConfig {
     return this.getQueryRoute()?.provider;
   }
 
+  get requiresMultipleTxs(): boolean {
+    const txs = this.getTxsIfReady();
+    if (!txs) {
+      return false;
+    }
+
+    return txs.length > 1;
+  }
+
   @action
   setOutChainId(chainId: string): void {
     this._outChainId = chainId;
@@ -255,14 +267,21 @@ export class SwapAmountConfig extends AmountConfig {
    * @dev It is recommended to use the default slippageTolerancePercent value
    *      except when temporarily testing with a very high slippage to search for possible routes.
    */
-  async getTx(
+  async getTxs(
     slippageTolerancePercent?: number,
     priorOutAmount?: Int,
     customRecipient?: {
       chainId: string;
       recipient: string;
     }
-  ): Promise<MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals> {
+  ): Promise<
+    (
+      | (MakeTxResponse & {
+          chainId: string;
+        })
+      | UnsignedEVMTransactionWithErc20Approvals
+    )[]
+  > {
     const querySwapHelper = this.getQuerySwapHelper();
     if (!querySwapHelper) {
       throw new Error("Query Swap Helper is not initialized");
@@ -277,7 +296,10 @@ export class SwapAmountConfig extends AmountConfig {
     const slippageTolerancePercentToUse =
       slippageTolerancePercent ?? this._getSlippageTolerancePercent();
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercentToUse);
+    const routeQuery = querySwapHelper.getRoute(
+      slippageTolerancePercentToUse,
+      DEFAULT_PROVIDERS
+    );
 
     await routeQuery.waitResponse();
 
@@ -301,12 +323,20 @@ export class SwapAmountConfig extends AmountConfig {
     const chainIdsToAddresses: Record<string, string> = {};
 
     for (const chainId of requiredChainIds) {
+      const normalizedChainId = normalizeChainId(chainId);
+
+      // required_chain_ids can contain duplicated chain ids,
+      // so avoid adding the chain if it's already in the map
+      if (chainIdsToAddresses[normalizedChainId]) {
+        continue;
+      }
+
       const address = await this.getAddressAsync(chainId);
       if (!address) {
         throw new Error("Address is not set");
       }
 
-      chainIdsToAddresses[normalizeChainId(chainId)] = address;
+      chainIdsToAddresses[normalizedChainId] = address;
     }
 
     if (customRecipient) {
@@ -335,13 +365,12 @@ export class SwapAmountConfig extends AmountConfig {
       throw new Error(txsQuery.error.message);
     }
 
-    // TODO: multiple txs support
-    const tx = this.getTxIfReady(
+    const txs = this.getTxsIfReady(
       slippageTolerancePercentToUse,
       customRecipient
     );
-    if (!tx) {
-      throw new Error("Tx is not ready");
+    if (!txs || txs.length === 0) {
+      throw new Error("Txs are not ready");
     }
 
     if (priorOutAmount) {
@@ -362,24 +391,31 @@ export class SwapAmountConfig extends AmountConfig {
       }
     }
 
-    return tx;
+    return txs;
   }
 
   /**
-   * Synchronously returns a transaction if all required data is currently available,
+   * Synchronously returns transactions if all required data is currently available,
    * without waiting for any pending queries to complete.
    *
    * @param slippageTolerancePercent - The maximum slippage tolerance percentage (default: _getSlippageTolerancePercent())
    * @param customRecipient - Optional custom recipient override for the destination chain
    * @returns The constructed transaction if ready, or `undefined` if data is not yet available
    */
-  getTxIfReady(
+  getTxsIfReady(
     slippageTolerancePercent?: number,
     customRecipient?: {
       chainId: string;
       recipient: string;
     }
-  ): MakeTxResponse | UnsignedEVMTransactionWithErc20Approvals | undefined {
+  ):
+    | (
+        | (MakeTxResponse & {
+            chainId: string;
+          })
+        | UnsignedEVMTransactionWithErc20Approvals
+      )[]
+    | undefined {
     if (!this.currency) {
       return;
     }
@@ -400,7 +436,10 @@ export class SwapAmountConfig extends AmountConfig {
     const slippageTolerancePercentToUse =
       slippageTolerancePercent ?? this._getSlippageTolerancePercent();
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercentToUse);
+    const routeQuery = querySwapHelper.getRoute(
+      slippageTolerancePercentToUse,
+      DEFAULT_PROVIDERS
+    );
 
     const routeResponse = routeQuery.response;
     if (!routeResponse) {
@@ -412,12 +451,20 @@ export class SwapAmountConfig extends AmountConfig {
     const chainIdsToAddresses: Record<string, string> = {};
 
     for (const chainId of requiredChainIds) {
+      const normalizedChainId = normalizeChainId(chainId);
+
+      // required_chain_ids can contain duplicated chain ids,
+      // so avoid adding the chain if it's already in the map
+      if (chainIdsToAddresses[normalizedChainId]) {
+        continue;
+      }
+
       const address = this.getAddressSync(chainId);
       if (!address) {
         return;
       }
 
-      chainIdsToAddresses[normalizeChainId(chainId)] = address;
+      chainIdsToAddresses[normalizedChainId] = address;
     }
 
     if (customRecipient) {
@@ -441,23 +488,20 @@ export class SwapAmountConfig extends AmountConfig {
       return;
     }
 
-    // TODO: multiple txs support
-    if (transactions.length > 1) {
-      return;
-    }
+    const txs: (
+      | (MakeTxResponse & { chainId: string })
+      | UnsignedEVMTransactionWithErc20Approvals
+    )[] = [];
 
-    const firstTx = transactions[0];
-
-    try {
-      if (firstTx.chain_type === SwapChainType.COSMOS) {
-        return this.buildCosmosTx(firstTx.tx_data);
+    for (const tx of transactions) {
+      if (tx.chain_type === SwapChainType.COSMOS) {
+        txs.push(this.buildCosmosTx(tx.tx_data));
       } else {
-        return this.buildEVMTx(firstTx.tx_data);
+        txs.push(this.buildEVMTx(tx.tx_data));
       }
-    } catch (error) {
-      console.error(error);
-      return;
     }
+
+    return txs;
   }
 
   private getAddressSync(chainId: string): string | undefined {
@@ -502,49 +546,61 @@ export class SwapAmountConfig extends AmountConfig {
     return isChainEVMOnly ? account.ethereumHexAddress : account.bech32Address;
   }
 
-  private buildCosmosTx(txData: CosmosTxData): MakeTxResponse {
-    const sourceAccount = this.accountStore.getAccount(this.chainId);
-
+  private buildCosmosTx(
+    txData: CosmosTxData
+  ): MakeTxResponse & { chainId: string } {
     if (txData.msgs.length === 0) {
       throw new Error("No messages in transaction");
     }
 
+    const chainId = txData.chain_id;
+    const account = this.accountStore.getAccount(chainId);
+
     const msg = txData.msgs[0];
+    let tx: MakeTxResponse;
 
     switch (msg.type) {
       case "cosmos-sdk/MsgTransfer": {
-        const tx = sourceAccount.cosmos.makeIBCTransferTx(
+        const currency = this.chainGetter
+          .getChain(chainId)
+          .forceFindCurrency(msg.value.token.denom);
+        const normalizedAmount = new Dec(msg.value.token.amount)
+          .quo(DecUtils.getPrecisionDec(currency.coinDecimals))
+          .toString();
+
+        tx = account.cosmos.makeIBCTransferTx(
           {
             portId: msg.value.source_port,
             channelId: msg.value.source_channel,
             counterpartyChainId: "", // NOTE: counterpartyChainId is not included in the server response
           },
-          this.amount[0].toDec().toString(),
-          this.amount[0].currency,
+          normalizedAmount,
+          currency,
           msg.value.receiver,
           msg.value.memo
         );
         tx.ui.overrideType("ibc-swap");
-        return tx;
+        break;
       }
       case "wasm/MsgExecuteContract": {
-        const tx = sourceAccount.cosmwasm.makeExecuteContractTx(
+        tx = account.cosmwasm.makeExecuteContractTx(
           "unknown",
           msg.value.contract,
           msg.value.msg,
           msg.value.funds
         );
         tx.ui.overrideType("ibc-swap");
-        return tx;
+        break;
       }
       case "cctp/DepositForBurn": {
-        return sourceAccount.cosmos.makeCCTPDepositForBurnTx(
+        tx = account.cosmos.makeCCTPDepositForBurnTx(
           msg.value.from,
           msg.value.amount,
           msg.value.destination_domain,
           msg.value.mint_recipient,
           msg.value.burn_token
         );
+        break;
       }
       case "cctp/DepositForBurnWithCaller": {
         // DepositForBurnWithCaller and MsgSend should be together on skip
@@ -577,20 +633,27 @@ export class SwapAmountConfig extends AmountConfig {
           amount: sendMsg.value.amount,
         };
 
-        return sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(
+        tx = account.cosmos.makeCCTPDepositForBurnWithCallerTx(
           JSON.stringify(cctpMsgValue),
           JSON.stringify(sendMsgValue)
         );
+        break;
       }
       default:
         throw new Error("Unsupported message type");
     }
+
+    return { ...tx, chainId: txData.chain_id };
   }
 
   private buildEVMTx(
     txData: EVMTxData
   ): UnsignedEVMTransactionWithErc20Approvals {
-    const ethereumAccount = this.ethereumAccountStore.getAccount(this.chainId);
+    const chainId = txData.chain_id.startsWith("eip155:")
+      ? txData.chain_id
+      : `eip155:${txData.chain_id}`;
+
+    const account = this.ethereumAccountStore.getAccount(chainId);
     const hexValue = txData.value.startsWith("0x")
       ? txData.value
       : `0x${BigInt(txData.value).toString(16)}`;
@@ -598,7 +661,7 @@ export class SwapAmountConfig extends AmountConfig {
       ? txData.data
       : `0x${txData.data}`;
 
-    const tx = ethereumAccount.makeTx(txData.to, hexValue, hexData);
+    const tx = account.makeTx(txData.to, hexValue, hexData);
 
     return {
       ...tx,
@@ -640,7 +703,10 @@ export class SwapAmountConfig extends AmountConfig {
 
       const slippageTolerancePercent = this._getSlippageTolerancePercent();
 
-      const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
+      const routeQuery = querySwapHelper.getRoute(
+        slippageTolerancePercent,
+        DEFAULT_PROVIDERS
+      );
       if (routeQuery.isFetching) {
         return {
           ...prev,
@@ -648,7 +714,7 @@ export class SwapAmountConfig extends AmountConfig {
         };
       }
 
-      // TODO: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
+      // CHECK: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
       const routeError = routeQuery.error;
       if (routeError) {
         const CCTP_BRIDGE_FEE_ERROR_MESSAGE =
@@ -716,7 +782,10 @@ export class SwapAmountConfig extends AmountConfig {
 
     const slippageTolerancePercent = this._getSlippageTolerancePercent();
 
-    const routeQuery = querySwapHelper.getRoute(slippageTolerancePercent);
+    const routeQuery = querySwapHelper.getRoute(
+      slippageTolerancePercent,
+      DEFAULT_PROVIDERS
+    );
     if (routeQuery.isFetching) {
       return {
         ...prev,
@@ -724,7 +793,7 @@ export class SwapAmountConfig extends AmountConfig {
       };
     }
 
-    // TODO: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
+    // CHECK: 현재 에러 메시지를 프로바이더에서 발생한 오류를 그대로 던져주는지 체크 필요
     const routeError = routeQuery.error;
     if (routeError) {
       const CCTP_BRIDGE_FEE_ERROR_MESSAGE =
@@ -938,7 +1007,7 @@ export class SwapAmountConfig extends AmountConfig {
         fromAddress,
         toAddress
       )
-      .getRoute(slippageTolerancePercentToUse);
+      .getRoute(slippageTolerancePercentToUse, DEFAULT_PROVIDERS);
   }
 }
 

@@ -9,7 +9,6 @@ import { BackgroundTxExecutorService } from "./service";
 import {
   RecordAndExecuteTxsMsg,
   ResumeTxMsg,
-  CancelTxExecutionMsg,
   GetTxExecutionMsg,
 } from "./messages";
 
@@ -27,11 +26,6 @@ export const getHandler: (service: BackgroundTxExecutorService) => Handler = (
         return handleGetTxExecutionMsg(service)(env, msg as GetTxExecutionMsg);
       case ResumeTxMsg:
         return handleResumeTxMsg(service)(env, msg as ResumeTxMsg);
-      case CancelTxExecutionMsg:
-        return handleCancelTxExecutionMsg(service)(
-          env,
-          msg as CancelTxExecutionMsg
-        );
       default:
         throw new KeplrError("direct-tx-executor", 100, "Unknown msg type");
     }
@@ -48,7 +42,8 @@ const handleRecordAndExecuteTxsMsg: (
       msg.executionType,
       msg.txs,
       msg.executableChainIds,
-      msg.historyData
+      msg.historyData,
+      msg.historyTxIndex
     );
   };
 };
@@ -66,13 +61,5 @@ const handleGetTxExecutionMsg: (
 ) => InternalHandler<GetTxExecutionMsg> = (service) => {
   return (_env, msg) => {
     return service.getTxExecution(msg.id);
-  };
-};
-
-const handleCancelTxExecutionMsg: (
-  service: BackgroundTxExecutorService
-) => InternalHandler<CancelTxExecutionMsg> = (service) => {
-  return async (_env, msg) => {
-    await service.cancelTxExecution(msg.id);
   };
 };

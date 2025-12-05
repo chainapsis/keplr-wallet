@@ -11,6 +11,7 @@ import {
   ChainInfo,
   EthereumSignResponse,
   EthSignType,
+  JsonRpcResponse,
 } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -112,6 +113,17 @@ export class KeyRingEthereumService {
       const unsignedTx = JSON.parse(Buffer.from(message).toString());
       if (unsignedTx.authorizationList) {
         throw new Error("EIP-7702 transactions are not supported.");
+      }
+
+      const hasRequiredErc20Approvals =
+        unsignedTx.requiredErc20Approvals &&
+        Array.isArray(unsignedTx.requiredErc20Approvals) &&
+        unsignedTx.requiredErc20Approvals.length > 0;
+
+      if (!env.isInternalMsg && hasRequiredErc20Approvals) {
+        throw new Error(
+          "Required ERC20 approvals are not supported for external messages"
+        );
       }
     }
 
@@ -1280,12 +1292,7 @@ export class KeyRingEthereumService {
             this.chainsService.getEVMInfoOrThrow(currentChainId);
 
           return (
-            await simpleFetch<{
-              jsonrpc: string;
-              id: number;
-              result: any;
-              error?: Error;
-            }>(currentChainEVMInfo.rpc, {
+            await simpleFetch<JsonRpcResponse<any>>(currentChainEVMInfo.rpc, {
               method: "POST",
               headers: {
                 "content-type": "application/json",

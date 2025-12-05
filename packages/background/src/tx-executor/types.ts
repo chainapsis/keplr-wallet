@@ -8,13 +8,8 @@ import { SwapProvider } from "../recent-send-history";
 // Transaction status
 export enum BackgroundTxStatus {
   PENDING = "pending",
-  SIGNING = "signing",
-  SIGNED = "signed",
-  BROADCASTING = "broadcasting",
-  BROADCASTED = "broadcasted",
   CONFIRMED = "confirmed",
   FAILED = "failed",
-  CANCELLED = "cancelled",
   BLOCKED = "blocked",
 }
 
@@ -43,12 +38,12 @@ interface BackgroundTxBase {
 
 export interface EVMBackgroundTx extends BackgroundTxBase {
   readonly type: BackgroundTxType.EVM;
-  readonly txData: UnsignedTransaction;
+  txData: UnsignedTransaction;
 }
 
 export interface CosmosBackgroundTx extends BackgroundTxBase {
   readonly type: BackgroundTxType.COSMOS;
-  readonly txData: {
+  txData: {
     aminoMsgs?: Msg[];
     protoMsgs: Any[];
 
@@ -75,7 +70,6 @@ export enum TxExecutionStatus {
   BLOCKED = "blocked",
   COMPLETED = "completed",
   FAILED = "failed",
-  CANCELLED = "cancelled",
 }
 
 export enum TxExecutionType {
@@ -103,12 +97,19 @@ export interface TxExecutionBase {
 
   readonly timestamp: number; // Timestamp when execution started
 
-  readonly preventAutoSign?: boolean;
+  // If true, automatic signing is prevented and this execution may be blocked.
+  // This happens when:
+  // 1. Some txs are not immediately executable (chainId not in executableChainIds)
+  // 2. Hardware wallet (ledger/keystone) - requires user interaction for signing
+  // When preventAutoSign is true, the execution will be persisted to KVStore.
+  readonly preventAutoSign: boolean;
+
+  readonly historyTxIndex?: number;
 }
 
 export interface UndefinedTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.UNDEFINED;
-  readonly historyData?: never;
+  historyData?: never;
 }
 
 export interface RecentSendHistoryData {
@@ -132,7 +133,7 @@ export interface RecentSendHistoryData {
 
 export interface SendTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SEND;
-  readonly historyData?: RecentSendHistoryData;
+  historyData?: RecentSendHistoryData;
 
   hasRecordedHistory?: boolean;
 }
@@ -160,7 +161,7 @@ export interface IBCTransferHistoryData {
 
 export interface IBCTransferTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.IBC_TRANSFER;
-  readonly historyData?: IBCTransferHistoryData;
+  historyData?: IBCTransferHistoryData;
 
   historyId?: string;
 }
@@ -194,7 +195,7 @@ export interface IBCSwapHistoryData {
 
 export interface IBCSwapTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.IBC_SWAP;
-  readonly historyData?: IBCSwapHistoryData;
+  historyData?: IBCSwapHistoryData;
 
   historyId?: string;
 }
@@ -228,7 +229,7 @@ export interface SwapV2HistoryData {
 
 export interface SwapV2TxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SWAP_V2;
-  readonly historyData?: SwapV2HistoryData;
+  historyData?: SwapV2HistoryData;
 
   historyId?: string;
 }
@@ -253,3 +254,23 @@ export type TxExecution =
   | IBCTransferTxExecution
   | IBCSwapTxExecution
   | SwapV2TxExecution;
+
+/**
+ * Result of executing a single pending transaction.
+ * Used to batch state updates and reduce autorun triggers.
+ */
+export interface PendingTxExecutionResult {
+  status: BackgroundTxStatus;
+  signedTx?: string;
+  txHash?: string;
+  error?: string;
+}
+
+/**
+ * Result of executing a single transaction.
+ * Used to batch state updates and reduce autorun triggers.
+ */
+export interface TxExecutionResult {
+  status: TxExecutionStatus;
+  error?: string;
+}

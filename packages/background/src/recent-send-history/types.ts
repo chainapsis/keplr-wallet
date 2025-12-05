@@ -520,7 +520,7 @@ export interface SwapV2TxStatusResponse {
   provider: SwapProvider;
   status: SwapV2TxStatus;
   steps: SwapV2TxStatusStep[];
-  asset_location?: SwapV2AssetLocation[] | null;
+  asset_location?: SwapV2AssetLocation | null;
 }
 
 export interface SwapV2History {
@@ -570,6 +570,7 @@ export interface SwapV2History {
 
   trackDone?: boolean; // status tracking이 완료되었는지 여부
   trackError?: string; // status tracking 중 에러가 발생했는지 여부
+  finalizationRetryCount?: number; // success/partial_success/failed 상태에서 currentStep이 진행 중일 때 추가 polling 횟수
 
   notified?: boolean;
   notificationInfo?: {
@@ -577,4 +578,9 @@ export interface SwapV2History {
   };
 
   isOnlyUseBridge?: boolean;
+
+  hidden?: boolean;
+  // 멀티 tx swap의 경우, 모든 트랜잭션이 서명되지 않아 hidden 처리되었더라도
+  // 다음 트랜잭션 처리가 필요한 경우 강제로 다시 display하기 위한 플래그
+  requiresNextTransaction?: boolean;
 }
