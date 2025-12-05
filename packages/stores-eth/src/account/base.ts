@@ -464,10 +464,9 @@ export class EthereumAccountBase {
    */
   async signEthereumTx(
     sender: string,
-    unsignedTx: UnsignedTransaction,
+    unsignedTx: UnsignedEVMTransactionWithErc20Approvals,
     options?: {
       nonceMethod?: "pending" | "latest";
-      pendingTxs?: UnsignedTransaction[];
     }
   ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
@@ -479,18 +478,6 @@ export class EthereumAccountBase {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
 
-    const pendingTxs =
-      options?.pendingTxs?.map((tx) => ({
-        to: tx.to,
-        data: tx.data,
-        value: tx.value,
-      })) ?? [];
-
-    // prevent invalid to address in pending transactions (deploy contract not supported here)
-    if (pendingTxs.some((tx) => tx.to == null || tx.to === "0x")) {
-      throw new Error("Invalid pending transaction: to is required");
-    }
-
     const transactionCount = await keplr.ethereum.request<string>({
       method: "eth_getTransactionCount",
       params: [sender, options?.nonceMethod || "pending"],
@@ -499,23 +486,17 @@ export class EthereumAccountBase {
 
     unsignedTx = {
       ...unsignedTx,
-      nonce: parseInt(transactionCount) + (pendingTxs?.length ?? 0),
+      nonce:
+        parseInt(transactionCount) +
+        (unsignedTx.requiredErc20Approvals?.length ?? 0),
     };
-
-    const messagePayload =
-      pendingTxs.length > 0
-        ? {
-            ...unsignedTx,
-            pendingTxs,
-          }
-        : unsignedTx;
 
     const signEthereum = keplr.signEthereum.bind(keplr);
 
     const signature = await signEthereum(
       this.chainId,
       sender,
-      JSON.stringify(messagePayload),
+      JSON.stringify(unsignedTx),
       EthSignType.TRANSACTION
     );
 

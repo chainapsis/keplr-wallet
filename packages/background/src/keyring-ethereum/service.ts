@@ -115,24 +115,15 @@ export class KeyRingEthereumService {
         throw new Error("EIP-7702 transactions are not supported.");
       }
 
-      const hasPendingTxs =
-        unsignedTx.pendingTxs &&
-        Array.isArray(unsignedTx.pendingTxs) &&
-        unsignedTx.pendingTxs.length > 0;
+      const hasRequiredErc20Approvals =
+        unsignedTx.requiredErc20Approvals &&
+        Array.isArray(unsignedTx.requiredErc20Approvals) &&
+        unsignedTx.requiredErc20Approvals.length > 0;
 
-      if (!env.isInternalMsg && hasPendingTxs) {
+      if (!env.isInternalMsg && hasRequiredErc20Approvals) {
         throw new Error(
-          "Pending transactions are not supported for external messages"
+          "Required ERC20 approvals are not supported for external messages"
         );
-      }
-
-      if (
-        hasPendingTxs &&
-        unsignedTx.pendingTxs.some(
-          (tx: UnsignedTransaction) => tx.to == null || tx.to === "0x"
-        )
-      ) {
-        throw new Error("Invalid pending transaction: to is required");
       }
     }
 

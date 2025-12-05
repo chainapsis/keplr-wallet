@@ -54,6 +54,7 @@ import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { HeaderProps } from "../../../../layouts/header/types";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
+import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
 
 export const EthereumSignTxView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -103,28 +104,39 @@ export const EthereumSignTxView: FunctionComponent<{
     gasConfig
   );
 
-  const [_pendingTxs] = useState<UnsignedTransaction[]>(() => {
+  const [requiredErc20Approvals] = useState<
+    NonNullable<
+      UnsignedEVMTransactionWithErc20Approvals["requiredErc20Approvals"]
+    >
+  >(() => {
     const parsed = JSON.parse(Buffer.from(message).toString("utf8"));
     if (
-      parsed.pendingTxs &&
-      Array.isArray(parsed.pendingTxs) &&
-      parsed.pendingTxs.length > 0
+      parsed.requiredErc20Approvals &&
+      Array.isArray(parsed.requiredErc20Approvals) &&
+      parsed.requiredErc20Approvals.length > 0
     ) {
-      return parsed.pendingTxs;
+      return parsed.requiredErc20Approvals;
     }
     return [];
   });
 
   const [signingDataBuff, setSigningDataBuff] = useState(() => {
     const parsed = JSON.parse(Buffer.from(message).toString("utf8"));
-    if (parsed.pendingTxs) {
+    if (parsed.requiredErc20Approvals) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { pendingTxs: _pendingTxs, ...txWithoutPendingTxs } = parsed;
-      return Buffer.from(JSON.stringify(txWithoutPendingTxs), "utf8");
+      const { requiredErc20Approvals: _, ...unsignedTx } = parsed;
+      return Buffer.from(JSON.stringify(unsignedTx), "utf8");
     }
     return Buffer.from(message);
   });
   const [preferNoSetFee, setPreferNoSetFee] = useState<boolean>(false);
+
+  const simulatorKey = useMemo(() => {
+    if (requiredErc20Approvals.length === 0) {
+      return "evm/native";
+    }
+    return "evm/native/bundle";
+  }, [requiredErc20Approvals]);
 
   const gasSimulator = useGasSimulator(
     new MemoryKVStore("gas-simulator.ethereum.sign"),
@@ -132,21 +144,49 @@ export const EthereumSignTxView: FunctionComponent<{
     chainInfo.chainId,
     gasConfig,
     feeConfig,
-    "evm/native",
+    simulatorKey,
     () => {
       if (chainInfo.evm == null) {
         throw new Error("Gas simulator is only working with EVM info");
       }
 
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+      if (requiredErc20Approvals.length === 0) {
+        return {
+          simulate: () =>
+            ethereumAccount.simulateGas(account.ethereumHexAddress, {
+              to: unsignedTx.to,
+              data: unsignedTx.data,
+              value: unsignedTx.value,
+            }),
+        };
+      }
 
+      if (requiredErc20Approvals.length > 1) {
+        throw new Error("Multiple required ERC20 approvals are not supported");
+      }
+
+      // NOTE:
+      // If multiple ERC20 approvals are needed, or
+      // bundle simulation using state diff tracing is not possible,
+      // execute ERC20 approvals first—then simulate the main transaction on this page.
       return {
         simulate: () =>
-          ethereumAccount.simulateGas(account.ethereumHexAddress, {
-            to: unsignedTx.to,
-            data: unsignedTx.data,
-            value: unsignedTx.value,
-          }),
+          ethereumAccount
+            .simulateGasWithPendingErc20Approval(account.ethereumHexAddress, {
+              to: unsignedTx.to,
+              data: unsignedTx.data,
+              value: unsignedTx.value,
+              requiredErc20Approvals,
+            })
+            .then((result) => {
+              const { gasUsed } = result;
+              // only consider the gas used for the main tx
+              if (gasUsed == null || gasUsed <= 0) {
+                throw new Error("Gas used is not positive");
+              }
+              return { gasUsed };
+            }),
       };
     }
   );
@@ -205,6 +245,7 @@ export const EthereumSignTxView: FunctionComponent<{
   }, []);
 
   useEffect(() => {
+    // NOTE: set fee only for external requests
     if (!interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
@@ -318,6 +359,7 @@ export const EthereumSignTxView: FunctionComponent<{
         const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
           JSON.parse(Buffer.from(message).toString("utf8"));
 
+        // TODO: bundle simulation인 경우에 대한 처리 필요
         const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
           to,
           gasLimit,
