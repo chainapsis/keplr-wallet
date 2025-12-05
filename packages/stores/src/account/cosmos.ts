@@ -2148,6 +2148,10 @@ export class CosmosAccountImpl {
       },
     };
 
+    if (!cctpMsg.value.destination_domain) {
+      delete cctpMsg.value.destination_domain;
+    }
+
     const sendMsgValue = JSON.parse(rawSendMsg);
     const sendMsg = {
       type: this.msgOpts.send.native.type,
