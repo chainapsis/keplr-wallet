@@ -36,7 +36,7 @@ const getCopyAddressButtonHoverBackgroundColor = (theme: {
 }): string => {
   return theme.mode === "light"
     ? Color(ColorPalette["gray-100"]).alpha(0.5).toString()
-    : ColorPalette["gray-450"];
+    : ColorPalette["gray-500"];
 };
 
 export const CopyAddressButton: FunctionComponent<{
