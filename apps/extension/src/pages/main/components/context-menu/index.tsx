@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -9,19 +10,21 @@ import { observer } from "mobx-react-lite";
 import styled, { useTheme } from "styled-components";
 import { useStore } from "../../../../stores";
 import { Box } from "../../../../components/box";
-import { TextButton } from "../../../../components/button-text";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse/collapse";
 import { Body2, Body3 } from "../../../../components/typography";
 import { ColorPalette } from "../../../../styles";
 import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
-import { CloseIcon } from "../../../../components/icon";
+import { AdjustmentIcon, CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
-import { useGlobarSimpleBar } from "../../../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../../../hooks/global-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
+import { COMMON_HOVER_OPACITY } from "../../../../styles/constant";
+import { useNavigate } from "react-router";
+import { ContextMenuStyles } from "../../../../components/context-menu";
 
 const Styles = {
   MenuContainer: styled.div`
@@ -32,25 +35,13 @@ const Styles = {
     user-select: none;
     background-color: transparent;
   `,
-  MenuWrapper: styled.div`
+  ContextMenuContent: styled(ContextMenuStyles.Container)`
     position: absolute;
     right: 0;
     top: calc(100% + 0.5rem);
     z-index: 9999;
     min-width: 15.625rem;
     overflow: visible;
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 3px 0px rgba(43, 39, 55, 0.10), 0px 5px 30px 0px rgba(43, 39, 55, 0.05), 0px 10px 50px 0px rgba(43, 39, 55, 0.05)"
-        : "none"};
-  `,
-  ContextMenuContent: styled.div`
-    border-radius: 0.5rem;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
-    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
     overflow: hidden;
   `,
   MenuBackdrop: styled.div`
@@ -62,16 +53,10 @@ const Styles = {
     z-index: 9998;
     background-color: transparent;
   `,
-  MenuItem: styled.div`
+  MenuItem: styled(ContextMenuStyles.Item)`
     padding: 0.75rem 0.75rem 0.75rem 1rem;
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
+
     border-bottom: 1px solid
       ${(props) =>
         props.theme.mode === "light"
@@ -80,13 +65,6 @@ const Styles = {
 
     &:last-child {
       border-bottom: none;
-    }
-
-    &:hover {
-      background-color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-50"]
-          : ColorPalette["gray-450"]};
     }
   `,
   MenuItemXAxis: styled(XAxis)`
@@ -118,6 +96,7 @@ const MainMenu: React.FC<MainMenuProps> = observer(
     const { hideLowBalance, showFiatValue } = uiConfigStore.options;
     const theme = useTheme();
     const intl = useIntl();
+    const navigate = useNavigate();
 
     const handleToggleClick = (e: React.MouseEvent, toggleFn: () => void) => {
       if (!(e.target as HTMLElement).closest(".toggle-component")) {
@@ -137,6 +116,35 @@ const MainMenu: React.FC<MainMenuProps> = observer(
 
     return (
       <YAxis>
+        <Styles.MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/manage-view-asset-token-list");
+          }}
+        >
+          <Styles.MenuItemXAxis alignY="center" gap="0.25rem">
+            <AdjustmentIcon
+              width="1rem"
+              height="1rem"
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-700"]
+                  : ColorPalette["white"]
+              }
+            >
+              {intl.formatMessage({
+                id: "page.main.components.context-menu.manage-asset-list",
+              })}
+            </Body3>
+          </Styles.MenuItemXAxis>
+        </Styles.MenuItem>
         <Styles.MenuItem
           onClick={(e) => handleToggleClick(e, onToggleHideLowBalance)}
         >
@@ -198,8 +206,6 @@ const MainMenu: React.FC<MainMenuProps> = observer(
                   id: "page.main.components.context-menu.smart-grouping",
                 })}
               </Body3>
-              <Gutter size="0.125rem" />
-              <BetaIcon />
             </Styles.MenuItemXAxis>
             <div onClick={(e) => e.stopPropagation()}>
               <Toggle
@@ -245,19 +251,12 @@ const MainMenu: React.FC<MainMenuProps> = observer(
   }
 );
 
-const CustomTextButton = styled(TextButton)`
-  && button {
-    padding: 0.25rem 0 !important;
-    color: ${ColorPalette["gray-300"]};
-    height: 1rem;
-    font-size: 0.8125rem;
+const CustomBox = styled(Box)`
+  cursor: pointer;
+  transition: opacity 0.1s ease;
 
-    &:hover {
-      color: ${(props) =>
-        props.theme.mode === "light"
-          ? ColorPalette["gray-500"]
-          : ColorPalette["gray-200"]};
-    }
+  &:hover {
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 
@@ -269,13 +268,11 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 }> = observer(
   ({ isOpen, setIsOpen, showFiatValueVisible, setShowFiatValueVisible }) => {
     const { uiConfigStore, analyticsAmplitudeStore } = useStore();
-    const intl = useIntl();
     const containerRef = useRef<HTMLDivElement>(null);
     const menuContentRef = useRef<HTMLDivElement>(null);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
-    const [isHovered, setIsHovered] = useState(false);
-    const globalSimpleBar = useGlobarSimpleBar();
+    const globalSimpleBar = useGlobalSimpleBar();
 
     useLayoutEffect(() => {
       if (!initialized) {
@@ -303,9 +300,49 @@ export const ViewOptionsContextMenu: FunctionComponent<{
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
-    const closeMenu = () => {
+    const closeMenu = useCallback(() => {
       setIsOpen(false);
-    };
+    }, [setIsOpen]);
+
+    useEffect(() => {
+      if (!isOpen) {
+        return;
+      }
+
+      const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+
+      if (scrollElement) {
+        /**
+         * 사용자가 직접 스크롤(wheel/touchmove)했을 때만 메뉴를 닫는다.
+         * 단, 터치의 미세한 떨림은 무시한다.
+         */
+        let touchStartY = 0;
+        const TOUCH_MOVE_THRESHOLD = 10; // px
+
+        const onTouchStart = (e: TouchEvent) => {
+          touchStartY = e.touches[0].clientY;
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+          const currentY = e.touches[0].clientY;
+          const diff = Math.abs(currentY - touchStartY);
+
+          if (diff > TOUCH_MOVE_THRESHOLD) {
+            closeMenu();
+          }
+        };
+
+        scrollElement.addEventListener("wheel", closeMenu);
+        scrollElement.addEventListener("touchstart", onTouchStart);
+        scrollElement.addEventListener("touchmove", onTouchMove);
+
+        return () => {
+          scrollElement.removeEventListener("wheel", closeMenu);
+          scrollElement.removeEventListener("touchstart", onTouchStart);
+          scrollElement.removeEventListener("touchmove", onTouchMove);
+        };
+      }
+    }, [isOpen, closeMenu, globalSimpleBar]);
 
     const toggleMenu = () => {
       analyticsAmplitudeStore.logEvent("click_view_options_context_menu", {
@@ -403,49 +440,27 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           enabled={uiConfigStore.switchAssetViewModeSuggestion}
           isAlwaysOpen={uiConfigStore.switchAssetViewModeSuggestion}
         >
-          <div
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <CustomTextButton
-              text={intl.formatMessage({
-                id: "page.main.components.context-menu.title",
-              })}
-              size="small"
-              right={
-                <Styles.MenuItemXAxis alignY="center">
-                  <ViewOptionsIcon
-                    width="1rem"
-                    height="1rem"
-                    color={
-                      isHovered
-                        ? theme.mode === "light"
-                          ? ColorPalette["gray-500"]
-                          : ColorPalette["gray-200"]
-                        : ColorPalette["gray-300"]
-                    }
-                  />
-                </Styles.MenuItemXAxis>
-              }
-              onClick={toggleMenu}
+          <CustomBox onClick={toggleMenu}>
+            <ViewOptionsIcon
+              width="1.5rem"
+              height="1.5rem"
+              color={ColorPalette["gray-300"]}
             />
-          </div>
+          </CustomBox>
         </Tooltip>
 
         {isOpen && (
-          <Styles.MenuWrapper>
-            <Styles.ContextMenuContent ref={menuContentRef}>
-              <MainMenu
-                onToggleAssetViewMode={handleToggleAssetViewMode}
-                hideLowBalance={uiConfigStore.options.hideLowBalance}
-                showFiatValue={uiConfigStore.options.showFiatValue}
-                onToggleHideLowBalance={handleToggleHideLowBalance}
-                onToggleShowFiatValue={handleToggleShowFiatValue}
-                showFiatValueVisible={showFiatValueVisible}
-                assetViewMode={uiConfigStore.options.assetViewMode}
-              />
-            </Styles.ContextMenuContent>
-          </Styles.MenuWrapper>
+          <Styles.ContextMenuContent ref={menuContentRef}>
+            <MainMenu
+              onToggleAssetViewMode={handleToggleAssetViewMode}
+              hideLowBalance={uiConfigStore.options.hideLowBalance}
+              showFiatValue={uiConfigStore.options.showFiatValue}
+              onToggleHideLowBalance={handleToggleHideLowBalance}
+              onToggleShowFiatValue={handleToggleShowFiatValue}
+              showFiatValueVisible={showFiatValueVisible}
+              assetViewMode={uiConfigStore.options.assetViewMode}
+            />
+          </Styles.ContextMenuContent>
         )}
       </Styles.MenuContainer>
     );
@@ -516,12 +531,16 @@ const SuggestionTooltipContent: FunctionComponent<{
   );
 };
 
-const ViewOptionsIcon: FunctionComponent<IconProps> = ({ color }) => {
+const ViewOptionsIcon: FunctionComponent<IconProps> = ({
+  color,
+  width,
+  height,
+}) => {
   return (
     <div
       style={{
-        width: "1rem",
-        height: "1rem",
+        width: width,
+        height: height,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -698,49 +717,6 @@ const FireIcon: FunctionComponent<IconProps> = ({ color }) => {
           clipRule="evenodd"
           d="M10.7999 3.95005C13.4783 5.49645 14.396 8.92136 12.8496 11.5998C11.3032 14.2782 7.8783 15.1959 5.19986 13.6495C2.52142 12.1031 1.60372 8.67823 3.15012 5.99979C3.28484 5.76646 3.43381 5.54648 3.59531 5.34033C3.7566 5.13445 4.0678 5.16558 4.22981 5.3709C4.45199 5.65247 4.70505 5.90857 4.98387 6.13406C5.24998 6.34928 5.61327 6.0955 5.60253 5.75342C5.60093 5.70245 5.60012 5.65128 5.60012 5.59993C5.60012 4.86509 5.76524 4.16883 6.06041 3.54621C6.48693 2.64652 7.18499 1.90062 8.04873 1.41434C8.24632 1.3031 8.4891 1.40171 8.5903 1.60463C9.06387 2.55411 9.81214 3.37979 10.7999 3.95005ZM11.2001 9.59995C11.2001 11.3673 9.76743 12.8 8.00012 12.8C6.46949 12.8 5.18338 11.6812 4.87223 10.2546C4.79738 9.91143 5.22383 9.73988 5.52326 9.92352C5.91209 10.162 6.34994 10.3171 6.8044 10.3747C7.0465 10.4054 7.22897 10.1831 7.21195 9.93966C7.2041 9.82744 7.20012 9.71416 7.20012 9.59995C7.20012 8.45843 7.59859 7.40998 8.26403 6.58611C8.34708 6.48328 8.47927 6.43281 8.60905 6.45782C10.0851 6.74219 11.2001 8.04086 11.2001 9.59995Z"
           fill={color}
-        />
-      </svg>
-    </div>
-  );
-};
-
-const BetaIcon: FunctionComponent<IconProps> = () => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        width: "28px",
-        height: "15px",
-        padding: "1px 3px",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "10px",
-        borderRadius: "4px",
-        background: "var(--Blue-Blue400, #2C4BE2)",
-      }}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="8"
-        viewBox="0 0 20 8"
-        fill="none"
-      >
-        <path
-          d="M15.1934 7.04541C14.7979 7.04541 14.5254 6.79932 14.5254 6.44775C14.5254 6.30273 14.5649 6.13574 14.666 5.84131L15.9932 1.95215C16.2305 1.24023 16.5732 0.95459 17.2061 0.95459C17.8389 0.95459 18.1729 1.23584 18.4146 1.95215L19.7373 5.84131C19.8164 6.0874 19.856 6.26318 19.856 6.41699C19.856 6.79932 19.5835 7.04541 19.166 7.04541C18.7793 7.04541 18.5552 6.83447 18.4102 6.33789L18.1816 5.62158H16.1646L15.9316 6.33789C15.7866 6.84766 15.5801 7.04541 15.1934 7.04541ZM16.4634 4.57129H17.8872L17.2148 2.29932H17.1445L16.4634 4.57129Z"
-          fill="#FEFEFE"
-        />
-        <path
-          d="M12.4577 7.04102C12.005 7.04102 11.7326 6.75098 11.7326 6.27637V2.18945H10.5944C10.2604 2.18945 10.0099 1.93457 10.0099 1.59619C10.0099 1.25342 10.2604 0.998535 10.5944 0.998535H14.3341C14.6681 0.998535 14.9142 1.25342 14.9142 1.59619C14.9142 1.93457 14.6681 2.18945 14.3341 2.18945H13.1872V6.27637C13.1872 6.75098 12.9103 7.04102 12.4577 7.04102Z"
-          fill="#FEFEFE"
-        />
-        <path
-          d="M5.68782 6.1665V1.8291C5.68782 1.29297 5.98225 0.998535 6.53157 0.998535H9.25179C9.58577 0.998535 9.82307 1.23584 9.82307 1.57861C9.82307 1.91699 9.58577 2.1499 9.25179 2.1499H7.12483V3.44629H9.14632C9.45833 3.44629 9.66927 3.66602 9.66927 3.98242C9.66927 4.30322 9.45833 4.50977 9.14632 4.50977H7.12483V5.8457H9.23421C9.58577 5.8457 9.82307 6.07422 9.82307 6.42139C9.82307 6.77295 9.58577 6.99707 9.22981 6.99707H6.53157C5.98225 6.99707 5.68782 6.70703 5.68782 6.1665Z"
-          fill="#FEFEFE"
-        />
-        <path
-          d="M0.144028 6.1665V1.8291C0.144028 1.29297 0.438461 0.998535 0.987778 0.998535H2.80272C3.93651 0.998535 4.64842 1.56543 4.64842 2.4707C4.64842 3.15625 4.23534 3.65723 3.57616 3.78027V3.84619C4.38036 3.89893 4.93407 4.48779 4.93407 5.29639C4.93407 6.31592 4.09911 6.99707 2.84666 6.99707H0.987778C0.438461 6.99707 0.144028 6.70703 0.144028 6.1665ZM1.58104 3.4375H2.27977C2.94334 3.4375 3.22899 3.14746 3.22899 2.72119C3.22899 2.29932 2.93895 2.02686 2.43358 2.02686H1.58104V3.4375ZM1.58104 5.96875H2.35887C3.1367 5.96875 3.4575 5.66553 3.4575 5.17773C3.4575 4.68994 3.1367 4.36914 2.50389 4.36914H1.58104V5.96875Z"
-          fill="#FEFEFE"
         />
       </svg>
     </div>

@@ -88,10 +88,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         return undefined;
       }
 
-      return new CoinPretty(
-        this.amountConfig.currency,
+      if (this.txSizeConfig.txSize <= 0) {
+        return new CoinPretty(this.amountConfig.currency, new Dec(0));
+      }
+
+      const feeDec = new Dec(
         this.txSizeConfig.txSize * this.feeRateConfig.feeRate + this.remainder
-      );
+      ).roundUpDec();
+
+      return new CoinPretty(this.amountConfig.currency, feeDec);
     }
 
     return new CoinPretty(this.amountConfig.currency, this._value);

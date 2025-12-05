@@ -1252,27 +1252,22 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   get uiProperties(): UIProperties {
     if (
       this.forceTopUp ||
-      (this._uiProperties.error instanceof InsufficientFeeError &&
-        this._topUpStatus.shouldTopUp)
+      this._uiProperties.error instanceof InsufficientFeeError
     ) {
-      return {
-        warning: new ShouldTopUpWarning("Should top up"),
-      };
+      const topUpStatus = this.getTopUpStatus();
+      if (topUpStatus.shouldTopUp) {
+        return {
+          warning: new ShouldTopUpWarning("Should top up"),
+        };
+      }
     }
 
     return this._uiProperties;
   }
 
-  @computed
-  protected get _topUpStatus(): {
-    shouldTopUp: boolean;
-    isTopUpAvailable: boolean;
-    remainingTimeMs?: number;
-    topUpOverrideStdFee?: StdFee;
-  } {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-    if (!queryTopUpStatus) {
+  readonly getTopUpStatus = computedFn(() => {
+    const keplrETCQueries = this.queriesStore.get(this.chainId).keplrETC;
+    if (!keplrETCQueries) {
       return {
         isTopUpAvailable: false,
         remainingTimeMs: undefined,
@@ -1281,85 +1276,86 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       };
     }
 
-    const topUpStatus = queryTopUpStatus.getTopUpStatus(
+    const topUpStatus = keplrETCQueries.queryTopUpStatus.getTopUpStatus(
       this.senderConfig.sender
-    );
-    if (topUpStatus.error != null) {
-      return {
-        isTopUpAvailable: false,
-        remainingTimeMs: undefined,
-        shouldTopUp: false,
-        topUpOverrideStdFee: undefined,
-      };
-    }
+    ).topUpStatus;
 
-    const { isTopUpAvailable, remainingTimeMs } = topUpStatus.topUpStatus;
+    if (topUpStatus != null) {
+      const { isTopUpAvailable, remainingTimeMs } = topUpStatus;
 
-    // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
-    const shouldTopUp = (() => {
-      const queryBalances = this.queriesStore
-        .get(this.chainId)
-        .queryBalances.getQueryBech32Address(this.senderConfig.sender);
+      // 모든 fee currency가 부족할 경우에만 topup 사용이 가능
+      const shouldTopUp = (() => {
+        const queryBalances = this.queriesStore
+          .get(this.chainId)
+          .queryBalances.getQueryBech32Address(this.senderConfig.sender);
 
-      for (const feeCurrency of this.selectableFeeCurrencies) {
-        const requiredFee = this.getFeeTypePrettyForFeeCurrency(
-          feeCurrency,
-          this.type === "manual" ? "average" : this.type
-        );
+        for (const feeCurrency of this.selectableFeeCurrencies) {
+          const requiredFee = this.getFeeTypePrettyForFeeCurrency(
+            feeCurrency,
+            this.type === "manual" ? "average" : this.type
+          );
 
-        const totalNeed = (() => {
-          let need = requiredFee;
-          for (const amt of this.amountConfig.amount) {
-            if (
-              amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom
-            ) {
-              need = need.add(amt);
+          const totalNeed = (() => {
+            let need = requiredFee;
+            for (const amt of this.amountConfig.amount) {
+              if (
+                amt.currency.coinMinimalDenom === feeCurrency.coinMinimalDenom
+              ) {
+                need = need.add(amt);
+              }
             }
+            return need;
+          })();
+
+          const bal = queryBalances.getBalance(feeCurrency)?.balance;
+          if (!bal || bal.toDec().lte(new Dec(0))) {
+            continue;
           }
-          return need;
-        })();
 
-        const bal = queryBalances.getBalance(feeCurrency)?.balance;
-        if (!bal || bal.toDec().lte(new Dec(0))) {
-          continue;
+          if (bal.toDec().gte(totalNeed.toDec())) {
+            return false;
+          }
         }
 
-        if (bal.toDec().gte(totalNeed.toDec())) {
-          return false;
+        return this.selectableFeeCurrencies.length > 0;
+      })();
+      let topUpOverrideStdFee: StdFee | undefined = undefined;
+
+      if (this.forceTopUp || shouldTopUp) {
+        const baseFeeCurrency = this.chainInfo.feeCurrencies[0];
+        if (baseFeeCurrency) {
+          const feeAmount = this.getFeeTypePrettyForFeeCurrency(
+            baseFeeCurrency,
+            "average"
+          );
+
+          topUpOverrideStdFee = {
+            gas: this.gasConfig.gas.toString(),
+            amount: [
+              {
+                amount: feeAmount.toCoin().amount,
+                denom: baseFeeCurrency.coinMinimalDenom,
+              },
+            ],
+          };
         }
       }
 
-      return this.selectableFeeCurrencies.length > 0;
-    })();
-    let topUpOverrideStdFee: StdFee | undefined = undefined;
-
-    if (this.forceTopUp || shouldTopUp) {
-      const baseFeeCurrency = this.chainInfo.feeCurrencies[0];
-      if (baseFeeCurrency) {
-        const feeAmount = this.getFeeTypePrettyForFeeCurrency(
-          baseFeeCurrency,
-          "average"
-        );
-
-        topUpOverrideStdFee = {
-          gas: this.gasConfig.gas.toString(),
-          amount: [
-            {
-              amount: feeAmount.toCoin().amount,
-              denom: baseFeeCurrency.coinMinimalDenom,
-            },
-          ],
-        };
-      }
+      return {
+        shouldTopUp,
+        isTopUpAvailable,
+        remainingTimeMs,
+        topUpOverrideStdFee,
+      };
     }
 
     return {
-      shouldTopUp,
-      isTopUpAvailable,
-      remainingTimeMs,
-      topUpOverrideStdFee,
+      isTopUpAvailable: false,
+      remainingTimeMs: undefined,
+      shouldTopUp: false,
+      topUpOverrideStdFee: undefined,
     };
-  }
+  });
 
   @computed
   get topUpStatus(): {
@@ -1368,12 +1364,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     topUpOverrideStdFee?: StdFee;
     isTopUpAvailable: boolean;
   } {
+    // always call getTopUpStatus() to ensure topUpQuery is observed
+    const status = this.getTopUpStatus();
+
     if (this.uiProperties.warning instanceof ShouldTopUpWarning) {
       return {
-        ...this._topUpStatus,
-        shouldTopUp: this.forceTopUp || this._topUpStatus.shouldTopUp,
+        ...status,
+        shouldTopUp: this.forceTopUp || status.shouldTopUp,
       };
     }
+
     return {
       shouldTopUp: false,
       remainingTimeMs: undefined,
@@ -1383,13 +1383,17 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   refreshTopUpStatus(): void {
-    const queryTopUpStatus = this.queriesStore.get(this.chainId).keplrETC
-      ?.queryTopUpStatus;
-    if (queryTopUpStatus) {
-      const topUpQuery = queryTopUpStatus.getTopUpStatus(
-        this.senderConfig.sender
-      );
-      topUpQuery.fetch();
+    const keplrETCQueries = this.queriesStore.get(this.chainId).keplrETC;
+    if (!keplrETCQueries) {
+      return;
+    }
+
+    const topUpQuery = keplrETCQueries.queryTopUpStatus.getTopUpStatus(
+      this.senderConfig.sender
+    );
+
+    if (topUpQuery.topUpStatus != null) {
+      topUpQuery.waitFreshResponse();
     }
   }
 

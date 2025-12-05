@@ -34,6 +34,8 @@ import { useKeyCoinTypeFinalize } from "./hooks/use-key-coin-type-finalize";
 import { EmbedChainInfos } from "../../config";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
+import { determineLedgerApp } from "../../utils/determine-ledger-app";
+import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 
 export const Ecosystem = {
   All: "All",
@@ -47,7 +49,7 @@ export type Ecosystem = (typeof Ecosystem)[keyof typeof Ecosystem];
 const HideEnabledText = styled(Subtitle4)`
   cursor: pointer;
   &:hover {
-    opacity: 0.7;
+    opacity: ${COMMON_HOVER_OPACITY};
   }
 `;
 
@@ -93,22 +95,6 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     setBackupSelectedNativeChainIdentifiers,
   ] = useState(chainStore.enabledChainIdentifiers);
 
-  const determineLedgerApp = (info: ModularChainInfo, cid: string): string => {
-    if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
-      return "Ethereum";
-    }
-
-    if ("starknet" in info) {
-      return "Starknet";
-    }
-    if ("bitcoin" in info) {
-      const coinType = info.bitcoin.bip44.coinType;
-      return coinType === 1 ? "Bitcoin Test" : "Bitcoin";
-    }
-
-    return "Cosmos";
-  };
-
   const applyEnableChange = useCallback(
     async (chainId: string, enable: boolean) => {
       if (!vaultId || !chainId) return;
@@ -151,7 +137,11 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         if (chainStore.hasModularChain(chainId)) {
           if (keyRingStore.selectedKeyInfo?.type === "ledger") {
             const modularChainInfo = chainStore.getModularChain(chainId);
-            const ledgerApp = determineLedgerApp(modularChainInfo, chainId);
+            const ledgerApp = determineLedgerApp(
+              chainStore,
+              modularChainInfo,
+              chainId
+            );
 
             const alreadyAppended = Boolean(
               keyRingStore.selectedKeyInfo?.insensitive?.[ledgerApp]
@@ -437,20 +427,35 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
   const ecosystemFilteredChainInfos = useMemo(() => {
     return searchedAllChains.filter((ci) => {
+      const cosmosChainInfo = (() => {
+        if ("cosmos" in ci) {
+          return ci.cosmos;
+        }
+        if ("currencies" in ci && "feeCurrencies" in ci) {
+          return ci;
+        }
+      })();
+      const isEvmOnlyChainId = (chainId: string) => {
+        const chainIdLikeCAIP2 = chainId.split(":");
+        return (
+          chainIdLikeCAIP2.length === 2 && chainIdLikeCAIP2[0] === "eip155"
+        );
+      };
       switch (selectedEcosystem) {
         case "All":
           return true;
         case "Cosmos":
           return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            !chainStore.isEvmOnlyChain(ci.chainId)
+            cosmosChainInfo != null &&
+            "bech32Config" in cosmosChainInfo &&
+            !isEvmOnlyChainId(ci.chainId)
           );
         case "EVM":
           return (
-            "cosmos" in ci &&
-            chainStore.hasChain(ci.chainId) &&
-            chainStore.isEvmOnlyChain(ci.chainId)
+            cosmosChainInfo != null &&
+            !("bech32Config" in cosmosChainInfo) &&
+            "evm" in cosmosChainInfo &&
+            isEvmOnlyChainId(ci.chainId)
           );
         case "Bitcoin":
           return "bitcoin" in ci;

@@ -137,14 +137,6 @@ export class ObservableQueryAssetsFromSourceInner extends ObservableQuery<Assets
       {
         headers: {
           "content-type": "application/json",
-          ...(() => {
-            const res: { authorization?: string } = {};
-            if (process.env["SKIP_API_KEY"]) {
-              res.authorization = process.env["SKIP_API_KEY"];
-            }
-
-            return res;
-          })(),
         },
         signal: abortController.signal,
       }

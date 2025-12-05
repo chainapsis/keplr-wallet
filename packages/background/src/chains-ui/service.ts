@@ -266,10 +266,20 @@ export class ChainsUIService {
       const identifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
       const vaultIds = this.enabledChainIdentifiersMap.keys();
       for (const vaultId of vaultIds) {
-        const map = this.enabledChainIdentifierMapForVault(vaultId);
+        const map = (() => {
+          const arr = this.enabledChainIdentifiersMap.get(vaultId) ?? [];
+
+          const res = new Map<string, boolean>();
+          for (const chainIdentifier of arr) {
+            res.set(chainIdentifier, true);
+          }
+
+          return res;
+        })();
         if (map.get(identifier)) {
-          const newIdentifiers =
-            this.enabledChainIdentifiersForVault(vaultId).slice();
+          const newIdentifiers = (
+            this.enabledChainIdentifiersMap.get(vaultId) ?? []
+          ).slice();
 
           const index = newIdentifiers.findIndex((i) => i === identifier);
           if (index >= 0) {

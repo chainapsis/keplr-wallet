@@ -12,4 +12,29 @@ declare global {
     // 로직에 의해서 알아내는데 알아내는 방법은 index.tsx에서 isReady를 확인하는 로직을 참고
     isStartFromInteractionWithSidePanelEnabled: boolean | undefined;
   }
+
+  //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter
+  namespace Intl {
+    class Segmenter {
+      constructor(locales?: string | string[], options?: SegmenterOptions);
+      segment(input: string): Iterable<SegmentData>;
+
+      //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf
+      static supportedLocalesOf(
+        locales: string | string[],
+        options?: SegmenterOptions
+      ): string[];
+    }
+
+    interface SegmenterOptions {
+      granularity?: "grapheme" | "word" | "sentence";
+    }
+
+    interface SegmentData {
+      segment: string;
+      index: number;
+      input: string;
+      isWordLike?: boolean;
+    }
+  }
 }

@@ -335,16 +335,6 @@ export class ObservableQueryAssetsInner extends ObservableQuery<AssetsResponse> 
   ): Promise<{ headers: any; data: AssetsResponse }> {
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
-      headers: {
-        ...(() => {
-          const res: { authorization?: string } = {};
-          if (process.env["SKIP_API_KEY"]) {
-            res.authorization = process.env["SKIP_API_KEY"];
-          }
-
-          return res;
-        })(),
-      },
     });
     const result = {
       headers: _result.headers,
@@ -714,14 +704,7 @@ export class ObservableQueryAssetsBatchInner extends ObservableQuery<AssetsRespo
     const _result = await simpleFetch(this.baseURL, this.url, {
       signal: abortController.signal,
       headers: {
-        ...(() => {
-          const res: { authorization?: string } = {};
-          if (process.env["SKIP_API_KEY"]) {
-            res.authorization = process.env["SKIP_API_KEY"];
-          }
-
-          return res;
-        })(),
+        "content-type": "application/json",
       },
     });
     const result = {

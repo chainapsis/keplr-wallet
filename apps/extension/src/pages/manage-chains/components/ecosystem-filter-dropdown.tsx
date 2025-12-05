@@ -1,9 +1,17 @@
-import React, { FunctionComponent, useState } from "react";
+import React, {
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../styles";
 import { Subtitle4 } from "../../../components/typography";
 import { Ecosystem } from "..";
 import { useIntl } from "react-intl";
+import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
+import { ContextMenuStyles } from "../../../components/context-menu";
+import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
 
 interface Props {
   selected: Ecosystem;
@@ -17,6 +25,52 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const intl = useIntl();
+
+  const globalSimpleBar = useGlobalSimpleBar();
+
+  const closeDropdown = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+
+    if (scrollElement) {
+      /**
+       * 사용자가 직접 스크롤(wheel/touchmove)했을 때만 메뉴를 닫는다.
+       * 단, 터치의 미세한 떨림은 무시한다.
+       */
+      let touchStartY = 0;
+      const TOUCH_MOVE_THRESHOLD = 10; // px
+
+      const onTouchStart = (e: TouchEvent) => {
+        touchStartY = e.touches[0].clientY;
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        const currentY = e.touches[0].clientY;
+        const diff = Math.abs(currentY - touchStartY);
+
+        if (diff > TOUCH_MOVE_THRESHOLD) {
+          closeDropdown();
+        }
+      };
+
+      scrollElement.addEventListener("wheel", closeDropdown);
+      scrollElement.addEventListener("touchstart", onTouchStart);
+      scrollElement.addEventListener("touchmove", onTouchMove);
+
+      return () => {
+        scrollElement.removeEventListener("wheel", closeDropdown);
+        scrollElement.removeEventListener("touchstart", onTouchStart);
+        scrollElement.removeEventListener("touchmove", onTouchMove);
+      };
+    }
+  }, [closeDropdown, globalSimpleBar, isOpen]);
 
   return (
     <Styles.MenuContainer>
@@ -39,22 +93,45 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
         <ArrowDownIcon />
       </Styles.MenuButton>
       {isOpen && (
-        <Styles.MenuWrapper>
-          <Styles.ContextMenuContent>
-            {Object.values(Ecosystem).map((item) => (
-              <Styles.MenuItem
-                key={item}
-                onClick={() => {
-                  onSelect(item);
-                  setIsOpen(false);
+        <Styles.ContextMenuContent>
+          {Object.values(Ecosystem).map((item) => (
+            <Styles.MenuItem
+              key={item}
+              onClick={() => {
+                onSelect(item);
+                setIsOpen(false);
+              }}
+              selected={item === selected}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
                 }}
-                selected={item === selected}
               >
                 {item}
-              </Styles.MenuItem>
-            ))}
-          </Styles.ContextMenuContent>
-        </Styles.MenuWrapper>
+                {selected === item && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="5"
+                    height="5"
+                    viewBox="0 0 5 5"
+                    fill="none"
+                  >
+                    <circle
+                      cx="2.5"
+                      cy="2.5"
+                      r="2.5"
+                      fill={ColorPalette["blue-300"]}
+                    />
+                  </svg>
+                )}
+              </div>
+            </Styles.MenuItem>
+          ))}
+        </Styles.ContextMenuContent>
       )}
     </Styles.MenuContainer>
   );
@@ -87,48 +164,36 @@ const Styles = {
     background-color: transparent;
   `,
 
-  MenuWrapper: styled.div`
+  ContextMenuContent: styled(ContextMenuStyles.Container)`
     width: 12.375rem;
     position: absolute;
     left: 0;
     top: calc(100% + 0.5rem);
     z-index: 9999;
     min-width: 8rem;
-    overflow: visible;
-    box-shadow: ${(props) =>
-      props.theme.mode === "light"
-        ? "0px 1px 3px 0px rgba(43, 39, 55, 0.10), 0px 5px 30px 0px rgba(43, 39, 55, 0.05), 0px 10px 50px 0px rgba(43, 39, 55, 0.05)"
-        : "none"};
   `,
 
-  ContextMenuContent: styled.div`
-    border-radius: 0.5rem;
-    background-color: ${(props) =>
-      props.theme.mode === "light"
-        ? ColorPalette.white
-        : ColorPalette["gray-500"]};
-    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-  `,
-
-  MenuItem: styled.div<{ selected?: boolean }>`
+  MenuItem: styled(ContextMenuStyles.Item)<{ selected?: boolean }>`
     padding: 0.6875rem 1rem;
     cursor: pointer;
-    background-color: rgba(37, 37, 37, 0.5);
-    border-bottom: 0.03125rem solid rgba(84, 84, 88, 0.65);
+    border-bottom: 0.03125rem solid
+      ${({ theme }) =>
+        theme.mode === "light"
+          ? ColorPalette["gray-100"]
+          : ColorPalette["gray-400"]};
 
     font-size: 1.0625rem;
     line-height: 1.375rem;
 
     color: ${(props) =>
-      props.selected ? ColorPalette["blue-300"] : ColorPalette.white};
+      props.selected
+        ? ColorPalette["blue-300"]
+        : props.theme.mode === "light"
+        ? ColorPalette["gray-700"]
+        : ColorPalette.white};
 
     &:last-child {
       border-bottom: none;
-    }
-
-    &:hover {
-      background-color: rgba(51, 51, 51, 0.5);
     }
   `,
 
@@ -140,7 +205,7 @@ const Styles = {
 
     &:hover > :nth-child(2),
     &:hover > :nth-child(3) {
-      opacity: 0.7;
+      opacity: ${COMMON_HOVER_OPACITY};
     }
   `,
 };

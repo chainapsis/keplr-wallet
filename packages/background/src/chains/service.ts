@@ -36,7 +36,10 @@ import { AnalyticsService } from "../analytics";
 import { runIfOnlyAppStart } from "../utils";
 
 type ChainRemovedHandler = (chainInfo: ChainInfo) => void;
-type ChainSuggestedHandler = (chainInfo: ChainInfo) => void | Promise<void>;
+type ChainSuggestedHandler = (
+  chainInfo: ChainInfo,
+  options?: Record<string, any>
+) => void | Promise<void>;
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
@@ -164,7 +167,7 @@ export class ChainsService {
         });
 
         for (const chainInfo of filtered) {
-          await this.addSuggestedChainInfo(chainInfo, true);
+          await this.addSuggestedChainInfo(chainInfo, undefined, true);
         }
 
         const chainInfos = this.embedChainInfos.concat(filtered);
@@ -679,7 +682,8 @@ export class ChainsService {
     chainInfo = await validateBasicChainInfoType(chainInfo);
 
     const onApprove = async (
-      receivedChainInfo: ChainInfoWithSuggestedOptions
+      receivedChainInfo: ChainInfoWithSuggestedOptions,
+      handlerOptions?: Record<string, any>
     ) => {
       // approve 이후에 이미 등록되어있으면 아무것도 하지 않는다...
       if (this.hasChainInfo(receivedChainInfo.chainId)) {
@@ -702,7 +706,7 @@ export class ChainsService {
         );
       }
 
-      await this.addSuggestedChainInfo(validChainInfo);
+      await this.addSuggestedChainInfo(validChainInfo, handlerOptions);
     };
 
     // If the message is internal message or the origin is in the privileged origins, approve it immediately.
@@ -718,7 +722,9 @@ export class ChainsService {
       } catch (e) {
         console.log(e);
       }
-      await onApprove(chainInfo);
+      await onApprove(chainInfo, {
+        isInternalMsg: env.isInternalMsg,
+      });
     } else {
       await this.interactionService.waitApproveV2(
         env,
@@ -737,6 +743,7 @@ export class ChainsService {
 
   async addSuggestedChainInfo(
     chainInfo: ChainInfoWithSuggestedOptions,
+    handlerOptions?: Record<string, any>,
     // Used for migration
     notInvokeHandlers?: boolean
   ): Promise<void> {
@@ -757,7 +764,7 @@ export class ChainsService {
 
         for (const handler of this.onChainSuggestedHandlers) {
           try {
-            await handler(updated);
+            await handler(updated, handlerOptions);
           } catch (e) {
             console.error(e);
           }
@@ -1179,38 +1186,45 @@ export class ChainsService {
     const updated = this.mergeChainInfosWithDynamics([chainInfo])[0];
 
     {
-      const newChainInfos = this.updatedChainInfos.slice();
-      newChainInfos.filter(
-        (chainInfo) =>
-          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
-      );
+      const newChainInfos = this.updatedChainInfos
+        .slice()
+        .filter(
+          (chainInfo) =>
+            ChainIdHelper.parse(chainInfo.chainId).identifier !==
+            chainIdentifier
+        );
       this.updatedChainInfos = newChainInfos;
     }
 
     {
-      const newChainInfos = this.suggestedChainInfos.slice();
-      newChainInfos.filter(
-        (chainInfo) =>
-          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
-      );
+      const newChainInfos = this.suggestedChainInfos
+        .slice()
+        .filter(
+          (chainInfo) =>
+            ChainIdHelper.parse(chainInfo.chainId).identifier !==
+            chainIdentifier
+        );
       this.suggestedChainInfos = newChainInfos;
     }
 
     {
-      const newChainInfos = this.repoChainInfos.slice();
-      newChainInfos.filter(
-        (chainInfo) =>
-          ChainIdHelper.parse(chainInfo.chainId).identifier !== chainIdentifier
-      );
+      const newChainInfos = this.repoChainInfos
+        .slice()
+        .filter(
+          (chainInfo) =>
+            ChainIdHelper.parse(chainInfo.chainId).identifier !==
+            chainIdentifier
+        );
       this.repoChainInfos = newChainInfos;
     }
 
     {
-      const newEndpoints = this.endpoints.slice();
-      newEndpoints.filter(
-        (endpoint) =>
-          ChainIdHelper.parse(endpoint.chainId).identifier !== chainIdentifier
-      );
+      const newEndpoints = this.endpoints
+        .slice()
+        .filter(
+          (endpoint) =>
+            ChainIdHelper.parse(endpoint.chainId).identifier !== chainIdentifier
+        );
       this.endpoints = newEndpoints;
     }
 

@@ -6,6 +6,8 @@ import { ObservableQueryCw20BalanceRegistry } from "./cw20-balance";
 import { QuerySharedContext } from "../../common";
 import { ObservableQueryNeutronStakingRewards } from "./neutron/staking-rewards";
 import { ObservableQueryNeutronStakingRewardsConfig } from "./neutron/staking-rewards-config";
+import { ObservableQueryNeutronGovernance } from "./neutron/governance-proposals";
+import { ObservableQueryNeutronProposalVote } from "./neutron/governance-vote";
 
 export interface CosmwasmQueries {
   cosmwasm: CosmwasmQueriesImpl;
@@ -40,6 +42,9 @@ export class CosmwasmQueriesImpl {
   public readonly querycw20ContractInfo: DeepReadonly<ObservableQueryCw20ContractInfo>;
   public readonly queryNeutronStakingRewards: DeepReadonly<ObservableQueryNeutronStakingRewards>;
   public readonly queryNeutronStakingRewardsConfig: DeepReadonly<ObservableQueryNeutronStakingRewardsConfig>;
+  public readonly queryNeutronGovernance: DeepReadonly<ObservableQueryNeutronGovernance>;
+  public readonly queryNeutronVote: DeepReadonly<ObservableQueryNeutronProposalVote>;
+
   constructor(
     base: QueriesSetBase,
     sharedContext: QuerySharedContext,
@@ -68,5 +73,17 @@ export class CosmwasmQueriesImpl {
         chainId,
         chainGetter
       );
+
+    this.queryNeutronGovernance = new ObservableQueryNeutronGovernance(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
+
+    this.queryNeutronVote = new ObservableQueryNeutronProposalVote(
+      sharedContext,
+      chainId,
+      chainGetter
+    );
   }
 }

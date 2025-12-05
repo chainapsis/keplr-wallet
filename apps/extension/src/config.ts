@@ -2332,9 +2332,21 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           type: "erc20",
           contractAddress:
             "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
-          coinDenom: "USDC",
+          coinDenom: "USDC.e",
           coinMinimalDenom:
             "erc20:0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
+          coinDecimals: 6,
+          coinGeckoId: "usd-coin",
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
+          coinDenom: "USDC",
+          coinMinimalDenom:
+            "erc20:0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
           coinDecimals: 6,
           coinGeckoId: "usd-coin",
           coinImageUrl:
@@ -2434,6 +2446,17 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinDecimals: 18,
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/starknet.png",
+        },
+        {
+          type: "erc20",
+          contractAddress:
+            "0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
+          coinDenom: "USDC",
+          coinMinimalDenom:
+            "erc20:0x0512feac6339ff7889822cb5aa2a86c848e9d392bb0e3e237c008674feed8343",
+          coinDecimals: 6,
+          coinImageUrl:
+            "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
         },
       ],
       ethContractAddress:
@@ -3882,6 +3905,110 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       },
     ],
+    features: ["cosmwasm"],
+  },
+  {
+    rpc: "https://rpc.monad.xyz",
+    rest: "https://rpc.monad.xyz",
+    evm: {
+      chainId: 143,
+      rpc: "https://rpc.monad.xyz",
+      websocket: "wss://rpc.monad.xyz",
+    },
+    chainId: "eip155:143",
+    chainName: "Monad Mainnet",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/chain.png",
+    bip44: {
+      coinType: 60,
+    },
+    currencies: [
+      {
+        coinDenom: "MON",
+        coinMinimalDenom: "monad-native",
+        coinDecimals: 18,
+        coinGeckoId: "monad",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/monad-native.png",
+      },
+      {
+        coinDenom: "WMON",
+        coinMinimalDenom: "erc20:0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A",
+        coinDecimals: 18,
+        coinGeckoId: "wrapped-monad",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/erc20/0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "MON",
+        coinMinimalDenom: "monad-native",
+        coinDecimals: 18,
+        coinGeckoId: "monad",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:143/monad-native.png",
+      },
+    ],
+    features: [],
+  },
+  {
+    chainId: "zigchain-1",
+    chainName: "ZIGChain",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/chain.png",
+    rpc: "https://rpc-zigchain.keplr.app",
+    rest: "https://lcd-zigchain.keplr.app",
+    bip44: { coinType: 118 },
+    bech32Config: {
+      bech32PrefixAccAddr: "zig",
+      bech32PrefixAccPub: "zigpub",
+      bech32PrefixValAddr: "zigvaloper",
+      bech32PrefixValPub: "zigvaloperpub",
+      bech32PrefixConsAddr: "zigvalcons",
+      bech32PrefixConsPub: "zigvalconspub",
+    },
+    currencies: [
+      {
+        coinDenom: "ZIG",
+        coinMinimalDenom: "uzig",
+        coinDecimals: 6,
+        coinGeckoId: "zignaly",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
+      },
+      {
+        coinDenom: "stzig",
+        coinMinimalDenom:
+          "coin.zig109f7g2rzl2aqee7z6gffn8kfe9cpqx0mjkk7ethmx8m2hq4xpe9snmaam2.stzig",
+        coinDecimals: 6,
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/stzig.png",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "ZIG",
+        coinMinimalDenom: "uzig",
+        coinDecimals: 6,
+        coinGeckoId: "zignaly",
+        coinImageUrl:
+          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
+        gasPriceStep: {
+          low: 0.0025,
+          average: 0.025,
+          high: 0.05,
+        },
+      },
+    ],
+    stakeCurrency: {
+      coinDenom: "ZIG",
+      coinMinimalDenom: "uzig",
+      coinDecimals: 6,
+      coinGeckoId: "zignaly",
+      coinImageUrl:
+        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
+    },
     features: ["cosmwasm"],
   },
 ];

@@ -18,6 +18,7 @@ import {
   EmptyAmountError,
   IFeeConfig,
   IGasConfig,
+  ISenderConfig,
   useGasSimulator,
   useTxConfigsValidate,
   ZeroAmountError,
@@ -35,7 +36,7 @@ import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
-import { useGlobarSimpleBar } from "../../hooks/global-simplebar";
+import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
 import { Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
@@ -62,6 +63,7 @@ import { InsufficientFeeError } from "@keplr-wallet/hooks";
 import { getSwapWarnings } from "./utils/swap-warnings";
 import { FeeCoverageDescription } from "../../components/top-up";
 import { useTopUp } from "../../hooks/use-topup";
+import { useInsufficientFeeAnalytics } from "../../hooks/analytics/use-insufficient-fee-analytics";
 import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 import { useSwapFeeBps } from "./hooks/use-swap-fee-bps";
 import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
@@ -1764,6 +1766,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             amountConfig={swapConfigs.amountConfig}
             feeConfig={swapConfigs.feeConfig}
             gasConfig={swapConfigs.gasConfig}
+            senderConfig={swapConfigs.senderConfig}
             title={
               isHighPriceImpact &&
               !calculatingTxError &&
@@ -1913,6 +1916,7 @@ const WarningGuideBox: FunctionComponent<{
   amountConfig: SwapAmountConfig;
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  senderConfig: ISenderConfig;
 
   forceError?: Error;
   forceWarning?: Error;
@@ -1925,12 +1929,15 @@ const WarningGuideBox: FunctionComponent<{
     amountConfig,
     feeConfig,
     gasConfig,
+    senderConfig,
     forceError,
     forceWarning,
     title,
     showUSDNWarning,
     showCelestiaWarning,
   }) => {
+    useInsufficientFeeAnalytics(feeConfig, senderConfig);
+
     const intl = useIntl();
     const theme = useTheme();
 
@@ -2011,7 +2018,7 @@ const WarningGuideBox: FunctionComponent<{
 
     let collapsed = error == null;
 
-    const globalSimpleBar = useGlobarSimpleBar();
+    const globalSimpleBar = useGlobalSimpleBar();
     useEffect(() => {
       if (!collapsed) {
         const timeoutId = setTimeout(() => {

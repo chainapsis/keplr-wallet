@@ -1194,9 +1194,26 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
         );
 
         if (chainInfo) {
-          const selectedAddress = (
-            await injectedKeplr().getKey(this._currentChainId)
-          ).ethereumHexAddress;
+          let selectedAddress: string | null = null;
+
+          try {
+            selectedAddress = (
+              await injectedKeplr().getKey(this._currentChainId)
+            ).ethereumHexAddress;
+          } catch (e) {
+            // If the key is not found (e.g. ledger is never connected with ethereum app),
+            // should emit empty array as parameter to accountsChanged event
+            if (
+              !e?.message.includes(
+                "on Ledger by selecting the chain in the extension"
+              )
+            ) {
+              console.error(
+                `Failed to get key for keystorechange event: ${e.message}`
+              );
+            }
+          }
+
           this._handleAccountsChanged(selectedAddress);
         }
       }
@@ -1373,11 +1390,15 @@ class EthereumProvider extends EventEmitter implements IEthereumProvider {
     }
   };
 
-  protected _handleAccountsChanged = async (selectedAddress: string) => {
+  protected _handleAccountsChanged = async (selectedAddress: string | null) => {
     if (this.selectedAddress !== selectedAddress) {
       this.selectedAddress = selectedAddress;
 
-      this.emit("accountsChanged", [selectedAddress]);
+      if (selectedAddress) {
+        this.emit("accountsChanged", [selectedAddress]);
+      } else {
+        this.emit("accountsChanged", []);
+      }
     }
   };
 
@@ -1475,19 +1496,33 @@ class StarknetProvider implements IStarknetProvider {
 
     window.addEventListener("keplr_keystorechange", async () => {
       if (this._currentChainId) {
-        const selectedAddress = (
-          await this._injectedKeplr().getStarknetKey(this._currentChainId)
-        ).hexAddress;
+        let selectedAddress: string | null = null;
 
-        this.selectedAddress = selectedAddress;
+        try {
+          selectedAddress = (
+            await this._injectedKeplr().getStarknetKey(this._currentChainId)
+          ).hexAddress;
+        } catch (e) {
+          // If the key is not found (e.g. ledger is never connected with starknet app),
+          // should emit array with empty string as parameter to accountsChanged event
+          if (
+            !e?.message.includes(
+              "on Ledger by selecting the chain in the extension"
+            )
+          ) {
+            console.error(
+              `Failed to get key for keystorechange event: ${e.message}`
+            );
+          }
+        }
 
-        this.onAccountChange({
-          selectedAddress,
-        });
+        this.selectedAddress = selectedAddress ?? undefined;
+
+        this.onAccountChange({ selectedAddress });
 
         this._userWalletEvents.forEach((userWalletEvent) => {
           if (userWalletEvent.type === "accountsChanged") {
-            userWalletEvent.handler([selectedAddress]);
+            userWalletEvent.handler(selectedAddress ? [selectedAddress] : [""]);
           }
         });
       }
@@ -1712,10 +1747,23 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     super();
 
     window.addEventListener("keplr_keystorechange", async () => {
-      const accounts = await this.getAccounts();
-      if (accounts && accounts.length > 0) {
-        this._handleAccountsChanged(accounts[0]);
+      let accounts: string[] | null = null;
+
+      try {
+        accounts = await this.getAccounts();
+      } catch (e) {
+        if (
+          !e?.message.includes(
+            "on Ledger by selecting the chain in the extension"
+          )
+        ) {
+          console.error(
+            `Failed to get key for keystorechange event: ${e.message}`
+          );
+        }
       }
+
+      this._handleAccountsChanged(accounts);
     });
 
     window.addEventListener("keplr_bitcoinChainChanged", async (event) => {
@@ -1723,17 +1771,44 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
 
       if (origin === window.location.origin) {
         const network = (event as CustomEvent).detail.network;
-        const accounts = await this.getAccounts();
+
+        let accounts: string[] | null = null;
+        try {
+          accounts = await this.getAccounts();
+        } catch (e) {
+          if (
+            !e?.message.includes(
+              "on Ledger by selecting the chain in the extension"
+            )
+          ) {
+            console.error(
+              `Failed to get key for keystorechange event: ${e.message}`
+            );
+          }
+        }
+
         this._handleNetworkChanged(network);
-        this._handleAccountsChanged(accounts[0]);
+        this._handleAccountsChanged(accounts);
       }
     });
 
     window.addEventListener("keplr_bitcoinAccountsChanged", async () => {
-      const accounts = await this.getAccounts();
-      if (accounts && accounts.length > 0) {
-        this._handleAccountsChanged(accounts[0]);
+      let accounts: string[] | null = null;
+      try {
+        accounts = await this.getAccounts();
+      } catch (e) {
+        if (
+          !e?.message.includes(
+            "on Ledger by selecting the chain in the extension"
+          )
+        ) {
+          console.error(
+            `Failed to get key for keystorechange event: ${e.message}`
+          );
+        }
       }
+
+      this._handleAccountsChanged(accounts);
     });
   }
 
@@ -1888,8 +1963,15 @@ export class BitcoinProvider extends EventEmitter implements IBitcoinProvider {
     this.emit("networkChanged", network);
   };
 
-  protected _handleAccountsChanged = async (selectedAddress: string) => {
-    this.emit("accountChanged", [selectedAddress]);
-    this.emit("accountsChanged", [selectedAddress]);
+  protected _handleAccountsChanged = async (accounts: string[] | null) => {
+    if (accounts && accounts.length > 0) {
+      this.emit("accountChanged", accounts);
+      this.emit("accountsChanged", accounts);
+    } else {
+      // If the accounts are not found (e.g. ledger is never connected with bitcoin app),
+      // should emit empty array as parameter to accountsChanged event
+      this.emit("accountChanged", [""]);
+      this.emit("accountsChanged", [""]);
+    }
   };
 }

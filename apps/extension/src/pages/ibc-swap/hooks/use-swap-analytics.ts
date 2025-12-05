@@ -154,6 +154,13 @@ export const useSwapAnalytics = ({
   const inChainIdentifier = ChainIdHelper.parse(inChainId).identifier;
   const outChainIdentifier = ChainIdHelper.parse(outChainId).identifier;
 
+  const inChainName = chainStore.hasChain(inChainId)
+    ? chainStore.getChain(inChainId).chainName
+    : undefined;
+  const outChainName = chainStore.hasChain(outChainId)
+    ? chainStore.getChain(outChainId).chainName
+    : undefined;
+
   // source selected
   useEffect(() => {
     if (entryPoint !== "select_from_asset") return;
@@ -164,6 +171,7 @@ export const useSwapAnalytics = ({
     ) {
       logEvent("swap_source_selected", {
         in_chain_identifier: inChainIdentifier,
+        in_chain_name: inChainName,
         in_coin_denom: inCurrency.coinDenom,
       });
       prevInRef.current = {
@@ -184,6 +192,7 @@ export const useSwapAnalytics = ({
     ) {
       logEvent("swap_destination_selected", {
         out_chain_identifier: outChainIdentifier,
+        out_chain_name: outChainName,
         out_coin_denom: outCurrency.coinDenom,
       });
       prevOutRef.current = {
@@ -243,8 +252,10 @@ export const useSwapAnalytics = ({
       requestStartedAtRef.current = performance.now();
       logEvent("swap_quote_requested", {
         in_chain_identifier: inChainIdentifier,
+        in_chain_name: inChainName,
         in_coin_denom: inCurrency.coinDenom,
         out_chain_identifier: outChainIdentifier,
+        out_chain_name: outChainName,
         out_coin_denom: outCurrency.coinDenom,
         in_amount_raw: inAmountRaw,
         in_amount_usd: inAmountUsd,
@@ -270,36 +281,31 @@ export const useSwapAnalytics = ({
     const currentKey = `${source_asset_denom}-${source_asset_chain_id}-${dest_asset_denom}-${dest_asset_chain_id}-${amount_in}-${amount_out}`;
     if (prevRouteKeyRef.current === currentKey) return;
 
-    const sourceChainIdentifier = ChainIdHelper.parse(
-      source_asset_chain_id
-    ).identifier;
-    const sourceCurrency = chainStore
-      .getChain(
-        Number.isNaN(parseInt(sourceChainIdentifier))
-          ? sourceChainIdentifier
-          : `eip155:${sourceChainIdentifier}`
-      )
-      .forceFindCurrency(source_asset_denom);
-    const sourceCoinPretty = new CoinPretty(sourceCurrency, amount_in);
-    const sourceAmountUsd = (() => {
-      const p = priceStore.calculatePrice(sourceCoinPretty, "usd");
-      return p ? p.toDec().toString() : undefined;
-    })();
+    const {
+      chainIdentifier: sourceChainIdentifier,
+      chainName: sourceChainName,
+      coinDenom: sourceCoinDenom,
+      amountUsd: sourceAmountUsd,
+    } = getChainProperties(
+      chainStore,
+      priceStore,
+      source_asset_chain_id,
+      source_asset_denom,
+      amount_in
+    );
 
-    const destChainIdentifier =
-      ChainIdHelper.parse(dest_asset_chain_id).identifier;
-    const destCurrency = chainStore
-      .getChain(
-        Number.isNaN(parseInt(dest_asset_chain_id))
-          ? dest_asset_chain_id
-          : `eip155:${dest_asset_chain_id}`
-      )
-      .forceFindCurrency(dest_asset_denom);
-    const destCoinPretty = new CoinPretty(destCurrency, amount_out);
-    const destAmountUsd = (() => {
-      const p = priceStore.calculatePrice(destCoinPretty, "usd");
-      return p ? p.toDec().toString() : undefined;
-    })();
+    const {
+      chainIdentifier: destChainIdentifier,
+      chainName: destChainName,
+      coinDenom: destCoinDenom,
+      amountUsd: destAmountUsd,
+    } = getChainProperties(
+      chainStore,
+      priceStore,
+      dest_asset_chain_id,
+      dest_asset_denom,
+      amount_out
+    );
 
     const quoteId = uuidv4();
 
@@ -312,11 +318,13 @@ export const useSwapAnalytics = ({
       quote_id: quoteId,
       duration_ms: durationMs,
       in_chain_identifier: sourceChainIdentifier,
-      in_coin_denom: sourceCurrency.coinDenom,
+      in_chain_name: sourceChainName,
+      in_coin_denom: sourceCoinDenom,
       in_amount_raw: amount_in,
       in_amount_usd: sourceAmountUsd,
       out_chain_identifier: destChainIdentifier,
-      out_coin_denom: destCurrency.coinDenom,
+      out_chain_name: destChainName,
+      out_coin_denom: destCoinDenom,
       out_amount_est_raw: amount_out,
       out_amount_est_usd: destAmountUsd,
       provider: "skip",
@@ -350,8 +358,10 @@ export const useSwapAnalytics = ({
     logEvent("swap_quote_failed", {
       duration_ms: durationMs,
       in_chain_identifier: inChainIdentifier,
+      in_chain_name: inChainName,
       in_coin_denom: inCurrency.coinDenom,
       out_chain_identifier: outChainIdentifier,
+      out_chain_name: outChainName,
       out_coin_denom: outCurrency.coinDenom,
       in_amount_raw: inAmountRaw,
       in_amount_usd: inAmountUsd,
@@ -400,3 +410,47 @@ export const useSwapAnalytics = ({
     logEvent,
   };
 };
+
+type SwapChainAnalytics = {
+  chainIdentifier: string;
+  chainName: string;
+  coinDenom: string;
+  amountUsd?: string;
+};
+
+function getChainProperties(
+  chainStore: ReturnType<typeof useStore>["chainStore"],
+  priceStore: ReturnType<typeof useStore>["priceStore"],
+  chainId: string,
+  denom: string,
+  amount: string
+): SwapChainAnalytics {
+  const _chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+  const chainIdentifier = Number.isNaN(parseInt(_chainIdentifier, 10))
+    ? _chainIdentifier
+    : `eip155:${_chainIdentifier}`;
+  const chain = chainStore.hasChain(chainIdentifier)
+    ? chainStore.getChain(chainIdentifier)
+    : undefined;
+
+  if (!chain) {
+    return {
+      chainIdentifier,
+      chainName: chainId,
+      coinDenom: denom,
+    };
+  }
+
+  const currency = chain.forceFindCurrency(denom);
+  const price = priceStore.calculatePrice(
+    new CoinPretty(currency, amount),
+    "usd"
+  );
+
+  return {
+    chainIdentifier,
+    chainName: chain.chainName,
+    coinDenom: currency.coinDenom,
+    amountUsd: price ? price.toDec().toString() : undefined,
+  };
+}
