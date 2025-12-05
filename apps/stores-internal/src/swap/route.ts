@@ -135,12 +135,15 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
     // merge same denom fees
     const feeMap = new Map<string, CoinPretty>();
     for (const fee of fees) {
-      const chainId =
-        fee.fee_token.type === SwapChainType.EVM
-          ? `eip155:${fee.fee_token.chain_id}`
-          : fee.fee_token.chain_id;
+      const evmLikeChainId = Number(fee.fee_token.chain_id);
+      const isEVMLikeChainId =
+        !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+      const chainId = isEVMLikeChainId
+        ? `eip155:${evmLikeChainId}`
+        : fee.fee_token.chain_id;
       const denom = (() => {
-        if (fee.fee_token.type === SwapChainType.EVM) {
+        if (isEVMLikeChainId) {
           if (
             fee.fee_token.denom === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
           ) {
