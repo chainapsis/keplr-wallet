@@ -4,7 +4,6 @@ import { ColorPalette } from "../../../../styles";
 import { Body3, Caption2, Subtitle4 } from "../../../../components/typography";
 import { KeyInfo } from "@keplr-wallet/background";
 import { observer } from "mobx-react-lite";
-import { Tooltip } from "../../../../components/tooltip";
 import { EllipsisIcon } from "../../../../components/icon";
 import { XAxis, YAxis } from "../../../../components/axis";
 import { Image } from "../../../../components/image";
@@ -24,6 +23,7 @@ import { useGetKeyInfoParagraph } from "../../../../hooks/key-info";
 import { useGetIcnsName } from "../../../../hooks/use-get-icns-name";
 import { ContextMenuStyles } from "../../../../components/context-menu";
 import { AccountNameIcon } from "../account-icon";
+import { PortalTooltip } from "../../../../components/tooltip/portal";
 
 const Styles = {
   AccountItem: styled.div<{ isSelected: boolean }>`
@@ -218,14 +218,14 @@ export const AccountItemSwitchModal = observer(
                 {icnsPrimaryName && (
                   <React.Fragment>
                     <Gutter size="0.375rem" />
-                    <Tooltip
+                    <PortalTooltip
                       hideArrow={true}
                       content={
                         <Caption2 color={ColorPalette["white"]}>
                           {icnsPrimaryName}
                         </Caption2>
                       }
-                      allowedPlacements={["top", "bottom", "right"]}
+                      allowedPlacements={["top"]}
                     >
                       <Image
                         alt="icns-icon"
@@ -238,7 +238,7 @@ export const AccountItemSwitchModal = observer(
                           opacity: isSelected ? COMMON_HOVER_OPACITY : 1,
                         }}
                       />
-                    </Tooltip>
+                    </PortalTooltip>
                   </React.Fragment>
                 )}
               </XAxis>
