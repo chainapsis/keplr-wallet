@@ -52,7 +52,7 @@ export interface EthereumSignResponse {
   signature: Uint8Array;
 }
 
-export enum EVMGasSimulateKind {
+export enum EvmGasSimulationOutcome {
   TX_SIMULATED = "tx-simulated",
   TX_BUNDLE_SIMULATED = "tx-bundle-simulated",
   APPROVAL_ONLY_SIMULATED = "approval-only-simulated",

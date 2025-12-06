@@ -52,6 +52,7 @@ import {
   TxExecutionType,
   TxExecutionStatus,
   EVMBackgroundTx,
+  CosmosBackgroundTx,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
@@ -72,7 +73,7 @@ import {
   SwapProvider,
 } from "@keplr-wallet/stores-internal/build/swap/types";
 import { Button } from "../../components/button";
-import { EVMGasSimulateKind, EthTxStatus } from "@keplr-wallet/types";
+import { EvmGasSimulationOutcome, EthTxStatus } from "@keplr-wallet/types";
 // import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
@@ -328,7 +329,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ethereumAccount
               .simulateGasWithPendingErc20Approval(sender, tx)
               .then((result) => {
-                const { kind, gasUsed, erc20ApprovalGasUsed } = result;
+                const { outcome, gasUsed, erc20ApprovalGasUsed } = result;
 
                 const totalGasUsed =
                   (gasUsed ?? 0) + (erc20ApprovalGasUsed ?? 0);
@@ -356,14 +357,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       );
                       return {
                         gasUsed: totalGasUsed,
-                        evmSimulateKind: kind,
+                        evmSimulationOutcome: outcome,
                       };
                     });
                 }
 
                 return {
                   gasUsed: totalGasUsed,
-                  evmSimulateKind: kind,
+                  evmSimulationOutcome: outcome,
                 };
               }),
         };
@@ -421,7 +422,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
 
-  const [isTxLoading, setIsTxLoading] = useState(false);
   const [isButtonHolding, setIsButtonHolding] = useState(false);
 
   // 10초마다 route query 자동 refresh
@@ -430,11 +430,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     if (
       queryRoute &&
       !queryRoute.isFetching &&
-      !isTxLoading &&
+      !uiConfigStore.ibcSwapConfig.isSwapLoading &&
       !isButtonHolding
     ) {
       const timeoutId = setTimeout(() => {
-        if (!queryRoute.isFetching && !isTxLoading && !isButtonHolding) {
+        if (
+          !queryRoute.isFetching &&
+          !uiConfigStore.ibcSwapConfig.isSwapLoading &&
+          !isButtonHolding
+        ) {
           queryRoute.fetch();
         }
       }, 10000);
@@ -447,7 +451,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
     // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
     // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
-  }, [queryRoute, queryRoute?.isFetching, isTxLoading, isButtonHolding]);
+  }, [
+    queryRoute,
+    queryRoute?.isFetching,
+    uiConfigStore.ibcSwapConfig.isSwapLoading,
+    isButtonHolding,
+  ]);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -526,8 +535,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   // });
 
   const isSwap = swapConfigs.amountConfig.type === "swap";
-  const isOneClickSwapDisabled =
-    swapConfigs.amountConfig.requiresMultipleTxs || isHardwareWallet;
+
+  /**
+   * One-click swap is disabled when:
+   * 1. Requires multiple transactions
+   * 2. Hardware wallet
+   * 3. EVM gas simulation outcome is APPROVAL_ONLY_SIMULATED (approve tx only simulated, not swap tx)
+   */
+  const oneClickSwapDisabled =
+    swapConfigs.amountConfig.requiresMultipleTxs ||
+    isHardwareWallet ||
+    gasSimulator.evmSimulationOutcome ===
+      EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED;
 
   const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
     swapConfigs.amountConfig.currency,
@@ -565,7 +584,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (!interactionBlocked) {
           // logSwapSignOpened();
 
-          setIsTxLoading(true);
+          const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+          if (!selectedKeyInfo) {
+            throw new Error("selectedKeyInfo is undefined");
+          }
+
+          const evmSimulationOutcome = gasSimulator.evmSimulationOutcome;
+          if (isInChainEVMOnly && evmSimulationOutcome == null) {
+            // it should be set by the gas simulator
+            throw new Error("EVM gas simulation outcome is not set");
+          }
+
+          uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
+
+          const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
 
           let txs: (
             | (MakeTxResponse & {
@@ -573,14 +605,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               })
             | UnsignedEVMTransactionWithErc20Approvals
           )[];
-
-          const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
-          const evmSimulateKind = gasSimulator.evmSimulateKind;
-          if (isInChainEVMOnly && evmSimulateKind == null) {
-            // it should be set by the gas simulator
-            throw new Error("EVM gas simulate kind is not set");
-          }
-
           const channels: {
             portId: string;
             channelId: string;
@@ -903,16 +927,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             txs = _txs;
           } catch (e) {
             setCalculatingTxError(e);
-            setIsTxLoading(false);
+            uiConfigStore.ibcSwapConfig.setIsSwapLoading(false);
             return;
           }
 
           setCalculatingTxError(undefined);
-
-          const selectedKeyInfo = keyRingStore.selectedKeyInfo;
-          if (!selectedKeyInfo) {
-            throw new Error("selectedKeyInfo is undefined");
-          }
 
           // prepare txs to execute
           const vaultId = selectedKeyInfo.id;
@@ -1027,11 +1046,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }
 
           const executableChainIds = [inChainId];
-
           const backgroundTxs: (BackgroundTx & {
             status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
           })[] = [];
-
           const requiresMultipleTxs = txs.length > 1;
 
           // find the index of the tx to be recorded as history
@@ -1046,7 +1063,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             if ("send" in tx) {
               const msgs = await tx.msgs();
 
-              const backgroundTx: BackgroundTx & {
+              const backgroundTx: CosmosBackgroundTx & {
                 status:
                   | BackgroundTxStatus.PENDING
                   | BackgroundTxStatus.CONFIRMED;
@@ -1059,6 +1076,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   protoMsgs: msgs.protoMsgs,
                   rlpTypes: msgs.rlpTypes,
                   memo: swapConfigs.memoConfig.memo,
+                  fee:
+                    txIndex === 0
+                      ? swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
+                        swapConfigs.feeConfig.toStdFee()
+                      : undefined,
                 },
                 // NOTE: Only the first transaction contains fee type and fee currency denom.
                 // A Cosmos transaction can contain multiple messages, so in the case of multi-tx routes,
@@ -1077,9 +1099,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               };
 
               if (requiresMultipleTxs || isHardwareWallet) {
-                // check chain id is in executableChainIds and it's the first tx
-                // if not, skip signing
-                // if so, sign the tx (only sign the tx and serialize it to signedTx)
+                // Check if the tx is executable and it's the first tx
                 if (
                   executableChainIds.includes(backgroundTx.chainId) &&
                   txIndex === 0
@@ -1095,15 +1115,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     }
                   );
 
-                  // 서명 화면에서 빠져나오기
-                  // TODO: 이게 맞냐
+                  // Navigate back to escape the sign page
                   navigate(-1);
 
                   backgroundTx.signedTx = Buffer.from(result.tx).toString(
                     "base64"
                   );
                 }
-              } else {
+              } else if (shouldTopUp) {
                 // TODO: top-up이 필요한데 서명페이지까지 가지 않는 경우에 대한 처리
               }
 
@@ -1167,7 +1186,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵한다.
                 if (
                   isFirstAndApprovalTx &&
-                  evmSimulateKind === EVMGasSimulateKind.APPROVAL_ONLY_SIMULATED
+                  evmSimulationOutcome ===
+                    EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
                 ) {
                   const { maxFeePerGas, maxPriorityFeePerGas, gasPrice } =
                     swapConfigs.feeConfig.getEIP1559TxFees(
@@ -1280,7 +1300,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   continue;
                 }
 
-                if (requiresMultipleTxs || isHardwareWallet) {
+                if (
+                  requiresMultipleTxs ||
+                  isHardwareWallet ||
+                  gasSimulator.evmSimulationOutcome ===
+                    EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
+                ) {
                   /**
                    * {
                    *   "code": -32000,
@@ -1295,13 +1320,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                   let gasLimit: number;
                   if (
-                    evmSimulateKind === EVMGasSimulateKind.TX_SIMULATED &&
+                    evmSimulationOutcome ===
+                      EvmGasSimulationOutcome.TX_SIMULATED &&
                     evmTxs.length === 1
                   ) {
                     gasLimit = swapConfigs.gasConfig.gas;
                   } else if (
-                    evmSimulateKind ===
-                      EVMGasSimulateKind.TX_BUNDLE_SIMULATED &&
+                    evmSimulationOutcome ===
+                      EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED &&
                     evmTxs.length === 2
                   ) {
                     if (evmTxIndex === 0) {
@@ -1584,7 +1610,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               ""
             );
           } finally {
-            setIsTxLoading(false);
+            uiConfigStore.ibcSwapConfig.setIsSwapLoading(false);
           }
         }
       }}
@@ -1827,7 +1853,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Gutter size="0.75rem" />
 
-        {isOneClickSwapDisabled ? (
+        {oneClickSwapDisabled ? (
           <Button
             type="submit"
             disabled={
@@ -1846,7 +1872,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              isTxLoading ||
+              uiConfigStore.ibcSwapConfig.isSwapLoading ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
           />
@@ -1873,7 +1899,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              isTxLoading ||
+              uiConfigStore.ibcSwapConfig.isSwapLoading ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
             onHoldStart={() => setIsButtonHolding(true)}

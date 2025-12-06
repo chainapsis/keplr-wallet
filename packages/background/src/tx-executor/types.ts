@@ -1,5 +1,5 @@
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, StdFee } from "@keplr-wallet/types";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import { Msg } from "@keplr-wallet/types";
 
@@ -57,6 +57,7 @@ export interface CosmosBackgroundTx extends BackgroundTxBase {
       }>
     >;
 
+    fee?: StdFee;
     memo?: string;
   };
 }

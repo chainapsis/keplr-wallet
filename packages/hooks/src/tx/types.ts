@@ -1,6 +1,6 @@
 import {
   AppCurrency,
-  EVMGasSimulateKind,
+  EvmGasSimulationOutcome,
   FeeCurrency,
   StdFee,
 } from "@keplr-wallet/types";
@@ -151,7 +151,7 @@ export interface IGasSimulator {
   setGasAdjustmentValue(gasAdjustment: string | number): void;
 
   // Optional EVM gas simulation metadata
-  evmSimulateKind?: EVMGasSimulateKind;
+  evmSimulationOutcome?: EvmGasSimulationOutcome;
 
   uiProperties: UIProperties;
 }

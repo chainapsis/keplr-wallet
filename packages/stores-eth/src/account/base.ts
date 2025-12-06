@@ -2,7 +2,7 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
   ERC20Currency,
-  EVMGasSimulateKind,
+  EvmGasSimulationOutcome,
   EthSignType,
   EthTxReceipt,
   JsonRpcResponse,
@@ -249,7 +249,7 @@ export class EthereumAccountBase {
     if (!erc20ApprovalTxs || erc20ApprovalTxs?.length === 0) {
       const result = await this.simulateGas(sender, unsignedTx);
       return {
-        kind: EVMGasSimulateKind.TX_SIMULATED,
+        outcome: EvmGasSimulationOutcome.TX_SIMULATED,
         gasUsed: result.gasUsed,
       };
     }
@@ -304,7 +304,7 @@ export class EthereumAccountBase {
       );
 
       return {
-        kind: EVMGasSimulateKind.TX_BUNDLE_SIMULATED,
+        outcome: EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED,
         gasUsed: result.gasUsed,
         erc20ApprovalGasUsed: erc20ApprovalSimResult.gasUsed,
       };
@@ -312,7 +312,7 @@ export class EthereumAccountBase {
       console.error("Failed to simulate gas with pending ERC20 approval", e);
 
       return {
-        kind: EVMGasSimulateKind.APPROVAL_ONLY_SIMULATED,
+        outcome: EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED,
         erc20ApprovalGasUsed: erc20ApprovalSimResult.gasUsed,
       };
     }

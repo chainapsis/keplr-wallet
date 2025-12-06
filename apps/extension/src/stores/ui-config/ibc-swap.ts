@@ -27,6 +27,9 @@ export class IBCSwapConfig {
   @observable
   protected _celestiaDisabled: boolean = false;
 
+  @observable
+  protected _isSwapLoading: boolean = false;
+
   constructor(
     kvStore: KVStore,
     protected readonly chainStore: ChainStore,
@@ -242,5 +245,14 @@ export class IBCSwapConfig {
 
   get celestiaDisabled(): boolean {
     return this._celestiaDisabled;
+  }
+
+  get isSwapLoading(): boolean {
+    return this._isSwapLoading;
+  }
+
+  @action
+  setIsSwapLoading(isLoading: boolean) {
+    this._isSwapLoading = isLoading;
   }
 }

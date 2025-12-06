@@ -1,5 +1,5 @@
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { EVMGasSimulateKind } from "@keplr-wallet/types";
+import { EvmGasSimulationOutcome } from "@keplr-wallet/types";
 
 export type UnsignedEVMTransaction = UnsignedTransaction;
 
@@ -25,7 +25,7 @@ export interface AccountStateDiffTracerResult {
 }
 
 export interface SimulateGasWithPendingErc20ApprovalResult {
-  kind: EVMGasSimulateKind;
+  outcome: EvmGasSimulationOutcome;
   gasUsed?: number;
   erc20ApprovalGasUsed?: number;
 }

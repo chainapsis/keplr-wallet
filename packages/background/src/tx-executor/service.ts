@@ -707,30 +707,33 @@ export class BackgroundTxExecutorService {
       true
     );
 
-    const { gasUsed } = await simulateCosmosTx(
-      signer,
-      chainInfo,
-      protoMsgs,
-      pseudoFee,
-      memo
-    );
+    let fee = tx.txData.fee; // use provided fee if exists
+    if (fee == null) {
+      const { gasUsed } = await simulateCosmosTx(
+        signer,
+        chainInfo,
+        protoMsgs,
+        pseudoFee,
+        memo
+      );
 
-    const feeCurrency =
-      chainInfo.feeCurrencies.find(
-        (currency) => currency.coinMinimalDenom === tx.feeCurrencyDenom
-      ) ?? chainInfo.currencies[0];
+      const feeCurrency =
+        chainInfo.feeCurrencies.find(
+          (currency) => currency.coinMinimalDenom === tx.feeCurrencyDenom
+        ) ?? chainInfo.currencies[0];
 
-    const { gasPrice } = await getCosmosGasPrice(
-      chainInfo,
-      tx.feeType ?? "average",
-      feeCurrency
-    );
-    const fee = calculateCosmosStdFee(
-      feeCurrency,
-      gasUsed,
-      gasPrice,
-      chainInfo.features
-    );
+      const { gasPrice } = await getCosmosGasPrice(
+        chainInfo,
+        tx.feeType ?? "average",
+        feeCurrency
+      );
+      fee = calculateCosmosStdFee(
+        feeCurrency,
+        gasUsed,
+        gasPrice,
+        chainInfo.features
+      );
+    }
 
     const signDoc = prepareSignDocForAminoSigning({
       chainInfo,

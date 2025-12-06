@@ -13,7 +13,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
-import { Coin, EVMGasSimulateKind, StdFee } from "@keplr-wallet/types";
+import { Coin, EvmGasSimulationOutcome, StdFee } from "@keplr-wallet/types";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
@@ -42,7 +42,8 @@ class GasSimulatorState {
 
   // Optional EVM gas simulation metadata for the most recent run (if any).
   @observable.ref
-  protected _recentEvmSimulateKind: EVMGasSimulateKind | undefined = undefined;
+  protected _recentEvmSimulationOutcome: EvmGasSimulationOutcome | undefined =
+    undefined;
 
   constructor() {
     makeObservable(this);
@@ -111,13 +112,13 @@ class GasSimulatorState {
     this._error = error;
   }
 
-  get recentEvmSimulateKind(): EVMGasSimulateKind | undefined {
-    return this._recentEvmSimulateKind;
+  get recentEvmSimulationOutcome(): EvmGasSimulationOutcome | undefined {
+    return this._recentEvmSimulationOutcome;
   }
 
   @action
-  setRecentEvmSimulateKind(kind: EVMGasSimulateKind | undefined) {
-    this._recentEvmSimulateKind = kind;
+  setRecentEvmSimulationOutcome(outcome: EvmGasSimulationOutcome | undefined) {
+    this._recentEvmSimulationOutcome = outcome;
   }
 
   static isZeroFee(amount: readonly Coin[] | undefined): boolean {
@@ -270,10 +271,10 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     return undefined;
   }
 
-  get evmSimulateKind(): EVMGasSimulateKind | undefined {
+  get evmSimulationOutcome(): EvmGasSimulationOutcome | undefined {
     const key = this.storeKey;
     const state = this.getState(key);
-    return state.recentEvmSimulateKind;
+    return state.recentEvmSimulationOutcome;
   }
 
   get gasAdjustment(): number {
@@ -405,9 +406,9 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
           .then(
             (res: {
               gasUsed: number;
-              evmSimulateKind?: EVMGasSimulateKind;
+              evmSimulationOutcome?: EvmGasSimulationOutcome;
             }) => {
-              const { gasUsed, evmSimulateKind } = res;
+              const { gasUsed, evmSimulationOutcome } = res;
 
               // Changing the gas in the gas config definitely will make the reaction to the fee config,
               // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
@@ -418,13 +419,13 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
                 Math.abs(state.recentGasEstimated - gasUsed) /
                   state.recentGasEstimated >
                   0.02 ||
-                evmSimulateKind !== state.recentEvmSimulateKind;
+                evmSimulationOutcome !== state.recentEvmSimulationOutcome;
 
               if (shouldUpdate) {
                 // Update gas and EVM simulate kind atomically so they always
                 // represent the same simulation context.
                 state.setRecentGasEstimated(gasUsed);
-                state.setRecentEvmSimulateKind(evmSimulateKind);
+                state.setRecentEvmSimulationOutcome(evmSimulationOutcome);
               }
 
               state.setOutdatedCosmosSdk(false);
