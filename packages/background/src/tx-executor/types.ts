@@ -21,10 +21,11 @@ export enum BackgroundTxType {
 
 // Base transaction interface
 interface BackgroundTxBase {
-  status: BackgroundTxStatus; // mutable while executing
   readonly chainId: string;
-  readonly feeType?: BackgroundTxFeeType;
-  readonly feeCurrencyDenom?: string;
+
+  status: BackgroundTxStatus;
+  feeType?: BackgroundTxFeeType;
+  feeCurrencyDenom?: string;
 
   // Cosmos: base64 encoded, EVM: hex encoded (0x prefix)
   signedTx?: string;
