@@ -5,6 +5,23 @@ import { Dec } from "@keplr-wallet/unit";
 import { BackgroundTxFeeType } from "../types";
 import { JsonRpcResponse } from "@keplr-wallet/types";
 
+const ETH_FEE_HISTORY_REWARD_PERCENTILES = [25, 50, 75];
+const ETH_FEE_SETTINGS_BY_FEE_TYPE: Record<
+  BackgroundTxFeeType,
+  {
+    percentile: number;
+  }
+> = {
+  low: {
+    percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[0],
+  },
+  average: {
+    percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[1],
+  },
+  high: {
+    percentile: ETH_FEE_HISTORY_REWARD_PERCENTILES[2],
+  },
+};
 const FEE_MULTIPLIERS: Record<BackgroundTxFeeType, number> = {
   low: 1.1,
   average: 1.25,
@@ -35,7 +52,7 @@ export async function fillUnsignedEVMTx(
   const getFeeHistoryRequest = {
     jsonrpc: "2.0",
     method: "eth_feeHistory",
-    params: [20, "latest", [50]],
+    params: [20, "latest", ETH_FEE_HISTORY_REWARD_PERCENTILES],
     id: 3,
   };
 
@@ -114,29 +131,39 @@ export async function fillUnsignedEVMTx(
 
   let maxPriorityFeePerGasDec: Dec | undefined;
   if (feeHistory.reward && feeHistory.reward.length > 0) {
-    // get 50th percentile rewards (index 0 since we requested [50] percentile)
-    const percentileIndex = 0;
-    const rewards = feeHistory.reward
-      .map((block) => block[percentileIndex])
-      .filter((v) => v != null)
-      .map((v) => BigInt(v));
+    const percentile =
+      ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].percentile ??
+      ETH_FEE_HISTORY_REWARD_PERCENTILES[1];
+    const percentileIndex =
+      ETH_FEE_HISTORY_REWARD_PERCENTILES.indexOf(percentile);
 
-    if (rewards.length > 0) {
-      const sum = rewards.reduce((acc, x) => acc + x, BigInt(0));
-      const mean = sum / BigInt(rewards.length);
+    if (percentileIndex >= 0) {
+      const rewards = feeHistory.reward
+        .map((block) => block[percentileIndex])
+        .filter((v) => v != null)
+        .map((v) => BigInt(v));
 
-      const sortedRewards = [...rewards].sort((a, b) =>
-        a < b ? -1 : a > b ? 1 : 0
-      );
-      const median = sortedRewards[Math.floor(sortedRewards.length / 2)];
+      if (rewards.length > 0) {
+        const sum = rewards.reduce((acc, x) => acc + x, BigInt(0));
+        const mean = sum / BigInt(rewards.length);
 
-      // use 1 Gwei deviation threshold to decide between mean and median
-      const deviationThreshold = BigInt(1 * 10 ** 9); // 1 Gwei
-      const deviation = mean > median ? mean - median : median - mean;
-      const pick =
-        deviation > deviationThreshold ? (mean > median ? mean : median) : mean;
+        const sortedRewards = [...rewards].sort((a, b) =>
+          a < b ? -1 : a > b ? 1 : 0
+        );
+        const median = sortedRewards[Math.floor(sortedRewards.length / 2)];
 
-      maxPriorityFeePerGasDec = new Dec(pick);
+        // use 1 Gwei deviation threshold to decide between mean and median
+        const deviationThreshold = BigInt(1 * 10 ** 9); // 1 Gwei
+        const deviation = mean > median ? mean - median : median - mean;
+        const pick =
+          deviation > deviationThreshold
+            ? mean > median
+              ? mean
+              : median
+            : mean;
+
+        maxPriorityFeePerGasDec = new Dec(pick);
+      }
     }
   }
 
@@ -169,8 +196,8 @@ export async function fillUnsignedEVMTx(
   // Calculate maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas
   const baseFeePerGasDec = new Dec(BigInt(latestBlock.baseFeePerGas));
   const maxFeePerGasDec = baseFeePerGasDec
-    .add(maxPriorityFeePerGasDec)
-    .mul(multiplier);
+    .mul(multiplier)
+    .add(maxPriorityFeePerGasDec);
   const maxFeePerGasHex = `0x${maxFeePerGasDec
     .truncate()
     .toBigNumber()
