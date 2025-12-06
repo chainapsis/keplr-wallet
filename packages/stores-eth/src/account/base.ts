@@ -349,6 +349,76 @@ export class EthereumAccountBase {
     return l1Fee;
   }
 
+  async simulateOpStackL1FeeWithPendingErc20Approval(
+    unsignedTx: UnsignedEVMTransactionWithErc20Approvals
+  ): Promise<string> {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
+      throw new Error("The chain isn't built with OP Stack");
+    }
+
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
+
+    const txsToSimulate: UnsignedTransaction[] = [
+      {
+        to: unsignedTx.to,
+        gasLimit: unsignedTx.gasLimit,
+        value: unsignedTx.value,
+        data: unsignedTx.data,
+        chainId: unsignedTx.chainId,
+      },
+    ];
+
+    // If there's a pending ERC20 approval, add it to the batch
+    const erc20Approval = unsignedTx.requiredErc20Approvals?.[0];
+    if (erc20Approval != null) {
+      txsToSimulate.push({
+        to: erc20Approval.tokenAddress,
+        data: erc20ContractInterface.encodeFunctionData("approve", [
+          erc20Approval.spender,
+          hexValue(BigInt(erc20Approval.amount)),
+        ]),
+        chainId: unsignedTx.chainId,
+      });
+    }
+
+    const batchRequests = txsToSimulate.map((tx, index) => ({
+      jsonrpc: "2.0" as const,
+      method: "eth_call",
+      params: [
+        {
+          to: opStackGasPriceOracleProxyAddress,
+          data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
+            serialize(tx),
+          ]),
+        },
+        "latest",
+      ],
+      id: index + 1,
+    }));
+
+    const response = await simpleFetch<JsonRpcResponse<string>[]>(evmInfo.rpc, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(batchRequests),
+    });
+
+    let totalL1Fee = BigInt(0);
+    for (const result of response.data) {
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      if (result.result) {
+        totalL1Fee += BigInt(result.result);
+      }
+    }
+
+    return "0x" + totalL1Fee.toString(16);
+  }
+
   makeSendTokenTx({
     currency,
     amount,

@@ -342,18 +342,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     .getChain(inChainId)
                     .features.includes("op-stack-l1-data-fee")
                 ) {
-                  // TODO: bundle인 경우에 대한 L1 data fee 계산...
+                  // L1 data fee는 직렬화된 tx 데이터 크기 기반이므로
+                  // approval 상태와 관계없이 계산 가능
                   return ethereumAccount
-                    .simulateOpStackL1Fee({
-                      to: tx?.to,
+                    .simulateOpStackL1FeeWithPendingErc20Approval({
+                      ...tx,
                       gasLimit: gasUsed,
-                      value: tx?.value,
-                      data: tx?.data,
-                      chainId: tx?.chainId,
                     })
-                    .then((l1DataFee) => {
+                    .then((totalL1DataFee: string) => {
+                      // Do not sum the L1 data fee with the gas used,
+                      // because it should be treated as a separate fee.
                       swapConfigs.feeConfig.setL1DataFee(
-                        new Dec(BigInt(l1DataFee))
+                        new Dec(BigInt(totalL1DataFee))
                       );
                       return {
                         gasUsed: totalGasUsed,

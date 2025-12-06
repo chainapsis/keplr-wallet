@@ -359,7 +359,6 @@ export const EthereumSignTxView: FunctionComponent<{
         const { to, gasLimit, value, data, chainId }: UnsignedTransaction =
           JSON.parse(Buffer.from(message).toString("utf8"));
 
-        // TODO: bundle simulation인 경우에 대한 처리 필요
         const l1DataFee = await ethereumAccount.simulateOpStackL1Fee({
           to,
           gasLimit,
