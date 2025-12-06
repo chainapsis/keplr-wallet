@@ -29,6 +29,10 @@ export class IBCSwapConfig {
 
   @observable
   protected _isSwapLoading: boolean = false;
+  @observable
+  protected _totalSignatureCount: number | undefined = undefined;
+  @observable
+  protected _completedSignatureCount: number | undefined = undefined;
 
   constructor(
     kvStore: KVStore,
@@ -254,5 +258,32 @@ export class IBCSwapConfig {
   @action
   setIsSwapLoading(isLoading: boolean) {
     this._isSwapLoading = isLoading;
+  }
+
+  get totalSignatureCount(): number | undefined {
+    return this._totalSignatureCount;
+  }
+
+  get completedSignatureCount(): number | undefined {
+    return this._completedSignatureCount;
+  }
+
+  @action
+  setSignatureProgress(total: number, completed: number) {
+    this._totalSignatureCount = total;
+    this._completedSignatureCount = completed;
+  }
+
+  @action
+  incrementCompletedSignature() {
+    if (this._completedSignatureCount != null) {
+      this._completedSignatureCount += 1;
+    }
+  }
+
+  @action
+  resetSignatureProgress() {
+    this._totalSignatureCount = undefined;
+    this._completedSignatureCount = undefined;
   }
 }
