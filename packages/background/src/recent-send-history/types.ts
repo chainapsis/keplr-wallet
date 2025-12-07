@@ -1,7 +1,16 @@
-import { AppCurrency } from "@keplr-wallet/types";
+import { AppCurrency, SwapProvider } from "@keplr-wallet/types";
 
-export interface RecentSendHistory {
-  timestamp: number;
+export { SwapProvider };
+
+// ============================================================================
+// RecentSend History Types
+// ============================================================================
+
+/**
+ * Base interface for RecentSendHistory data.
+ * Contains common fields between RecentSendHistoryData and RecentSendHistory.
+ */
+export interface RecentSendHistoryBase {
   sender: string;
   recipient: string;
   amount: {
@@ -9,7 +18,6 @@ export interface RecentSendHistory {
     denom: string;
   }[];
   memo: string;
-
   ibcChannels:
     | {
         portId: string;
@@ -19,6 +27,118 @@ export interface RecentSendHistory {
     | undefined;
 }
 
+/**
+ * Data required to record a recent send history.
+ * Used by tx-executor when creating history entries.
+ */
+export interface RecentSendHistoryData extends RecentSendHistoryBase {
+  readonly chainId: string;
+  readonly historyType: string;
+}
+
+/**
+ * Stored recent send history record.
+ */
+export interface RecentSendHistory extends RecentSendHistoryBase {
+  timestamp: number;
+}
+
+// ============================================================================
+// IBC History Types (Transfer & Swap)
+// ============================================================================
+
+/**
+ * Data required to record an IBC transfer history.
+ * Used by tx-executor when creating history entries.
+ */
+export interface IBCTransferHistoryData {
+  readonly historyType: string;
+  readonly sourceChainId: string;
+  readonly destinationChainId: string;
+  readonly channels: {
+    portId: string;
+    channelId: string;
+    counterpartyChainId: string;
+  }[];
+  readonly sender: string;
+  readonly recipient: string;
+  readonly amount: {
+    readonly amount: string;
+    readonly denom: string;
+  }[];
+  readonly memo: string;
+  readonly notificationInfo: {
+    readonly currencies: AppCurrency[];
+  };
+}
+
+/**
+ * Data required to record an IBC swap history.
+ * Used by tx-executor when creating history entries.
+ */
+export interface IBCSwapHistoryData {
+  readonly swapType: "amount-in" | "amount-out";
+  readonly chainId: string;
+  readonly destinationChainId: string;
+  readonly sender: string;
+  readonly amount: {
+    amount: string;
+    denom: string;
+  }[];
+  readonly memo: string;
+  readonly ibcChannels: {
+    portId: string;
+    channelId: string;
+    counterpartyChainId: string;
+  }[];
+  readonly destinationAsset: {
+    chainId: string;
+    denom: string;
+  };
+  readonly swapChannelIndex: number;
+  readonly swapReceiver: string[];
+  readonly notificationInfo: {
+    currencies: AppCurrency[];
+  };
+}
+
+/**
+ * Stored IBC transfer history record (subset of IBCHistory).
+ */
+export interface IBCTransferHistory {
+  recipient: string;
+}
+
+/**
+ * Stored IBC swap history record (subset of IBCHistory).
+ */
+export interface IBCSwapHistory {
+  swapType: "amount-in" | "amount-out";
+  swapChannelIndex: number;
+  swapReceiver: string[];
+
+  destinationAsset: {
+    chainId: string;
+    denom: string;
+  };
+
+  resAmount: {
+    amount: string;
+    denom: string;
+  }[][];
+
+  swapRefundInfo?: {
+    chainId: string;
+    amount: {
+      amount: string;
+      denom: string;
+    }[];
+  };
+}
+
+/**
+ * Stored IBC history record (union of IBCTransferHistory and IBCSwapHistory).
+ */
 export type IBCHistory = {
   id: string;
   chainId: string;
@@ -67,19 +187,97 @@ export type IBCHistory = {
   };
 } & (IBCTransferHistory | IBCSwapHistory);
 
-export interface IBCTransferHistory {
-  recipient: string;
+// ============================================================================
+// SwapV2 History Types
+// ============================================================================
+
+export enum SwapV2RouteStepStatus {
+  IN_PROGRESS = "in_progress",
+  SUCCESS = "success",
+  FAILED = "failed",
 }
 
-export interface IBCSwapHistory {
-  swapType: "amount-in" | "amount-out";
-  swapChannelIndex: number;
-  swapReceiver: string[];
+export enum SwapV2TxStatus {
+  IN_PROGRESS = "in_progress",
+  SUCCESS = "success",
+  PARTIAL_SUCCESS = "partial_success",
+  FAILED = "failed",
+}
 
+export interface SwapV2TxStatusStep {
+  chain_id: string;
+  status: SwapV2RouteStepStatus;
+  tx_hash?: string;
+  explorer_url?: string;
+}
+
+export interface SwapV2AssetLocation {
+  chain_id: string;
+  denom: string;
+  amount: string;
+}
+
+export interface SwapV2TxStatusRequest {
+  provider: SwapProvider;
+  from_chain: string;
+  to_chain?: string; // optional, used by Squid
+  tx_hash: string;
+}
+
+export interface SwapV2TxStatusResponse {
+  provider: SwapProvider;
+  status: SwapV2TxStatus;
+  steps: SwapV2TxStatusStep[];
+  asset_location?: SwapV2AssetLocation | null;
+}
+
+/**
+ * Base interface for SwapV2History data.
+ * Contains common fields between SwapV2HistoryData and SwapV2History.
+ */
+export interface SwapV2HistoryBase {
+  fromChainId: string;
+  toChainId: string;
+  provider: SwapProvider;
+  sender: string;
+  recipient: string;
+  amount: {
+    amount: string;
+    denom: string;
+  }[];
+  simpleRoute: {
+    isOnlyEvm: boolean;
+    chainId: string;
+    receiver: string;
+  }[];
   destinationAsset: {
     chainId: string;
     denom: string;
+    expectedAmount: string;
   };
+  routeDurationSeconds: number;
+  notificationInfo: {
+    currencies: AppCurrency[];
+  };
+  isOnlyUseBridge?: boolean;
+}
+
+/**
+ * Data required to record a SwapV2 history.
+ * Used by tx-executor when creating history entries.
+ */
+export type SwapV2HistoryData = SwapV2HistoryBase;
+
+/**
+ * Stored SwapV2 history record.
+ */
+export interface SwapV2History extends SwapV2HistoryBase {
+  id: string;
+  timestamp: number;
+  txHash: string;
+
+  status: SwapV2TxStatus;
+  routeIndex: number; // 현재까지 진행된 라우팅 인덱스
 
   resAmount: {
     amount: string;
@@ -93,7 +291,24 @@ export interface IBCSwapHistory {
       denom: string;
     }[];
   };
+
+  backgroundExecutionId?: string;
+
+  trackDone?: boolean; // status tracking이 완료되었는지 여부
+  trackError?: string; // status tracking 중 에러가 발생했는지 여부
+  finalizationRetryCount?: number; // success/partial_success/failed 상태에서 currentStep이 진행 중일 때 추가 polling 횟수
+
+  notified?: boolean;
+
+  hidden?: boolean;
+  // 멀티 tx swap의 경우, 모든 트랜잭션이 서명되지 않아 hidden 처리되었더라도
+  // 다음 트랜잭션 처리가 필요한 경우 강제로 다시 display하기 위한 플래그
+  requiresNextTransaction?: boolean;
 }
+
+// ============================================================================
+// Skip History Types (Legacy)
+// ============================================================================
 
 export type SkipHistory = {
   id: string;
@@ -149,10 +364,23 @@ export type SkipHistory = {
   isOnlyUseBridge?: boolean; // send bridge 페이지에서 swap코드를 사용 하고 있기 때문에 브릿지만 사용했는지 여부 필요함
 };
 
+// ============================================================================
+// History Data Union Type
+// ============================================================================
+
 /**
- * This file is a temporary file to store types that are required for tracking the status of a transaction related to the skip-go.
- * Reference: https://github.com/skip-mev/skip-go/blob/staging/packages/client/src/types/lifecycle.ts
+ * Union type of all history data types.
  */
+export type HistoryData =
+  | RecentSendHistoryData
+  | IBCTransferHistoryData
+  | IBCSwapHistoryData
+  | SwapV2HistoryData;
+
+// ============================================================================
+// Skip/Bridge Tracking Types
+// Reference: https://github.com/skip-mev/skip-go/blob/staging/packages/client/src/types/lifecycle.ts
+// ============================================================================
 
 export type StatusState =
   | "STATE_UNKNOWN"
@@ -476,111 +704,3 @@ export type TransferEvent =
   | { go_fast_transfer: GoFastTransferInfo }
   | { stargate_transfer: StargateTransferInfo }
   | { eureka_transfer: EurekaTransferInfo };
-
-export enum SwapV2RouteStepStatus {
-  IN_PROGRESS = "in_progress",
-  SUCCESS = "success",
-  FAILED = "failed",
-}
-
-export enum SwapV2TxStatus {
-  IN_PROGRESS = "in_progress",
-  SUCCESS = "success",
-  PARTIAL_SUCCESS = "partial_success",
-  FAILED = "failed",
-}
-
-export interface SwapV2TxStatusStep {
-  chain_id: string;
-  status: SwapV2RouteStepStatus;
-  tx_hash?: string;
-  explorer_url?: string;
-}
-
-export interface SwapV2AssetLocation {
-  chain_id: string;
-  denom: string;
-  amount: string;
-}
-
-// NOTE: duplicate with @keplr-wallet/stores-internal/src/swap/types.ts
-export enum SwapProvider {
-  SKIP = "skip",
-  SQUID = "squid",
-}
-
-export interface SwapV2TxStatusRequest {
-  provider: SwapProvider;
-  from_chain: string;
-  to_chain?: string; // optional, used by Squid
-  tx_hash: string;
-}
-
-export interface SwapV2TxStatusResponse {
-  provider: SwapProvider;
-  status: SwapV2TxStatus;
-  steps: SwapV2TxStatusStep[];
-  asset_location?: SwapV2AssetLocation | null;
-}
-
-export interface SwapV2History {
-  id: string;
-  fromChainId: string;
-  toChainId: string;
-  provider: SwapProvider;
-  timestamp: number;
-  sender: string;
-  recipient: string;
-
-  amount: {
-    amount: string;
-    denom: string;
-  }[]; // [fromChain asset, toChain asset] 형태로 저장
-  txHash: string;
-
-  status: SwapV2TxStatus;
-  simpleRoute: {
-    isOnlyEvm: boolean;
-    chainId: string;
-    receiver: string;
-  }[]; // 세부적인 채널 정보를 제외, 덩어리 경로 정보만 저장
-  routeIndex: number; // 현재까지 진행된 라우팅 인덱스
-  routeDurationSeconds: number; // 라우팅에 걸리는 예상 시간
-
-  destinationAsset: {
-    chainId: string;
-    denom: string;
-    expectedAmount: string;
-  }; // 최종 목적지의 asset 정보
-
-  resAmount: {
-    amount: string;
-    denom: string;
-  }[][];
-
-  swapRefundInfo?: {
-    chainId: string;
-    amount: {
-      amount: string;
-      denom: string;
-    }[];
-  };
-
-  backgroundExecutionId?: string;
-
-  trackDone?: boolean; // status tracking이 완료되었는지 여부
-  trackError?: string; // status tracking 중 에러가 발생했는지 여부
-  finalizationRetryCount?: number; // success/partial_success/failed 상태에서 currentStep이 진행 중일 때 추가 polling 횟수
-
-  notified?: boolean;
-  notificationInfo?: {
-    currencies: AppCurrency[];
-  };
-
-  isOnlyUseBridge?: boolean;
-
-  hidden?: boolean;
-  // 멀티 tx swap의 경우, 모든 트랜잭션이 서명되지 않아 hidden 처리되었더라도
-  // 다음 트랜잭션 처리가 필요한 경우 강제로 다시 display하기 위한 플래그
-  requiresNextTransaction?: boolean;
-}

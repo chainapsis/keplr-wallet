@@ -68,10 +68,7 @@ import { useInsufficientFeeAnalytics } from "../../hooks/analytics/use-insuffici
 import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-options";
 import { useSwapFeeBps } from "./hooks/use-swap-fee-bps";
 import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
-import {
-  RouteStepType,
-  SwapProvider,
-} from "@keplr-wallet/stores-internal/build/swap/types";
+import { RouteStepType, SwapProvider } from "@keplr-wallet/stores-internal";
 import { Button } from "../../components/button";
 import { EvmGasSimulationOutcome, EthTxStatus } from "@keplr-wallet/types";
 // import { useSwapAnalytics } from "./hooks/use-swap-analytics";

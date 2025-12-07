@@ -1,9 +1,22 @@
 import { UnsignedTransaction } from "@ethersproject/transactions";
-import { AppCurrency, StdFee } from "@keplr-wallet/types";
+import { StdFee } from "@keplr-wallet/types";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
 import { Msg } from "@keplr-wallet/types";
+import {
+  RecentSendHistoryData,
+  IBCTransferHistoryData,
+  IBCSwapHistoryData,
+  SwapV2HistoryData,
+} from "../recent-send-history";
 
-import { SwapProvider } from "../recent-send-history";
+export {
+  SwapProvider,
+  RecentSendHistoryData,
+  IBCTransferHistoryData,
+  IBCSwapHistoryData,
+  SwapV2HistoryData,
+  HistoryData,
+} from "../recent-send-history";
 
 // Transaction status
 export enum BackgroundTxStatus {
@@ -114,51 +127,11 @@ export interface UndefinedTxExecution extends TxExecutionBase {
   historyData?: never;
 }
 
-export interface RecentSendHistoryData {
-  readonly chainId: string;
-  readonly historyType: string;
-  readonly sender: string;
-  readonly recipient: string;
-  readonly amount: {
-    readonly amount: string;
-    readonly denom: string;
-  }[];
-  readonly memo: string;
-  ibcChannels:
-    | {
-        portId: string;
-        channelId: string;
-        counterpartyChainId: string;
-      }[]
-    | undefined;
-}
-
 export interface SendTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.SEND;
   historyData?: RecentSendHistoryData;
 
   hasRecordedHistory?: boolean;
-}
-
-export interface IBCTransferHistoryData {
-  readonly historyType: string;
-  readonly sourceChainId: string;
-  readonly destinationChainId: string;
-  readonly channels: {
-    portId: string;
-    channelId: string;
-    counterpartyChainId: string;
-  }[];
-  readonly sender: string;
-  readonly recipient: string;
-  readonly amount: {
-    readonly amount: string;
-    readonly denom: string;
-  }[];
-  readonly memo: string;
-  readonly notificationInfo: {
-    readonly currencies: AppCurrency[];
-  };
 }
 
 export interface IBCTransferTxExecution extends TxExecutionBase {
@@ -168,65 +141,11 @@ export interface IBCTransferTxExecution extends TxExecutionBase {
   historyId?: string;
 }
 
-export interface IBCSwapHistoryData {
-  readonly swapType: "amount-in" | "amount-out";
-  readonly chainId: string;
-  readonly destinationChainId: string;
-  readonly sender: string;
-  readonly amount: {
-    amount: string;
-    denom: string;
-  }[];
-  readonly memo: string;
-  readonly ibcChannels:
-    | {
-        portId: string;
-        channelId: string;
-        counterpartyChainId: string;
-      }[];
-  readonly destinationAsset: {
-    chainId: string;
-    denom: string;
-  };
-  readonly swapChannelIndex: number;
-  readonly swapReceiver: string[];
-  readonly notificationInfo: {
-    currencies: AppCurrency[];
-  };
-}
-
 export interface IBCSwapTxExecution extends TxExecutionBase {
   readonly type: TxExecutionType.IBC_SWAP;
   historyData?: IBCSwapHistoryData;
 
   historyId?: string;
-}
-
-export interface SwapV2HistoryData {
-  readonly fromChainId: string;
-  readonly toChainId: string;
-  readonly provider: SwapProvider;
-  readonly destinationAsset: {
-    chainId: string;
-    denom: string;
-    expectedAmount: string;
-  };
-  readonly simpleRoute: {
-    isOnlyEvm: boolean;
-    chainId: string;
-    receiver: string;
-  }[];
-  readonly sender: string;
-  readonly recipient: string;
-  readonly amount: {
-    readonly amount: string;
-    readonly denom: string;
-  }[];
-  readonly notificationInfo: {
-    currencies: AppCurrency[];
-  };
-  readonly routeDurationSeconds: number;
-  readonly isOnlyUseBridge?: boolean;
 }
 
 export interface SwapV2TxExecution extends TxExecutionBase {
@@ -235,12 +154,6 @@ export interface SwapV2TxExecution extends TxExecutionBase {
 
   historyId?: string;
 }
-
-export type HistoryData =
-  | RecentSendHistoryData
-  | IBCTransferHistoryData
-  | IBCSwapHistoryData
-  | SwapV2HistoryData;
 
 export type ExecutionTypeToHistoryData = {
   [TxExecutionType.SWAP_V2]: SwapV2HistoryData;

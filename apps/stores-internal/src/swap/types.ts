@@ -1,7 +1,5 @@
-export enum SwapProvider {
-  SKIP = "skip",
-  SQUID = "squid",
-}
+import { SwapProvider } from "@keplr-wallet/types";
+export { SwapProvider };
 
 export enum SwapChainType {
   COSMOS = "cosmos",
