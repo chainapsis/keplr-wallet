@@ -1097,10 +1097,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         try {
           // set the signature progress state for multi tx swap or hardware wallet case
-          if (requiresMultipleTxs || isHardwareWallet) {
+          // totalSignatureCount > 1 covers APPROVAL_ONLY_SIMULATED case where txs.length is 1
+          // but approval + swap requires 2 signatures
+          const shouldShowSignatureProgress =
+            requiresMultipleTxs || isHardwareWallet;
+          if (shouldShowSignatureProgress || totalSignatureCount > 1) {
             uiConfigStore.ibcSwapConfig.setSignatureProgress(
               totalSignatureCount,
-              0
+              0,
+              shouldShowSignatureProgress
             );
           }
 
@@ -1157,9 +1162,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       ...(shouldTopUp ? getShouldTopUpSignOptions() : {}),
                     }
                   );
-
-                  // Navigate back to escape the sign page
-                  navigate(-1);
 
                   backgroundTx.signedTx = Buffer.from(result.tx).toString(
                     "base64"
@@ -1347,6 +1349,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     };
                     backgroundTx.txHash = erc20ApprovalTxHash;
 
+                    uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
+
                     evmBackgroundTxs.push(backgroundTx);
                   } else if (requiresMultipleTxs || isHardwareWallet) {
                     let gasLimit: number;
@@ -1410,9 +1414,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       }
                     );
 
-                    // CHECK: huge query가 refetch되는 문제가 있다.
-                    navigate(-1);
-
                     backgroundTx.signedTx = signedTx;
                     backgroundTx.txData = {
                       ...backgroundTx.txData,
@@ -1428,6 +1429,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
               backgroundTxs.push(...evmBackgroundTxs);
             }
+          }
+
+          // Navigate back once for all sign pages to avoid multiple remounts
+          // Sign pages use replace after the first one, so only 1 history entry is added
+          const completedSignatures =
+            uiConfigStore.ibcSwapConfig.completedSignatureCount ?? 0;
+          if (completedSignatures > 0) {
+            navigate(-1);
           }
 
           const executeTxMsg = new RecordAndExecuteTxsMsg(

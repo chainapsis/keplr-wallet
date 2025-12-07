@@ -29,10 +29,14 @@ export class IBCSwapConfig {
 
   @observable
   protected _isSwapLoading: boolean = false;
+
+  // multi tx swap signature progress state
   @observable
   protected _totalSignatureCount: number | undefined = undefined;
   @observable
   protected _completedSignatureCount: number | undefined = undefined;
+  @observable
+  protected _showSignatureProgress: boolean = false;
 
   constructor(
     kvStore: KVStore,
@@ -268,10 +272,15 @@ export class IBCSwapConfig {
     return this._completedSignatureCount;
   }
 
+  get showSignatureProgress(): boolean {
+    return this._showSignatureProgress;
+  }
+
   @action
-  setSignatureProgress(total: number, completed: number) {
+  setSignatureProgress(total: number, completed: number, showInUI: boolean) {
     this._totalSignatureCount = total;
     this._completedSignatureCount = completed;
+    this._showSignatureProgress = showInUI;
   }
 
   @action
@@ -285,5 +294,6 @@ export class IBCSwapConfig {
   resetSignatureProgress() {
     this._totalSignatureCount = undefined;
     this._completedSignatureCount = undefined;
+    this._showSignatureProgress = false;
   }
 }
