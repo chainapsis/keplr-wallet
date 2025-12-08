@@ -46,6 +46,7 @@ import {
 } from "./utils/cosmos";
 import { fillUnsignedEVMTx } from "./utils/evm";
 import { Subscriber, TxExecutableEvent } from "./internal";
+
 export class BackgroundTxExecutorService {
   @observable
   protected recentTxExecutionSeq: number = 0;
@@ -68,8 +69,6 @@ export class BackgroundTxExecutorService {
   }
 
   async init(): Promise<void> {
-    console.log("[TxExecutor] Initializing...");
-
     const recentTxExecutionSeqSaved = await this.kvStore.get<number>(
       "recentTxExecutionSeq"
     );
@@ -84,50 +83,48 @@ export class BackgroundTxExecutorService {
     });
 
     const recentTxExecutionMapSaved = await this.kvStore.get<
-      Record<string, TxExecution>
-    >("recentTxExecutionMap");
+      Record<string, string>
+    >("recentSerializedTxExecutionMap");
     if (recentTxExecutionMapSaved) {
-      console.log(
-        "[TxExecutor] Loaded saved executions:",
-        Object.keys(recentTxExecutionMapSaved).length
-      );
       runInAction(() => {
-        let entries = Object.entries(recentTxExecutionMapSaved);
-        entries = entries.sort(([, a], [, b]) => {
-          return parseInt(a.id) - parseInt(b.id);
-        });
-        for (const [key, value] of entries) {
-          this.recentTxExecutionMap.set(key, value);
+        const entries = Object.entries(recentTxExecutionMapSaved);
+        const sorted = entries
+          .map(([key, value]) => [key, JSON.parse(value)] as const)
+          .sort(([, a], [, b]) => parseInt(a.id) - parseInt(b.id));
+
+        for (const [key, execution] of sorted) {
+          this.recentTxExecutionMap.set(key, execution);
         }
 
         this.cleanupOldExecutions();
       });
     }
     autorun(() => {
-      // Only persist executions that may be blocked (preventAutoSign is true)
-      const persistableExecutions = new Map<string, TxExecution>();
-      for (const [key, value] of this.recentTxExecutionMap) {
-        if (value.preventAutoSign) {
-          persistableExecutions.set(key, value);
+      const js = toJS(this.recentTxExecutionMap);
+      const serialized: Record<string, string> = {};
+      for (const [key, value] of js) {
+        // only persist executions that are blocked or have preventAutoSign set to true
+        if (
+          value.preventAutoSign ||
+          value.status === TxExecutionStatus.BLOCKED
+        ) {
+          serialized[key] = JSON.stringify(value);
         }
       }
-      const js = toJS(persistableExecutions);
-      const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, TxExecution>>(
-        "recentTxExecutionMap",
-        obj
-      );
+
+      this.kvStore
+        .set<Record<string, string>>(
+          "recentSerializedTxExecutionMap",
+          serialized
+        )
+        .catch((e) => {
+          console.error("[TxExecutor] kvStore save failed:", e);
+        });
     });
 
     this.subscriber.subscribe(async ({ executionId, executableChainIds }) => {
-      console.log("[TxExecutor] Subscriber event received:", {
-        executionId,
-        executableChainIds,
-      });
-
       const execution = this.getTxExecution(executionId);
       if (!execution) {
-        console.log("[TxExecutor] Execution not found for id:", executionId);
         return;
       }
 
@@ -136,14 +133,8 @@ export class BackgroundTxExecutorService {
       );
 
       if (newExecutableChainIds.length === 0) {
-        console.log("[TxExecutor] No new executable chain ids");
         return;
       }
-
-      console.log(
-        "[TxExecutor] New executable chain ids:",
-        newExecutableChainIds
-      );
 
       runInAction(() => {
         // update the executable chain ids
@@ -175,17 +166,13 @@ export class BackgroundTxExecutorService {
         execution.vaultId
       );
       if (keyInfo?.type === "ledger" || keyInfo?.type === "keystone") {
-        console.log("[TxExecutor] Hardware wallet detected, skip auto resume");
         return;
       }
 
       // cause new executable chain ids are available, resume the execution
       // CHECK: 현재 활성화되어 있는 vault에서만 실행해야 할까, 아니면 모든 vault에서 실행할 수 있어야 할까?
-      console.log("[TxExecutor] Auto resuming execution:", executionId);
       await this.executeTxs(executionId);
     });
-
-    console.log("[TxExecutor] Initialized");
   }
 
   /**
@@ -207,14 +194,6 @@ export class BackgroundTxExecutorService {
       : ExecutionTypeToHistoryData[T],
     historyTxIndex?: number
   ): Promise<TxExecutionResult> {
-    console.log("[TxExecutor] recordAndExecuteTxs called:", {
-      type,
-      txCount: txs.length,
-      executableChainIds,
-      historyData,
-      historyTxIndex,
-    });
-
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
@@ -224,8 +203,6 @@ export class BackgroundTxExecutorService {
     if (!keyInfo) {
       throw new KeplrError("direct-tx-executor", 102, "Key info not found");
     }
-
-    console.log("[TxExecutor] Key type:", keyInfo.type);
 
     // If any of the transactions are not executable or the key is hardware wallet,
     // set preventAutoSign to true. This also determines if the execution needs persistence.
@@ -259,8 +236,6 @@ export class BackgroundTxExecutorService {
 
     const id = (this.recentTxExecutionSeq++).toString();
 
-    console.log("[TxExecutor] preventAutoSign:", preventAutoSign);
-
     const execution = {
       id,
       status: TxExecutionStatus.PENDING,
@@ -276,7 +251,6 @@ export class BackgroundTxExecutorService {
     } as TxExecution;
 
     this.recentTxExecutionMap.set(id, execution);
-    console.log("[TxExecutor] Execution created with id:", id);
 
     return await this.executeTxs(id);
   }
@@ -290,12 +264,6 @@ export class BackgroundTxExecutorService {
     txIndex?: number,
     signedTx?: string
   ): Promise<TxExecutionResult> {
-    console.log("[TxExecutor] resumeTx called:", {
-      id,
-      txIndex,
-      hasSignedTx: signedTx != null,
-    });
-
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
@@ -314,19 +282,10 @@ export class BackgroundTxExecutorService {
       signedTx?: string;
     }
   ): Promise<TxExecutionResult> {
-    console.log("[TxExecutor] executeTxs started:", { id, options });
-
     const execution = this.getTxExecution(id);
     if (!execution) {
       throw new KeplrError("direct-tx-executor", 105, "Execution not found");
     }
-
-    console.log("[TxExecutor] Current execution state:", {
-      status: execution.status,
-      txIndex: execution.txIndex,
-      txCount: execution.txs.length,
-      executableChainIds: execution.executableChainIds,
-    });
 
     if (execution.status === TxExecutionStatus.PROCESSING) {
       throw new KeplrError(
@@ -341,7 +300,6 @@ export class BackgroundTxExecutorService {
       execution.status === TxExecutionStatus.PENDING ||
       execution.status === TxExecutionStatus.BLOCKED;
     if (!needResume) {
-      console.log("[TxExecutor] No need to resume, status:", execution.status);
       return {
         status: execution.status,
       };
@@ -360,19 +318,12 @@ export class BackgroundTxExecutorService {
       execution.txs.length - 1
     );
 
-    console.log("[TxExecutor] Starting from index:", executionStartIndex);
-
     runInAction(() => {
       execution.status = TxExecutionStatus.PROCESSING;
     });
 
     for (let i = executionStartIndex; i < execution.txs.length; i++) {
       const currentTx = execution.txs[i];
-      console.log(`[TxExecutor] Processing tx[${i}]:`, {
-        chainId: currentTx.chainId,
-        type: currentTx.type,
-        status: currentTx.status,
-      });
 
       const providedSignedTx =
         options?.txIndex != null && i === options.txIndex
@@ -401,8 +352,6 @@ export class BackgroundTxExecutorService {
         }
       });
 
-      console.log(`[TxExecutor] tx[${i}] result:`, result.status);
-
       if (result.status === BackgroundTxStatus.CONFIRMED) {
         continue;
       }
@@ -416,11 +365,9 @@ export class BackgroundTxExecutorService {
        * - The execution should be resumed later when the condition is met.
        */
       if (result.status === BackgroundTxStatus.BLOCKED) {
-        console.log("[TxExecutor] Execution BLOCKED at tx index:", i);
         runInAction(() => {
           execution.status = TxExecutionStatus.BLOCKED;
           this.recordHistoryIfNeeded(execution);
-
           // no need to keep the history data anymore
           delete execution.historyData;
         });
@@ -430,7 +377,9 @@ export class BackgroundTxExecutorService {
       }
 
       if (result.status === BackgroundTxStatus.FAILED) {
-        console.log("[TxExecutor] Execution FAILED at tx index:", i);
+        runInAction(() => {
+          execution.status = TxExecutionStatus.FAILED;
+        });
         this.removeTxExecution(id);
 
         return {
@@ -448,7 +397,9 @@ export class BackgroundTxExecutorService {
     }
 
     // if the execution is completed successfully, record the history and remove the execution
-    console.log("[TxExecutor] Execution COMPLETED");
+    runInAction(() => {
+      execution.status = TxExecutionStatus.COMPLETED;
+    });
     this.recordHistoryIfNeeded(execution);
     this.removeTxExecution(id);
 
@@ -469,7 +420,6 @@ export class BackgroundTxExecutorService {
     preventAutoSign: boolean,
     providedSignedTx?: string
   ): Promise<PendingTxExecutionResult> {
-    // Track mutable state locally without touching observable
     let status = tx.status;
     let signedTx = tx.signedTx ?? providedSignedTx;
     let txHash = tx.txHash;
@@ -480,18 +430,11 @@ export class BackgroundTxExecutorService {
       status === BackgroundTxStatus.CONFIRMED ||
       status === BackgroundTxStatus.FAILED
     ) {
-      console.log(`[TxExecutor] tx already in final state:`, status);
       return { status, signedTx, txHash, error };
     }
 
     // Check if blocked
     const isBlocked = !executableChainIds.includes(tx.chainId);
-    console.log(`[TxExecutor] tx blocked check:`, {
-      chainId: tx.chainId,
-      executableChainIds,
-      isBlocked,
-    });
-
     if (isBlocked) {
       return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
     }
@@ -505,7 +448,6 @@ export class BackgroundTxExecutorService {
     try {
       const result = await this.signTx(vaultId, tx);
       signedTx = result.signedTx;
-      console.log(`[TxExecutor] tx signed successfully`);
     } catch (e) {
       console.error(`[TxExecutor] tx signing failed:`, e);
       return {
@@ -518,11 +460,9 @@ export class BackgroundTxExecutorService {
 
     // BROADCASTING
     try {
-      // Create a tx copy with signedTx for broadcast
       const txWithSignedTx = { ...tx, signedTx };
       const result = await this.broadcastTx(txWithSignedTx);
       txHash = result.txHash;
-      console.log(`[TxExecutor] tx broadcasted, txHash:`, txHash);
     } catch (e) {
       console.error(`[TxExecutor] tx broadcast failed:`, e);
       return {
@@ -535,10 +475,8 @@ export class BackgroundTxExecutorService {
 
     // TRACING
     try {
-      // Create a tx copy with txHash for trace
       const txWithHash = { ...tx, txHash };
       const confirmed = await this.traceTx(txWithHash);
-      console.log(`[TxExecutor] tx trace result:`, confirmed);
 
       if (confirmed) {
         status = BackgroundTxStatus.CONFIRMED;
@@ -560,7 +498,6 @@ export class BackgroundTxExecutorService {
       };
     }
 
-    console.log(`[TxExecutor] tx final status:`, status);
     return { status, signedTx, txHash, error };
   }
 
@@ -916,13 +853,7 @@ export class BackgroundTxExecutorService {
 
   @action
   protected recordHistoryIfNeeded(execution: TxExecution): void {
-    console.log("[TxExecutor] recordHistoryIfNeeded:", {
-      type: execution.type,
-      historyId: "historyId" in execution ? execution.historyId : undefined,
-    });
-
     if (execution.type === TxExecutionType.UNDEFINED) {
-      console.log("[TxExecutor] Skip recording history: UNDEFINED type");
       return;
     }
 
@@ -945,16 +876,12 @@ export class BackgroundTxExecutorService {
         }
       );
 
-      console.log("[TxExecutor] SEND history recorded");
       execution.hasRecordedHistory = true;
       return;
     }
 
     if (execution.type === TxExecutionType.IBC_TRANSFER) {
       if (execution.historyId != null || !execution.historyData) {
-        console.log(
-          "[TxExecutor] Skip IBC_TRANSFER history: already recorded or no data"
-        );
         return;
       }
 
@@ -990,16 +917,12 @@ export class BackgroundTxExecutorService {
       );
       this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
 
-      console.log("[TxExecutor] IBC_TRANSFER history recorded, id:", id);
       execution.historyId = id;
       return;
     }
 
     if (execution.type === TxExecutionType.IBC_SWAP) {
       if (execution.historyId != null || !execution.historyData) {
-        console.log(
-          "[TxExecutor] Skip IBC_SWAP history: already recorded or no data"
-        );
         return;
       }
 
@@ -1039,16 +962,12 @@ export class BackgroundTxExecutorService {
       );
       this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
 
-      console.log("[TxExecutor] IBC_SWAP history recorded, id:", id);
       execution.historyId = id;
       return;
     }
 
     if (execution.type === TxExecutionType.SWAP_V2) {
       if (execution.historyId != null || !execution.historyData) {
-        console.log(
-          "[TxExecutor] Skip SWAP_V2 history: already recorded or no data"
-        );
         return;
       }
 
@@ -1069,10 +988,6 @@ export class BackgroundTxExecutorService {
       const requiresNextTransaction = execution.txs.some(
         (tx) => !execution.executableChainIds.includes(tx.chainId)
       );
-      console.log(
-        "[TxExecutor] requiresNextTransaction:",
-        requiresNextTransaction
-      );
 
       const id = this.recentSendHistoryService.recordTxWithSwapV2(
         historyData.fromChainId,
@@ -1091,7 +1006,6 @@ export class BackgroundTxExecutorService {
         execution.id
       );
 
-      console.log("[TxExecutor] SWAP_V2 history recorded, id:", id);
       execution.historyId = id;
     }
   }
@@ -1122,13 +1036,12 @@ export class BackgroundTxExecutorService {
 
   @action
   protected cleanupOldExecutions(): void {
-    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7일
-    const now = Date.now();
-
     const completedStatuses = [
       TxExecutionStatus.COMPLETED,
       TxExecutionStatus.FAILED,
     ];
+
+    const idsToDelete: string[] = [];
 
     for (const [id, execution] of this.recentTxExecutionMap) {
       // 비정상 종료된 PROCESSING 상태 → FAILED 처리
@@ -1137,12 +1050,13 @@ export class BackgroundTxExecutorService {
         execution.status = TxExecutionStatus.FAILED;
       }
 
-      const isOld = now - execution.timestamp > maxAge;
-      const isDone = completedStatuses.includes(execution.status);
-
-      if (isOld && isDone) {
-        this.recentTxExecutionMap.delete(id);
+      if (completedStatuses.includes(execution.status)) {
+        idsToDelete.push(id);
       }
+    }
+
+    for (const id of idsToDelete) {
+      this.recentTxExecutionMap.delete(id);
     }
   }
 }
