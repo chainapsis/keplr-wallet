@@ -52,3 +52,30 @@ export class RevalidateTokenScansMsg extends Message<{
     return RevalidateTokenScansMsg.type();
   }
 }
+
+export class SyncTokenScanInfosMsg extends Message<{
+  vaultId: string;
+  tokenScans: TokenScan[];
+}> {
+  public static type() {
+    return "sync-token-scan-infos";
+  }
+
+  constructor(public readonly vaultId: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.vaultId) {
+      throw new Error("Empty vault id");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return SyncTokenScanInfosMsg.type();
+  }
+}

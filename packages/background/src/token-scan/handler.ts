@@ -5,7 +5,11 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { GetTokenScansMsg, RevalidateTokenScansMsg } from "./messages";
+import {
+  GetTokenScansMsg,
+  RevalidateTokenScansMsg,
+  SyncTokenScanInfosMsg,
+} from "./messages";
 import { TokenScanService } from "./service";
 
 export const getHandler: (service: TokenScanService) => Handler = (
@@ -19,6 +23,11 @@ export const getHandler: (service: TokenScanService) => Handler = (
         return handleRevalidateTokenScansMsg(service)(
           env,
           msg as RevalidateTokenScansMsg
+        );
+      case SyncTokenScanInfosMsg:
+        return handleSyncTokenScanInfosMsg(service)(
+          env,
+          msg as SyncTokenScanInfosMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -39,6 +48,18 @@ const handleRevalidateTokenScansMsg: (
 ) => InternalHandler<RevalidateTokenScansMsg> = (service) => {
   return async (_, msg) => {
     await service.scanAll(msg.vaultId);
+    return {
+      vaultId: msg.vaultId,
+      tokenScans: service.getTokenScans(msg.vaultId),
+    };
+  };
+};
+
+const handleSyncTokenScanInfosMsg: (
+  service: TokenScanService
+) => InternalHandler<SyncTokenScanInfosMsg> = (service) => {
+  return async (_, msg) => {
+    await service.syncPreviousAndCurrentTokenScan(msg.vaultId);
     return {
       vaultId: msg.vaultId,
       tokenScans: service.getTokenScans(msg.vaultId),

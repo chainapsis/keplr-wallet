@@ -14,23 +14,26 @@ import { CairoUint256 } from "starknet";
 import { KeyRingBitcoinService } from "../keyring-bitcoin";
 import { MessageRequester } from "@keplr-wallet/router";
 
+export type TokenScanInfo = {
+  bech32Address?: string;
+  ethereumHexAddress?: string;
+  starknetHexAddress?: string;
+  bitcoinAddress?: {
+    bech32Address: string;
+    paymentType: SupportedPaymentType;
+  };
+  coinType?: number;
+  assets: {
+    currency: AppCurrency;
+    amount: string;
+  }[];
+};
+
 export type TokenScan = {
   chainId: string;
-  infos: {
-    bech32Address?: string;
-    ethereumHexAddress?: string;
-    starknetHexAddress?: string;
-    bitcoinAddress?: {
-      bech32Address: string;
-      paymentType: SupportedPaymentType;
-    };
-    coinType?: number;
-    assets: {
-      currency: AppCurrency;
-      amount: string;
-    }[];
-  }[];
+  infos: TokenScanInfo[];
   linkedChainKey?: string;
+  prevInfos?: TokenScanInfo[];
 };
 
 export class TokenScanService {
@@ -212,7 +215,13 @@ export class TokenScanService {
       return;
     }
 
-    const tokenScan = await this.calculateTokenScan(vaultId, chainId);
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+    const prevScan = prevTokenScans.find((scan) => {
+      return ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier;
+    });
+
+    const tokenScan = await this.calculateTokenScan(vaultId, chainId, prevScan);
 
     if (tokenScan) {
       if (this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)) {
@@ -265,9 +274,20 @@ export class TokenScanService {
 
       promises.push(
         (async () => {
+          const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+          const chainIdentifier = ChainIdHelper.parse(
+            modularChainInfo.chainId
+          ).identifier;
+          const prevScan = prevTokenScans.find((scan) => {
+            return (
+              ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+            );
+          });
+
           const tokenScan = await this.calculateTokenScan(
             vaultId,
-            modularChainInfo.chainId
+            modularChainInfo.chainId,
+            prevScan
           );
 
           if (tokenScan) {
@@ -309,7 +329,8 @@ export class TokenScanService {
 
   protected async calculateTokenScan(
     vaultId: string,
-    chainId: string
+    chainId: string,
+    prevTokenScan?: TokenScan
   ): Promise<TokenScan | undefined> {
     if (this.keyRingService.keyRingStatus !== "unlocked") {
       return;
@@ -422,13 +443,24 @@ export class TokenScanService {
           );
 
           if (res.status === 200) {
-            const assets: TokenScan["infos"][number]["assets"] = [];
+            const assets: TokenScanInfo["assets"] = [];
 
             const balances = res.data?.balances ?? [];
             for (const bal of balances) {
-              const currency = chainInfo.currencies.find(
+              let currency = chainInfo.currencies.find(
                 (cur) => cur.coinMinimalDenom === bal.denom
               );
+
+              // IBC 토큰의 경우 일단 여기서 반환하고
+              // 사용하는 쪽에서 가공한다.
+              if (!currency && bal.denom.startsWith("ibc/")) {
+                currency = {
+                  coinMinimalDenom: bal.denom,
+                  coinDenom: bal.denom,
+                  coinDecimals: chainInfo.stakeCurrency?.coinDecimals ?? 6,
+                };
+              }
+
               if (currency) {
                 // validate
                 if (typeof bal.amount !== "string") {
@@ -436,7 +468,7 @@ export class TokenScanService {
                 }
 
                 const dec = new Dec(bal.amount);
-                if (dec.gt(new Dec(0))) {
+                if (dec.gte(new Dec(0))) {
                   assets.push({
                     currency,
                     amount: bal.amount,
@@ -502,28 +534,26 @@ export class TokenScanService {
               .toBigInt()
               .toString(10);
 
-            if (amount !== "0") {
-              // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
-              //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
-              if (tokenScan.infos.length === 0) {
-                tokenScan.infos.push({
-                  starknetHexAddress,
-                  assets: [
-                    {
-                      currency,
-                      amount,
-                    },
-                  ],
-                });
-              } else {
-                if (
-                  tokenScan.infos[0].starknetHexAddress === starknetHexAddress
-                ) {
-                  tokenScan.infos[0].assets.push({
+            // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
+            //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
+            if (tokenScan.infos.length === 0) {
+              tokenScan.infos.push({
+                starknetHexAddress,
+                assets: [
+                  {
                     currency,
                     amount,
-                  });
-                }
+                  },
+                ],
+              });
+            } else {
+              if (
+                tokenScan.infos[0].starknetHexAddress === starknetHexAddress
+              ) {
+                tokenScan.infos[0].assets.push({
+                  currency,
+                  amount,
+                });
               }
             }
           }
@@ -613,40 +643,53 @@ export class TokenScanService {
           );
         }
 
-        let hasNonZeroAmount = false;
-
-        for (const bitcoinScanInfo of bitcoinScanInfos) {
-          // 우선 main currency만 처리한다.
-          if (
-            bitcoinScanInfo.assets.length > 0 &&
-            bitcoinScanInfo.assets[0].amount !== "0"
-          ) {
-            hasNonZeroAmount = true;
-            break;
-          }
-        }
-
-        // 하나라도 0이 아닌 값이 있으면 연결된 모든 체인에 대해 토큰 스캔 정보를 추가한다.
-        if (hasNonZeroAmount) {
-          tokenScan.infos.push(...bitcoinScanInfos);
-        }
+        tokenScan.infos.push(...bitcoinScanInfos);
       } else {
         const bitcoinScanInfo = await getBitcoinScanInfo(
           vaultId,
           chainId,
-          false
+          true
         );
-
         if (bitcoinScanInfo) {
           tokenScan.infos.push(bitcoinScanInfo);
         }
       }
     }
 
-    if (tokenScan.infos.length > 0) {
-      return tokenScan;
+    if (
+      tokenScan.infos.length > 0 ||
+      (prevTokenScan && prevTokenScan.infos.length > 0)
+    ) {
+      return this.mergeTokenScanWithPrevious(tokenScan, prevTokenScan);
     }
 
     return undefined;
+  }
+
+  syncPreviousAndCurrentTokenScan(vaultId: string) {
+    runInAction(() => {
+      const tokenScans = this.vaultToMap.get(vaultId) ?? [];
+      const updated = tokenScans.map((scan) => ({
+        ...scan,
+        prevInfos: scan.infos,
+      }));
+      this.vaultToMap.set(vaultId, updated);
+    });
+  }
+
+  protected mergeTokenScanWithPrevious(
+    current: TokenScan,
+    prev?: TokenScan
+  ): TokenScan {
+    if (!prev) {
+      return {
+        ...current,
+      };
+    }
+
+    return {
+      ...current,
+      prevInfos: [...prev.infos],
+    };
   }
 }
