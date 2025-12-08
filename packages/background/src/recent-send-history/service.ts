@@ -2162,7 +2162,6 @@ export class RecentSendHistoryService {
     routeDurationSeconds: number = 0,
     txHash: string,
     isOnlyUseBridge?: boolean,
-    requiresNextTransaction?: boolean,
     backgroundExecutionId?: string
   ): string {
     const id = (this.recentSwapV2HistorySeq++).toString();
@@ -2185,10 +2184,9 @@ export class RecentSendHistoryService {
       routeIndex: -1,
       destinationAsset,
       resAmount: [],
-      swapRefundInfo: undefined,
+      assetLocationInfo: undefined,
       notified: undefined,
-      backgroundExecutionId: backgroundExecutionId,
-      requiresNextTransaction,
+      backgroundExecutionId,
     };
 
     this.recentSwapV2HistoryMap.set(id, history);
@@ -2337,7 +2335,7 @@ export class RecentSendHistoryService {
       steps.find((s) => s.status !== SwapV2RouteStepStatus.SUCCESS) ??
       steps[steps.length - 1];
 
-    // calculate routeIndex by matching step.chain_id with simpleRoute
+    // NOTE: The lengths of simpleRoute and steps may differ.
     let updatedRouteIndex = Math.max(0, history.routeIndex);
     if (currentStep.chain_id) {
       const normalizedStepChainId = currentStep.chain_id.toLowerCase();
@@ -2351,19 +2349,28 @@ export class RecentSendHistoryService {
         }
       }
     }
+
+    // update routeIndex
     history.routeIndex = updatedRouteIndex;
 
-    // publish executable chains if routeIndex increased
-    if (updatedRouteIndex > prevRouteIndex && history.backgroundExecutionId) {
+    const publishExecutableChains = (chainIds?: string[]) => {
+      if (!history.backgroundExecutionId) {
+        return;
+      }
+      const executableChainIds =
+        chainIds ?? this.getExecutableChainIdsFromSwapV2History(history);
       this.publisher.publish({
         executionId: history.backgroundExecutionId,
-        executableChainIds:
-          this.getExecutableChainIdsFromSwapV2History(history),
+        executableChainIds,
       });
-    }
+    };
 
     switch (status) {
       case SwapV2TxStatus.IN_PROGRESS:
+        // publish executable chains if routeIndex increased
+        if (updatedRouteIndex > prevRouteIndex) {
+          publishExecutableChains();
+        }
         // Continue polling
         onError();
         break;
@@ -2384,52 +2391,128 @@ export class RecentSendHistoryService {
           // Max retries reached, fall through to finalize
         }
 
-        // Move routeIndex to the end for success
-        if (status === SwapV2TxStatus.SUCCESS) {
+        let executableChainIdsToPublish: string[] | undefined;
+
+        // NOTE: 현재 asset_location은 skip의 interchain operation인 경우에만 주어지는 값이다.
+        if (asset_location) {
+          const chainId = asset_location.chain_id;
+          const evmLikeChainId = Number(chainId);
+          const isEVMChainId =
+            !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+          const chainIdInKeplr = isEVMChainId ? `eip155:${chainId}` : chainId;
+          const denomInKeplr = isEVMChainId
+            ? `erc20:${asset_location.denom}`
+            : asset_location.denom;
+
+          // destination chain에 destination denom으로 도착했으면 완전 성공이므로
+          // assetLocationInfo를 설정하지 않음
+          const isDestinationReached =
+            chainIdInKeplr === history.toChainId &&
+            denomInKeplr === history.destinationAsset.denom;
+
+          if (!isDestinationReached) {
+            /*
+              Determine the type of asset location:
+                - "intermediate": SUCCESS 상태이지만 asset_location이 최종 목적지가 아닌 경우
+                  (예: base USDC -> osmosis OSMO 스왑 시, noble USDC가 먼저 도착하고
+                  이후 noble USDC -> osmosis OSMO로 ibc swap하는 transaction이 필요한 경우)
+                  이 경우 추가 transaction을 실행하거나 현재 받은 자산을 그대로 둘 수 있음
+                - "refund": PARTIAL_SUCCESS/FAILED 상태로 자산이 중간에서 릴리즈된 경우
+                  backgroundExecutionId가 있으면 멀티 transaction 케이스이고 추가 transaction이 필요할 수 있음
+            */
+            const assetLocationType: "refund" | "intermediate" =
+              status === SwapV2TxStatus.SUCCESS && history.backgroundExecutionId
+                ? "intermediate"
+                : "refund";
+
+            history.assetLocationInfo = {
+              chainId: chainIdInKeplr,
+              amount: [
+                {
+                  amount: asset_location.amount,
+                  denom: denomInKeplr,
+                },
+              ],
+              type: assetLocationType,
+            };
+
+            // asset location chain까지 routeIndex가 이동해야 하는지 확인
+            const assetLocationChainIndex = simpleRoute.findIndex(
+              (route) => route.chainId === chainIdInKeplr
+            );
+            if (
+              assetLocationChainIndex !== -1 &&
+              assetLocationChainIndex > updatedRouteIndex
+            ) {
+              updatedRouteIndex = assetLocationChainIndex;
+            }
+            executableChainIdsToPublish =
+              this.getExecutableChainIdsFromSwapV2History(history);
+          } else {
+            // destination에 도달한 경우
+            history.routeIndex = simpleRoute.length - 1;
+            executableChainIdsToPublish =
+              this.getExecutableChainIdsFromSwapV2History(history, true);
+          }
+        } else if (status === SwapV2TxStatus.SUCCESS) {
+          // For SUCCESS without asset_location, move routeIndex to end
           history.routeIndex = simpleRoute.length - 1;
+          executableChainIdsToPublish =
+            this.getExecutableChainIdsFromSwapV2History(history, true);
         }
 
-        // Track destination amount if tx_hash exists
-        if (currentStep.tx_hash && status === SwapV2TxStatus.SUCCESS) {
-          this.trackSwapV2DestinationAssetAmount(
+        // Publish executable chains
+        publishExecutableChains(executableChainIdsToPublish);
+
+        // assetLocationInfo가 있으면 해당 위치, 없으면 최종 destination 사용
+        const targetChainId =
+          history.assetLocationInfo?.chainId ?? history.toChainId;
+        const targetDenom =
+          history.assetLocationInfo?.amount[0]?.denom ??
+          history.destinationAsset.denom;
+
+        // 해당 위치의 tx_hash를 찾아서 자산 추적, 없을 수도 있다.
+        const targetTxHash = (() => {
+          const targetChainIdNormalized = targetChainId
+            .replace("eip155:", "")
+            .toLowerCase();
+          const targetStep = steps.find((s) => {
+            const stepChainId = s.chain_id?.toLowerCase();
+            return stepChainId === targetChainIdNormalized && s.tx_hash;
+          });
+          return targetStep?.tx_hash ?? currentStep.tx_hash;
+        })();
+
+        // CHECK: asset location이 destination이 아니고,
+        // 관련 tx hash가 없는 경우에 자산 정보 업데이트를 어떻게 처리할지 고민해야함
+        if (targetTxHash) {
+          this.trackSwapV2ReleasedAssetAmount(
             id,
-            currentStep.tx_hash,
+            targetTxHash,
+            targetChainId,
+            targetDenom,
             onFulfill
           );
           break;
         }
 
-        // Finalize: check for refunded assets (for partial_success/failed)
+        // Finalize
         history.trackDone = true;
-        if (
-          (status === SwapV2TxStatus.PARTIAL_SUCCESS ||
-            status === SwapV2TxStatus.FAILED) &&
-          asset_location
-        ) {
-          const chainId = asset_location.chain_id;
-          const evmLikeChainId = Number(chainId);
-          const isEVMChainId =
-            !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
-          history.swapRefundInfo = {
-            chainId: isEVMChainId ? `eip155:${chainId}` : chainId,
-            amount: [
-              {
-                amount: asset_location.amount,
-                denom: isEVMChainId
-                  ? `erc20:${asset_location.denom}`
-                  : asset_location.denom,
-              },
-            ],
-          };
-        }
         onFulfill();
         break;
     }
   }
 
-  protected trackSwapV2DestinationAssetAmount(
+  /**
+   * Track released asset amount from tx receipt.
+   * - SUCCESS: destination asset 추적
+   * - FAILED/PARTIAL_SUCCESS + assetLocationInfo: refund된 자산 추적
+   */
+  protected trackSwapV2ReleasedAssetAmount(
     historyId: string,
     txHash: string,
+    targetChainId: string,
+    targetDenom: string,
     onFulfill: () => void
   ) {
     const history = this.getRecentSwapV2History(historyId);
@@ -2438,13 +2521,13 @@ export class RecentSendHistoryService {
       return;
     }
 
-    const chainInfo = this.chainsService.getChainInfo(history.toChainId);
+    const chainInfo = this.chainsService.getChainInfo(targetChainId);
     if (!chainInfo) {
       onFulfill();
       return;
     }
 
-    if (this.chainsService.isEvmChain(history.toChainId)) {
+    if (this.chainsService.isEvmChain(targetChainId)) {
       const evmInfo = chainInfo.evm;
       if (!evmInfo) {
         onFulfill();
@@ -2507,7 +2590,7 @@ export class RecentSendHistoryService {
                         history.resAmount.push([
                           {
                             amount: value.toString(10),
-                            denom: history.destinationAsset.denom,
+                            denom: targetDenom,
                           },
                         ]);
                         isFoundFromCall = true;
@@ -2537,15 +2620,20 @@ export class RecentSendHistoryService {
                   if (log.topics[0] === transferTopic) {
                     const to = "0x" + log.topics[2].slice(26);
                     if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                      const destinationAssetDenom =
-                        history.destinationAsset.denom.replace("erc20:", "");
+                      const expectedAssetDenom = targetDenom.replace(
+                        "erc20:",
+                        ""
+                      );
 
                       const amount = BigInt(log.data).toString(10);
-                      if (log.address === destinationAssetDenom) {
+                      if (
+                        log.address.toLowerCase() ===
+                        expectedAssetDenom.toLowerCase()
+                      ) {
                         history.resAmount.push([
                           {
                             amount,
-                            denom: history.destinationAsset.denom,
+                            denom: targetDenom,
                           },
                         ]);
                       } else {
@@ -2554,14 +2642,15 @@ export class RecentSendHistoryService {
                         // 받을 토큰의 컨트랙트가 아닌 다른 컨트랙트에서 호출된 경우는 Swap을 실패한 것으로 추측
                         // 고로 실제로 받은 토큰의 컨트랙트 주소로 환불 정보에 저장한다.
                         history.trackError = "Swap failed";
-                        history.swapRefundInfo = {
-                          chainId: history.toChainId,
+                        history.assetLocationInfo = {
+                          chainId: targetChainId,
                           amount: [
                             {
                               amount,
                               denom: `erc20:${log.address.toLowerCase()}`,
                             },
                           ],
+                          type: "refund",
                         };
                       }
 
@@ -2572,9 +2661,7 @@ export class RecentSendHistoryService {
                     const to = "0x" + log.topics[1].slice(26);
                     if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
                       const amount = BigInt(log.data).toString(10);
-                      history.resAmount.push([
-                        { amount, denom: history.destinationAsset.denom },
-                      ]);
+                      history.resAmount.push([{ amount, denom: targetDenom }]);
                       history.trackDone = true;
                       return;
                     }
@@ -2587,10 +2674,10 @@ export class RecentSendHistoryService {
                       history.resAmount.push([
                         {
                           amount:
-                            history.destinationAsset.denom === "forma-native"
+                            targetDenom === "forma-native"
                               ? `${amount}000000000000`
                               : amount,
-                          denom: history.destinationAsset.denom,
+                          denom: targetDenom,
                         },
                       ]);
                       history.trackDone = true;
@@ -2671,17 +2758,17 @@ export class RecentSendHistoryService {
   }
 
   @action
-  hideRecentSwapV2History(id: string): boolean {
+  hideSwapV2History(id: string): boolean {
     const history = this.getRecentSwapV2History(id);
     if (!history) {
       return false;
     }
 
-    if (!history.requiresNextTransaction) {
+    if (!history.backgroundExecutionId) {
       return false;
     }
 
-    // only hide if the history requires next transaction
+    // only hide if multi tx case
     history.hidden = true;
     return true;
   }
@@ -3428,15 +3515,15 @@ export class RecentSendHistoryService {
   }
 
   protected getExecutableChainIdsFromSwapV2History(
-    history: SwapV2History
+    history: SwapV2History,
+    includeAllChainIds: boolean = false
   ): string[] {
     const chainIds: string[] = [];
 
-    for (
-      let i = 0;
-      i <= history.routeIndex && i < history.simpleRoute.length;
-      i++
-    ) {
+    const endIndex = includeAllChainIds
+      ? history.simpleRoute.length
+      : Math.max(0, history.routeIndex + 1);
+    for (let i = 0; i < endIndex; i++) {
       chainIds.push(history.simpleRoute[i].chainId);
     }
 

@@ -284,12 +284,20 @@ export interface SwapV2History extends SwapV2HistoryBase {
     denom: string;
   }[][];
 
-  swapRefundInfo?: {
+  assetLocationInfo?: {
     chainId: string;
     amount: {
       amount: string;
       denom: string;
     }[];
+    /**
+     * "refund": 실패/오류로 인해 자산이 중간에서 릴리즈된 경우
+     * "intermediate": TX는 성공했지만 자산이 최종 목적지가 아닌 중간 단계에 도달한 경우
+     *                 (예: base USDC -> osmosis OSMO 스왑 시, noble USDC가 먼저 도착)
+     *                 이 경우 추가 TX를 실행하여 최종 목적지로 자산을 보내거나,
+     *                 현재 받은 자산을 그대로 둘 수 있음
+     */
+    type: "refund" | "intermediate";
   };
 
   backgroundExecutionId?: string;
@@ -301,9 +309,6 @@ export interface SwapV2History extends SwapV2HistoryBase {
   notified?: boolean;
 
   hidden?: boolean;
-  // 멀티 tx swap의 경우, 모든 트랜잭션이 서명되지 않아 hidden 처리되었더라도
-  // 다음 트랜잭션 처리가 필요한 경우 강제로 다시 display하기 위한 플래그
-  requiresNextTransaction?: boolean;
 }
 
 // ============================================================================

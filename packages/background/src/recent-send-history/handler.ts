@@ -300,8 +300,7 @@ const handleRecordTxWithSwapV2Msg: (
       msg.notificationInfo,
       msg.routeDurationSeconds,
       msg.txHash,
-      msg.isOnlyUseBridge,
-      msg.requiresNextTransaction
+      msg.isOnlyUseBridge
     );
   };
 };
@@ -335,6 +334,6 @@ const handleHideSwapV2HistoryMsg: (
   service: RecentSendHistoryService
 ) => InternalHandler<HideSwapV2HistoryMsg> = (service) => {
   return (_env, msg) => {
-    service.hideRecentSwapV2History(msg.id);
+    service.hideSwapV2History(msg.id);
   };
 };
