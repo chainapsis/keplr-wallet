@@ -78,6 +78,7 @@ export const HoldButton: FunctionComponent<HoldButtonProps> = ({
         setProgress(0);
         holdStartTimeRef.current = null;
 
+        onHoldEnd?.();
         onConfirm?.();
 
         if (type === "submit" && buttonRef.current?.form) {
@@ -90,6 +91,7 @@ export const HoldButton: FunctionComponent<HoldButtonProps> = ({
     isLoading,
     holdDurationMs,
     onHoldStart,
+    onHoldEnd,
     onProgressChange,
     onConfirm,
     type,
