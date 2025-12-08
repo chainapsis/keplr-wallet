@@ -2408,9 +2408,19 @@ export class RecentSendHistoryService {
           // assetLocationInfo를 설정하지 않음
           const isDestinationReached =
             chainIdInKeplr === history.toChainId &&
-            denomInKeplr === history.destinationAsset.denom;
-
-          if (!isDestinationReached) {
+            denomInKeplr.toLowerCase() ===
+              history.destinationAsset.denom.toLowerCase();
+          if (isDestinationReached) {
+            history.routeIndex = simpleRoute.length - 1;
+            executableChainIdsToPublish =
+              this.getExecutableChainIdsFromSwapV2History(history, true);
+            history.resAmount.push([
+              {
+                amount: asset_location.amount,
+                denom: denomInKeplr,
+              },
+            ]);
+          } else {
             /*
               Determine the type of asset location:
                 - "intermediate": SUCCESS 상태이지만 asset_location이 최종 목적지가 아닌 경우
@@ -2448,11 +2458,6 @@ export class RecentSendHistoryService {
             }
             executableChainIdsToPublish =
               this.getExecutableChainIdsFromSwapV2History(history);
-          } else {
-            // destination에 도달한 경우
-            history.routeIndex = simpleRoute.length - 1;
-            executableChainIdsToPublish =
-              this.getExecutableChainIdsFromSwapV2History(history, true);
           }
         } else if (status === SwapV2TxStatus.SUCCESS) {
           // For SUCCESS without asset_location, move routeIndex to end
@@ -2465,11 +2470,8 @@ export class RecentSendHistoryService {
         publishExecutableChains(executableChainIdsToPublish);
 
         // assetLocationInfo가 있으면 해당 위치, 없으면 최종 destination 사용
-        const targetChainId =
-          history.assetLocationInfo?.chainId ?? history.toChainId;
-        const targetDenom =
-          history.assetLocationInfo?.amount[0]?.denom ??
-          history.destinationAsset.denom;
+        const targetChainId = history.toChainId;
+        const targetDenom = history.destinationAsset.denom;
 
         // 해당 위치의 tx_hash를 찾아서 자산 추적, 없을 수도 있다.
         const targetTxHash = (() => {
@@ -2483,9 +2485,10 @@ export class RecentSendHistoryService {
           return targetStep?.tx_hash ?? currentStep.tx_hash;
         })();
 
-        // CHECK: asset location이 destination이 아니고,
-        // 관련 tx hash가 없는 경우에 자산 정보 업데이트를 어떻게 처리할지 고민해야함
-        if (targetTxHash) {
+        // 이미 resAmount가 있거나 assetLocationInfo가 있으면 추가 트래킹 불필요
+        const skipAssetTracking =
+          history.resAmount.length > 0 || history.assetLocationInfo;
+        if (!skipAssetTracking && targetTxHash) {
           this.trackSwapV2ReleasedAssetAmount(
             id,
             targetTxHash,
@@ -2496,7 +2499,6 @@ export class RecentSendHistoryService {
           break;
         }
 
-        // Finalize
         history.trackDone = true;
         onFulfill();
         break;
@@ -2659,6 +2661,7 @@ export class RecentSendHistoryService {
                     }
                   } else if (log.topics[0] === withdrawTopic) {
                     const to = "0x" + log.topics[1].slice(26);
+
                     if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
                       const amount = BigInt(log.data).toString(10);
                       history.resAmount.push([{ amount, denom: targetDenom }]);
@@ -2667,6 +2670,7 @@ export class RecentSendHistoryService {
                     }
                   } else if (log.topics[0] === hyperlaneReceiveTopic) {
                     const to = "0x" + log.topics[2].slice(26);
+
                     if (to.toLowerCase() === history.recipient.toLowerCase()) {
                       const amount = BigInt(log.data).toString(10);
                       // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
