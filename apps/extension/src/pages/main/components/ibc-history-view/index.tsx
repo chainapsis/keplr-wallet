@@ -22,6 +22,7 @@ import {
   SwapV2TxStatus,
   TxExecution,
 } from "@keplr-wallet/background";
+import { SwapProvider } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useLayoutEffectOnce } from "../../../../hooks/use-effect-once";
@@ -344,10 +345,9 @@ export const IbcHistoryView: FunctionComponent<{
             <SwapV2HistoryViewItem
               key={history.id}
               history={history}
-              removeHistory={(id) => {
+              removeHistory={(id, shouldHide) => {
                 const requester = new InExtensionMessageRequester();
-                if (history.backgroundExecutionId && !history.trackDone) {
-                  // do not remove the history before the tracking is done (multi tx case)
+                if (shouldHide) {
                   const msg = new HideSwapV2HistoryMsg(id);
                   requester.sendMessage(BACKGROUND_PORT, msg);
                 } else {
@@ -1421,7 +1421,7 @@ const SkipHistoryViewItem: FunctionComponent<{
 
 const SwapV2HistoryViewItem: FunctionComponent<{
   history: SwapV2History;
-  removeHistory: (id: string) => void;
+  removeHistory: (id: string, shouldHide: boolean) => void;
 }> = observer(({ history, removeHistory }) => {
   const { chainStore, uiConfigStore } = useStore();
 
@@ -1529,7 +1529,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     );
   }, [txExecution, history.backgroundExecutionId]);
 
-  // 실행된 개수 / 총 실행해야 하는 tx 개수
   const txExecutionProgress: {
     executedTxCount: number;
     totalTxCount: number;
@@ -1549,6 +1548,16 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       totalTxCount,
     };
   }, [txExecution, history.backgroundExecutionId]);
+
+  // 삭제 시 hide 처리할지 여부 계산
+  // 멀티 TX 스왑이고 트래킹 중이며, skip provider에서 asset location 정보가 없는 경우에만 hide
+  const shouldHideOnRemove = useMemo(() => {
+    return (
+      !!history.backgroundExecutionId &&
+      history.provider === SwapProvider.SKIP &&
+      !history.assetLocationInfo
+    );
+  }, [history]);
 
   async function handleContinueSigning() {
     try {
@@ -1689,8 +1698,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
             cursor="pointer"
             onClick={(e) => {
               e.preventDefault();
-
-              removeHistory(history.id);
+              removeHistory(history.id, shouldHideOnRemove);
             }}
           >
             <XMarkIcon
@@ -1856,12 +1864,18 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                   i >= failedRouteIndex &&
                   (assetReleasedRouteIndex < 0 || i > assetReleasedRouteIndex);
 
+                // 환불된 체인인지 확인 (에러가 있고, assetLocationInfo가 있고, 해당 체인이 환불 목적지인 경우)
+                const refunded =
+                  !!history.trackError &&
+                  assetReleasedRouteIndex >= 0 &&
+                  i === assetReleasedRouteIndex;
+
                 return (
                   // 일부분 순환하는 경우도 이론적으로 가능은 하기 때문에 chain id를 key로 사용하지 않음.
                   <IbcHistoryViewItemChainImage
                     key={i}
                     chainInfo={chainInfo}
-                    completed={!error && completed}
+                    completed={!error && !refunded && completed}
                     notCompletedBlink={(() => {
                       if (failedRoute) {
                         // asset이 릴리즈된 체인까지는 blink하지 않음
@@ -1889,14 +1903,47 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                         return "right";
                       }
 
-                      // asset이 릴리즈된 체인이 있으면, 그 이후는 화살표 숨김
+                      // asset이 릴리즈된 체인이 있으면
                       if (assetReleasedRouteIndex >= 0) {
-                        return i > assetReleasedRouteIndex ? "hide" : "right";
+                        // 환불이 진행중인 라우트보다 뒤로 돌아간 경우
+                        if (assetReleasedRouteIndex < history.routeIndex) {
+                          // 환불 체인 ~ 실패 체인 사이는 왼쪽 화살표 (환불 경로 표시)
+                          if (
+                            i >= assetReleasedRouteIndex &&
+                            i < history.routeIndex
+                          ) {
+                            return "left";
+                          }
+                          // 실패 체인 이후는 숨김
+                          if (i >= history.routeIndex) {
+                            return "hide";
+                          }
+                        } else {
+                          // 환불된 체인 이후의 화살표는 숨김
+                          if (i >= assetReleasedRouteIndex) {
+                            return "hide";
+                          }
+                        }
+                        return "right";
                       }
 
                       return i === failedRouteIndex ? "left" : "right";
                     })()}
+                    arrowWarning={(() => {
+                      // 환불 시 왼쪽 화살표에 경고 색상 적용 (에러가 있을 때만)
+                      if (
+                        !!history.trackError &&
+                        assetReleasedRouteIndex >= 0 &&
+                        assetReleasedRouteIndex < history.routeIndex &&
+                        i >= assetReleasedRouteIndex &&
+                        i < history.routeIndex
+                      ) {
+                        return true;
+                      }
+                      return false;
+                    })()}
                     error={error}
+                    refunded={refunded}
                     isLast={chainIds.length - 1 === i}
                   />
                 );
@@ -2084,8 +2131,13 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                       : ColorPalette["gray-200"]
                   }
                 >
-                  {txExecutionProgress.executedTxCount}/
-                  {txExecutionProgress.totalTxCount} Approvals
+                  <FormattedMessage
+                    id="page.main.components.ibc-history-view.swap-v2.approvals"
+                    values={{
+                      executed: txExecutionProgress.executedTxCount,
+                      total: txExecutionProgress.totalTxCount,
+                    }}
+                  />
                 </Subtitle4>
                 <div style={{ flex: 1 }} />
                 {hasExecutableTx ? (
@@ -2110,7 +2162,18 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                     }
                     onClick={handleContinueSigning}
                   />
-                ) : null}
+                ) : (
+                  <Subtitle4
+                    color={
+                      theme.mode === "light"
+                        ? ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
+                    }
+                  >
+                    {"⏳ "}
+                    <FormattedMessage id="page.main.components.ibc-history-view.swap-v2.wait-for-confirmation" />
+                  </Subtitle4>
+                )}
               </XAxis>
             </React.Fragment>
           )}
@@ -2133,20 +2196,24 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
   // prop이 괴상해졌다...
   // TODO: 나중에 시간나면 다시 정리한다
   error: boolean;
+  refunded?: boolean;
   arrowDirection: "left" | "right" | "hide";
+  arrowWarning?: boolean;
 }> = ({
   chainInfo,
   completed,
   notCompletedBlink,
   isLast,
   error,
+  refunded,
   arrowDirection,
+  arrowWarning,
 }) => {
   const theme = useTheme();
 
   const opacity = useSpringValue(
     (() => {
-      if (error) {
+      if (error || refunded) {
         return 0.3;
       }
       return completed ? 1 : 0.3;
@@ -2157,7 +2224,7 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
   );
 
   useEffect(() => {
-    if (error) {
+    if (error || refunded) {
       opacity.start(0.3);
     } else if (completed) {
       opacity.start(1);
@@ -2176,7 +2243,7 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
     } else {
       opacity.start(0.3);
     }
-  }, [completed, error, notCompletedBlink, opacity]);
+  }, [completed, error, refunded, notCompletedBlink, opacity]);
 
   return (
     <XAxis alignY="center">
@@ -2188,7 +2255,7 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
             opacity,
           }}
         />
-        {error ? (
+        {error || refunded ? (
           <Box
             position="absolute"
             style={{
@@ -2217,7 +2284,7 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
           <Gutter size="0.25rem" />
           <Box
             style={{
-              opacity: completed ? 1 : 0.3,
+              opacity: arrowWarning ? 1 : completed ? 1 : 0.3,
               ...(() => {
                 if (arrowDirection === "left") {
                   return {
@@ -2235,7 +2302,11 @@ const IbcHistoryViewItemChainImage: FunctionComponent<{
               width="0.75rem"
               height="0.75rem"
               color={
-                theme.mode === "light"
+                arrowWarning
+                  ? theme.mode === "light"
+                    ? ColorPalette["orange-400"]
+                    : ColorPalette["yellow-400"]
+                  : theme.mode === "light"
                   ? ColorPalette["gray-400"]
                   : ColorPalette["gray-10"]
               }

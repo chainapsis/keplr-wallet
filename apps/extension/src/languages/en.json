@@ -667,6 +667,8 @@
   "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed": "Refund Completed",
   "page.main.components.ibc-history-view.ibc-swap.item.action-required": "Action Required",
   "page.main.components.ibc-history-view.swap-v2.continue-signing": "Continue Signing",
+  "page.main.components.ibc-history-view.swap-v2.approvals": "{executed}/{total} Approvals",
+  "page.main.components.ibc-history-view.swap-v2.wait-for-confirmation": "Wait for confirmation..",
   "page.main.components.ibc-history-view.send-bridge.item.pending": "Transfer in Progress",
   "page.main.components.ibc-history-view.send-bridge.item.succeed": "Transfer Successful",
   "page.main.components.ibc-history-view.paragraph": "Transfer {assets} from {sourceChain} to {destinationChain}",
