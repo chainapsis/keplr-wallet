@@ -698,6 +698,6 @@ export class HideSwapV2HistoryMsg extends Message<void> {
   }
 
   type(): string {
-    return ClearAllSwapV2HistoryMsg.type();
+    return HideSwapV2HistoryMsg.type();
   }
 }
