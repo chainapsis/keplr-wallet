@@ -37,6 +37,7 @@ import { EmbedChainInfos } from "../../../../config";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenTag } from "../../../register/enable-chains/components/chain-item";
 import { SupportedPaymentType } from "@keplr-wallet/types";
+import { useTokenTag } from "../../../../hooks/use-token-tag";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
@@ -514,6 +515,15 @@ const FoundTokenView: FunctionComponent<{
     }
   }, [asset.currency, chainId, asset.paymentType]);
 
+  const tag = useTokenTag({
+    token: new CoinPretty(asset.currency, asset.amount),
+    chainInfo: chainStore.hasChain(chainId)
+      ? chainStore.getChain(chainId)
+      : chainStore.getModularChain(chainId),
+    isFetching: false,
+    error: undefined,
+  });
+
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.5rem" height="1.5rem">
@@ -543,35 +553,54 @@ const FoundTokenView: FunctionComponent<{
           }
         >
           {(() => {
-            if (chainStore.hasChain(chainId)) {
-              return chainStore
-                .getChain(chainId)
-                .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
-            } else {
-              const modularChainInfo = chainStore.getModularChain(chainId);
-              const isBitcoin = "bitcoin" in modularChainInfo;
-              const isStarknet = "starknet" in modularChainInfo;
-              const isCosmos = "cosmos" in modularChainInfo;
-
-              if (isBitcoin || isStarknet || isCosmos) {
-                return (
-                  chainStore
-                    .getModularChainInfoImpl(chainId)
-                    .getCurrencies(
-                      isBitcoin ? "bitcoin" : isStarknet ? "starknet" : "cosmos"
-                    )
-                    .find(
-                      (cur) =>
-                        cur.coinMinimalDenom === asset.currency.coinMinimalDenom
-                    )?.coinDenom ?? asset.currency.coinDenom
-                );
+            const coinDenom = (() => {
+              if (chainStore.hasChain(chainId)) {
+                return chainStore
+                  .getChain(chainId)
+                  .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
               } else {
-                return asset.currency.coinDenom;
+                const modularChainInfo = chainStore.getModularChain(chainId);
+                const isBitcoin = "bitcoin" in modularChainInfo;
+                const isStarknet = "starknet" in modularChainInfo;
+                const isCosmos = "cosmos" in modularChainInfo;
+
+                if (isBitcoin || isStarknet || isCosmos) {
+                  return (
+                    chainStore
+                      .getModularChainInfoImpl(chainId)
+                      .getCurrencies(
+                        isBitcoin
+                          ? "bitcoin"
+                          : isStarknet
+                          ? "starknet"
+                          : "cosmos"
+                      )
+                      .find(
+                        (cur) =>
+                          cur.coinMinimalDenom ===
+                          asset.currency.coinMinimalDenom
+                      )?.coinDenom ?? asset.currency.coinDenom
+                  );
+                } else {
+                  return asset.currency.coinDenom;
+                }
               }
+            })();
+
+            if (
+              asset.currency.coinMinimalDenom.startsWith("ibc/") &&
+              coinDenom
+            ) {
+              const cut = coinDenom.indexOf(" (");
+              return cut > 0 ? coinDenom.slice(0, cut) : coinDenom;
             }
+            return coinDenom;
           })()}
         </Subtitle3>
         {addressTag ? <TokenTag text={addressTag.text} /> : null}
+        {tag && tag.text === "IBC" ? (
+          <TokenTag text={tag.text} tooltip={tag.tooltip} />
+        ) : null}
       </Box>
 
       <Column weight={1} />
@@ -615,6 +644,7 @@ const FoundTokenView: FunctionComponent<{
           return uiConfigStore.hideStringIfPrivacyMode(
             new CoinPretty(currency, asset.amount)
               .shrink(true)
+              .hideIBCMetadata(true)
               .trim(true)
               .maxDecimals(6)
               .inequalitySymbol(true)
