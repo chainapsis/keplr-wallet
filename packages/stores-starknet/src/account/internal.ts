@@ -69,11 +69,11 @@ export class StoreAccount extends Account {
       );
 
     const estimate = await this.estimateAccountDeployFee({
+      ...stark.v3Details(details),
       classHash,
       constructorCalldata,
       addressSalt,
       contractAddress,
-      ...stark.v3Details(details),
     });
 
     const keplr = await this.getKeplr();
