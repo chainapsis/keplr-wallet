@@ -55,6 +55,7 @@ import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { HeaderProps } from "../../../../layouts/header/types";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
+import { StepIndicator } from "../../../../components/step-indicator";
 
 export const EthereumSignTxView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -496,10 +497,51 @@ export const EthereumSignTxView: FunctionComponent<{
       },
     },
     {
-      text: intl.formatMessage({ id: "button.approve" }),
-      color: "primary",
+      isSpecial: true,
+      text: (() => {
+        const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
+        if (progress.show) {
+          if (isLedgerInteracting) {
+            return intl.formatMessage({ id: "button.continue-on-ledger" });
+          }
+          if (isKeystoneInteracting) {
+            return intl.formatMessage({ id: "button.continue-on-keystone" });
+          }
+          return intl.formatMessage(
+            { id: "button.approve-with-progress" },
+            {
+              total: progress.total,
+              completed: progress.completed,
+            }
+          );
+        }
+        return intl.formatMessage({ id: "button.approve" });
+      })(),
       size: "large",
-      left: !isLoading && <ApproveIcon />,
+      left: (() => {
+        const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
+        if (progress.show) {
+          return (
+            <StepIndicator
+              totalCount={progress.total}
+              completedCount={progress.completed}
+              inactiveOpacity={0.4}
+              activeColor={ColorPalette["white"]}
+              style={{ marginRight: "0.125rem" }}
+            />
+          );
+        }
+        if (isLoading) {
+          return undefined;
+        }
+        return <ApproveIcon />;
+      })(),
+      suppressDefaultLoadingIndicator:
+        uiConfigStore.ibcSwapConfig.signatureProgress.show &&
+        (isLedgerInteracting || isKeystoneInteracting),
+      showTextWhileLoading:
+        uiConfigStore.ibcSwapConfig.signatureProgress.show &&
+        (isLedgerInteracting || isKeystoneInteracting),
       disabled: buttonDisabled,
       isLoading,
       onClick: async () => {

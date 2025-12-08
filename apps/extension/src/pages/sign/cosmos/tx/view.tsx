@@ -56,6 +56,7 @@ import {
   FeeCoverageBackground,
 } from "../../../../components/top-up";
 import { useTopUp } from "../../../../hooks/use-topup";
+import { StepIndicator } from "../../../../components/step-indicator";
 
 /**
  * 서명을 처리할때 웹페이지에서 연속적으로 서명을 요청했을 수 있고
@@ -602,14 +603,58 @@ export const CosmosTxView: FunctionComponent<{
         // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
         {
           isSpecial: true,
-          text:
-            shouldTopUp && remainingText
-              ? remainingText
-              : intl.formatMessage({ id: "button.approve" }),
+          text: (() => {
+            if (shouldTopUp && remainingText) {
+              return remainingText;
+            }
+            const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
+            if (progress.show) {
+              if (isLedgerInteracting) {
+                return intl.formatMessage({ id: "button.continue-on-ledger" });
+              }
+              if (isKeystoneInteracting) {
+                return intl.formatMessage({
+                  id: "button.continue-on-keystone",
+                });
+              }
+              return intl.formatMessage(
+                { id: "button.approve-with-progress" },
+                {
+                  total: progress.total,
+                  completed: progress.completed,
+                }
+              );
+            }
+            return intl.formatMessage({ id: "button.approve" });
+          })(),
           size: "large",
-          left: !(shouldTopUp && remainingText) && !isLoading && (
-            <ApproveIcon />
-          ),
+          left: (() => {
+            if (shouldTopUp && remainingText) {
+              return undefined;
+            }
+            const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
+            if (progress.show) {
+              return (
+                <StepIndicator
+                  totalCount={progress.total}
+                  completedCount={progress.completed}
+                  inactiveOpacity={0.4}
+                  activeColor={ColorPalette["white"]}
+                  style={{ marginRight: "0.125rem" }}
+                />
+              );
+            }
+            if (isLoading) {
+              return undefined;
+            }
+            return <ApproveIcon />;
+          })(),
+          suppressDefaultLoadingIndicator:
+            uiConfigStore.ibcSwapConfig.signatureProgress.show &&
+            (isLedgerInteracting || isKeystoneInteracting),
+          showTextWhileLoading:
+            uiConfigStore.ibcSwapConfig.signatureProgress.show &&
+            (isLedgerInteracting || isKeystoneInteracting),
           disabled: buttonDisabled,
           isLoading,
           onClick: approve,

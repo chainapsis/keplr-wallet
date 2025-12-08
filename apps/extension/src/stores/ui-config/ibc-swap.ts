@@ -264,16 +264,21 @@ export class IBCSwapConfig {
     this._isSwapLoading = isLoading;
   }
 
-  get totalSignatureCount(): number | undefined {
-    return this._totalSignatureCount;
-  }
-
-  get completedSignatureCount(): number | undefined {
-    return this._completedSignatureCount;
-  }
-
-  get showSignatureProgress(): boolean {
-    return this._showSignatureProgress;
+  get signatureProgress():
+    | { show: false }
+    | { show: true; total: number; completed: number } {
+    if (
+      this._showSignatureProgress &&
+      this._totalSignatureCount != null &&
+      this._completedSignatureCount != null
+    ) {
+      return {
+        show: true,
+        total: this._totalSignatureCount,
+        completed: this._completedSignatureCount,
+      };
+    }
+    return { show: false };
   }
 
   @action

@@ -1445,9 +1445,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           // Navigate back once for all sign pages to avoid multiple remounts
           // Sign pages use replace after the first one, so only 1 history entry is added
-          const completedSignatures =
-            uiConfigStore.ibcSwapConfig.completedSignatureCount ?? 0;
-          if (completedSignatures > 0) {
+          const signatureProgress =
+            uiConfigStore.ibcSwapConfig.signatureProgress;
+          if (signatureProgress.show && signatureProgress.completed > 0) {
             navigate(-1);
           }
 
@@ -1641,9 +1641,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }
 
           // in case of error, navigate back to the previous page if at least one signature is completed
-          const completedSignatures =
-            uiConfigStore.ibcSwapConfig.completedSignatureCount ?? 0;
-          if (completedSignatures > 0) {
+          const signatureProgress =
+            uiConfigStore.ibcSwapConfig.signatureProgress;
+          if (signatureProgress.show && signatureProgress.completed > 0) {
             navigate(-1);
           }
 

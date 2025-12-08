@@ -55,6 +55,7 @@ import { IconProps } from "../../../../components/icon/types";
 import { useSpringValue, animated, easings } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../../styles/spring";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
+import { StepIndicator } from "../../../../components/step-indicator";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export const IbcHistoryView: FunctionComponent<{
@@ -2095,34 +2096,10 @@ const SwapV2HistoryViewItem: FunctionComponent<{
             <React.Fragment>
               <Gutter size="1rem" />
               <XAxis alignY="center">
-                <Box
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: "0.25rem",
-                    flexShrink: 0,
-                  }}
-                >
-                  {Array.from({
-                    length: txExecutionProgress.totalTxCount,
-                  }).map((_, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        width: "0.25rem",
-                        height: "0.75rem",
-                        borderRadius: "13.875rem",
-                        backgroundColor:
-                          theme.mode === "light"
-                            ? ColorPalette["blue-400"]
-                            : ColorPalette["white"],
-                        opacity:
-                          index < txExecutionProgress.executedTxCount ? 1 : 0.3,
-                      }}
-                    />
-                  ))}
-                </Box>
+                <StepIndicator
+                  totalCount={txExecutionProgress.totalTxCount}
+                  completedCount={txExecutionProgress.executedTxCount}
+                />
                 <Gutter size="0.375rem" />
                 <Subtitle4
                   color={
