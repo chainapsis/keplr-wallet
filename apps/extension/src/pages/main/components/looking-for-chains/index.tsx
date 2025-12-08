@@ -139,7 +139,7 @@ export const LookingForChainItem: FunctionComponent<{
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {
               try {
-                if ("bech32Config" in chainInfo) {
+                if ("cosmos" in chainInfo && chainInfo.cosmos.bech32Config) {
                   const convertedChainInfo =
                     convertModularChainInfoToChainInfo(chainInfo);
 
