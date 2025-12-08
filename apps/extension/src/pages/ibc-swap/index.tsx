@@ -937,9 +937,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             destinationAsset: {
               chainId: outChainId,
               denom: outCurrency.coinMinimalDenom,
-              expectedAmount: swapConfigs.amountConfig.outAmount
-                .toDec()
-                .toString(),
+              expectedAmount:
+                swapConfigs.amountConfig.outAmount.toCoin().amount,
             },
             simpleRoute,
             sender: swapConfigs.senderConfig.sender,

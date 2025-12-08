@@ -203,7 +203,6 @@ export async function fillUnsignedEVMTx(
     .toBigNumber()
     .toString(16)}`;
 
-  maxPriorityFeePerGasDec = maxPriorityFeePerGasDec.mul(multiplier);
   const maxPriorityFeePerGasHex = `0x${maxPriorityFeePerGasDec
     .truncate()
     .toBigNumber()

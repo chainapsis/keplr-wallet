@@ -159,19 +159,6 @@ export class BackgroundTxExecutorService {
           }
         }
       });
-
-      // if the key is hardware wallet, do not resume the execution automatically
-      // user should sign the transaction manually
-      const keyInfo = this.keyRingCosmosService.keyRingService.getKeyInfo(
-        execution.vaultId
-      );
-      if (keyInfo?.type === "ledger" || keyInfo?.type === "keystone") {
-        return;
-      }
-
-      // cause new executable chain ids are available, resume the execution
-      // CHECK: 현재 활성화되어 있는 vault에서만 실행해야 할까, 아니면 모든 vault에서 실행할 수 있어야 할까?
-      await this.executeTxs(executionId);
     });
   }
 
@@ -342,14 +329,13 @@ export class BackgroundTxExecutorService {
       runInAction(() => {
         execution.txIndex = i;
         currentTx.status = result.status;
-        // NOTE: no need to set signedTx as it's already consumed,
-        // just set the result of pending tx execution
         if (result.txHash != null) {
           currentTx.txHash = result.txHash;
         }
         if (result.error != null) {
           currentTx.error = result.error;
         }
+        currentTx.signedTx = undefined; // clear the signed tx after the execution
       });
 
       if (result.status === BackgroundTxStatus.CONFIRMED) {
@@ -377,9 +363,6 @@ export class BackgroundTxExecutorService {
       }
 
       if (result.status === BackgroundTxStatus.FAILED) {
-        runInAction(() => {
-          execution.status = TxExecutionStatus.FAILED;
-        });
         this.removeTxExecution(id);
 
         return {
@@ -397,9 +380,7 @@ export class BackgroundTxExecutorService {
     }
 
     // if the execution is completed successfully, record the history and remove the execution
-    runInAction(() => {
-      execution.status = TxExecutionStatus.COMPLETED;
-    });
+
     this.recordHistoryIfNeeded(execution);
     this.removeTxExecution(id);
 
@@ -430,18 +411,18 @@ export class BackgroundTxExecutorService {
       status === BackgroundTxStatus.CONFIRMED ||
       status === BackgroundTxStatus.FAILED
     ) {
-      return { status, signedTx, txHash, error };
+      return { status, txHash, error };
     }
 
     // Check if blocked
     const isBlocked = !executableChainIds.includes(tx.chainId);
     if (isBlocked) {
-      return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
+      return { status: BackgroundTxStatus.BLOCKED, txHash, error };
     }
 
     // If preventAutoSign and not signed, block
     if (preventAutoSign && signedTx == null) {
-      return { status: BackgroundTxStatus.BLOCKED, signedTx, txHash, error };
+      return { status: BackgroundTxStatus.BLOCKED, txHash, error };
     }
 
     // SIGNING
@@ -452,7 +433,6 @@ export class BackgroundTxExecutorService {
       console.error(`[TxExecutor] tx signing failed:`, e);
       return {
         status: BackgroundTxStatus.FAILED,
-        signedTx,
         txHash,
         error: e.message ?? "Transaction signing failed",
       };
@@ -467,7 +447,6 @@ export class BackgroundTxExecutorService {
       console.error(`[TxExecutor] tx broadcast failed:`, e);
       return {
         status: BackgroundTxStatus.FAILED,
-        signedTx,
         txHash,
         error: e.message ?? "Transaction broadcasting failed",
       };
@@ -483,7 +462,6 @@ export class BackgroundTxExecutorService {
       } else {
         return {
           status: BackgroundTxStatus.FAILED,
-          signedTx,
           txHash,
           error: "Transaction failed",
         };
@@ -492,13 +470,12 @@ export class BackgroundTxExecutorService {
       console.error(`[TxExecutor] tx trace failed:`, e);
       return {
         status: BackgroundTxStatus.FAILED,
-        signedTx,
         txHash,
         error: e.message ?? "Transaction confirmation failed",
       };
     }
 
-    return { status, signedTx, txHash, error };
+    return { status, txHash, error };
   }
 
   protected async signTx(
@@ -903,6 +880,10 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
+      const backgroundExecutionId = execution.preventAutoSign
+        ? execution.id
+        : undefined;
+
       const id = this.recentSendHistoryService.addRecentIBCTransferHistory(
         historyData.sourceChainId,
         historyData.destinationChainId,
@@ -913,7 +894,7 @@ export class BackgroundTxExecutorService {
         historyData.channels,
         historyData.notificationInfo,
         Buffer.from(tx.txHash, "hex"),
-        execution.id
+        backgroundExecutionId
       );
       this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
 
@@ -945,6 +926,12 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
+      // preventAutoSign means that the execution requires multiple transactions to be executed
+      // so we need to record the history with the execution id
+      const backgroundExecutionId = execution.preventAutoSign
+        ? execution.id
+        : undefined;
+
       const id = this.recentSendHistoryService.addRecentIBCSwapHistory(
         historyData.swapType,
         historyData.chainId,
@@ -958,7 +945,7 @@ export class BackgroundTxExecutorService {
         historyData.swapReceiver,
         historyData.notificationInfo,
         Buffer.from(tx.txHash, "hex"),
-        execution.id
+        backgroundExecutionId
       );
       this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
 
@@ -983,11 +970,9 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
-      // if there is a tx that is not executable, we need to record the history with requiresNextTransaction
-      // so that the history can be displayed again once the tx is executable
-      const requiresNextTransaction = execution.txs.some(
-        (tx) => !execution.executableChainIds.includes(tx.chainId)
-      );
+      const backgroundExecutionId = execution.preventAutoSign
+        ? execution.id
+        : undefined;
 
       const id = this.recentSendHistoryService.recordTxWithSwapV2(
         historyData.fromChainId,
@@ -1002,8 +987,7 @@ export class BackgroundTxExecutorService {
         historyData.routeDurationSeconds,
         tx.txHash,
         historyData.isOnlyUseBridge,
-        requiresNextTransaction,
-        execution.id
+        backgroundExecutionId
       );
 
       execution.historyId = id;

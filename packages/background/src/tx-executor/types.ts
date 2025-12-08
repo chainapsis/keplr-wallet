@@ -176,7 +176,6 @@ export type TxExecution =
  */
 export interface PendingTxExecutionResult {
   status: BackgroundTxStatus;
-  signedTx?: string;
   txHash?: string;
   error?: string;
 }
