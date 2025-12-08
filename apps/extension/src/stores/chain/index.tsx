@@ -8,7 +8,7 @@ import {
   toJS,
 } from "mobx";
 
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
@@ -29,14 +29,21 @@ import {
   RemoveSuggestedChainInfoMsg,
   RevalidateTokenScansMsg,
   SetChainEndpointsMsg,
+  SyncTokenScanInfosMsg,
   ToggleChainsMsg,
   TokenScan,
+  TokenScanInfo,
   TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+
+type Assets = {
+  currency: AppCurrency;
+  amount: string;
+};
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
@@ -52,6 +59,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @observable
   protected _lastTokenScanRevalidateTimestamp: Map<string, number> = new Map();
+
+  @observable
+  protected _newTokenFoundDismissed: Map<string, boolean> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -124,14 +134,217 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   get tokenScans(): TokenScan[] {
-    return this._tokenScans.filter((scan) => {
-      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
-        return false;
+    const resolveCurrency = (
+      chainId: string,
+      denom: string
+    ): AppCurrency | undefined => {
+      const chainInfo = this.hasChain(chainId) ? this.getChain(chainId) : null;
+      const modularChainInfo = this.hasModularChain(chainId)
+        ? this.getModularChain(chainId)
+        : null;
+
+      const currencies: AppCurrency[] = (() => {
+        if (chainInfo) return chainInfo.currencies;
+        if (modularChainInfo) {
+          if ("cosmos" in modularChainInfo) {
+            return modularChainInfo.cosmos.currencies;
+          }
+
+          if ("bitcoin" in modularChainInfo) {
+            return modularChainInfo.bitcoin.currencies;
+          }
+
+          if ("starknet" in modularChainInfo) {
+            return modularChainInfo.starknet.currencies;
+          }
+        }
+        return [];
+      })();
+
+      if (chainInfo) {
+        const found = chainInfo.forceFindCurrency(denom);
+        if (!found.coinDenom.startsWith("ibc/")) {
+          return found;
+        }
       }
 
-      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
-      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+      if (modularChainInfo) {
+        const found = currencies.find((cur) => cur.coinMinimalDenom === denom);
+        if (found) {
+          return found;
+        }
+      }
+
+      return undefined;
+    };
+
+    return this._tokenScans
+      .filter((scan) => {
+        if (
+          !this.hasChain(scan.chainId) &&
+          !this.hasModularChain(scan.chainId)
+        ) {
+          return false;
+        }
+
+        const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+        return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+      })
+      .map((scan) => {
+        const newInfos = scan.infos.map((info) => {
+          const newAssets = info.assets
+            .map((asset) => {
+              const cur = resolveCurrency(
+                scan.chainId,
+                asset.currency.coinMinimalDenom
+              );
+              if (!cur) return undefined;
+              return {
+                ...asset,
+                currency: cur,
+              };
+            })
+            .filter((a): a is Assets => !!a);
+
+          return {
+            ...info,
+            assets: newAssets,
+          };
+        });
+
+        return {
+          ...scan,
+          infos: newInfos,
+        };
+      });
+  }
+
+  @computed
+  get shouldShowNewTokenFoundInMain(): boolean {
+    const vaultId = this.keyRingStore.selectedKeyInfo?.id;
+    if (!vaultId) {
+      return false;
+    }
+
+    const dismissed = this._newTokenFoundDismissed.get(vaultId) ?? false;
+    if (dismissed) {
+      return false;
+    }
+
+    return this.tokenScans.length > 0;
+  }
+
+  dismissNewTokenFoundInHome() {
+    const vaultId = this.keyRingStore.selectedKeyInfo?.id;
+    if (!vaultId) {
+      return;
+    }
+
+    runInAction(() => {
+      this._newTokenFoundDismissed.set(vaultId, true);
     });
+
+    // Sync prevInfos to current infos in background so future scans
+    // compare against the state at dismiss time
+    this.requester.sendMessage(
+      BACKGROUND_PORT,
+      new SyncTokenScanInfosMsg(vaultId)
+    );
+  }
+
+  protected resetDismissIfNeeded(vaultId: string, tokenScans: TokenScan[]) {
+    const needReset = tokenScans.some((scan) =>
+      this.isMeaningfulTokenScanChange(scan)
+    );
+
+    if (needReset) {
+      runInAction(() => {
+        this._newTokenFoundDismissed.set(vaultId, false);
+      });
+    }
+  }
+
+  protected isMeaningfulTokenScanChange(tokenScan: TokenScan): boolean {
+    if (!tokenScan.prevInfos || tokenScan.prevInfos.length === 0) {
+      return tokenScan.infos.length > 0;
+    }
+
+    const makeKey = (info: TokenScanInfo): string | undefined => {
+      if (info.bech32Address) return `bech32:${info.bech32Address}`;
+      if (info.ethereumHexAddress) return `eth:${info.ethereumHexAddress}`;
+      if (info.starknetHexAddress) return `stark:${info.starknetHexAddress}`;
+      if (info.bitcoinAddress?.bech32Address)
+        return `btc:${info.bitcoinAddress.bech32Address}`;
+      if (info.coinType != null) return `coin:${info.coinType}`;
+      return undefined;
+    };
+
+    const toBigIntSafe = (v: string): bigint | undefined => {
+      try {
+        return BigInt(v);
+      } catch {
+        return undefined;
+      }
+    };
+
+    const prevTokenInfosMap = new Map<string, TokenScanInfo>();
+    for (const info of tokenScan.prevInfos ?? []) {
+      const key = makeKey(info);
+      if (key) {
+        prevTokenInfosMap.set(key, info);
+      }
+    }
+
+    for (const info of tokenScan.infos) {
+      const key = makeKey(info);
+      if (!key) {
+        continue;
+      }
+
+      const prevTokenInfo = prevTokenInfosMap.get(key);
+
+      if (!prevTokenInfo) {
+        if (info.assets.length > 0) {
+          return true;
+        }
+        continue;
+      }
+
+      const prevAssetMap = new Map<string, Assets>();
+      for (const asset of prevTokenInfo.assets) {
+        prevAssetMap.set(asset.currency.coinMinimalDenom, asset);
+      }
+
+      for (const asset of info.assets) {
+        const prevAsset = prevAssetMap.get(asset.currency.coinMinimalDenom);
+
+        // 없던 토큰이 생긴경우
+        if (!prevAsset) {
+          return true;
+        }
+
+        const prevAmount = toBigIntSafe(prevAsset.amount);
+        const curAmount = toBigIntSafe(asset.amount);
+        if (prevAmount == null || curAmount == null) {
+          continue;
+        }
+
+        // 이전에 0이였다가 밸런스가 생긴경우.
+        if (prevAmount === BigInt(0) && curAmount > BigInt(0)) {
+          return true;
+        }
+
+        // 이전 밸런스에 배해서 10% 밸런스가 증가한 경우
+        if (
+          prevAmount > BigInt(0) &&
+          curAmount * BigInt(10) >= prevAmount * BigInt(11)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   @computed
@@ -423,6 +636,24 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       });
     });
 
+    const dismissedNewTokenFound = yield* toGenerator(
+      this.kvStore.get<Record<string, boolean>>("dismissedNewTokenFound")
+    );
+
+    if (dismissedNewTokenFound) {
+      for (const [key, value] of Object.entries(dismissedNewTokenFound)) {
+        runInAction(() => {
+          this._newTokenFoundDismissed.set(key, value);
+        });
+      }
+    }
+
+    autorun(() => {
+      const js = toJS(this._newTokenFoundDismissed);
+      const obj = Object.fromEntries(js);
+      this.kvStore.set<Record<string, boolean>>("dismissedNewTokenFound", obj);
+    });
+
     yield Promise.all([
       this.updateChainInfosFromBackground(),
       this.updateEnabledChainIdentifiersFromBackground(),
@@ -510,6 +741,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._tokenScans = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
     );
+    this.resetDismissIfNeeded(id, this._tokenScans);
+
     (async () => {
       await new Promise<void>((resolve) => {
         const disposal = autorun(() => {
@@ -541,6 +774,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
           runInAction(() => {
             this._tokenScans = res.tokenScans;
           });
+          this.resetDismissIfNeeded(id, this._tokenScans);
         }
       }
     })();
