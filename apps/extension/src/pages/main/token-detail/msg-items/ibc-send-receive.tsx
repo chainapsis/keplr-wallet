@@ -18,7 +18,7 @@ export const MsgRelationIBCSendReceive: FunctionComponent<{
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const chainInfo = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const sendAmountPretty = useMemo(() => {
     const currency = chainInfo.forceFindCurrency(targetDenom);

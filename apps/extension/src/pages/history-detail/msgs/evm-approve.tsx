@@ -17,14 +17,14 @@ export const HistoryDetailEvmApprove: FunctionComponent<{
 }> = observer(({ msg, targetDenom }) => {
   const { chainStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
   const meta = msg.meta as ERC20ApproveRelMeta;
 
   const approveCurrency = useMemo(() => {
-    return chainInfo.findCurrency(
+    return modularChainInfoImpl.findCurrency(
       meta.contract ? `erc20:${meta.contract}` : targetDenom
     );
-  }, [chainInfo, meta.contract, targetDenom]);
+  }, [modularChainInfoImpl, meta.contract, targetDenom]);
 
   const spendingCapPretty = useMemo(() => {
     if (!meta.value || meta.value === "0") {

@@ -21,10 +21,10 @@ export const WelcomePage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const [isDesktop, setIsDesktop] = React.useState(true);
 
-  const osmosisInfo = chainStore.chainInfos.find(
+  const osmosisInfo = chainStore.modularChainInfos.find(
     (chainInfo) => chainInfo.chainId === "osmosis-1"
   );
-  const stargazeInfo = chainStore.chainInfos.find(
+  const stargazeInfo = chainStore.modularChainInfos.find(
     (chainInfo) => chainInfo.chainId === "stargaze-1"
   );
 

@@ -16,9 +16,13 @@ export class ObservableChainQuery<
     chainGetter: ChainGetter,
     url: string
   ) {
-    const chainInfo = chainGetter.getChain(chainId);
+    const modularChainInfo = chainGetter.getModularChain(chainId);
 
-    super(sharedContext, chainInfo.rest, url);
+    super(
+      sharedContext,
+      "cosmos" in modularChainInfo ? modularChainInfo.cosmos.rest : "",
+      url
+    );
 
     this._chainId = chainId;
     this.chainGetter = chainGetter;

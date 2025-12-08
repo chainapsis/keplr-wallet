@@ -76,14 +76,17 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     });
 
   const supportedChainInfos = useMemo(() => {
-    return chainStore.chainInfosInListUI.filter((chainInfo) => {
+    return chainStore.modularChainInfosInListUI.filter((chainInfo) => {
+      const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+        chainInfo.chainId
+      );
       return (
-        chainInfo.features?.includes("cosmwasm") ||
-        chainInfo.features?.includes("secretwasm") ||
-        chainInfo.evm != null
+        modularChainInfoImpl.hasFeature("cosmwasm") ||
+        modularChainInfoImpl.hasFeature("secretwasm") ||
+        ("evm" in chainInfo && chainInfo.evm != null)
       );
     });
-  }, [chainStore.chainInfosInListUI]);
+  }, [chainStore]);
   const starknetChainInfos = useMemo(() => {
     return chainStore.modularChainInfosInUI.filter((modularChainInfo) => {
       return (
@@ -100,7 +103,7 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     if (supportedChainInfos.length > 0) {
       return supportedChainInfos[0].chainId;
     } else {
-      return chainStore.chainInfos[0].chainId;
+      return chainStore.modularChainInfos[0].chainId;
     }
   });
 
@@ -145,18 +148,12 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
     };
   }, [accountStore, chainId]);
 
-  const { chainInfo, modularChainInfo } = (() => {
-    const modularChainInfo = chainStore.getModularChain(chainId);
-    if ("cosmos" in modularChainInfo) {
-      return { chainInfo: chainStore.getChain(chainId), modularChainInfo };
-    } else {
-      return { chainInfo: undefined, modularChainInfo };
-    }
-  })();
+  const modularChainInfo = chainStore.getModularChain(chainId);
 
-  const isSecretWasm = chainInfo?.hasFeature("secretwasm");
-  const isEvmChain =
-    chainInfo != null && "evm" in chainInfo && chainInfo.evm != null;
+  const isSecretWasm = chainStore
+    .getModularChainInfoImpl(chainId)
+    .hasFeature("secretwasm");
+  const isEvmChain = chainStore.isEvmChain(modularChainInfo.chainId);
   const isStarknet =
     modularChainInfo != null &&
     "starknet" in modularChainInfo &&
@@ -405,10 +402,14 @@ export const SettingTokenAddPage: FunctionComponent = observer(() => {
             required: true,
             validate: (value): string | undefined => {
               try {
-                if (!isEvmChain && !isStarknet) {
+                if (
+                  !isEvmChain &&
+                  !isStarknet &&
+                  "cosmos" in modularChainInfo
+                ) {
                   Bech32Address.validate(
                     value,
-                    chainInfo?.bech32Config?.bech32PrefixAccAddr
+                    modularChainInfo?.cosmos?.bech32Config?.bech32PrefixAccAddr
                   );
                 }
               } catch (e) {

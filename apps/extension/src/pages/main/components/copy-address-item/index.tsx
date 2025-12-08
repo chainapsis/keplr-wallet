@@ -67,8 +67,7 @@ export const CopyAddressItem = observer(
       }: CopyAddressItemProps,
       ref
     ) {
-      const { analyticsStore, keyRingStore, uiConfigStore, chainStore } =
-        useStore();
+      const { analyticsStore, keyRingStore, uiConfigStore } = useStore();
 
       const theme = useTheme();
 
@@ -84,9 +83,9 @@ export const CopyAddressItem = observer(
       const [isBookmarkHover, setIsBookmarkHover] = useState(false);
 
       const isEVMOnlyChain =
-        "cosmos" in address.modularChainInfo &&
-        address.modularChainInfo.cosmos != null &&
-        chainStore.isEvmOnlyChain(address.modularChainInfo.chainId);
+        "evm" in address.modularChainInfo &&
+        address.modularChainInfo.evm != null &&
+        !("cosmos" in address.modularChainInfo);
 
       const executeCopy = useCallback(async () => {
         if (blockInteraction) {

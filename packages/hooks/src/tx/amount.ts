@@ -165,20 +165,24 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
 
   @computed
   get currency(): AppCurrency {
-    const chainInfo = this.chainInfo;
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
 
     if (this._currency) {
-      const find = chainInfo.findCurrency(this._currency.coinMinimalDenom);
+      const find = modularChainInfoImpl.findCurrency(
+        this._currency.coinMinimalDenom
+      );
       if (find) {
         return find;
       }
     }
 
-    if (chainInfo.currencies.length === 0) {
+    if (modularChainInfoImpl.getCurrencies().length === 0) {
       throw new Error("Chain doesn't have the sendable currency informations");
     }
 
-    return chainInfo.currencies[0];
+    return modularChainInfoImpl.getCurrencies()[0];
   }
 
   @action
@@ -201,7 +205,11 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
   }
 
   canUseCurrency(currency: AppCurrency): boolean {
-    return this.chainInfo.findCurrency(currency.coinMinimalDenom) != null;
+    return (
+      this.chainGetter
+        .getModularChainInfoImpl(this.chainId)
+        .findCurrency(currency.coinMinimalDenom) != null
+    );
   }
 
   @computed
