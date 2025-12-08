@@ -130,21 +130,19 @@ export class TokenScanService {
         });
       }
     );
-    this.chainsUIService.addChainUIEnabledChangedHandler(
-      (vaultId, chainIdentifiers) => {
-        runInAction(() => {
-          let prevTokenScans = this.vaultToMap.get(vaultId);
-          if (prevTokenScans) {
-            prevTokenScans = prevTokenScans.filter((tokenScan) => {
-              return !chainIdentifiers.includes(
-                ChainIdHelper.parse(tokenScan.chainId).identifier
-              );
-            });
-            this.vaultToMap.set(vaultId, prevTokenScans);
-          }
-        });
-      }
-    );
+
+    this.chainsService.addChainRemovedHandler((chainInfo) => {
+      runInAction(() => {
+        for (const [vaultId, tokenScans] of this.vaultToMap.entries()) {
+          let prevTokenScans = tokenScans;
+          prevTokenScans = prevTokenScans.filter((scan) => {
+            return scan.chainId !== chainInfo.chainId;
+          });
+
+          this.vaultToMap.set(vaultId, prevTokenScans);
+        }
+      });
+    });
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
@@ -317,10 +315,6 @@ export class TokenScanService {
 
           prevTokenScans.push(tokenScan);
         }
-
-        prevTokenScans = prevTokenScans.filter((scan) => {
-          return !this.chainsUIService.isEnabled(vaultId, scan.chainId);
-        });
 
         this.vaultToMap.set(vaultId, prevTokenScans);
       });
