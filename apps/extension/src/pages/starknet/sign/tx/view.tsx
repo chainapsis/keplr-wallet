@@ -18,7 +18,7 @@ import {
   useSenderConfig,
   useTxConfigsValidate,
 } from "@keplr-wallet/hooks-starknet";
-import { MemoryKVStore } from "@keplr-wallet/common";
+import { MemoryKVStore, safeToBigInt } from "@keplr-wallet/common";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { num, InvocationsSignerDetails } from "starknet";
 import { Box } from "../../../../components/box";
@@ -84,7 +84,7 @@ export const SignStarknetTxView: FunctionComponent<{
     (() => {
       if ("resourceBounds" in interactionData.data.details) {
         return parseInt(
-          interactionData.data.details.resourceBounds.l1_gas.max_amount
+          interactionData.data.details.resourceBounds.l1_gas.max_amount.toString()
         );
       }
     })()
@@ -159,42 +159,36 @@ export const SignStarknetTxView: FunctionComponent<{
           .getAccount(chainId)
           .estimateInvokeFee(sender, interactionData.data.transactions);
 
-        const {
-          l1_gas_consumed,
-          l1_gas_price,
-          l2_gas_consumed,
-          l2_gas_price,
-          l1_data_gas_consumed,
-          l1_data_gas_price,
-        } = estimateResult;
+        const { l1_gas, l2_gas, l1_data_gas } = estimateResult.resourceBounds;
 
         const extraL2GasForOnchainVerification =
           interactionData.data.keyType === "ledger"
-            ? new Dec(90240)
-            : new Dec(22039040);
+            ? BigInt(90240)
+            : BigInt(22039040);
 
-        const adjustedL2GasConsumed = new Dec(l2_gas_consumed ?? 0).add(
-          extraL2GasForOnchainVerification
+        const adjustedL2GasConsumed =
+          l2_gas.max_amount + extraL2GasForOnchainVerification;
+
+        const l1Fee = l1_gas.max_amount * l1_gas.max_price_per_unit;
+        const l2Fee = adjustedL2GasConsumed * l2_gas.max_price_per_unit;
+        const l1DataFee =
+          l1_data_gas.max_amount * l1_data_gas.max_price_per_unit;
+
+        const calculatedOverallFee = l1Fee + l2Fee + l1DataFee;
+
+        const totalGasConsumed =
+          l1_gas.max_amount + adjustedL2GasConsumed + l1_data_gas.max_amount;
+
+        // margin 1.5x = 3/2
+        const adjustedGasPrice = calculatedOverallFee / totalGasConsumed;
+        const gasPrice = new CoinPretty(
+          feeCurrency,
+          new Dec(adjustedGasPrice.toString())
         );
-
-        const l1Fee = new Dec(l1_gas_consumed).mul(new Dec(l1_gas_price));
-        const l2Fee = adjustedL2GasConsumed.mul(new Dec(l2_gas_price ?? 0));
-        const l1DataFee = new Dec(l1_data_gas_consumed).mul(
-          new Dec(l1_data_gas_price)
+        const maxGasPrice = new CoinPretty(
+          feeCurrency,
+          new Dec(((adjustedGasPrice * BigInt(3)) / BigInt(2)).toString())
         );
-
-        const calculatedOverallFee = l1Fee.add(l2Fee).add(l1DataFee);
-
-        const totalGasConsumed = new Dec(l1_gas_consumed)
-          .add(adjustedL2GasConsumed)
-          .add(new Dec(l1_data_gas_consumed));
-
-        const adjustedGasPrice = calculatedOverallFee.quo(totalGasConsumed);
-
-        const gasPriceMargin = new Dec(1.5);
-
-        const gasPrice = new CoinPretty(feeCurrency, adjustedGasPrice);
-        const maxGasPrice = gasPrice.mul(gasPriceMargin);
 
         feeConfig.setGasPrice({
           gasPrice: gasPrice,
@@ -203,16 +197,16 @@ export const SignStarknetTxView: FunctionComponent<{
 
         return {
           l1Gas: {
-            consumed: l1_gas_consumed.toString(),
-            price: l1_gas_price.toString(),
+            consumed: l1_gas.max_amount.toString(),
+            price: l1_gas.max_price_per_unit.toString(),
           },
           l2Gas: {
             consumed: adjustedL2GasConsumed.toString(),
-            price: l2_gas_price?.toString() ?? "0",
+            price: l2_gas.max_price_per_unit.toString(),
           },
           l1DataGas: {
-            consumed: l1_data_gas_consumed.toString(),
-            price: l1_data_gas_price.toString(),
+            consumed: l1_data_gas.max_amount.toString(),
+            price: l1_data_gas.max_price_per_unit.toString(),
           },
         };
       };
@@ -305,14 +299,6 @@ export const SignStarknetTxView: FunctionComponent<{
       const maxL1GasPrice = new Dec(l1Gas.price).mul(margin);
       const maxL2GasPrice = new Dec(l2Gas.price).mul(margin);
 
-      const safeToHex = (value: string | Int | null | undefined): string => {
-        if (value === null || value === undefined) {
-          return "0";
-        }
-        const val = value.toString();
-        return num.toHex(val === "0x" ? "0" : val);
-      };
-
       const details: InvocationsSignerDetails = {
         version: "0x3",
         walletAddress: interactionData.data.details.walletAddress,
@@ -322,16 +308,16 @@ export const SignStarknetTxView: FunctionComponent<{
         skipValidate: false,
         resourceBounds: {
           l1_data_gas: {
-            max_amount: safeToHex(maxL1DataGas.truncate()),
-            max_price_per_unit: safeToHex(maxL1DataGasPrice.truncate()),
+            max_amount: safeToBigInt(maxL1DataGas.truncate()),
+            max_price_per_unit: safeToBigInt(maxL1DataGasPrice.truncate()),
           },
           l1_gas: {
-            max_amount: safeToHex(maxL1Gas.truncate()),
-            max_price_per_unit: safeToHex(maxL1GasPrice.truncate()),
+            max_amount: safeToBigInt(maxL1Gas.truncate()),
+            max_price_per_unit: safeToBigInt(maxL1GasPrice.truncate()),
           },
           l2_gas: {
-            max_amount: safeToHex(maxL2Gas.truncate()),
-            max_price_per_unit: safeToHex(maxL2GasPrice.truncate()),
+            max_amount: safeToBigInt(maxL2Gas.truncate()),
+            max_price_per_unit: safeToBigInt(maxL2GasPrice.truncate()),
           },
         },
         tip: "0x0",

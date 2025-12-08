@@ -4,7 +4,6 @@ import {
   AllowArray,
   Call,
   InvokeFunctionResponse,
-  TransactionType,
   UniversalDetails,
   num,
   stark,
@@ -17,7 +16,7 @@ import {
   ETransactionVersion,
 } from "starknet";
 import { Keplr } from "@keplr-wallet/types";
-import { Int } from "@keplr-wallet/unit";
+import { safeToBigInt } from "@keplr-wallet/common";
 
 export type Fee = {
   l1MaxGas: string;
@@ -35,13 +34,13 @@ export class StoreAccount extends Account {
     public readonly keplrChainId: string,
     protected readonly getKeplr: () => Promise<Keplr | undefined>
   ) {
-    super(
-      { nodeUrl: rpc, specVersion: "0.8.1" },
+    super({
+      provider: { nodeUrl: rpc, specVersion: "0.9.0" },
       address,
-      "",
-      "1",
-      ETransactionVersion.V3
-    );
+      cairoVersion: "1",
+      // Placeholder signer - actual signing is done via Keplr
+      signer: "0x0",
+    });
   }
 
   public override async deployAccount(
@@ -69,19 +68,13 @@ export class StoreAccount extends Account {
         0
       );
 
-    const estimate = await this.getUniversalSuggestedFee(
-      version,
-      {
-        type: TransactionType.DEPLOY_ACCOUNT,
-        payload: {
-          classHash,
-          constructorCalldata,
-          addressSalt,
-          contractAddress,
-        },
-      },
-      details
-    );
+    const estimate = await this.estimateAccountDeployFee({
+      classHash,
+      constructorCalldata,
+      addressSalt,
+      contractAddress,
+      ...stark.v3Details(details),
+    });
 
     const keplr = await this.getKeplr();
     if (!keplr) {
@@ -89,7 +82,7 @@ export class StoreAccount extends Account {
     }
     const { transaction: newTransaction, signature } =
       await keplr.signStarknetDeployAccountTransaction(this.keplrChainId, {
-        ...stark.v3Details(details, "0.8.1"),
+        ...stark.v3Details(details),
         classHash,
         constructorCalldata,
         contractAddress,
@@ -103,7 +96,7 @@ export class StoreAccount extends Account {
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },
       {
-        ...stark.v3Details(newTransaction, "0.8.1"),
+        ...stark.v3Details(newTransaction),
         ...newTransaction,
       }
     );
@@ -150,16 +143,8 @@ export class StoreAccount extends Account {
         0
       );
 
-    const safeToHex = (value: string | Int | null | undefined): string => {
-      if (value === null || value === undefined) {
-        return "0";
-      }
-      const val = value.toString();
-      return num.toHex(val === "0x" ? "0" : val);
-    };
-
     const signerDetails: DeployAccountSignerDetails = {
-      ...stark.v3Details({}, "0.8.1"),
+      ...stark.v3Details({}),
       classHash,
       constructorCalldata,
       contractAddress,
@@ -169,16 +154,16 @@ export class StoreAccount extends Account {
       chainId: chainId,
       resourceBounds: {
         l1_gas: {
-          max_amount: safeToHex(fee.l1MaxGas),
-          max_price_per_unit: safeToHex(fee.l1MaxGasPrice),
+          max_amount: safeToBigInt(fee.l1MaxGas),
+          max_price_per_unit: safeToBigInt(fee.l1MaxGasPrice),
         },
         l2_gas: {
-          max_amount: safeToHex(fee.l2MaxGas),
-          max_price_per_unit: safeToHex(fee.l2MaxGasPrice),
+          max_amount: safeToBigInt(fee.l2MaxGas),
+          max_price_per_unit: safeToBigInt(fee.l2MaxGasPrice),
         },
         l1_data_gas: {
-          max_amount: safeToHex(fee.l1MaxDataGas),
-          max_price_per_unit: safeToHex(fee.l1MaxDataGasPrice),
+          max_amount: safeToBigInt(fee.l1MaxDataGas),
+          max_price_per_unit: safeToBigInt(fee.l1MaxDataGasPrice),
         },
       },
     };
@@ -196,7 +181,7 @@ export class StoreAccount extends Account {
     return this.deployAccountContract(
       { classHash, addressSalt, constructorCalldata, signature },
       {
-        ...stark.v3Details(newTransaction, "0.8.1"),
+        ...stark.v3Details(newTransaction),
         ...newTransaction,
       }
     );
@@ -225,19 +210,15 @@ export class StoreAccount extends Account {
       throw new Error(`Invalid version: ${version}`);
     }
 
-    const estimate = await this.getUniversalSuggestedFee(
+    const estimate = await this.estimateInvokeFee(transactions, {
+      ...details,
       version,
-      { type: TransactionType.INVOKE, payload: transactions },
-      {
-        ...details,
-        version,
-      }
-    );
+    });
 
     const chainId = await this.getChainId();
 
     const signerDetails: InvocationsSignerDetails = {
-      ...stark.v3Details(details, "0.8.1"),
+      ...stark.v3Details(details),
       resourceBounds: estimate.resourceBounds,
       walletAddress: this.address,
       nonce,
@@ -282,35 +263,28 @@ export class StoreAccount extends Account {
   ): Promise<InvokeFunctionResponse> {
     const nonce = await this.getNonce();
     const chainId = await this.getChainId();
-
-    const safeToHex = (value: string | Int | null | undefined): string => {
-      if (value === null || value === undefined) {
-        return "0";
-      }
-      const val = value.toString();
-      return num.toHex(val === "0x" ? "0" : val);
-    };
+    const cairoVersion = await this.getCairoVersion();
 
     const signerDetails: InvocationsSignerDetails = {
-      ...stark.v3Details({}, "0.8.1"),
+      ...stark.v3Details({}),
       version: ETransactionVersion.V3,
       walletAddress: this.address,
       nonce: nonce,
       chainId: chainId,
-      cairoVersion: this.cairoVersion,
+      cairoVersion: cairoVersion,
       skipValidate: false,
       resourceBounds: {
         l1_gas: {
-          max_amount: safeToHex(fee.l1MaxGas),
-          max_price_per_unit: safeToHex(fee.l1MaxGasPrice),
+          max_amount: safeToBigInt(fee.l1MaxGas),
+          max_price_per_unit: safeToBigInt(fee.l1MaxGasPrice),
         },
         l2_gas: {
-          max_amount: safeToHex(fee.l2MaxGas),
-          max_price_per_unit: safeToHex(fee.l2MaxGasPrice),
+          max_amount: safeToBigInt(fee.l2MaxGas),
+          max_price_per_unit: safeToBigInt(fee.l2MaxGasPrice),
         },
         l1_data_gas: {
-          max_amount: safeToHex(fee.l1MaxDataGas),
-          max_price_per_unit: safeToHex(fee.l1MaxDataGasPrice),
+          max_amount: safeToBigInt(fee.l1MaxDataGas),
+          max_price_per_unit: safeToBigInt(fee.l1MaxDataGasPrice),
         },
       },
     };
@@ -339,10 +313,7 @@ export class StoreAccount extends Account {
       signature = result.signature;
     }
 
-    const calldata = transaction.getExecuteCalldata(
-      transactions,
-      await this.getCairoVersion()
-    );
+    const calldata = transaction.getExecuteCalldata(transactions, cairoVersion);
 
     return this.invokeFunction(
       { contractAddress: this.address, calldata, signature },
