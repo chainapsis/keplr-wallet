@@ -609,6 +609,8 @@
   "page.main.components.ibc-history-view.ibc-swap.item.succeed": "兑换成功。",
   "page.main.components.ibc-history-view.ibc-swap.item.refund.pending": "正在退款。",
   "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed": "退款完成。",
+  "page.main.components.ibc-history-view.ibc-swap.item.action-required": "需要操作",
+  "page.main.components.ibc-history-view.swap-v2.continue-signing": "继续签名",
   "page.main.components.ibc-history-view.send-bridge.item.pending": "转账进行中",
   "page.main.components.ibc-history-view.send-bridge.item.succeed": "转账成功。",
   "page.main.components.ibc-history-view.paragraph": "从 {sourceChain} 转 {assets} 到 {destinationChain}",

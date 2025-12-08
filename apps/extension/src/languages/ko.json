@@ -646,6 +646,8 @@
   "page.main.components.ibc-history-view.ibc-swap.item.succeed": "토큰 교환 성공",
   "page.main.components.ibc-history-view.ibc-swap.item.refund.pending": "환불 진행중",
   "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed": "환불 완료",
+  "page.main.components.ibc-history-view.ibc-swap.item.action-required": "서명 대기중",
+  "page.main.components.ibc-history-view.swap-v2.continue-signing": "서명 계속하기",
   "page.main.components.ibc-history-view.send-bridge.item.pending": "토큰 전송 진행중",
   "page.main.components.ibc-history-view.send-bridge.item.succeed": "토큰 전송 성공",
   "page.main.components.ibc-history-view.paragraph": "{sourceChain}에서 {destinationChain}(으)로 {assets} 보내기",

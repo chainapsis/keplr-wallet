@@ -1,9 +1,17 @@
-import React, { FunctionComponent, useEffect, useState } from "react";
+import React, {
+  FunctionComponent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { observer } from "mobx-react-lite";
 import {
+  BackgroundTxStatus,
   GetIBCHistoriesMsg,
   GetSkipHistoriesMsg,
   GetSwapV2HistoriesMsg,
+  GetTxExecutionMsg,
   HideSwapV2HistoryMsg,
   IBCHistory,
   RemoveIBCHistoryMsg,
@@ -12,12 +20,14 @@ import {
   SkipHistory,
   SwapV2History,
   SwapV2TxStatus,
+  TxExecution,
 } from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useLayoutEffectOnce } from "../../../../hooks/use-effect-once";
 import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
+import { Button } from "../../../../components/button";
 import { Gutter } from "../../../../components/gutter";
 import { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
@@ -31,6 +41,8 @@ import {
 } from "../../../../components/typography";
 import {
   CheckCircleIcon,
+  ChevronRightIcon,
+  InformationIcon,
   LoadingIcon,
   XMarkIcon,
 } from "../../../../components/icon";
@@ -334,8 +346,8 @@ export const IbcHistoryView: FunctionComponent<{
               history={history}
               removeHistory={(id) => {
                 const requester = new InExtensionMessageRequester();
-                if (history.requiresNextTransaction && !history.trackDone) {
-                  // do not remove the history before the tracking is done
+                if (history.backgroundExecutionId && !history.trackDone) {
+                  // do not remove the history before the tracking is done (multi tx case)
                   const msg = new HideSwapV2HistoryMsg(id);
                   requester.sendMessage(BACKGROUND_PORT, msg);
                 } else {
@@ -1193,7 +1205,12 @@ const SkipHistoryViewItem: FunctionComponent<{
 
               return chainIds.map((chainId, i) => {
                 const chainInfo = chainStore.getChain(chainId);
-                const completed = !!history.trackDone || i < history.routeIndex;
+                // Only mark as completed based on routeIndex, not trackDone
+                const completed =
+                  i < history.routeIndex ||
+                  (i === history.routeIndex &&
+                    !!history.trackDone &&
+                    !history.trackError);
                 const error = !!history.trackError && i >= failedRouteIndex;
 
                 return (
@@ -1406,42 +1423,145 @@ const SwapV2HistoryViewItem: FunctionComponent<{
   history: SwapV2History;
   removeHistory: (id: string) => void;
 }> = observer(({ history, removeHistory }) => {
-  const { chainStore } = useStore();
+  const { chainStore, uiConfigStore } = useStore();
 
   const theme = useTheme();
   const intl = useIntl();
 
-  const historyCompleted = (() => {
+  const [txExecution, setTxExecution] = useState<TxExecution | undefined>(
+    undefined
+  );
+
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const backgroundExecutionId = history.backgroundExecutionId;
+    if (!backgroundExecutionId) {
+      setTxExecution(undefined);
+      return;
+    }
+
+    const clearPolling = () => {
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    };
+
+    const fetchTxExecution = () => {
+      const requester = new InExtensionMessageRequester();
+      requester
+        .sendMessage(
+          BACKGROUND_PORT,
+          new GetTxExecutionMsg(backgroundExecutionId)
+        )
+        .then((execution) => {
+          setTxExecution(execution);
+        })
+        .catch((e) => {
+          console.error("Failed to get tx execution:", e);
+          setTxExecution(undefined);
+          // execution이 없으면 polling 중단
+          clearPolling();
+        });
+    };
+
+    fetchTxExecution();
+
+    // 5초마다 주기적으로 가져오기
+    intervalIdRef.current = setInterval(fetchTxExecution, 5000);
+
+    return () => {
+      clearPolling();
+    };
+  }, [history.backgroundExecutionId]);
+
+  const historyCompleted = useMemo(() => {
     if (!history.trackDone) {
       return false;
     }
 
-    // If there's a track error, check if swapRefundInfo exists (refund completed)
+    // If there's a track error, check if assetLocationInfo exists (refund completed)
     if (history.trackError) {
-      return !!history.swapRefundInfo;
+      return !!history.assetLocationInfo;
+    }
+
+    // SUCCESS 상태에서 assetLocationInfo가 없으면 destination에 도달한 것
+    if (
+      history.status === SwapV2TxStatus.SUCCESS &&
+      !history.assetLocationInfo
+    ) {
+      return true;
     }
 
     // Success or partial success with last route completed
+    // CHECK: partial success는 어떤 경우에 발생하는가
     return (
       (history.status === SwapV2TxStatus.SUCCESS ||
         history.status === SwapV2TxStatus.PARTIAL_SUCCESS) &&
       history.routeIndex === history.simpleRoute.length - 1
     );
-  })();
+  }, [history]);
 
-  const failedRouteIndex = (() => {
+  const failedRouteIndex = useMemo(() => {
     // Failed if status is FAILED or if there's a trackError
     if (history.status === SwapV2TxStatus.FAILED || history.trackError) {
       return history.routeIndex;
     }
     return -1;
-  })();
+  }, [history]);
 
-  const failedRoute = (() => {
+  const failedRoute = useMemo(() => {
     if (failedRouteIndex >= 0) {
       return history.simpleRoute[failedRouteIndex];
     }
-  })();
+  }, [failedRouteIndex, history]);
+
+  const hasExecutableTx = useMemo(() => {
+    if (!txExecution || !history.backgroundExecutionId) {
+      return false;
+    }
+    return txExecution.txs.some(
+      (tx) =>
+        (tx.status === BackgroundTxStatus.PENDING ||
+          tx.status === BackgroundTxStatus.BLOCKED) &&
+        txExecution.executableChainIds.includes(tx.chainId)
+    );
+  }, [txExecution, history.backgroundExecutionId]);
+
+  // 실행된 개수 / 총 실행해야 하는 tx 개수
+  const txExecutionProgress: {
+    executedTxCount: number;
+    totalTxCount: number;
+  } = useMemo(() => {
+    if (!txExecution || !history.backgroundExecutionId) {
+      return {
+        executedTxCount: 0,
+        totalTxCount: 0,
+      };
+    }
+    const executedTxCount = txExecution.txs.filter(
+      (tx) => tx.status === BackgroundTxStatus.CONFIRMED
+    ).length;
+    const totalTxCount = txExecution.txs.length;
+    return {
+      executedTxCount,
+      totalTxCount,
+    };
+  }, [txExecution, history.backgroundExecutionId]);
+
+  async function handleContinueSigning() {
+    try {
+      uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
+
+      // TODO: implement continue signing
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    } catch (error) {
+      console.error("Failed to continue signing:", error);
+    } finally {
+      uiConfigStore.ibcSwapConfig.setIsSwapLoading(false);
+    }
+  }
 
   if (history.hidden) {
     return null;
@@ -1474,6 +1594,16 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                       ? ColorPalette["orange-400"]
                       : ColorPalette["yellow-400"]
                   }
+                />
+              );
+            }
+
+            if (hasExecutableTx) {
+              return (
+                <InformationIcon
+                  width="1.25rem"
+                  height="1.25rem"
+                  color={ColorPalette["gray-200"]}
                 />
               );
             }
@@ -1514,7 +1644,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               if (failedRouteIndex >= 0) {
                 if (
                   history.status === SwapV2TxStatus.FAILED &&
-                  history.swapRefundInfo
+                  history.assetLocationInfo
                 ) {
                   return intl.formatMessage({
                     id: "page.main.components.ibc-history-view.ibc-swap.item.refund.succeed",
@@ -1533,6 +1663,12 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                   : intl.formatMessage({
                       id: "page.main.components.ibc-history-view.send-bridge.item.succeed",
                     });
+              }
+
+              if (hasExecutableTx) {
+                return intl.formatMessage({
+                  id: "page.main.components.ibc-history-view.ibc-swap.item.action-required",
+                });
               }
 
               return !historyCompleted
@@ -1690,10 +1826,35 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 return route.chainId;
               });
 
+              // assetLocationInfo가 있으면 해당 체인까지는 asset이 릴리즈된 것이므로 성공으로 처리
+              const assetReleasedRouteIndex = (() => {
+                if (history.assetLocationInfo) {
+                  const idx = chainIds.findIndex(
+                    (chainId) => chainId === history.assetLocationInfo!.chainId
+                  );
+                  if (idx >= 0) {
+                    return idx;
+                  }
+                }
+                return -1;
+              })();
+
               return chainIds.map((chainId, i) => {
                 const chainInfo = chainStore.getChain(chainId);
-                const completed = !!history.trackDone || i < history.routeIndex;
-                const error = !!history.trackError && i >= failedRouteIndex;
+                // Asset이 릴리즈된 체인까지는 성공으로 처리
+                const completed =
+                  i < history.routeIndex ||
+                  (i === history.routeIndex &&
+                    !!history.trackDone &&
+                    !history.trackError) ||
+                  (assetReleasedRouteIndex >= 0 &&
+                    i <= assetReleasedRouteIndex);
+
+                // 에러는 assetReleasedRouteIndex보다 큰 인덱스에서만 표시
+                const error =
+                  !!history.trackError &&
+                  i >= failedRouteIndex &&
+                  (assetReleasedRouteIndex < 0 || i > assetReleasedRouteIndex);
 
                 return (
                   // 일부분 순환하는 경우도 이론적으로 가능은 하기 때문에 chain id를 key로 사용하지 않음.
@@ -1703,6 +1864,13 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                     completed={!error && completed}
                     notCompletedBlink={(() => {
                       if (failedRoute) {
+                        // asset이 릴리즈된 체인까지는 blink하지 않음
+                        if (
+                          assetReleasedRouteIndex >= 0 &&
+                          i <= assetReleasedRouteIndex
+                        ) {
+                          return false;
+                        }
                         return i === failedRouteIndex;
                       }
 
@@ -1721,7 +1889,12 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                         return "right";
                       }
 
-                      return i === failedRouteIndex ? "left" : "hide";
+                      // asset이 릴리즈된 체인이 있으면, 그 이후는 화살표 숨김
+                      if (assetReleasedRouteIndex >= 0) {
+                        return i > assetReleasedRouteIndex ? "hide" : "right";
+                      }
+
+                      return i === failedRouteIndex ? "left" : "right";
                     })()}
                     error={error}
                     isLast={chainIds.length - 1 === i}
@@ -1748,16 +1921,18 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                   history.status === SwapV2TxStatus.PARTIAL_SUCCESS;
 
                 // status tracking이 오류로 끝난 경우
-                // SwapV2에서는 swapRefundInfo를 사용하여 환불 정보 표시
+                // SwapV2에서는 assetLocationInfo를 사용하여 환불 정보 표시
                 if (
                   history.trackDone &&
                   (history.trackError ||
                     history.status === SwapV2TxStatus.FAILED)
                 ) {
-                  if (history.swapRefundInfo) {
-                    if (chainStore.hasChain(history.swapRefundInfo.chainId)) {
-                      const swapRefundChain = chainStore.getChain(
-                        history.swapRefundInfo.chainId
+                  if (history.assetLocationInfo) {
+                    if (
+                      chainStore.hasChain(history.assetLocationInfo.chainId)
+                    ) {
+                      const assetLocationChain = chainStore.getChain(
+                        history.assetLocationInfo.chainId
                       );
 
                       return intl.formatMessage(
@@ -1765,12 +1940,12 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                           id: "page.main.components.ibc-history-view.skip-swap.failed.after-transfer.complete",
                         },
                         {
-                          chain: swapRefundChain.chainName,
-                          assets: history.swapRefundInfo.amount
+                          chain: assetLocationChain.chainName,
+                          assets: history.assetLocationInfo.amount
                             .map((amount) => {
                               return new CoinPretty(
                                 chainStore
-                                  .getChain(history.swapRefundInfo!.chainId)
+                                  .getChain(history.assetLocationInfo!.chainId)
                                   .forceFindCurrency(amount.denom),
                                 amount.amount
                               )
@@ -1795,7 +1970,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
             />
           </Caption1>
         </VerticalCollapseTransition>
-
         <VerticalCollapseTransition collapsed={historyCompleted}>
           <Gutter size="1rem" />
           <Box
@@ -1806,61 +1980,140 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 : ColorPalette["gray-500"]
             }
           />
-          <Gutter size="1rem" />
+          {/* only show estimated duration when there is no executable tx */}
+          {!hasExecutableTx && (
+            <React.Fragment>
+              <Gutter size="1rem" />
 
-          <XAxis alignY="center">
-            <Subtitle3
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-300"]
-                  : ColorPalette["gray-200"]
-              }
-            >
-              <FormattedMessage id="page.main.components.ibc-history-view.estimated-duration" />
-            </Subtitle3>
-            <div
-              style={{
-                flex: 1,
-              }}
-            />
-            <Body2
-              color={
-                theme.mode === "light"
-                  ? ColorPalette["gray-600"]
-                  : ColorPalette["gray-10"]
-              }
-            >
-              <FormattedMessage
-                id="page.main.components.ibc-history-view.estimated-duration.value"
-                values={{
-                  minutes: (() => {
-                    const minutes = Math.floor(
-                      history.routeDurationSeconds / 60
-                    );
-                    const seconds = history.routeDurationSeconds % 60;
+              <XAxis alignY="center">
+                <Subtitle3
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  <FormattedMessage id="page.main.components.ibc-history-view.estimated-duration" />
+                </Subtitle3>
+                <div
+                  style={{
+                    flex: 1,
+                  }}
+                />
+                <Body2
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-600"]
+                      : ColorPalette["gray-10"]
+                  }
+                >
+                  <FormattedMessage
+                    id="page.main.components.ibc-history-view.estimated-duration.value"
+                    values={{
+                      minutes: (() => {
+                        const minutes = Math.floor(
+                          history.routeDurationSeconds / 60
+                        );
+                        const seconds = history.routeDurationSeconds % 60;
 
-                    return minutes + Math.ceil(seconds / 60);
-                  })(),
-                }}
-              />
-            </Body2>
-          </XAxis>
-
-          <Gutter size="1rem" />
-
-          <Caption2
-            color={
-              theme.mode === "light"
-                ? ColorPalette["gray-300"]
-                : ColorPalette["gray-200"]
-            }
-          >
-            <FormattedMessage
-              id={
-                "page.main.components.ibc-history-view.ibc-swap.help.can-close-extension"
-              }
-            />
-          </Caption2>
+                        return minutes + Math.ceil(seconds / 60);
+                      })(),
+                    }}
+                  />
+                </Body2>
+              </XAxis>
+            </React.Fragment>
+          )}
+          {/* only show close message when there is no tx execution */}
+          {!txExecution && (
+            <React.Fragment>
+              <Gutter size="1rem" />
+              <Caption2
+                color={
+                  theme.mode === "light"
+                    ? ColorPalette["gray-300"]
+                    : ColorPalette["gray-200"]
+                }
+              >
+                <FormattedMessage
+                  id={
+                    "page.main.components.ibc-history-view.ibc-swap.help.can-close-extension"
+                  }
+                />
+              </Caption2>
+            </React.Fragment>
+          )}
+          {/* only show continue transaction button when there is tx execution */}
+          {txExecution && (
+            <React.Fragment>
+              <Gutter size="1rem" />
+              <XAxis alignY="center">
+                <Box
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  {Array.from({
+                    length: txExecutionProgress.totalTxCount,
+                  }).map((_, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        width: "0.25rem",
+                        height: "0.75rem",
+                        borderRadius: "13.875rem",
+                        backgroundColor:
+                          theme.mode === "light"
+                            ? ColorPalette["blue-400"]
+                            : ColorPalette["white"],
+                        opacity:
+                          index < txExecutionProgress.executedTxCount ? 1 : 0.3,
+                      }}
+                    />
+                  ))}
+                </Box>
+                <Gutter size="0.375rem" />
+                <Subtitle4
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-300"]
+                      : ColorPalette["gray-200"]
+                  }
+                >
+                  {txExecutionProgress.executedTxCount}/
+                  {txExecutionProgress.totalTxCount} Approvals
+                </Subtitle4>
+                <div style={{ flex: 1 }} />
+                {hasExecutableTx ? (
+                  <Button
+                    text={intl.formatMessage({
+                      id: "page.main.components.ibc-history-view.swap-v2.continue-signing",
+                    })}
+                    size="small"
+                    color="secondary"
+                    mode="ghost"
+                    buttonStyle={{
+                      color:
+                        theme.mode === "light"
+                          ? ColorPalette["gray-600"]
+                          : ColorPalette["gray-50"],
+                    }}
+                    isLoading={uiConfigStore.ibcSwapConfig.isSwapLoading}
+                    right={
+                      uiConfigStore.ibcSwapConfig.isSwapLoading ? null : (
+                        <ChevronRightIcon width="1rem" height="1rem" />
+                      )
+                    }
+                    onClick={handleContinueSigning}
+                  />
+                ) : null}
+              </XAxis>
+            </React.Fragment>
+          )}
         </VerticalCollapseTransition>
       </YAxis>
     </Box>
