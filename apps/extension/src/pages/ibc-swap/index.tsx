@@ -594,8 +594,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           throw new Error("EVM gas simulation outcome is not set");
         }
 
-        uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
-
         const queryRoute = swapConfigs.amountConfig.getQueryRoute()!;
 
         let txs: (
@@ -621,6 +619,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         let routeDurationSeconds: number | undefined;
         let isInterChainSwap: boolean = false;
         let isSingleEVMChainOperation: boolean = false;
+
+        uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
 
         // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
         // swapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하므로 굳이 여기서 또 하지 않는다.
@@ -1030,6 +1030,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
         })[] = [];
 
+        const requiresMultipleTxs = txs.length > 1;
         const totalSignatureCount = txs.reduce((acc, curr) => {
           if ("send" in curr) {
             return acc + 1;
@@ -1037,8 +1038,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             return acc + 1 + (curr.requiredErc20Approvals?.length ?? 0);
           }
         }, 0);
-
-        const requiresMultipleTxs = txs.length > 1;
 
         // find the index of the tx to be recorded as history
         // and set the balance update callback based on the first tx type
@@ -1096,12 +1095,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           // totalSignatureCount > 1 covers APPROVAL_ONLY_SIMULATED case where txs.length is 1
           // but approval + swap requires 2 signatures
           const shouldShowSignatureProgress =
-            requiresMultipleTxs || isHardwareWallet;
-          if (shouldShowSignatureProgress || totalSignatureCount > 1) {
+            requiresMultipleTxs ||
+            isHardwareWallet ||
+            gasSimulator.evmSimulationOutcome ===
+              EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED;
+          if (shouldShowSignatureProgress) {
             uiConfigStore.ibcSwapConfig.setSignatureProgress(
               totalSignatureCount,
-              0,
-              shouldShowSignatureProgress
+              0
             );
           }
 
@@ -1251,104 +1252,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           )}`,
                         };
 
-                  const isErc20ApprovalTx =
-                    evmTxIndex === 0 &&
-                    evmTxs.length > 1 &&
-                    erc20ApprovalTx != null;
-
-                  // if evmSimulationOutcome이 bundle인데 callback으로 erc20 approval만 계산되었다면,
-                  // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음 swap 트랜잭션의 서명을 처리해줘야만 한다.
-                  // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵한다.
                   if (
-                    evmSimulationOutcome ===
-                      EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED &&
-                    isErc20ApprovalTx
+                    requiresMultipleTxs ||
+                    isHardwareWallet ||
+                    gasSimulator.evmSimulationOutcome ===
+                      EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
                   ) {
-                    // For APPROVAL_ONLY_SIMULATED, use gas limit as calculated by the simulator
-                    // for the ERC20 approval tx (stored in gasConfig).
-                    const feeObject = buildEvmFeeObject(
-                      swapConfigs.gasConfig.gas
-                    );
-
-                    ethereumAccount.setIsSendingTx(true);
-
-                    // wait for the erc20 approval tx to be executed and confirmed
-                    // before signing the swap tx
-                    const erc20ApprovalTxHash = await new Promise<string>(
-                      (resolve, reject) => {
-                        ethereumAccount
-                          .sendEthereumTx(
-                            sender,
-                            {
-                              ...evmTx,
-                              ...feeObject,
-                            },
-                            {
-                              onBroadcastFailed: (e) => {
-                                if (
-                                  erc20ApprovalTx &&
-                                  e?.message === "Request rejected"
-                                ) {
-                                  // logEvent("erc20_approve_sign_canceled", {
-                                  //   quote_id: quoteIdRef.current,
-                                  // });
-                                }
-
-                                reject(e ?? new Error("Broadcast failed"));
-                              },
-                              onBroadcasted: () => {
-                                // logEvent("erc20_approve_tx_submitted", {
-                                //   quote_id: quoteIdRef.current,
-                                // });
-                              },
-                              onFulfill: (txReceipt) => {
-                                const queryBalances = queriesStore.get(
-                                  swapConfigs.amountConfig.chainId
-                                ).queryBalances;
-                                queryBalances
-                                  .getQueryEthereumHexAddress(sender)
-                                  .balances.forEach((balance) => {
-                                    if (
-                                      balance.currency.coinMinimalDenom ===
-                                        swapConfigs.amountConfig.currency
-                                          .coinMinimalDenom ||
-                                      swapConfigs.feeConfig.fees.some(
-                                        (fee) =>
-                                          fee.currency.coinMinimalDenom ===
-                                          balance.currency.coinMinimalDenom
-                                      )
-                                    ) {
-                                      balance.fetch();
-                                    }
-                                  });
-
-                                if (txReceipt.status === EthTxStatus.Success) {
-                                  resolve(txReceipt.transactionHash);
-                                } else {
-                                  reject(new Error("Transaction failed"));
-                                }
-                              },
-                            }
-                          )
-                          .catch(reject)
-                          .finally(() => {
-                            ethereumAccount.setIsSendingTx(false);
-                          });
-                      }
-                    );
-
-                    // update the backgroundTx with the erc20 approval tx hash
-                    backgroundTx.status = BackgroundTxStatus.CONFIRMED;
-                    backgroundTx.txData = {
-                      ...backgroundTx.txData,
-                      ...feeObject,
-                    };
-                    backgroundTx.txHash = erc20ApprovalTxHash;
-
-                    uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
-
-                    evmBackgroundTxs.push(backgroundTx);
-                  } else if (requiresMultipleTxs || isHardwareWallet) {
                     let gasLimit: number;
                     if (
                       evmSimulationOutcome ===
@@ -1358,18 +1267,31 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         sender,
                         evmTx
                       );
+
+                      console.log("only one tx and tx is simulated", result);
+
                       gasLimit = result.gasUsed;
                     } else if (
                       evmSimulationOutcome ===
-                        EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED &&
-                      evmTxs.length === 2
+                        EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED ||
+                      evmSimulationOutcome ===
+                        EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
                     ) {
                       // if bundle evm tx, calculate the gas limit for each tx
-                      if (evmTxIndex === 0) {
-                        // erc20 approval tx gas를 새로 계산해야 한다
-                        const approvalGasLimit =
-                          await ethereumAccount.simulateGas(sender, evmTx);
-                        gasLimit = approvalGasLimit.gasUsed;
+                      if (
+                        evmTxIndex === 0 ||
+                        evmSimulationOutcome ===
+                          EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
+                      ) {
+                        // 번들 시뮬레이션이 불가 또는 불필요하다
+                        const result = await ethereumAccount.simulateGas(
+                          sender,
+                          evmTx
+                        );
+
+                        console.log("single tx is simulated", result);
+
+                        gasLimit = result.gasUsed;
                       } else {
                         const result =
                           await ethereumAccount.simulateGasWithPendingErc20Approval(
@@ -1379,6 +1301,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                               requiredErc20Approvals: [erc20Approval!],
                             }
                           );
+                        console.log("bundle tx is simulated", result);
                         gasLimit = result.gasUsed ?? 0;
                       }
                     } else {
@@ -1394,29 +1317,122 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                     // CHECK: need to add margin to the gas limit? 좀 간당간당한디
                     const feeObject = buildEvmFeeObject(gasLimit);
 
-                    const signedTx = await ethereumAccount.signEthereumTx(
-                      swapConfigs.senderConfig.sender,
-                      {
-                        ...evmTx,
+                    // if evmSimulationOutcome이 bundle인데 callback으로 erc20 approval만 계산되었다면,
+                    // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음 swap 트랜잭션의 서명을 처리해줘야만 한다.
+                    // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵한다.
+
+                    if (
+                      evmSimulationOutcome ===
+                        EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED &&
+                      evmTxIndex === 0 &&
+                      erc20Approval != null
+                    ) {
+                      ethereumAccount.setIsSendingTx(true);
+
+                      // wait for the erc20 approval tx to be executed and confirmed
+                      // before signing the swap tx
+                      const erc20ApprovalTxHash = await new Promise<string>(
+                        (resolve, reject) => {
+                          ethereumAccount
+                            .sendEthereumTx(
+                              sender,
+                              {
+                                ...evmTx,
+                                ...feeObject,
+                              },
+                              {
+                                onBroadcastFailed: (e) => {
+                                  if (
+                                    erc20ApprovalTx &&
+                                    e?.message === "Request rejected"
+                                  ) {
+                                    // logEvent("erc20_approve_sign_canceled", {
+                                    //   quote_id: quoteIdRef.current,
+                                    // });
+                                  }
+
+                                  reject(e ?? new Error("Broadcast failed"));
+                                },
+                                onBroadcasted: () => {
+                                  // logEvent("erc20_approve_tx_submitted", {
+                                  //   quote_id: quoteIdRef.current,
+                                  // });
+                                },
+                                onFulfill: (txReceipt) => {
+                                  const queryBalances = queriesStore.get(
+                                    swapConfigs.amountConfig.chainId
+                                  ).queryBalances;
+                                  queryBalances
+                                    .getQueryEthereumHexAddress(sender)
+                                    .balances.forEach((balance) => {
+                                      if (
+                                        balance.currency.coinMinimalDenom ===
+                                          swapConfigs.amountConfig.currency
+                                            .coinMinimalDenom ||
+                                        swapConfigs.feeConfig.fees.some(
+                                          (fee) =>
+                                            fee.currency.coinMinimalDenom ===
+                                            balance.currency.coinMinimalDenom
+                                        )
+                                      ) {
+                                        balance.fetch();
+                                      }
+                                    });
+
+                                  if (
+                                    txReceipt.status === EthTxStatus.Success
+                                  ) {
+                                    resolve(txReceipt.transactionHash);
+                                  } else {
+                                    reject(new Error("Transaction failed"));
+                                  }
+                                },
+                              }
+                            )
+                            .catch(reject)
+                            .finally(() => {
+                              ethereumAccount.setIsSendingTx(false);
+                            });
+                        }
+                      );
+
+                      // update the backgroundTx with the erc20 approval tx hash
+                      backgroundTx.status = BackgroundTxStatus.CONFIRMED;
+                      backgroundTx.txData = {
+                        ...backgroundTx.txData,
                         ...feeObject,
-                        ...(evmTxIndex !== 0 && erc20Approval != null
-                          ? { requiredErc20Approvals: [erc20Approval] }
-                          : {}),
-                      },
-                      {
-                        nonceMethod: "pending",
-                        considerRequiredErc20ApprovalsForNonce:
-                          evmTxIndex !== 0 && erc20Approval != null,
-                      }
-                    );
+                      };
+                      backgroundTx.txHash = erc20ApprovalTxHash;
 
-                    backgroundTx.signedTx = signedTx;
-                    backgroundTx.txData = {
-                      ...backgroundTx.txData,
-                      ...feeObject,
-                    };
+                      uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
+                    } else {
+                      const signedTx = await ethereumAccount.signEthereumTx(
+                        swapConfigs.senderConfig.sender,
+                        {
+                          ...evmTx,
+                          ...feeObject,
+                          ...(evmTxIndex !== 0 &&
+                          erc20Approval != null &&
+                          evmSimulationOutcome !==
+                            EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
+                            ? { requiredErc20Approvals: [erc20Approval] }
+                            : {}),
+                        },
+                        {
+                          nonceMethod: "pending",
+                          considerRequiredErc20ApprovalsForNonce:
+                            evmTxIndex !== 0 && erc20Approval != null,
+                        }
+                      );
 
-                    uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
+                      backgroundTx.txData = {
+                        ...backgroundTx.txData,
+                        ...feeObject,
+                      };
+                      backgroundTx.signedTx = signedTx;
+
+                      uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
+                    }
                   }
                 }
 
@@ -1622,6 +1638,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             //   quote_id: quoteIdRef.current,
             //   error_message: e?.message,
             // });
+          }
+
+          // in case of error, navigate back to the previous page if at least one signature is completed
+          const completedSignatures =
+            uiConfigStore.ibcSwapConfig.completedSignatureCount ?? 0;
+          if (completedSignatures > 0) {
+            navigate(-1);
           }
 
           console.log(e);

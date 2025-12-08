@@ -277,10 +277,10 @@ export class IBCSwapConfig {
   }
 
   @action
-  setSignatureProgress(total: number, completed: number, showInUI: boolean) {
+  setSignatureProgress(total: number, completed: number) {
     this._totalSignatureCount = total;
     this._completedSignatureCount = completed;
-    this._showSignatureProgress = showInUI;
+    this._showSignatureProgress = true;
   }
 
   @action
