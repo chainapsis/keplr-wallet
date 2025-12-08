@@ -759,7 +759,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       const lastTimestamp = this._lastTokenScanRevalidateTimestamp.get(id);
       if (
         lastTimestamp == null ||
-        Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+        // Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+        // QA 용으로 1분으로 설정
+        Date.now() - lastTimestamp > 3 * 60 * 1000
       ) {
         runInAction(() => {
           this._lastTokenScanRevalidateTimestamp.set(id, Date.now());
