@@ -2350,9 +2350,6 @@ export class RecentSendHistoryService {
       }
     }
 
-    // update routeIndex
-    history.routeIndex = updatedRouteIndex;
-
     const publishExecutableChains = (chainIds?: string[]) => {
       if (!history.backgroundExecutionId) {
         return;
@@ -2369,6 +2366,7 @@ export class RecentSendHistoryService {
       case SwapV2TxStatus.IN_PROGRESS:
         // publish executable chains if routeIndex increased
         if (updatedRouteIndex > prevRouteIndex) {
+          history.routeIndex = updatedRouteIndex;
           publishExecutableChains();
         }
         // Continue polling
@@ -2454,7 +2452,7 @@ export class RecentSendHistoryService {
               assetLocationChainIndex !== -1 &&
               assetLocationChainIndex > updatedRouteIndex
             ) {
-              updatedRouteIndex = assetLocationChainIndex;
+              history.routeIndex = assetLocationChainIndex;
             }
             executableChainIdsToPublish =
               this.getExecutableChainIdsFromSwapV2History(history);
@@ -3527,8 +3525,16 @@ export class RecentSendHistoryService {
     const endIndex = includeAllChainIds
       ? history.simpleRoute.length
       : Math.max(0, history.routeIndex + 1);
+
     for (let i = 0; i < endIndex; i++) {
       chainIds.push(history.simpleRoute[i].chainId);
+    }
+
+    if (
+      history.assetLocationInfo &&
+      history.assetLocationInfo.type === "intermediate"
+    ) {
+      chainIds.push(history.assetLocationInfo.chainId);
     }
 
     return chainIds;

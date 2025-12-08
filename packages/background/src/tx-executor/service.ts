@@ -147,12 +147,13 @@ export class BackgroundTxExecutorService {
           execution.type === TxExecutionType.SWAP_V2 &&
           execution.historyId != null
         ) {
-          const hasPendingExecutableTx = execution.txs.some(
+          const hasExecutableTx = execution.txs.some(
             (tx) =>
-              tx.status === BackgroundTxStatus.PENDING &&
+              (tx.status === BackgroundTxStatus.PENDING ||
+                tx.status === BackgroundTxStatus.BLOCKED) &&
               execution.executableChainIds.includes(tx.chainId)
           );
-          if (hasPendingExecutableTx) {
+          if (hasExecutableTx) {
             this.recentSendHistoryService.showRecentSwapV2History(
               execution.historyId
             );
