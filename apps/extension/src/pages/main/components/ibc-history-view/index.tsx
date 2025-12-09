@@ -1611,9 +1611,160 @@ const SwapV2HistoryViewItem: FunctionComponent<{
             txData
           );
 
-          // get fee
+          // get fee (similar to getEIP1559TxFees logic, using "average" fee type)
+          const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
+          const ETH_FEE_HISTORY_REWARD_PERCENTILES = [50];
+          const ETH_FEE_HISTORY_NEWEST_BLOCK = "latest";
+          const baseFeePercentageMultiplier = new Dec(1.25);
+          const percentile = 50;
 
-          // build fee object
+          let feeObject:
+            | {
+                type: 2;
+                maxFeePerGas: string;
+                maxPriorityFeePerGas: string;
+                gasLimit: string;
+              }
+            | {
+                gasPrice: string;
+                gasLimit: string;
+              };
+
+          if (ethereumQueries) {
+            // Wait for queries to be ready
+            const blockQuery =
+              ethereumQueries.queryEthereumBlock.getQueryByBlockNumberOrTag(
+                ETH_FEE_HISTORY_NEWEST_BLOCK
+              );
+            const feeHistoryQuery =
+              ethereumQueries.queryEthereumFeeHistory.getQueryByFeeHistoryParams(
+                ETH_FEE_HISTORY_BLOCK_COUNT,
+                ETH_FEE_HISTORY_NEWEST_BLOCK,
+                ETH_FEE_HISTORY_REWARD_PERCENTILES
+              );
+            const maxPriorityFeeQuery =
+              ethereumQueries.queryEthereumMaxPriorityFee;
+
+            await Promise.all([
+              blockQuery.waitResponse(),
+              feeHistoryQuery.waitResponse(),
+              maxPriorityFeeQuery.waitResponse(),
+            ]);
+
+            const block = blockQuery.block;
+            const latestBaseFeePerGas = parseInt(block?.baseFeePerGas ?? "0");
+
+            if (latestBaseFeePerGas !== 0) {
+              // EIP-1559 fee calculation
+              const baseFeePerGasDec = new Dec(latestBaseFeePerGas);
+              const baseFeePerGasWithMargin = baseFeePerGasDec.mul(
+                baseFeePercentageMultiplier
+              );
+
+              // Calculate maxPriorityFeePerGas from fee history
+              const reasonableMaxPriorityFeePerGas =
+                feeHistoryQuery.reasonableMaxPriorityFeePerGas;
+              const networkMaxPriorityFeePerGas =
+                maxPriorityFeeQuery.maxPriorityFeePerGas;
+
+              let maxPriorityFeePerGas: Dec;
+
+              if (
+                reasonableMaxPriorityFeePerGas &&
+                reasonableMaxPriorityFeePerGas.length > 0
+              ) {
+                const targetPercentileData =
+                  reasonableMaxPriorityFeePerGas.find(
+                    (item) => item.percentile === percentile
+                  );
+
+                if (targetPercentileData) {
+                  const historyBasedFee = new Dec(targetPercentileData.value);
+                  const networkSuggestedFee = new Dec(
+                    BigInt(networkMaxPriorityFeePerGas ?? "0x0")
+                  );
+
+                  maxPriorityFeePerGas = historyBasedFee.gt(networkSuggestedFee)
+                    ? historyBasedFee
+                    : networkSuggestedFee;
+                } else if (networkMaxPriorityFeePerGas) {
+                  maxPriorityFeePerGas = new Dec(
+                    BigInt(networkMaxPriorityFeePerGas)
+                  ).mul(baseFeePercentageMultiplier);
+                } else {
+                  maxPriorityFeePerGas = new Dec(0);
+                }
+              } else if (networkMaxPriorityFeePerGas) {
+                maxPriorityFeePerGas = new Dec(
+                  BigInt(networkMaxPriorityFeePerGas)
+                ).mul(baseFeePercentageMultiplier);
+              } else {
+                maxPriorityFeePerGas = new Dec(0);
+              }
+
+              const maxFeePerGas =
+                baseFeePerGasWithMargin.add(maxPriorityFeePerGas);
+
+              feeObject = {
+                type: 2 as const,
+                maxFeePerGas: `0x${BigInt(
+                  maxFeePerGas.truncate().toString()
+                ).toString(16)}`,
+                maxPriorityFeePerGas: `0x${BigInt(
+                  maxPriorityFeePerGas.truncate().toString()
+                ).toString(16)}`,
+                gasLimit: `0x${gasUsed.toString(16)}`,
+              };
+            } else {
+              // Fallback to legacy gas price
+              const gasPrice =
+                ethereumQueries.queryEthereumGasPrice.gasPrice ?? 0;
+              const multipliedGasPrice = new Dec(BigInt(gasPrice)).mul(
+                baseFeePercentageMultiplier
+              );
+
+              feeObject = {
+                gasPrice: `0x${BigInt(
+                  multipliedGasPrice.truncate().toString()
+                ).toString(16)}`,
+                gasLimit: `0x${gasUsed.toString(16)}`,
+              };
+            }
+          } else {
+            throw new Error("ethereumQueries is not available");
+          }
+
+          // sign and resume tx
+          const signedTx = await ethereumAccount.signEthereumTx(
+            account.ethereumHexAddress,
+            {
+              ...txData,
+              ...feeObject,
+            },
+            {
+              nonceMethod: "pending",
+            }
+          );
+
+          // resume background tx execution
+          const executeResult =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              new ResumeTxMsg(history.backgroundExecutionId, txIndex, signedTx)
+            );
+          if (executeResult.status === TxExecutionStatus.FAILED) {
+            throw new Error(
+              executeResult.error ?? "Transaction execution failed"
+            );
+          }
+
+          notification.show(
+            "success",
+            intl.formatMessage({ id: "notification.transaction-success" }),
+            ""
+          );
+
+          uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
 
           break;
         }
