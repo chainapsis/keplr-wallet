@@ -88,7 +88,7 @@ export const TransactionFeeModal: FunctionComponent<{
 
     const showExternalFeeSetGuide = isExternalMsg && disableAutomaticFeeSet;
 
-    const showRememberLastFeeOptionToggle = !isExternalMsg;
+    const showRememberLastFeeOptionToggle = !disableAutomaticFeeSet;
 
     const isGasSimulatorUsable = (() => {
       if (!gasSimulator) {
