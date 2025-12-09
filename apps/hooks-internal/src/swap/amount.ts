@@ -317,7 +317,6 @@ export class SwapAmountConfig extends AmountConfig {
       }
     }
 
-    // CHECK: skip의 경우 swap venue chainId들도 필요할 수 있다.
     const requiredChainIds = routeResponse.data.required_chain_ids;
 
     const chainIdsToAddresses: Record<string, string> = {};

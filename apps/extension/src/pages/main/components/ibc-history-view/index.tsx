@@ -27,7 +27,7 @@ import { Stack } from "../../../../components/stack";
 import { Box } from "../../../../components/box";
 import { Button } from "../../../../components/button";
 import { Gutter } from "../../../../components/gutter";
-import { useTheme } from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { XAxis, YAxis } from "../../../../components/axis";
 import {
@@ -1765,7 +1765,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
           );
 
           uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
-
+          navigate("/");
           break;
         }
         case BackgroundTxType.COSMOS: {
@@ -1910,7 +1910,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
           );
 
           uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
-
+          navigate("/");
           break;
         }
         default: {
@@ -1919,15 +1919,19 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       }
     } catch (error) {
       console.error("Failed to continue signing:", error);
+      if (error?.message === "Request rejected") {
+        return;
+      }
+
       notification.show(
         "failed",
         intl.formatMessage({ id: "error.transaction-failed" }),
         ""
       );
+      navigate("/");
     } finally {
       // navigate to home
       // CHECK: 실패했을 때 홈으로 안가고 이상한데로 감
-      navigate("/");
       setIsLoading(false);
       uiConfigStore.ibcSwapConfig.resetSignatureProgress();
     }
@@ -2480,11 +2484,11 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 </Subtitle4>
                 <div style={{ flex: 1 }} />
                 {hasExecutableTx ? (
-                  <Button
+                  <NoHoverButton
                     text={intl.formatMessage({
                       id: "page.main.components.ibc-history-view.swap-v2.continue-signing",
                     })}
-                    size="small"
+                    size="extraSmall"
                     color="secondary"
                     mode="ghost"
                     buttonStyle={{
@@ -2492,6 +2496,8 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                         theme.mode === "light"
                           ? ColorPalette["gray-600"]
                           : ColorPalette["gray-50"],
+                      padding: 0,
+                      height: "auto",
                     }}
                     isLoading={isLoading}
                     right={
@@ -2706,3 +2712,10 @@ const ErrorIcon: FunctionComponent<IconProps> = ({
     </svg>
   );
 };
+
+const NoHoverButton = styled(Button)`
+  button:hover::after {
+    background-color: transparent !important;
+    opacity: 0 !important;
+  }
+`;
