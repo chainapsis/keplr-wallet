@@ -515,7 +515,7 @@ const FoundTokenView: FunctionComponent<{
     }
   }, [asset.currency, chainId, asset.paymentType]);
 
-  const tag = useTokenTag({
+  const tokenTag = useTokenTag({
     token: new CoinPretty(asset.currency, asset.amount),
     chainInfo: chainStore.hasChain(chainId)
       ? chainStore.getChain(chainId)
@@ -598,8 +598,8 @@ const FoundTokenView: FunctionComponent<{
           })()}
         </Subtitle3>
         {addressTag ? <TokenTag text={addressTag.text} /> : null}
-        {tag && tag.text === "IBC" ? (
-          <TokenTag text={tag.text} tooltip={tag.tooltip} />
+        {tokenTag && tokenTag.text === "IBC" ? (
+          <TokenTag text={tokenTag.text} tooltip={tokenTag.tooltip} />
         ) : null}
       </Box>
 

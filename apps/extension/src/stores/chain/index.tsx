@@ -40,7 +40,7 @@ import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-type Assets = {
+type Asset = {
   currency: AppCurrency;
   amount: string;
 };
@@ -134,50 +134,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   get tokenScans(): TokenScan[] {
-    const resolveCurrency = (
-      chainId: string,
-      denom: string
-    ): AppCurrency | undefined => {
-      const chainInfo = this.hasChain(chainId) ? this.getChain(chainId) : null;
-      const modularChainInfo = this.hasModularChain(chainId)
-        ? this.getModularChain(chainId)
-        : null;
-
-      const currencies: AppCurrency[] = (() => {
-        if (chainInfo) return chainInfo.currencies;
-        if (modularChainInfo) {
-          if ("cosmos" in modularChainInfo) {
-            return modularChainInfo.cosmos.currencies;
-          }
-
-          if ("bitcoin" in modularChainInfo) {
-            return modularChainInfo.bitcoin.currencies;
-          }
-
-          if ("starknet" in modularChainInfo) {
-            return modularChainInfo.starknet.currencies;
-          }
-        }
-        return [];
-      })();
-
-      if (chainInfo) {
-        const found = chainInfo.forceFindCurrency(denom);
-        if (!found.coinDenom.startsWith("ibc/")) {
-          return found;
-        }
-      }
-
-      if (modularChainInfo) {
-        const found = currencies.find((cur) => cur.coinMinimalDenom === denom);
-        if (found) {
-          return found;
-        }
-      }
-
-      return undefined;
-    };
-
     return this._tokenScans
       .filter((scan) => {
         if (
@@ -194,7 +150,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         const newInfos = scan.infos.map((info) => {
           const newAssets = info.assets
             .map((asset) => {
-              const cur = resolveCurrency(
+              const cur = this.resolveCurrency(
                 scan.chainId,
                 asset.currency.coinMinimalDenom
               );
@@ -204,7 +160,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
                 currency: cur,
               };
             })
-            .filter((a): a is Assets => !!a);
+            .filter((a): a is Asset => !!a);
 
           return {
             ...info,
@@ -217,6 +173,50 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
           infos: newInfos,
         };
       });
+  }
+
+  private resolveCurrency(
+    chainId: string,
+    denom: string
+  ): AppCurrency | undefined {
+    const chainInfo = this.hasChain(chainId) ? this.getChain(chainId) : null;
+    const modularChainInfo = this.hasModularChain(chainId)
+      ? this.getModularChain(chainId)
+      : null;
+
+    if (chainInfo) {
+      const found = chainInfo.forceFindCurrency(denom);
+      if (!found.coinDenom.startsWith("ibc/")) {
+        return found;
+      }
+    }
+
+    const currencies: AppCurrency[] = (() => {
+      if (chainInfo) return chainInfo.currencies;
+      if (modularChainInfo) {
+        if ("cosmos" in modularChainInfo) {
+          return modularChainInfo.cosmos.currencies;
+        }
+
+        if ("bitcoin" in modularChainInfo) {
+          return modularChainInfo.bitcoin.currencies;
+        }
+
+        if ("starknet" in modularChainInfo) {
+          return modularChainInfo.starknet.currencies;
+        }
+      }
+      return [];
+    })();
+
+    if (modularChainInfo) {
+      const found = currencies.find((cur) => cur.coinMinimalDenom === denom);
+      if (found) {
+        return found;
+      }
+    }
+
+    return undefined;
   }
 
   @computed
@@ -310,7 +310,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         continue;
       }
 
-      const prevAssetMap = new Map<string, Assets>();
+      const prevAssetMap = new Map<string, Asset>();
       for (const asset of prevTokenInfo.assets) {
         prevAssetMap.set(asset.currency.coinMinimalDenom, asset);
       }
