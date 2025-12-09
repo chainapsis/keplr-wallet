@@ -15,6 +15,8 @@ export interface StepIndicatorProps {
   activeColor?: string;
   /** Inactive opacity (default: 0.3) */
   inactiveOpacity?: number;
+  /** Whether to blink the current step (the step at completedCount index) */
+  blinkCurrentStep?: boolean;
   /** Custom style for the container */
   style?: CSSProperties;
 }

@@ -1,7 +1,28 @@
 import React, { FunctionComponent } from "react";
-import { useTheme } from "styled-components";
+import styled, { keyframes, useTheme } from "styled-components";
 import { ColorPalette } from "../../styles";
 import { StepIndicatorProps } from "./types";
+
+const blinkAnimation = keyframes`
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+`;
+
+const BlinkingDot = styled.div<{
+  $width: string;
+  $height: string;
+  $color: string;
+}>`
+  width: ${(props) => props.$width};
+  height: ${(props) => props.$height};
+  border-radius: 13.875rem;
+  background-color: ${(props) => props.$color};
+  animation: ${blinkAnimation} 1s ease-in-out infinite;
+`;
 
 export const StepIndicator: FunctionComponent<StepIndicatorProps> = ({
   totalCount,
@@ -11,6 +32,7 @@ export const StepIndicator: FunctionComponent<StepIndicatorProps> = ({
   gap = "0.25rem",
   activeColor,
   inactiveOpacity = 0.3,
+  blinkCurrentStep = false,
   style,
 }) => {
   const theme = useTheme();
@@ -19,6 +41,9 @@ export const StepIndicator: FunctionComponent<StepIndicatorProps> = ({
     theme.mode === "light" ? ColorPalette["blue-400"] : ColorPalette["white"];
 
   const color = activeColor ?? defaultActiveColor;
+
+  const isCurrentStep = (index: number) =>
+    blinkCurrentStep && index === completedCount && completedCount < totalCount;
 
   return (
     <div
@@ -31,18 +56,27 @@ export const StepIndicator: FunctionComponent<StepIndicatorProps> = ({
         ...style,
       }}
     >
-      {Array.from({ length: totalCount }).map((_, index) => (
-        <div
-          key={index}
-          style={{
-            width,
-            height,
-            borderRadius: "13.875rem",
-            backgroundColor: color,
-            opacity: index < completedCount ? 1 : inactiveOpacity,
-          }}
-        />
-      ))}
+      {Array.from({ length: totalCount }).map((_, index) =>
+        isCurrentStep(index) ? (
+          <BlinkingDot
+            key={index}
+            $width={width}
+            $height={height}
+            $color={color}
+          />
+        ) : (
+          <div
+            key={index}
+            style={{
+              width,
+              height,
+              borderRadius: "13.875rem",
+              backgroundColor: color,
+              opacity: index < completedCount ? 1 : inactiveOpacity,
+            }}
+          />
+        )
+      )}
     </div>
   );
 };

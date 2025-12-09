@@ -527,6 +527,7 @@ export const EthereumSignTxView: FunctionComponent<{
               completedCount={progress.completed}
               inactiveOpacity={0.4}
               activeColor={ColorPalette["white"]}
+              blinkCurrentStep={true}
               style={{ marginRight: "0.125rem" }}
             />
           );

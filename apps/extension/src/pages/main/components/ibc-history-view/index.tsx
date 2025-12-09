@@ -1551,13 +1551,16 @@ const SwapV2HistoryViewItem: FunctionComponent<{
   }, [txExecution, history.backgroundExecutionId]);
 
   // 삭제 시 hide 처리할지 여부 계산
-  // 멀티 TX 스왑이고 트래킹 중이며, skip provider에서 asset location 정보가 없는 경우에만 hide
   const shouldHideOnRemove = useMemo(() => {
-    return (
-      !!history.backgroundExecutionId &&
-      history.provider === SwapProvider.SKIP &&
-      !history.assetLocationInfo
-    );
+    if (!history.backgroundExecutionId || history.resAmount.length !== 0) {
+      return false;
+    }
+
+    if (history.provider === SwapProvider.SKIP && history.assetLocationInfo) {
+      return false;
+    }
+
+    return true;
   }, [history]);
 
   async function handleContinueSigning() {
@@ -2099,6 +2102,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 <StepIndicator
                   totalCount={txExecutionProgress.totalTxCount}
                   completedCount={txExecutionProgress.executedTxCount}
+                  blinkCurrentStep={hasExecutableTx}
                 />
                 <Gutter size="0.375rem" />
                 <Subtitle4
