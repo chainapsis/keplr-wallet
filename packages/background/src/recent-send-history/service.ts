@@ -2795,7 +2795,7 @@ export class RecentSendHistoryService {
   }
 
   @action
-  showRecentSwapV2History(id: string): boolean {
+  showSwapV2History(id: string): boolean {
     const history = this.getRecentSwapV2History(id);
     if (!history) {
       return false;

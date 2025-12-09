@@ -7,10 +7,9 @@ export { SwapProvider };
 // ============================================================================
 
 /**
- * Base interface for RecentSendHistory data.
- * Contains common fields between RecentSendHistoryData and RecentSendHistory.
+ * Stored recent send history record.
  */
-export interface RecentSendHistoryBase {
+export interface RecentSendHistory {
   sender: string;
   recipient: string;
   amount: {
@@ -25,21 +24,6 @@ export interface RecentSendHistoryBase {
         counterpartyChainId: string;
       }[]
     | undefined;
-}
-
-/**
- * Data required to record a recent send history.
- * Used by tx-executor when creating history entries.
- */
-export interface RecentSendHistoryData extends RecentSendHistoryBase {
-  readonly chainId: string;
-  readonly historyType: string;
-}
-
-/**
- * Stored recent send history record.
- */
-export interface RecentSendHistory extends RecentSendHistoryBase {
   timestamp: number;
 }
 
@@ -377,7 +361,6 @@ export type SkipHistory = {
  * Union type of all history data types.
  */
 export type HistoryData =
-  | RecentSendHistoryData
   | IBCTransferHistoryData
   | IBCSwapHistoryData
   | SwapV2HistoryData;

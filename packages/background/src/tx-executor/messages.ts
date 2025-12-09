@@ -38,21 +38,21 @@ export class RecordAndExecuteTxsMsg<
 
   validateBasic(): void {
     if (!this.vaultId) {
-      throw new KeplrError("direct-tx-executor", 101, "vaultId is empty");
+      throw new KeplrError("direct-tx-executor", 110, "vaultId is empty");
     }
 
     if (!this.executionType) {
-      throw new KeplrError("direct-tx-executor", 102, "executionType is empty");
+      throw new KeplrError("direct-tx-executor", 111, "executionType is empty");
     }
 
     if (!this.txs || this.txs.length === 0) {
-      throw new KeplrError("direct-tx-executor", 102, "txs is empty");
+      throw new KeplrError("direct-tx-executor", 112, "txs is empty");
     }
 
     if (!this.executableChainIds || this.executableChainIds.length === 0) {
       throw new KeplrError(
         "direct-tx-executor",
-        103,
+        113,
         "executableChainIds is empty"
       );
     }
@@ -60,7 +60,7 @@ export class RecordAndExecuteTxsMsg<
     if (this.historyTxIndex != null && this.historyTxIndex < 0) {
       throw new KeplrError(
         "direct-tx-executor",
-        104,
+        114,
         "historyTxIndex is invalid"
       );
     }
@@ -98,15 +98,15 @@ export class ResumeTxMsg extends Message<TxExecutionResult> {
 
   validateBasic(): void {
     if (!this.id) {
-      throw new KeplrError("direct-tx-executor", 101, "id is empty");
+      throw new KeplrError("direct-tx-executor", 115, "id is empty");
     }
 
     if (this.txIndex != null && this.txIndex < 0) {
-      throw new KeplrError("direct-tx-executor", 103, "txIndex is invalid");
+      throw new KeplrError("direct-tx-executor", 116, "txIndex is invalid");
     }
 
     if (this.signedTx != null && this.signedTx.length === 0) {
-      throw new KeplrError("direct-tx-executor", 104, "signedTx is empty");
+      throw new KeplrError("direct-tx-executor", 117, "signedTx is empty");
     }
   }
 
@@ -137,7 +137,7 @@ export class GetTxExecutionMsg extends Message<TxExecution | undefined> {
 
   validateBasic(): void {
     if (!this.id) {
-      throw new KeplrError("direct-tx-executor", 101, "id is empty");
+      throw new KeplrError("direct-tx-executor", 115, "id is empty");
     }
   }
 

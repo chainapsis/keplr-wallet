@@ -119,52 +119,48 @@ export class BackgroundTxExecutorService {
         });
     });
 
-    this.subscriber.subscribe(async ({ executionId, executableChainIds }) => {
-      const execution = this.getTxExecution(executionId);
-      if (!execution) {
-        return;
-      }
-
-      const newExecutableChainIds = executableChainIds.filter(
-        (chainId) => !execution.executableChainIds.includes(chainId)
-      );
-
-      if (newExecutableChainIds.length === 0) {
-        return;
-      }
-
-      runInAction(() => {
-        // update the executable chain ids
-        for (const chainId of newExecutableChainIds) {
-          execution.executableChainIds.push(chainId);
-        }
-
-        // if there is a pending tx that is executable, force display the swap v2 history
-        if (
-          execution.type === TxExecutionType.SWAP_V2 &&
-          execution.historyId != null
-        ) {
-          const hasExecutableTx = execution.txs.some(
-            (tx) =>
-              (tx.status === BackgroundTxStatus.PENDING ||
-                tx.status === BackgroundTxStatus.BLOCKED) &&
-              execution.executableChainIds.includes(tx.chainId)
-          );
-          if (hasExecutableTx) {
-            this.recentSendHistoryService.showRecentSwapV2History(
-              execution.historyId
-            );
-          }
-        }
-      });
-    });
+    this.subscriber.subscribe((event) => this.handleTxExecutableEvent(event));
   }
 
-  /**
-   * Execute multiple transactions sequentially
-   * Execution id is returned if the execution is started successfully
-   * and the execution will be started automatically after the transactions are recorded.
-   */
+  @action
+  protected handleTxExecutableEvent(event: TxExecutableEvent): void {
+    const { executionId, executableChainIds } = event;
+
+    const execution = this.getTxExecution(executionId);
+    if (!execution) {
+      return;
+    }
+
+    const newExecutableChainIds = executableChainIds.filter(
+      (chainId) => !execution.executableChainIds.includes(chainId)
+    );
+
+    if (newExecutableChainIds.length === 0) {
+      return;
+    }
+
+    // update the executable chain ids
+    execution.executableChainIds = Array.from(
+      new Set([...execution.executableChainIds, ...newExecutableChainIds])
+    );
+
+    // if there is a pending tx that is executable, force display the swap v2 history
+    if (
+      execution.type === TxExecutionType.SWAP_V2 &&
+      execution.historyId != null
+    ) {
+      const hasExecutableTx = execution.txs.some(
+        (tx) =>
+          (tx.status === BackgroundTxStatus.PENDING ||
+            tx.status === BackgroundTxStatus.BLOCKED) &&
+          execution.executableChainIds.includes(tx.chainId)
+      );
+      if (hasExecutableTx) {
+        this.recentSendHistoryService.showSwapV2History(execution.historyId);
+      }
+    }
+  }
+
   @action
   async recordAndExecuteTxs<T extends TxExecutionType>(
     env: Env,
@@ -186,35 +182,37 @@ export class BackgroundTxExecutorService {
     const keyInfo =
       this.keyRingCosmosService.keyRingService.getKeyInfo(vaultId);
     if (!keyInfo) {
-      throw new KeplrError("direct-tx-executor", 102, "Key info not found");
+      throw new KeplrError("direct-tx-executor", 120, "Key info not found");
     }
 
     // If any of the transactions are not executable or the key is hardware wallet,
-    // set preventAutoSign to true. This also determines if the execution needs persistence.
+    // auto sign is disabled.
     const preventAutoSign =
       txs.some((tx) => !executableChainIds.includes(tx.chainId)) ||
       keyInfo.type === "ledger" ||
       keyInfo.type === "keystone";
 
-    // at least first tx should be signed if preventAutoSign is true
+    /**
+     * If preventAutoSign is true, at least one executable transaction must already be signed.
+     * For example, in an EVM bundle (like ERC20 approve + swap) where simulation is not possible,
+     * the UI might execute 'approve' (tx[0]) first and set its txHash, then sign the swap (tx[1]).
+     * Both tx[0] and tx[1] are executable, but tx[0] has already been executed and doesn't need to be signed again.
+     * So, ensure that at least one executable tx is already signed before proceeding.
+     */
     if (preventAutoSign) {
-      const firstTx = txs[0];
-      if (!firstTx) {
-        throw new KeplrError(
-          "direct-tx-executor",
-          103,
-          "First tx is not found"
-        );
+      const executableTxs = txs.filter((tx) =>
+        executableChainIds.includes(tx.chainId)
+      );
+
+      if (executableTxs.length === 0) {
+        throw new KeplrError("direct-tx-executor", 122, "No executable txs");
       }
 
-      if (
-        firstTx.signedTx == null ||
-        !executableChainIds.includes(firstTx.chainId)
-      ) {
+      if (executableTxs.every((tx) => tx.signedTx == null)) {
         throw new KeplrError(
           "direct-tx-executor",
-          104,
-          "First tx should be signed and executable"
+          123,
+          "No signed txs found with preventAutoSign"
         );
       }
     }
@@ -250,7 +248,6 @@ export class BackgroundTxExecutorService {
     signedTx: string
   ): Promise<TxExecutionResult> {
     if (!env.isInternalMsg) {
-      // TODO: 에러 코드 신경쓰기
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
     }
 
@@ -265,39 +262,39 @@ export class BackgroundTxExecutorService {
     options?: {
       txIndex?: number;
       signedTx?: string;
+      // TODO: additional history data
     }
   ): Promise<TxExecutionResult> {
     const execution = this.getTxExecution(id);
     if (!execution) {
-      throw new KeplrError("direct-tx-executor", 105, "Execution not found");
+      throw new KeplrError("direct-tx-executor", 121, "Execution not found");
     }
 
     if (execution.status === TxExecutionStatus.PROCESSING) {
       throw new KeplrError(
         "direct-tx-executor",
-        108,
+        130,
         "Execution is already processing"
       );
     }
 
     // Only pending or blocked executions can be executed
-    const needRun =
+    const needExecute =
       execution.status === TxExecutionStatus.PENDING ||
       execution.status === TxExecutionStatus.BLOCKED;
-    if (!needRun) {
+    if (!needExecute) {
       return {
         status: execution.status,
       };
     }
 
-    const isResumeTx = options?.txIndex != null && options.signedTx != null;
+    const isResumingTx = options?.txIndex != null && options.signedTx != null;
 
-    // check if the key is valid
     const keyInfo = this.keyRingCosmosService.keyRingService.getKeyInfo(
       execution.vaultId
     );
     if (!keyInfo) {
-      throw new KeplrError("direct-tx-executor", 102, "Key info not found");
+      throw new KeplrError("direct-tx-executor", 120, "Key info not found");
     }
 
     const executionStartIndex = Math.min(
@@ -325,7 +322,7 @@ export class BackgroundTxExecutorService {
         providedSignedTx
       );
 
-      // Apply result in a single runInAction to minimize autorun triggers
+      // update the tx status and related fields
       runInAction(() => {
         execution.txIndex = i;
         currentTx.status = result.status;
@@ -335,74 +332,61 @@ export class BackgroundTxExecutorService {
         if (result.error != null) {
           currentTx.error = result.error;
         }
-        currentTx.signedTx = undefined; // clear the signed tx after the execution
+        currentTx.signedTx = undefined;
       });
 
-      if (result.status === BackgroundTxStatus.CONFIRMED) {
-        continue;
-      }
-
-      /**
-       * If the tx is BLOCKED, it means multiple transactions are required
-       * to be executed on different chains.
-       *
-       * - The execution should be stopped here,
-       * - Record the history if needed,
-       * - The execution should be resumed later when the condition is met.
-       */
-      if (result.status === BackgroundTxStatus.BLOCKED) {
-        runInAction(() => {
-          execution.status = TxExecutionStatus.BLOCKED;
-          this.recordHistoryIfNeeded(execution, isResumeTx);
-          // no need to keep the history data anymore
-          delete execution.historyData;
-        });
-        return {
-          status: TxExecutionStatus.BLOCKED,
-        };
-      }
-
-      if (result.status === BackgroundTxStatus.FAILED) {
-        // Record error to history if historyId exists
-        if (
-          execution.type === TxExecutionType.SWAP_V2 &&
-          execution.historyId != null
-        ) {
-          this.recentSendHistoryService.setSwapV2HistoryError(
-            execution.historyId,
+      switch (result.status) {
+        case BackgroundTxStatus.CONFIRMED: {
+          if (isResumingTx) {
+            // TODO: if is resuming tx and additional history data is provided, record the history
+          }
+          continue;
+        }
+        case BackgroundTxStatus.FAILED: {
+          this.recordSwapV2HistoryErrorIfNeeded(
+            execution,
             result.error ?? `${i + 1}th transaction failed`
           );
+          this.removeTxExecution(id);
+
+          return {
+            status: TxExecutionStatus.FAILED,
+            error: result.error,
+          };
         }
+        case BackgroundTxStatus.BLOCKED: {
+          /**
+           * If the tx is BLOCKED, it means multiple transactions are required
+           * to be executed on different chains.
+           *
+           * - The execution should be stopped here,
+           * - Record the history if needed,
+           * - The execution should be resumed later when the condition is met.
+           */
+          runInAction(() => {
+            execution.status = TxExecutionStatus.BLOCKED;
+            this.recordHistoryIfNeeded(execution);
 
-        this.removeTxExecution(id);
+            // no need to keep the history data anymore
+            delete execution.historyData;
+          });
 
-        return {
-          status: TxExecutionStatus.FAILED,
-          error: result.error,
-        };
+          return {
+            status: TxExecutionStatus.BLOCKED,
+          };
+        }
+        default: {
+          throw new KeplrError(
+            "direct-tx-executor",
+            131,
+            "Unexpected tx status: " + result.status
+          );
+        }
       }
-
-      // something went wrong, should not happen
-      throw new KeplrError(
-        "direct-tx-executor",
-        107,
-        "Unexpected tx status: " + result.status
-      );
     }
 
-    // if the execution is completed successfully, record the history and remove the execution
-    this.recordHistoryIfNeeded(execution, isResumeTx);
-
-    // 완료 시 backgroundExecutionId 제거 (더 이상 다음 tx를 기다리지 않음)
-    if (
-      execution.type === TxExecutionType.SWAP_V2 &&
-      execution.historyId != null
-    ) {
-      this.recentSendHistoryService.clearSwapV2HistoryBackgroundExecutionId(
-        execution.historyId
-      );
-    }
-
+    this.recordHistoryIfNeeded(execution);
+    this.clearSwapV2HistoryBackgroundExecutionIdIfNeeded(execution);
     this.removeTxExecution(id);
 
     return {
@@ -422,7 +406,7 @@ export class BackgroundTxExecutorService {
     preventAutoSign: boolean,
     providedSignedTx?: string
   ): Promise<PendingTxExecutionResult> {
-    let status = tx.status;
+    const status = tx.status;
     let signedTx = tx.signedTx ?? providedSignedTx;
     let txHash = tx.txHash;
     let error: string | undefined;
@@ -449,8 +433,8 @@ export class BackgroundTxExecutorService {
     // if not signed, sign the tx
     if (signedTx == null) {
       try {
-        const result = await this.signTx(vaultId, tx);
-        signedTx = result.signedTx;
+        const signResult = await this.signTx(vaultId, tx);
+        signedTx = signResult;
       } catch (e) {
         console.error(`[TxExecutor] tx signing failed:`, e);
         return {
@@ -459,38 +443,38 @@ export class BackgroundTxExecutorService {
           error: e.message ?? "Transaction signing failed",
         };
       }
-    } else {
-      console.log(`[TxExecutor] tx is already signed`);
     }
 
-    // BROADCASTING
-    try {
-      const txWithSignedTx = { ...tx, signedTx };
-      const result = await this.broadcastTx(txWithSignedTx);
-      txHash = result.txHash;
-    } catch (e) {
-      console.error(`[TxExecutor] tx broadcast failed:`, e);
-      return {
-        status: BackgroundTxStatus.FAILED,
-        txHash,
-        error: e.message ?? "Transaction broadcasting failed",
-      };
+    // if tx hash is not set, broadcast the tx
+    if (txHash == null) {
+      try {
+        const txWithSignedTx = { ...tx, signedTx };
+        const broadcastResult = await this.broadcastTx(txWithSignedTx);
+        txHash = broadcastResult;
+      } catch (e) {
+        console.error(`[TxExecutor] tx broadcast failed:`, e);
+        return {
+          status: BackgroundTxStatus.FAILED,
+          txHash,
+          error: e.message ?? "Transaction broadcasting failed",
+        };
+      }
     }
 
-    // TRACING
+    // trace the tx
     try {
       const txWithHash = { ...tx, txHash };
       const confirmed = await this.traceTx(txWithHash);
 
       if (confirmed) {
-        status = BackgroundTxStatus.CONFIRMED;
-      } else {
-        return {
-          status: BackgroundTxStatus.FAILED,
-          txHash,
-          error: "Transaction failed",
-        };
+        return { status: BackgroundTxStatus.CONFIRMED, txHash };
       }
+
+      return {
+        status: BackgroundTxStatus.FAILED,
+        txHash,
+        error: "Transaction confirmation failed",
+      };
     } catch (e) {
       console.error(`[TxExecutor] tx trace failed:`, e);
       return {
@@ -499,56 +483,47 @@ export class BackgroundTxExecutorService {
         error: e.message ?? "Transaction confirmation failed",
       };
     }
-
-    return { status, txHash, error };
   }
 
-  protected async signTx(
-    vaultId: string,
-    tx: BackgroundTx
-  ): Promise<{
-    signedTx: string;
-  }> {
-    if (tx.signedTx != null) {
-      return {
-        signedTx: tx.signedTx,
-      };
+  protected async signTx(vaultId: string, tx: BackgroundTx): Promise<string> {
+    switch (tx.type) {
+      case BackgroundTxType.EVM: {
+        return this.signEvmTx(vaultId, tx);
+      }
+      case BackgroundTxType.COSMOS: {
+        return this.signCosmosTx(vaultId, tx);
+      }
+      default: {
+        throw new KeplrError("direct-tx-executor", 143, "Unknown tx type");
+      }
     }
-
-    if (tx.type === BackgroundTxType.EVM) {
-      return this.signEvmTx(vaultId, tx);
-    }
-
-    return this.signCosmosTx(vaultId, tx);
   }
 
   private async signEvmTx(
     vaultId: string,
     tx: EVMBackgroundTx
-  ): Promise<{
-    signedTx: string;
-  }> {
+  ): Promise<string> {
     const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
     const signer = keyInfo.ethereumHexAddress;
-    const origin =
-      typeof browser !== "undefined"
-        ? new URL(browser.runtime.getURL("/")).origin
-        : "extension";
 
     // For hardware wallets, the signedTx must be provided externally when calling resumeTx or recordAndExecuteTxs.
     if (isHardware) {
       throw new KeplrError(
         "direct-tx-executor",
-        109,
+        140,
         "Hardware wallet signing should be triggered from user interaction"
       );
     }
 
+    const origin =
+      typeof browser !== "undefined"
+        ? new URL(browser.runtime.getURL("/")).origin
+        : "extension";
     const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
     const evmInfo = ChainsService.getEVMInfo(chainInfo);
     if (!evmInfo) {
-      throw new KeplrError("direct-tx-executor", 113, "Not EVM chain");
+      throw new KeplrError("direct-tx-executor", 142, "Not EVM chain");
     }
 
     const unsignedTx = await fillUnsignedEVMTx(
@@ -576,29 +551,32 @@ export class BackgroundTxExecutorService {
 
     delete signedTxData.from;
 
-    const signedTx = serialize(signedTxData, result.signature);
-
-    return {
-      signedTx: signedTx,
-    };
+    return serialize(signedTxData, result.signature);
   }
 
   private async signCosmosTx(
     vaultId: string,
     tx: CosmosBackgroundTx
-  ): Promise<{
-    signedTx: string;
-  }> {
+  ): Promise<string> {
     // check key
     const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
     const signer = keyInfo.bech32Address;
-    const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
+
+    // For hardware wallets, the signedTx must be provided externally when calling resumeTx or recordAndExecuteTxs.
+    if (isHardware) {
+      throw new KeplrError(
+        "direct-tx-executor",
+        140,
+        "Hardware wallet signing should be triggered from user interaction"
+      );
+    }
 
     const origin =
       typeof browser !== "undefined"
         ? new URL(browser.runtime.getURL("/")).origin
         : "extension";
+    const chainInfo = this.chainsService.getChainInfoOrThrow(tx.chainId);
 
     const aminoMsgs: Msg[] = tx.txData.aminoMsgs ?? [];
     const protoMsgs: Any[] = tx.txData.protoMsgs;
@@ -618,7 +596,7 @@ export class BackgroundTxExecutorService {
     if (isDirectSign) {
       throw new KeplrError(
         "direct-tx-executor",
-        110,
+        141,
         "Direct signing is not supported for now"
       );
     }
@@ -629,15 +607,6 @@ export class BackgroundTxExecutorService {
 
     if (!isDirectSign && aminoMsgs.length !== protoMsgs.length) {
       throw new Error("The length of aminoMsgs and protoMsgs are different");
-    }
-
-    // For hardware wallets, the signedTx must be provided externally when calling resumeTx or recordAndExecuteTxs.
-    if (isHardware) {
-      throw new KeplrError(
-        "direct-tx-executor",
-        109,
-        "Hardware wallet signing should be triggered from user interaction"
-      );
     }
 
     const account = await BaseAccount.fetchFromRest(
@@ -702,34 +671,27 @@ export class BackgroundTxExecutorService {
       useEthereumSign: false,
     });
 
-    return { signedTx: Buffer.from(signedTx.tx).toString("base64") };
+    return Buffer.from(signedTx.tx).toString("base64");
   }
 
-  protected async broadcastTx(tx: BackgroundTx): Promise<{
-    txHash: string;
-  }> {
-    if (tx.txHash != null) {
-      // optimistic assumption here:
-      // if the tx hash is set, the transaction is broadcasted successfully
-      // do not need to check broadcasted status here
-      return {
-        txHash: tx.txHash,
-      };
+  protected async broadcastTx(tx: BackgroundTx): Promise<string> {
+    switch (tx.type) {
+      case BackgroundTxType.EVM: {
+        return this.broadcastEvmTx(tx);
+      }
+      case BackgroundTxType.COSMOS: {
+        return this.broadcastCosmosTx(tx);
+      }
+      default: {
+        throw new KeplrError("direct-tx-executor", 143, "Unknown tx type");
+      }
     }
-
-    if (tx.type === BackgroundTxType.EVM) {
-      return this.broadcastEvmTx(tx);
-    }
-
-    return this.broadcastCosmosTx(tx);
   }
 
-  private async broadcastEvmTx(tx: EVMBackgroundTx): Promise<{
-    txHash: string;
-  }> {
+  private async broadcastEvmTx(tx: EVMBackgroundTx): Promise<string> {
     // assume the signed tx is valid if exists
     if (!tx.signedTx) {
-      throw new KeplrError("direct-tx-executor", 108, "Signed tx not found");
+      throw new KeplrError("direct-tx-executor", 132, "Signed tx not found");
     }
 
     const origin =
@@ -749,16 +711,12 @@ export class BackgroundTxExecutorService {
       }
     );
 
-    return {
-      txHash,
-    };
+    return txHash;
   }
 
-  private async broadcastCosmosTx(tx: CosmosBackgroundTx): Promise<{
-    txHash: string;
-  }> {
+  private async broadcastCosmosTx(tx: CosmosBackgroundTx): Promise<string> {
     if (!tx.signedTx) {
-      throw new KeplrError("direct-tx-executor", 108, "Signed tx not found");
+      throw new KeplrError("direct-tx-executor", 132, "Signed tx not found");
     }
 
     const signedTxBytes = Buffer.from(tx.signedTx, "base64");
@@ -774,22 +732,26 @@ export class BackgroundTxExecutorService {
       }
     );
 
-    return {
-      txHash: Buffer.from(txHash).toString("hex"),
-    };
+    return Buffer.from(txHash).toString("hex");
   }
 
   protected async traceTx(tx: BackgroundTx): Promise<boolean> {
-    if (tx.type === BackgroundTxType.EVM) {
-      return this.traceEvmTx(tx);
+    switch (tx.type) {
+      case BackgroundTxType.EVM: {
+        return this.traceEvmTx(tx);
+      }
+      case BackgroundTxType.COSMOS: {
+        return this.traceCosmosTx(tx);
+      }
+      default: {
+        throw new KeplrError("direct-tx-executor", 143, "Unknown tx type");
+      }
     }
-
-    return this.traceCosmosTx(tx);
   }
 
   private async traceEvmTx(tx: EVMBackgroundTx): Promise<boolean> {
     if (!tx.txHash) {
-      throw new KeplrError("direct-tx-executor", 108, "Tx hash not found");
+      throw new KeplrError("direct-tx-executor", 133, "Tx hash not found");
     }
 
     const origin =
@@ -812,7 +774,7 @@ export class BackgroundTxExecutorService {
 
   private async traceCosmosTx(tx: CosmosBackgroundTx): Promise<boolean> {
     if (!tx.txHash) {
-      throw new KeplrError("direct-tx-executor", 108, "Tx hash not found");
+      throw new KeplrError("direct-tx-executor", 133, "Tx hash not found");
     }
 
     const txResult = await this.backgroundTxService.traceTx(
@@ -829,7 +791,6 @@ export class BackgroundTxExecutorService {
       return false;
     }
 
-    // consider success
     return true;
   }
 
@@ -854,213 +815,136 @@ export class BackgroundTxExecutorService {
   }
 
   @action
-  protected recordHistoryIfNeeded(
-    execution: TxExecution,
-    isResumeTx: boolean = false
-  ): void {
-    if (execution.type === TxExecutionType.UNDEFINED) {
-      return;
-    }
-
-    if (execution.type === TxExecutionType.SEND) {
-      if (execution.hasRecordedHistory || !execution.historyData) {
-        return;
-      }
-
-      const historyData = execution.historyData;
-
-      this.recentSendHistoryService.addRecentSendHistory(
-        historyData.chainId,
-        historyData.historyType,
-        {
-          sender: historyData.sender,
-          recipient: historyData.recipient,
-          amount: historyData.amount,
-          memo: historyData.memo,
-          ibcChannels: undefined,
+  protected recordHistoryIfNeeded(execution: TxExecution): void {
+    switch (execution.type) {
+      case TxExecutionType.IBC_TRANSFER: {
+        if (execution.historyId != null || execution.historyData == null) {
+          return;
         }
-      );
 
-      execution.hasRecordedHistory = true;
-      return;
-    }
-
-    if (execution.type === TxExecutionType.IBC_TRANSFER) {
-      // If resuming tx and history already exists, resume tracking only
-      if (execution.historyId != null) {
-        if (isResumeTx) {
-          this.recentSendHistoryService.trackIBCPacketForwardingRecursive(
-            execution.historyId
-          );
+        const historyTxIndex = this.findHistoryTxIndex(execution);
+        if (historyTxIndex < 0) {
+          return;
         }
-        return;
-      }
 
-      if (!execution.historyData) {
-        return;
-      }
-
-      const historyTxIndex = this.findHistoryTxIndex(execution);
-      if (historyTxIndex < 0) {
-        return;
-      }
-
-      const tx = execution.txs[historyTxIndex];
-
-      // if the tx is not found or not a cosmos tx, skip recording history
-      if (!tx || tx.type !== BackgroundTxType.COSMOS) {
-        return;
-      }
-
-      if (tx.txHash == null) {
-        return;
-      }
-
-      const historyData = execution.historyData;
-
-      const backgroundExecutionId = execution.txs.some(
-        (tx) =>
-          tx.status === BackgroundTxStatus.PENDING ||
-          tx.status === BackgroundTxStatus.BLOCKED
-      )
-        ? execution.id
-        : undefined;
-
-      const id = this.recentSendHistoryService.addRecentIBCTransferHistory(
-        historyData.sourceChainId,
-        historyData.destinationChainId,
-        historyData.sender,
-        historyData.recipient,
-        historyData.amount,
-        historyData.memo,
-        historyData.channels,
-        historyData.notificationInfo,
-        Buffer.from(tx.txHash, "hex"),
-        backgroundExecutionId
-      );
-      this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
-
-      execution.historyId = id;
-      return;
-    }
-
-    if (execution.type === TxExecutionType.IBC_SWAP) {
-      // If resuming tx and history already exists, resume tracking only
-      if (execution.historyId != null) {
-        if (isResumeTx) {
-          this.recentSendHistoryService.trackIBCPacketForwardingRecursive(
-            execution.historyId
-          );
+        const tx = execution.txs[historyTxIndex];
+        if (!tx || tx.type !== BackgroundTxType.COSMOS || tx.txHash == null) {
+          return;
         }
-        return;
+
+        const historyData = execution.historyData;
+
+        const backgroundExecutionId = execution.txs.some(
+          (tx) => tx.status === BackgroundTxStatus.BLOCKED
+        )
+          ? execution.id
+          : undefined;
+
+        const id = this.recentSendHistoryService.addRecentIBCTransferHistory(
+          historyData.sourceChainId,
+          historyData.destinationChainId,
+          historyData.sender,
+          historyData.recipient,
+          historyData.amount,
+          historyData.memo,
+          historyData.channels,
+          historyData.notificationInfo,
+          Buffer.from(tx.txHash, "hex"),
+          backgroundExecutionId
+        );
+        this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
+
+        execution.historyId = id;
+        break;
       }
-
-      if (!execution.historyData) {
-        return;
-      }
-
-      const historyTxIndex = this.findHistoryTxIndex(execution);
-      if (historyTxIndex < 0) {
-        return;
-      }
-
-      const tx = execution.txs[historyTxIndex];
-
-      // if the tx is not found or not a cosmos tx, skip recording history
-      // CHECK: swap on single evm chain should be recorded as history?
-      if (!tx || tx.type !== BackgroundTxType.COSMOS) {
-        return;
-      }
-
-      if (tx.txHash == null) {
-        return;
-      }
-
-      const historyData = execution.historyData;
-
-      // do not use preventAutoSign here,
-      // because hardware wallet case with no multiple txs doesn't need to be recorded
-      const backgroundExecutionId = execution.txs.some(
-        (tx) =>
-          tx.status === BackgroundTxStatus.PENDING ||
-          tx.status === BackgroundTxStatus.BLOCKED
-      )
-        ? execution.id
-        : undefined;
-
-      const id = this.recentSendHistoryService.addRecentIBCSwapHistory(
-        historyData.swapType,
-        historyData.chainId,
-        historyData.destinationChainId,
-        historyData.sender,
-        historyData.amount,
-        historyData.memo,
-        historyData.ibcChannels,
-        historyData.destinationAsset,
-        historyData.swapChannelIndex,
-        historyData.swapReceiver,
-        historyData.notificationInfo,
-        Buffer.from(tx.txHash, "hex"),
-        backgroundExecutionId
-      );
-      this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
-
-      execution.historyId = id;
-      return;
-    }
-
-    if (execution.type === TxExecutionType.SWAP_V2) {
-      // If resuming tx and history already exists, resume tracking only
-      if (execution.historyId != null) {
-        if (isResumeTx) {
-          this.recentSendHistoryService.resumeSwapV2Tracking(
-            execution.historyId
-          );
+      case TxExecutionType.IBC_SWAP: {
+        if (execution.historyId != null || execution.historyData == null) {
+          return;
         }
+
+        const historyTxIndex = this.findHistoryTxIndex(execution);
+        if (historyTxIndex < 0) {
+          return;
+        }
+
+        const tx = execution.txs[historyTxIndex];
+        if (!tx || tx.type !== BackgroundTxType.COSMOS || tx.txHash == null) {
+          return;
+        }
+
+        const historyData = execution.historyData;
+
+        const backgroundExecutionId = execution.txs.some(
+          (tx) => tx.status === BackgroundTxStatus.BLOCKED
+        )
+          ? execution.id
+          : undefined;
+
+        const id = this.recentSendHistoryService.addRecentIBCSwapHistory(
+          historyData.swapType,
+          historyData.chainId,
+          historyData.destinationChainId,
+          historyData.sender,
+          historyData.amount,
+          historyData.memo,
+          historyData.ibcChannels,
+          historyData.destinationAsset,
+          historyData.swapChannelIndex,
+          historyData.swapReceiver,
+          historyData.notificationInfo,
+          Buffer.from(tx.txHash, "hex"),
+          backgroundExecutionId
+        );
+        this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
+
+        execution.historyId = id;
+        break;
+      }
+      case TxExecutionType.SWAP_V2: {
+        if (execution.historyId != null || execution.historyData == null) {
+          return;
+        }
+
+        const historyTxIndex = this.findHistoryTxIndex(execution);
+        if (historyTxIndex < 0) {
+          return;
+        }
+
+        const tx = execution.txs[historyTxIndex];
+        if (!tx || tx.txHash == null) {
+          return;
+        }
+
+        const historyData = execution.historyData;
+
+        const backgroundExecutionId = execution.txs.some(
+          (tx) => tx.status === BackgroundTxStatus.BLOCKED
+        )
+          ? execution.id
+          : undefined;
+
+        const id = this.recentSendHistoryService.recordTxWithSwapV2(
+          historyData.fromChainId,
+          historyData.toChainId,
+          historyData.provider,
+          historyData.destinationAsset,
+          historyData.simpleRoute,
+          historyData.sender,
+          historyData.recipient,
+          historyData.amount,
+          historyData.notificationInfo,
+          historyData.routeDurationSeconds,
+          tx.txHash,
+          historyData.isOnlyUseBridge,
+          backgroundExecutionId
+        );
+
+        execution.historyId = id;
+        break;
+      }
+      default: {
         return;
       }
-
-      if (!execution.historyData) {
-        return;
-      }
-
-      const historyTxIndex = this.findHistoryTxIndex(execution);
-      if (historyTxIndex < 0) {
-        return;
-      }
-
-      const tx = execution.txs[historyTxIndex];
-      if (!tx || tx.txHash == null) {
-        return;
-      }
-
-      const historyData = execution.historyData;
-
-      const backgroundExecutionId = execution.txs.some(
-        (tx) =>
-          tx.status === BackgroundTxStatus.PENDING ||
-          tx.status === BackgroundTxStatus.BLOCKED
-      )
-        ? execution.id
-        : undefined;
-
-      const id = this.recentSendHistoryService.recordTxWithSwapV2(
-        historyData.fromChainId,
-        historyData.toChainId,
-        historyData.provider,
-        historyData.destinationAsset,
-        historyData.simpleRoute,
-        historyData.sender,
-        historyData.recipient,
-        historyData.amount,
-        historyData.notificationInfo,
-        historyData.routeDurationSeconds,
-        tx.txHash,
-        historyData.isOnlyUseBridge,
-        backgroundExecutionId
-      );
-
-      execution.historyId = id;
     }
   }
 
@@ -1111,6 +995,34 @@ export class BackgroundTxExecutorService {
 
     for (const id of idsToDelete) {
       this.recentTxExecutionMap.delete(id);
+    }
+  }
+
+  private recordSwapV2HistoryErrorIfNeeded(
+    execution: TxExecution,
+    error: string
+  ): void {
+    if (
+      execution.type === TxExecutionType.SWAP_V2 &&
+      execution.historyId != null
+    ) {
+      this.recentSendHistoryService.setSwapV2HistoryError(
+        execution.historyId,
+        error
+      );
+    }
+  }
+
+  private clearSwapV2HistoryBackgroundExecutionIdIfNeeded(
+    execution: TxExecution
+  ): void {
+    if (
+      execution.type === TxExecutionType.SWAP_V2 &&
+      execution.historyId != null
+    ) {
+      this.recentSendHistoryService.clearSwapV2HistoryBackgroundExecutionId(
+        execution.historyId
+      );
     }
   }
 }
