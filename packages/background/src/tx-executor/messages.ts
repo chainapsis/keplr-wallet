@@ -90,9 +90,8 @@ export class ResumeTxMsg extends Message<TxExecutionResult> {
 
   constructor(
     public readonly id: string,
-    public readonly txIndex?: number,
-    // NOTE: these fields are optional for hardware wallet or multiple txs cases
-    public readonly signedTx?: string
+    public readonly txIndex: number,
+    public readonly signedTx: string
   ) {
     super();
   }

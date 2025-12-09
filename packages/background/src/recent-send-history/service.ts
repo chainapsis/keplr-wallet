@@ -2195,6 +2195,26 @@ export class RecentSendHistoryService {
     return id;
   }
 
+  @action
+  resumeSwapV2Tracking(id: string): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return;
+    }
+
+    // Reset trackDone to allow re-tracking
+    history.trackDone = false;
+    history.trackError = undefined;
+    history.finalizationRetryCount = undefined;
+    history.assetLocationInfo = undefined;
+    history.resAmount = [];
+
+    // Delay 3 seconds before resuming tracking
+    setTimeout(() => {
+      this.trackSwapV2Recursive(id);
+    }, 3000);
+  }
+
   trackSwapV2Recursive(id: string): void {
     const history = this.getRecentSwapV2History(id);
     if (!history) {
@@ -2782,6 +2802,18 @@ export class RecentSendHistoryService {
       return false;
     }
     history.hidden = false;
+    return true;
+  }
+
+  @action
+  setSwapV2HistoryError(id: string, error: string): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+
+    history.trackError = error;
+    history.trackDone = true;
     return true;
   }
 

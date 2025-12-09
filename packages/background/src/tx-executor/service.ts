@@ -246,8 +246,8 @@ export class BackgroundTxExecutorService {
   async resumeTx(
     env: Env,
     id: string,
-    txIndex?: number,
-    signedTx?: string
+    txIndex: number,
+    signedTx: string
   ): Promise<TxExecutionResult> {
     if (!env.isInternalMsg) {
       // TODO: 에러 코드 신경쓰기
@@ -281,14 +281,16 @@ export class BackgroundTxExecutorService {
     }
 
     // Only pending or blocked executions can be executed
-    const needResume =
+    const needRun =
       execution.status === TxExecutionStatus.PENDING ||
       execution.status === TxExecutionStatus.BLOCKED;
-    if (!needResume) {
+    if (!needRun) {
       return {
         status: execution.status,
       };
     }
+
+    const isResumeTx = options?.txIndex != null && options.signedTx != null;
 
     // check if the key is valid
     const keyInfo = this.keyRingCosmosService.keyRingService.getKeyInfo(
@@ -351,7 +353,7 @@ export class BackgroundTxExecutorService {
       if (result.status === BackgroundTxStatus.BLOCKED) {
         runInAction(() => {
           execution.status = TxExecutionStatus.BLOCKED;
-          this.recordHistoryIfNeeded(execution);
+          this.recordHistoryIfNeeded(execution, isResumeTx);
           // no need to keep the history data anymore
           delete execution.historyData;
         });
@@ -361,6 +363,17 @@ export class BackgroundTxExecutorService {
       }
 
       if (result.status === BackgroundTxStatus.FAILED) {
+        // Record error to history if historyId exists
+        if (
+          execution.type === TxExecutionType.SWAP_V2 &&
+          execution.historyId != null
+        ) {
+          this.recentSendHistoryService.setSwapV2HistoryError(
+            execution.historyId,
+            result.error ?? `${i + 1}th transaction failed`
+          );
+        }
+
         this.removeTxExecution(id);
 
         return {
@@ -378,8 +391,7 @@ export class BackgroundTxExecutorService {
     }
 
     // if the execution is completed successfully, record the history and remove the execution
-
-    this.recordHistoryIfNeeded(execution);
+    this.recordHistoryIfNeeded(execution, isResumeTx);
     this.removeTxExecution(id);
 
     return {
@@ -423,17 +435,19 @@ export class BackgroundTxExecutorService {
       return { status: BackgroundTxStatus.BLOCKED, txHash, error };
     }
 
-    // SIGNING
-    try {
-      const result = await this.signTx(vaultId, tx);
-      signedTx = result.signedTx;
-    } catch (e) {
-      console.error(`[TxExecutor] tx signing failed:`, e);
-      return {
-        status: BackgroundTxStatus.FAILED,
-        txHash,
-        error: e.message ?? "Transaction signing failed",
-      };
+    // if not signed, sign the tx
+    if (signedTx == null) {
+      try {
+        const result = await this.signTx(vaultId, tx);
+        signedTx = result.signedTx;
+      } catch (e) {
+        console.error(`[TxExecutor] tx signing failed:`, e);
+        return {
+          status: BackgroundTxStatus.FAILED,
+          txHash,
+          error: e.message ?? "Transaction signing failed",
+        };
+      }
     }
 
     // BROADCASTING
@@ -827,7 +841,10 @@ export class BackgroundTxExecutorService {
   }
 
   @action
-  protected recordHistoryIfNeeded(execution: TxExecution): void {
+  protected recordHistoryIfNeeded(
+    execution: TxExecution,
+    isResumeTx: boolean = false
+  ): void {
     if (execution.type === TxExecutionType.UNDEFINED) {
       return;
     }
@@ -856,7 +873,17 @@ export class BackgroundTxExecutorService {
     }
 
     if (execution.type === TxExecutionType.IBC_TRANSFER) {
-      if (execution.historyId != null || !execution.historyData) {
+      // If resuming tx and history already exists, resume tracking only
+      if (execution.historyId != null) {
+        if (isResumeTx) {
+          this.recentSendHistoryService.trackIBCPacketForwardingRecursive(
+            execution.historyId
+          );
+        }
+        return;
+      }
+
+      if (!execution.historyData) {
         return;
       }
 
@@ -905,7 +932,17 @@ export class BackgroundTxExecutorService {
     }
 
     if (execution.type === TxExecutionType.IBC_SWAP) {
-      if (execution.historyId != null || !execution.historyData) {
+      // If resuming tx and history already exists, resume tracking only
+      if (execution.historyId != null) {
+        if (isResumeTx) {
+          this.recentSendHistoryService.trackIBCPacketForwardingRecursive(
+            execution.historyId
+          );
+        }
+        return;
+      }
+
+      if (!execution.historyData) {
         return;
       }
 
@@ -960,7 +997,17 @@ export class BackgroundTxExecutorService {
     }
 
     if (execution.type === TxExecutionType.SWAP_V2) {
-      if (execution.historyId != null || !execution.historyData) {
+      // If resuming tx and history already exists, resume tracking only
+      if (execution.historyId != null) {
+        if (isResumeTx) {
+          this.recentSendHistoryService.resumeSwapV2Tracking(
+            execution.historyId
+          );
+        }
+        return;
+      }
+
+      if (!execution.historyData) {
         return;
       }
 
