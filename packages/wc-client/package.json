@@ -25,6 +25,6 @@
   "peerDependencies": {
     "@walletconnect/sign-client": "^2",
     "@walletconnect/types": "^2",
-    "starknet": "^7"
+    "starknet": "^8"
   }
 }
