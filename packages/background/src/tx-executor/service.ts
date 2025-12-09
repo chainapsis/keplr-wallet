@@ -103,11 +103,8 @@ export class BackgroundTxExecutorService {
       const js = toJS(this.recentTxExecutionMap);
       const serialized: Record<string, string> = {};
       for (const [key, value] of js) {
-        // only persist executions that are blocked or have preventAutoSign set to true
-        if (
-          value.preventAutoSign ||
-          value.status === TxExecutionStatus.BLOCKED
-        ) {
+        // only persist executions that are blocked
+        if (value.status === TxExecutionStatus.BLOCKED) {
           serialized[key] = JSON.stringify(value);
         }
       }
@@ -881,7 +878,11 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
-      const backgroundExecutionId = execution.preventAutoSign
+      const backgroundExecutionId = execution.txs.some(
+        (tx) =>
+          tx.status === BackgroundTxStatus.PENDING ||
+          tx.status === BackgroundTxStatus.BLOCKED
+      )
         ? execution.id
         : undefined;
 
@@ -927,9 +928,13 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
-      // preventAutoSign means that the execution requires multiple transactions to be executed
-      // so we need to record the history with the execution id
-      const backgroundExecutionId = execution.preventAutoSign
+      // do not use preventAutoSign here,
+      // because hardware wallet case with no multiple txs doesn't need to be recorded
+      const backgroundExecutionId = execution.txs.some(
+        (tx) =>
+          tx.status === BackgroundTxStatus.PENDING ||
+          tx.status === BackgroundTxStatus.BLOCKED
+      )
         ? execution.id
         : undefined;
 
@@ -971,7 +976,11 @@ export class BackgroundTxExecutorService {
 
       const historyData = execution.historyData;
 
-      const backgroundExecutionId = execution.preventAutoSign
+      const backgroundExecutionId = execution.txs.some(
+        (tx) =>
+          tx.status === BackgroundTxStatus.PENDING ||
+          tx.status === BackgroundTxStatus.BLOCKED
+      )
         ? execution.id
         : undefined;
 
