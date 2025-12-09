@@ -149,8 +149,9 @@ export class TokenScanService {
     return (this.vaultToMap.get(vaultId) ?? [])
       .filter((tokenScan) => {
         return (
-          this.chainsService.hasChainInfo(tokenScan.chainId) ||
-          this.chainsService.hasModularChainInfo(tokenScan.chainId)
+          (this.chainsService.hasChainInfo(tokenScan.chainId) ||
+            this.chainsService.hasModularChainInfo(tokenScan.chainId)) &&
+          !this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)
         );
       })
       .sort((a, b) => {
