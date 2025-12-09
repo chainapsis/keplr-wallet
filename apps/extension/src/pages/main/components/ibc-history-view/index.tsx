@@ -1,13 +1,8 @@
-import React, {
-  FunctionComponent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
   BackgroundTxStatus,
+  BackgroundTxType,
   GetIBCHistoriesMsg,
   GetSkipHistoriesMsg,
   GetSwapV2HistoriesMsg,
@@ -17,10 +12,12 @@ import {
   RemoveIBCHistoryMsg,
   RemoveSkipHistoryMsg,
   RemoveSwapV2HistoryMsg,
+  ResumeTxMsg,
   SkipHistory,
   SwapV2History,
   SwapV2TxStatus,
   TxExecution,
+  TxExecutionStatus,
 } from "@keplr-wallet/background";
 import { SwapProvider } from "@keplr-wallet/types";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
@@ -48,8 +45,8 @@ import {
   XMarkIcon,
 } from "../../../../components/icon";
 import { useStore } from "../../../../stores";
-import { CoinPretty } from "@keplr-wallet/unit";
-import { IChainInfoImpl } from "@keplr-wallet/stores";
+import { CoinPretty, Dec, DecUtils } from "@keplr-wallet/unit";
+import { IChainInfoImpl, MakeTxResponse } from "@keplr-wallet/stores";
 import { ChainImageFallback } from "../../../../components/image";
 import { IconProps } from "../../../../components/icon/types";
 import { useSpringValue, animated, easings } from "@react-spring/web";
@@ -57,6 +54,8 @@ import { defaultSpringConfig } from "../../../../styles/spring";
 import { VerticalCollapseTransition } from "../../../../components/transition/vertical-collapse";
 import { StepIndicator } from "../../../../components/step-indicator";
 import { FormattedMessage, useIntl } from "react-intl";
+import { useNavigate } from "react-router";
+import { useNotification } from "../../../../hooks/notification";
 
 export const IbcHistoryView: FunctionComponent<{
   isNotReady: boolean;
@@ -1424,16 +1423,27 @@ const SwapV2HistoryViewItem: FunctionComponent<{
   history: SwapV2History;
   removeHistory: (id: string, shouldHide: boolean) => void;
 }> = observer(({ history, removeHistory }) => {
-  const { chainStore, uiConfigStore } = useStore();
+  const {
+    chainStore,
+    queriesStore,
+    uiConfigStore,
+    accountStore,
+    ethereumAccountStore,
+  } = useStore();
+
+  console.log("history", history);
 
   const theme = useTheme();
   const intl = useIntl();
+  const navigate = useNavigate();
+  const notification = useNotification();
 
   const [txExecution, setTxExecution] = useState<TxExecution | undefined>(
     undefined
   );
+  const [isLoading, setIsLoading] = useState(false);
 
-  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+  console.log("txExecution", txExecution);
 
   useEffect(() => {
     const backgroundExecutionId = history.backgroundExecutionId;
@@ -1442,40 +1452,20 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return;
     }
 
-    const clearPolling = () => {
-      if (intervalIdRef.current) {
-        clearInterval(intervalIdRef.current);
-        intervalIdRef.current = null;
-      }
-    };
-
-    const fetchTxExecution = () => {
-      const requester = new InExtensionMessageRequester();
-      requester
-        .sendMessage(
-          BACKGROUND_PORT,
-          new GetTxExecutionMsg(backgroundExecutionId)
-        )
-        .then((execution) => {
-          setTxExecution(execution);
-        })
-        .catch((e) => {
-          console.error("Failed to get tx execution:", e);
-          setTxExecution(undefined);
-          // execution이 없으면 polling 중단
-          clearPolling();
-        });
-    };
-
-    fetchTxExecution();
-
-    // 5초마다 주기적으로 가져오기
-    intervalIdRef.current = setInterval(fetchTxExecution, 5000);
-
-    return () => {
-      clearPolling();
-    };
-  }, [history.backgroundExecutionId]);
+    const requester = new InExtensionMessageRequester();
+    requester
+      .sendMessage(
+        BACKGROUND_PORT,
+        new GetTxExecutionMsg(backgroundExecutionId)
+      )
+      .then((execution) => {
+        setTxExecution(execution);
+      })
+      .catch((e) => {
+        console.error("Failed to get tx execution:", e);
+        setTxExecution(undefined);
+      });
+  }, [history]);
 
   const historyCompleted = useMemo(() => {
     if (!history.trackDone) {
@@ -1485,6 +1475,11 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     // If there's a track error, check if assetLocationInfo exists (refund completed)
     if (history.trackError) {
       return !!history.assetLocationInfo;
+    }
+
+    // TODO: 임시 조치임
+    if (history.assetLocationInfo?.type === "intermediate") {
+      return false;
     }
 
     // SUCCESS 상태에서 assetLocationInfo가 없으면 destination에 도달한 것
@@ -1550,7 +1545,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     };
   }, [txExecution, history.backgroundExecutionId]);
 
-  // 삭제 시 hide 처리할지 여부 계산
   const shouldHideOnRemove = useMemo(() => {
     if (!history.backgroundExecutionId || history.resAmount.length !== 0) {
       return false;
@@ -1564,15 +1558,227 @@ const SwapV2HistoryViewItem: FunctionComponent<{
   }, [history]);
 
   async function handleContinueSigning() {
-    try {
-      uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
+    if (!history.backgroundExecutionId || !txExecution) {
+      console.log("tx execution is not found");
+      return;
+    }
 
-      // TODO: implement continue signing
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+    const txIndex = txExecution.txs.findIndex(
+      (tx) =>
+        tx.status === BackgroundTxStatus.PENDING ||
+        tx.status === BackgroundTxStatus.BLOCKED
+    );
+    if (txIndex < 0) {
+      console.log("tx index is not found");
+      return;
+    }
+
+    const tx = txExecution.txs[txIndex];
+    if (!tx) {
+      console.log("tx is not found");
+      return;
+    }
+
+    const totalTxCount = txExecution.txs.length;
+    const executedTxCount = txExecution.txs.filter(
+      (tx) => tx.status === BackgroundTxStatus.CONFIRMED
+    ).length;
+    if (totalTxCount <= 0 || executedTxCount >= totalTxCount) {
+      console.log("tx execution is completed");
+      return;
+    }
+
+    setIsLoading(true);
+    uiConfigStore.ibcSwapConfig.setSignatureProgress(
+      totalTxCount,
+      executedTxCount
+    );
+
+    try {
+      // get tx execution
+      switch (tx.type) {
+        case BackgroundTxType.EVM: {
+          const txData = tx.txData;
+
+          const account = accountStore.getAccount(tx.chainId);
+          const ethereumAccount = ethereumAccountStore.getAccount(tx.chainId);
+
+          const ethereumQueries = queriesStore.get(tx.chainId).ethereum;
+
+          // estimate gas
+          const { gasUsed } = await ethereumAccount.simulateGas(
+            account.ethereumHexAddress,
+            txData
+          );
+
+          // get fee
+
+          // build fee object
+
+          break;
+        }
+        case BackgroundTxType.COSMOS: {
+          const chainId = tx.chainId;
+          const txData = tx.txData;
+          const aminoMsgs = txData.aminoMsgs;
+          if (aminoMsgs == undefined || aminoMsgs.length === 0) {
+            throw new Error("aminoMsgs is not found or empty");
+          }
+
+          const account = accountStore.getAccount(chainId);
+
+          const msg = aminoMsgs[0];
+          let cosmosTx: MakeTxResponse;
+
+          switch (msg.type) {
+            case "cosmos-sdk/MsgTransfer": {
+              const currency = chainStore
+                .getChain(chainId)
+                .forceFindCurrency(msg.value.token.denom);
+              const normalizedAmount = new Dec(msg.value.token.amount)
+                .quo(DecUtils.getPrecisionDec(currency.coinDecimals))
+                .toString();
+
+              console.log("msg", msg);
+
+              cosmosTx = account.cosmos.makeIBCTransferTx(
+                {
+                  portId: msg.value.source_port,
+                  channelId: msg.value.source_channel,
+                  counterpartyChainId: "", // NOTE: counterpartyChainId is not included in the server response
+                },
+                normalizedAmount,
+                currency,
+                msg.value.receiver,
+                msg.value.memo
+              );
+              cosmosTx.ui.overrideType("ibc-swap");
+              break;
+            }
+            case "wasm/MsgExecuteContract": {
+              cosmosTx = account.cosmwasm.makeExecuteContractTx(
+                "unknown",
+                msg.value.contract,
+                msg.value.msg,
+                msg.value.funds
+              );
+              cosmosTx.ui.overrideType("ibc-swap");
+              break;
+            }
+            case "cctp/DepositForBurn": {
+              cosmosTx = account.cosmos.makeCCTPDepositForBurnTx(
+                msg.value.from,
+                msg.value.amount,
+                msg.value.destination_domain,
+                msg.value.mint_recipient,
+                msg.value.burn_token
+              );
+              break;
+            }
+            case "cctp/DepositForBurnWithCaller": {
+              // DepositForBurnWithCaller and MsgSend should be together on skip
+              // as squid don't charge cctp fee, this message won't appear frequently...
+              if (aminoMsgs.length !== 2) {
+                throw new Error(
+                  "Invalid number of messages for DepositForBurnWithCaller"
+                );
+              }
+
+              const sendMsg = aminoMsgs[1];
+              if (sendMsg.type !== "cosmos-sdk/MsgSend") {
+                throw new Error(
+                  "Second message should be MsgSend for DepositForBurnWithCaller"
+                );
+              }
+
+              const cctpMsgValue = {
+                from: msg.value.from,
+                amount: msg.value.amount,
+                destination_domain: msg.value.destination_domain,
+                mint_recipient: msg.value.mint_recipient,
+                burn_token: msg.value.burn_token,
+                destination_caller: msg.value.destination_caller,
+              };
+
+              const sendMsgValue = {
+                from_address: sendMsg.value.from_address,
+                to_address: sendMsg.value.to_address,
+                amount: sendMsg.value.amount,
+              };
+
+              cosmosTx = account.cosmos.makeCCTPDepositForBurnWithCallerTx(
+                JSON.stringify(cctpMsgValue),
+                JSON.stringify(sendMsgValue)
+              );
+              break;
+            }
+            default:
+              throw new Error("Unsupported message type");
+          }
+
+          const simulateResult = await cosmosTx.simulate({}, txData.memo);
+
+          const pseudoFee = {
+            amount: [
+              {
+                denom:
+                  chainStore.getChain(chainId).currencies[0].coinMinimalDenom,
+                amount: "1",
+              },
+            ],
+            // TODO: margin 값 정해야함
+            gas: Math.floor(simulateResult.gasUsed * 1.3).toString(),
+          };
+
+          const signResult = await cosmosTx.sign(pseudoFee, txData.memo, {
+            preferNoSetFee: false,
+            preferNoSetMemo: false,
+            // CHECK: topup 처리?
+          });
+
+          // resume background tx execution
+          const executeResult =
+            await new InExtensionMessageRequester().sendMessage(
+              BACKGROUND_PORT,
+              new ResumeTxMsg(
+                history.backgroundExecutionId,
+                txIndex,
+                Buffer.from(signResult.tx).toString("base64")
+              )
+            );
+          if (executeResult.status === TxExecutionStatus.FAILED) {
+            throw new Error(
+              executeResult.error ?? "Transaction execution failed"
+            );
+          }
+
+          notification.show(
+            "success",
+            intl.formatMessage({ id: "notification.transaction-success" }),
+            ""
+          );
+
+          uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
+
+          break;
+        }
+        default: {
+          throw new Error("Invalid tx type");
+        }
+      }
     } catch (error) {
       console.error("Failed to continue signing:", error);
+      notification.show(
+        "failed",
+        intl.formatMessage({ id: "error.transaction-failed" }),
+        ""
+      );
     } finally {
-      uiConfigStore.ibcSwapConfig.setIsSwapLoading(false);
+      // navigate to home
+      // CHECK: 실패했을 때 홈으로 안가고 이상한데로 감
+      navigate("/");
+      setIsLoading(false);
+      uiConfigStore.ibcSwapConfig.resetSignatureProgress();
     }
   }
 
@@ -1872,6 +2078,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 const refunded =
                   !!history.trackError &&
                   assetReleasedRouteIndex >= 0 &&
+                  history.assetLocationInfo?.type === "refund" &&
                   i === assetReleasedRouteIndex;
 
                 return (
@@ -2135,9 +2342,9 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                           ? ColorPalette["gray-600"]
                           : ColorPalette["gray-50"],
                     }}
-                    isLoading={uiConfigStore.ibcSwapConfig.isSwapLoading}
+                    isLoading={isLoading}
                     right={
-                      uiConfigStore.ibcSwapConfig.isSwapLoading ? null : (
+                      isLoading ? null : (
                         <ChevronRightIcon width="1rem" height="1rem" />
                       )
                     }

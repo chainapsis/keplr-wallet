@@ -2817,6 +2817,17 @@ export class RecentSendHistoryService {
   }
 
   @action
+  clearSwapV2HistoryBackgroundExecutionId(id: string): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+
+    history.backgroundExecutionId = undefined;
+    return true;
+  }
+
+  @action
   removeRecentSwapV2History(id: string): boolean {
     return this.recentSwapV2HistoryMap.delete(id);
   }

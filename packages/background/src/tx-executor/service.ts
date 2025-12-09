@@ -392,6 +392,17 @@ export class BackgroundTxExecutorService {
 
     // if the execution is completed successfully, record the history and remove the execution
     this.recordHistoryIfNeeded(execution, isResumeTx);
+
+    // 완료 시 backgroundExecutionId 제거 (더 이상 다음 tx를 기다리지 않음)
+    if (
+      execution.type === TxExecutionType.SWAP_V2 &&
+      execution.historyId != null
+    ) {
+      this.recentSendHistoryService.clearSwapV2HistoryBackgroundExecutionId(
+        execution.historyId
+      );
+    }
+
     this.removeTxExecution(id);
 
     return {
@@ -448,6 +459,8 @@ export class BackgroundTxExecutorService {
           error: e.message ?? "Transaction signing failed",
         };
       }
+    } else {
+      console.log(`[TxExecutor] tx is already signed`);
     }
 
     // BROADCASTING
