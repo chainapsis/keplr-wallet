@@ -500,7 +500,7 @@ export const EthereumSignTxView: FunctionComponent<{
       isSpecial: true,
       text: (() => {
         const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
-        if (progress.show) {
+        if (progress.show && progress.total > 1) {
           if (isLedgerInteracting) {
             return intl.formatMessage({ id: "button.continue-on-ledger" });
           }
@@ -520,7 +520,7 @@ export const EthereumSignTxView: FunctionComponent<{
       size: "large",
       left: (() => {
         const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
-        if (progress.show) {
+        if (progress.show && progress.total > 1) {
           return (
             <StepIndicator
               totalCount={progress.total}
@@ -537,12 +537,12 @@ export const EthereumSignTxView: FunctionComponent<{
         }
         return <ApproveIcon />;
       })(),
-      suppressDefaultLoadingIndicator:
-        uiConfigStore.ibcSwapConfig.signatureProgress.show &&
-        (isLedgerInteracting || isKeystoneInteracting),
-      showTextWhileLoading:
-        uiConfigStore.ibcSwapConfig.signatureProgress.show &&
-        (isLedgerInteracting || isKeystoneInteracting),
+      ...(uiConfigStore.ibcSwapConfig.signatureProgress.show &&
+        uiConfigStore.ibcSwapConfig.signatureProgress.total > 1 &&
+        (isLedgerInteracting || isKeystoneInteracting) && {
+          suppressDefaultLoadingIndicator: true,
+          showTextWhileLoading: true,
+        }),
       disabled: buttonDisabled,
       isLoading,
       onClick: async () => {
