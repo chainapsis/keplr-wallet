@@ -2248,10 +2248,9 @@ export class RecentSendHistoryService {
                   });
                 },
                 {
-                  // CHECK: Consider increasing maxRetries for long-running swaps (30~40 minutes)
-                  maxRetries: 50,
-                  waitMsAfterError: 500,
-                  maxWaitMsAfterError: 15000,
+                  maxRetries: 60,
+                  waitMsAfterError: 1000,
+                  maxWaitMsAfterError: 45000,
                 }
               );
             },
@@ -2260,9 +2259,9 @@ export class RecentSendHistoryService {
         });
       },
       {
-        maxRetries: 50,
-        waitMsAfterError: 500,
-        maxWaitMsAfterError: 15000,
+        maxRetries: 60,
+        waitMsAfterError: 1000,
+        maxWaitMsAfterError: 45000,
       }
     );
   }
