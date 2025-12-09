@@ -11,7 +11,6 @@ import {
 import {
   Call,
   DeployAccountContractPayload,
-  num,
   hash as starknetHash,
   shortString,
   constants,
@@ -37,7 +36,7 @@ import {
 } from "@ledgerhq/hw-app-starknet";
 import { PubKeyStarknet } from "@keplr-wallet/crypto";
 import { Fee } from "@keplr-wallet/stores-starknet/build/account/internal";
-import { Int } from "@keplr-wallet/unit";
+import { safeToBigInt } from "@keplr-wallet/common";
 
 // eip-2645 derivation path, m/2645'/starknet'/{application}'/0'/{accountId}'/0
 export const STARKNET_LEDGER_DERIVATION_PATH =
@@ -88,14 +87,6 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     chainId.replace("starknet:", "")
   ) as constants.StarknetChainId;
 
-  const safeToHex = (value: string | Int | null | undefined): string => {
-    if (value === null || value === undefined) {
-      return "0";
-    }
-    const val = value.toString();
-    return num.toHex(val === "0x" ? "0" : val);
-  };
-
   const transaction: V3DeployAccountSignerDetails = {
     version: "0x3",
     chainId: starknetChainId,
@@ -106,16 +97,16 @@ export const connectAndSignDeployAccountTxWithLedger = async (
     addressSalt,
     resourceBounds: {
       l1_gas: {
-        max_amount: safeToHex(fee.l1MaxGas),
-        max_price_per_unit: safeToHex(fee.l1MaxGasPrice),
+        max_amount: safeToBigInt(fee.l1MaxGas),
+        max_price_per_unit: safeToBigInt(fee.l1MaxGasPrice),
       },
       l2_gas: {
-        max_amount: safeToHex(fee.l2MaxGas),
-        max_price_per_unit: safeToHex(fee.l2MaxGasPrice),
+        max_amount: safeToBigInt(fee.l2MaxGas),
+        max_price_per_unit: safeToBigInt(fee.l2MaxGasPrice),
       },
       l1_data_gas: {
-        max_amount: safeToHex(fee.l1MaxDataGas),
-        max_price_per_unit: safeToHex(fee.l1MaxDataGasPrice),
+        max_amount: safeToBigInt(fee.l1MaxDataGas),
+        max_price_per_unit: safeToBigInt(fee.l1MaxDataGasPrice),
       },
     },
     tip: "0x0",

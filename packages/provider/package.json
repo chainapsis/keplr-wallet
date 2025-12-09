@@ -23,6 +23,6 @@
     "long": "^4.0.0"
   },
   "peerDependencies": {
-    "starknet": "^7"
+    "starknet": "^8"
   }
 }

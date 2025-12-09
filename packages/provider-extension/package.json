@@ -23,6 +23,6 @@
     "uuid": "^11.1.0"
   },
   "peerDependencies": {
-    "starknet": "^7"
+    "starknet": "^8"
   }
 }
