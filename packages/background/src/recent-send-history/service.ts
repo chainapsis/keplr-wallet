@@ -17,6 +17,7 @@ import {
 import { KVStore, retry } from "@keplr-wallet/common";
 import {
   IBCHistory,
+  IBCSwapHistoryData,
   RecentSendHistory,
   SkipHistory,
   StatusRequest,
@@ -2825,6 +2826,36 @@ export class RecentSendHistoryService {
 
     history.backgroundExecutionId = undefined;
     return true;
+  }
+
+  @action
+  setSwapV2AdditionalTrackingData(
+    id: string,
+    data:
+      | { type: "evm"; txHash: string }
+      | { type: "cosmos-ibc"; ibcSwapData: IBCSwapHistoryData }
+  ): boolean {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return false;
+    }
+
+    history.additionalTrackingData = data;
+    return true;
+  }
+
+  trackIBCSwapForSwapV2(id: string): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return;
+    }
+
+    if (history.additionalTrackingData?.type !== "cosmos-ibc") {
+      return;
+    }
+
+    // TODO: IBC swap tracking 로직 구현
+    // history.additionalTrackingData.ibcSwapData를 사용하여 tracking
   }
 
   @action

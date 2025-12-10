@@ -19,6 +19,7 @@ import {
   ExecutionTypeToHistoryData,
   TxExecutionResult,
   PendingTxExecutionResult,
+  IBCSwapHistoryData,
 } from "./types";
 import {
   action,
@@ -103,7 +104,7 @@ export class BackgroundTxExecutorService {
       const js = toJS(this.recentTxExecutionMap);
       const serialized: Record<string, string> = {};
       for (const [key, value] of js) {
-        // only persist executions that are blocked
+        // only persist executions that are BLOCKED
         if (value.status === TxExecutionStatus.BLOCKED) {
           serialized[key] = JSON.stringify(value);
         }
@@ -245,7 +246,8 @@ export class BackgroundTxExecutorService {
     env: Env,
     id: string,
     txIndex: number,
-    signedTx: string
+    signedTx: string,
+    ibcSwapData?: IBCSwapHistoryData
   ): Promise<TxExecutionResult> {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
@@ -254,6 +256,7 @@ export class BackgroundTxExecutorService {
     return await this.executeTxs(id, {
       txIndex,
       signedTx,
+      ibcSwapData,
     });
   }
 
@@ -262,7 +265,7 @@ export class BackgroundTxExecutorService {
     options?: {
       txIndex?: number;
       signedTx?: string;
-      // TODO: additional history data
+      ibcSwapData?: IBCSwapHistoryData;
     }
   ): Promise<TxExecutionResult> {
     const execution = this.getTxExecution(id);
@@ -287,8 +290,6 @@ export class BackgroundTxExecutorService {
         status: execution.status,
       };
     }
-
-    const isResumingTx = options?.txIndex != null && options.signedTx != null;
 
     const keyInfo = this.keyRingCosmosService.keyRingService.getKeyInfo(
       execution.vaultId
@@ -337,8 +338,55 @@ export class BackgroundTxExecutorService {
 
       switch (result.status) {
         case BackgroundTxStatus.CONFIRMED: {
-          if (isResumingTx) {
-            // TODO: if is resuming tx and additional history data is provided, record the history
+          if (providedSignedTx) {
+            // 외부에서 제공된 signed tx로 실행한 경우 (= multi tx 재개 케이스)
+            //
+            // 이번에 처리된 트랜잭션이 multi tx swap의 마지막 트랜잭션이라고 optimistically 가정하고,
+            // 추가적인 히스토리 데이터를 기록해야 한다.
+            //
+            // [배경]
+            // Skip에서 기본적으로 smart relay 기능을 활성화해 놓았으므로,
+            // multi tx swap이 필요한 경우는 다음과 같다:
+            //   - A 체인에서 브릿지, 메시징 프로토콜, 또는 IBC Eureka를 통해 B 체인으로 자산을 전송
+            //   - B 체인에서 사용자 주소로 릴리즈되는 자산이 wrapped asset이거나 IBC swap이 필요한 asset
+            //
+            // [마지막 트랜잭션의 유형]
+            // 따라서 multi tx swap의 마지막 트랜잭션은 아래 두 가지 중 하나라고 가정할 수 있다:
+            //   1. Wrapped asset → Native asset 변환 트랜잭션 (EVM)
+            //   2. IBC swap이 필요한 asset의 IBC swap 트랜잭션 (Cosmos)
+            //
+            // [트랜잭션 타입별 처리]
+            //   1. EVM: txHash를 additionalTrackingData에 저장 → debug_traceTransaction으로 추적
+            //   2. Cosmos: 외부에서 IBC swap data를 받아 additionalTrackingData에 저장 → IBC swap tracking
+
+            if (
+              execution.type === TxExecutionType.SWAP_V2 &&
+              execution.historyId != null
+            ) {
+              const currentTx = execution.txs[i];
+
+              if (currentTx.type === BackgroundTxType.EVM) {
+                // EVM: txHash를 저장하여 debug_traceTransaction으로 추적
+                if (result.txHash != null) {
+                  this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
+                    execution.historyId,
+                    { type: "evm", txHash: result.txHash }
+                  );
+                }
+              } else if (currentTx.type === BackgroundTxType.COSMOS) {
+                // Cosmos: 외부에서 IBC swap data를 받아서 IBC swap tracking
+                const ibcSwapData = options?.ibcSwapData;
+                if (ibcSwapData != null) {
+                  this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
+                    execution.historyId,
+                    { type: "cosmos-ibc", ibcSwapData }
+                  );
+                  this.recentSendHistoryService.trackIBCSwapForSwapV2(
+                    execution.historyId
+                  );
+                }
+              }
+            }
           }
           continue;
         }
@@ -558,7 +606,6 @@ export class BackgroundTxExecutorService {
     vaultId: string,
     tx: CosmosBackgroundTx
   ): Promise<string> {
-    // check key
     const keyInfo = await this.keyRingCosmosService.getKey(vaultId, tx.chainId);
     const isHardware = keyInfo.isNanoLedger || keyInfo.isKeystone;
     const signer = keyInfo.bech32Address;

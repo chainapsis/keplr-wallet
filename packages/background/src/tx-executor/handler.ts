@@ -52,7 +52,13 @@ const handleResumeTxMsg: (
   service: BackgroundTxExecutorService
 ) => InternalHandler<ResumeTxMsg> = (service) => {
   return async (env, msg) => {
-    return await service.resumeTx(env, msg.id, msg.txIndex, msg.signedTx);
+    return await service.resumeTx(
+      env,
+      msg.id,
+      msg.txIndex,
+      msg.signedTx,
+      msg.ibcSwapData
+    );
   };
 };
 

@@ -286,6 +286,11 @@ export interface SwapV2History extends SwapV2HistoryBase {
 
   backgroundExecutionId?: string;
 
+  // Multi TX swap 재개 시 추가 트래킹 데이터
+  additionalTrackingData?:
+    | { type: "evm"; txHash: string } // EVM: debug_traceTransaction으로 추적
+    | { type: "cosmos-ibc"; ibcSwapData: IBCSwapHistoryData }; // Cosmos: IBC swap tracking
+
   trackDone?: boolean; // status tracking이 완료되었는지 여부
   trackError?: string; // status tracking 중 에러가 발생했는지 여부
   finalizationRetryCount?: number; // success/partial_success/failed 상태에서 currentStep이 진행 중일 때 추가 polling 횟수

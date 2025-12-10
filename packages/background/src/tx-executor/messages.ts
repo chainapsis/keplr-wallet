@@ -7,6 +7,7 @@ import {
   TxExecution,
   ExecutionTypeToHistoryData,
   TxExecutionResult,
+  IBCSwapHistoryData,
 } from "./types";
 
 /**
@@ -91,7 +92,8 @@ export class ResumeTxMsg extends Message<TxExecutionResult> {
   constructor(
     public readonly id: string,
     public readonly txIndex: number,
-    public readonly signedTx: string
+    public readonly signedTx: string,
+    public readonly ibcSwapData?: IBCSwapHistoryData
   ) {
     super();
   }
