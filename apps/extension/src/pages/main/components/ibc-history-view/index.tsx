@@ -1799,17 +1799,13 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 .quo(DecUtils.getPrecisionDec(currency.coinDecimals))
                 .toString();
 
-              console.log("msg", msg);
-
-              // IBCSwapHistoryData 구성을 위한 채널 정보 추출
               const ibcChannels: {
                 portId: string;
                 channelId: string;
                 counterpartyChainId: string;
               }[] = [];
-              const swapReceiver: string[] = [];
+              const swapReceiver: string[] = [tx.chainId]; // should include source chain id
 
-              // 첫 번째 채널의 counterpartyChainId 조회
               const firstQueryClientState = queriesStore
                 .get(chainId)
                 .cosmos.queryIBCClientState.getClientState(
@@ -2179,6 +2175,32 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
             if (historyCompleted && failedRouteIndex < 0) {
               const destinationAssets = (() => {
+                // NOTE: evm은 resAmount[0]에 들어감
+                if (history.additionalTrackingData?.type === "cosmos-ibc") {
+                  const resAmount =
+                    history.resAmount[
+                      history.additionalTrackingData.ibcHistory.length
+                    ];
+                  if (resAmount) {
+                    return resAmount
+                      .map((amount) => {
+                        return new CoinPretty(
+                          chainStore
+                            .getChain(history.destinationAsset.chainId)
+                            .forceFindCurrency(amount.denom),
+                          amount.amount
+                        )
+                          .hideIBCMetadata(true)
+                          .shrink(true)
+                          .maxDecimals(6)
+                          .inequalitySymbol(true)
+                          .trim(true)
+                          .toString();
+                      })
+                      .join(", ");
+                  }
+                }
+
                 if (!history.resAmount[0]) {
                   return chainStore
                     .getChain(history.destinationAsset.chainId)
