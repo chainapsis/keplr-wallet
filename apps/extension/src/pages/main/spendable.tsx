@@ -720,41 +720,40 @@ export const SpendableAssetView: FunctionComponent<{
                 </React.Fragment>
               </VerticalCollapseTransition>
 
-              {numFoundToken > 0 &&
-                chainStore.shouldShowNewTokenFoundInMain && (
-                  <NewTokenFoundButtonContainer
-                    onClick={() => {
-                      chainStore.dismissNewTokenFoundInHome();
-                      setIsFoundTokenModalOpen(true);
-                    }}
-                  >
-                    <XAxis alignY="center">
-                      <Subtitle3>
-                        {intl.formatMessage(
-                          { id: "page.main.spendable.new-token-found" },
-                          {
-                            numFoundToken: (
-                              <span
-                                style={{
-                                  paddingRight: "0.25rem",
-                                  color: ColorPalette["blue-300"],
-                                }}
-                              >
-                                {numFoundToken}
-                              </span>
-                            ),
-                          }
-                        )}
-                      </Subtitle3>
-                      <div style={{ flex: 1 }} />
-                      <ArrowRightIcon
-                        width="1.25rem"
-                        height="1.25rem"
-                        color={ColorPalette["gray-300"]}
-                      />
-                    </XAxis>
-                  </NewTokenFoundButtonContainer>
-                )}
+              {numFoundToken > 0 && chainStore.isShowNewTokenFoundInMain && (
+                <NewTokenFoundButtonContainer
+                  onClick={() => {
+                    chainStore.dismissNewTokenFoundInMain();
+                    setIsFoundTokenModalOpen(true);
+                  }}
+                >
+                  <XAxis alignY="center">
+                    <Subtitle3>
+                      {intl.formatMessage(
+                        { id: "page.main.spendable.new-token-found" },
+                        {
+                          numFoundToken: (
+                            <span
+                              style={{
+                                paddingRight: "0.25rem",
+                                color: ColorPalette["blue-300"],
+                              }}
+                            >
+                              {numFoundToken}
+                            </span>
+                          ),
+                        }
+                      )}
+                    </Subtitle3>
+                    <div style={{ flex: 1 }} />
+                    <ArrowRightIcon
+                      width="1.25rem"
+                      height="1.25rem"
+                      color={ColorPalette["gray-300"]}
+                    />
+                  </XAxis>
+                </NewTokenFoundButtonContainer>
+              )}
 
               <SceneTransition
                 ref={sceneTransitionRef}

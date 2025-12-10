@@ -25,16 +25,17 @@ import {
   EnableVaultsWithCosmosAddressMsg,
   GetChainInfosWithCoreTypesMsg,
   GetEnabledChainIdentifiersMsg,
+  GetIsShowNewTokenFoundInMainMsg,
   GetTokenScansMsg,
   RemoveSuggestedChainInfoMsg,
   RevalidateTokenScansMsg,
   SetChainEndpointsMsg,
-  SyncTokenScanInfosMsg,
   ToggleChainsMsg,
   TokenScan,
-  TokenScanInfo,
   TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
+  DismissNewTokenFoundInMainMsg,
+  UpdateIsShowNewTokenFoundInMainMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
@@ -62,6 +63,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @observable
   protected _newTokenFoundDismissed: Map<string, boolean> = new Map();
+
+  @observable
+  protected _isShowNewTokenFoundInMain: boolean = false;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -220,134 +224,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @computed
-  get shouldShowNewTokenFoundInMain(): boolean {
-    const vaultId = this.keyRingStore.selectedKeyInfo?.id;
-    if (!vaultId) {
-      return false;
-    }
-
-    const dismissed = this._newTokenFoundDismissed.get(vaultId) ?? false;
-    if (dismissed) {
-      return false;
-    }
-
-    return this.tokenScans.length > 0;
-  }
-
-  dismissNewTokenFoundInHome() {
-    const vaultId = this.keyRingStore.selectedKeyInfo?.id;
-    if (!vaultId) {
-      return;
-    }
-
-    runInAction(() => {
-      this._newTokenFoundDismissed.set(vaultId, true);
-    });
-
-    // Sync prevInfos to current infos in background so future scans
-    // compare against the state at dismiss time
-    this.requester.sendMessage(
-      BACKGROUND_PORT,
-      new SyncTokenScanInfosMsg(vaultId)
-    );
-  }
-
-  protected resetDismissIfNeeded(vaultId: string, tokenScans: TokenScan[]) {
-    const needReset = tokenScans.some((scan) =>
-      this.isMeaningfulTokenScanChange(scan)
-    );
-
-    if (needReset) {
-      runInAction(() => {
-        this._newTokenFoundDismissed.set(vaultId, false);
-      });
-    }
-  }
-
-  protected isMeaningfulTokenScanChange(tokenScan: TokenScan): boolean {
-    if (!tokenScan.prevInfos || tokenScan.prevInfos.length === 0) {
-      return tokenScan.infos.length > 0;
-    }
-
-    const makeKey = (info: TokenScanInfo): string | undefined => {
-      if (info.bech32Address) return `bech32:${info.bech32Address}`;
-      if (info.ethereumHexAddress) return `eth:${info.ethereumHexAddress}`;
-      if (info.starknetHexAddress) return `stark:${info.starknetHexAddress}`;
-      if (info.bitcoinAddress?.bech32Address)
-        return `btc:${info.bitcoinAddress.bech32Address}`;
-      if (info.coinType != null) return `coin:${info.coinType}`;
-      return undefined;
-    };
-
-    const toBigIntSafe = (v: string): bigint | undefined => {
-      try {
-        return BigInt(v);
-      } catch {
-        return undefined;
-      }
-    };
-
-    const prevTokenInfosMap = new Map<string, TokenScanInfo>();
-    for (const info of tokenScan.prevInfos ?? []) {
-      const key = makeKey(info);
-      if (key) {
-        prevTokenInfosMap.set(key, info);
-      }
-    }
-
-    for (const info of tokenScan.infos) {
-      const key = makeKey(info);
-      if (!key) {
-        continue;
-      }
-
-      const prevTokenInfo = prevTokenInfosMap.get(key);
-
-      if (!prevTokenInfo) {
-        if (info.assets.length > 0) {
-          return true;
-        }
-        continue;
-      }
-
-      const prevAssetMap = new Map<string, Asset>();
-      for (const asset of prevTokenInfo.assets) {
-        prevAssetMap.set(asset.currency.coinMinimalDenom, asset);
-      }
-
-      for (const asset of info.assets) {
-        const prevAsset = prevAssetMap.get(asset.currency.coinMinimalDenom);
-
-        // 없던 토큰이 생긴경우
-        if (!prevAsset) {
-          return true;
-        }
-
-        const prevAmount = toBigIntSafe(prevAsset.amount);
-        const curAmount = toBigIntSafe(asset.amount);
-        if (prevAmount == null || curAmount == null) {
-          continue;
-        }
-
-        // 이전에 0이였다가 밸런스가 생긴경우.
-        if (prevAmount === BigInt(0) && curAmount > BigInt(0)) {
-          return true;
-        }
-
-        // 이전 밸런스에 배해서 10% 밸런스가 증가한 경우
-        if (
-          prevAmount > BigInt(0) &&
-          curAmount * BigInt(10) >= prevAmount * BigInt(11)
-        ) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  @computed
   override get chainInfos(): IChainInfoImpl<ChainInfoWithCoreTypes>[] {
     // Sort by chain name.
     // The first chain has priority to be the first.
@@ -443,6 +319,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   get enabledChainIdentifiers(): string[] {
     return this._enabledChainIdentifiers;
+  }
+
+  get isShowNewTokenFoundInMain(): boolean {
+    return this._isShowNewTokenFoundInMain;
   }
 
   @computed
@@ -606,6 +486,21 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
+  *dismissNewTokenFoundInMain() {
+    const msg = new DismissNewTokenFoundInMainMsg(
+      this.keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
+    const res = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    runInAction(() => {
+      this._isShowNewTokenFoundInMain = res;
+    });
+  }
+
+  @flow
   protected *init() {
     this._isInitializing = true;
 
@@ -635,18 +530,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         );
       });
     });
-
-    const dismissedNewTokenFound = yield* toGenerator(
-      this.kvStore.get<Record<string, boolean>>("dismissedNewTokenFound")
-    );
-
-    if (dismissedNewTokenFound) {
-      for (const [key, value] of Object.entries(dismissedNewTokenFound)) {
-        runInAction(() => {
-          this._newTokenFoundDismissed.set(key, value);
-        });
-      }
-    }
 
     autorun(() => {
       const js = toJS(this._newTokenFoundDismissed);
@@ -741,7 +624,13 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     this._tokenScans = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
     );
-    this.resetDismissIfNeeded(id, this._tokenScans);
+
+    this._isShowNewTokenFoundInMain = yield* toGenerator(
+      this.requester.sendMessage(
+        BACKGROUND_PORT,
+        new GetIsShowNewTokenFoundInMainMsg(id)
+      )
+    );
 
     (async () => {
       await new Promise<void>((resolve) => {
@@ -761,7 +650,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         lastTimestamp == null ||
         // Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
         // QA 용으로 1분으로 설정
-        Date.now() - lastTimestamp > 3 * 60 * 1000
+        Date.now() - lastTimestamp > 1 * 60 * 1000
       ) {
         runInAction(() => {
           this._lastTokenScanRevalidateTimestamp.set(id, Date.now());
@@ -776,7 +665,15 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
           runInAction(() => {
             this._tokenScans = res.tokenScans;
           });
-          this.resetDismissIfNeeded(id, this._tokenScans);
+
+          const updateRes = await this.requester.sendMessage(
+            BACKGROUND_PORT,
+            new UpdateIsShowNewTokenFoundInMainMsg(id)
+          );
+
+          runInAction(() => {
+            this._isShowNewTokenFoundInMain = updateRes;
+          });
         }
       }
     })();

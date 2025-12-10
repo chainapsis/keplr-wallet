@@ -6,9 +6,12 @@ import {
   Message,
 } from "@keplr-wallet/router";
 import {
+  DismissNewTokenFoundInMainMsg,
+  GetIsShowNewTokenFoundInMainMsg,
   GetTokenScansMsg,
   RevalidateTokenScansMsg,
   SyncTokenScanInfosMsg,
+  UpdateIsShowNewTokenFoundInMainMsg,
 } from "./messages";
 import { TokenScanService } from "./service";
 
@@ -28,6 +31,21 @@ export const getHandler: (service: TokenScanService) => Handler = (
         return handleSyncTokenScanInfosMsg(service)(
           env,
           msg as SyncTokenScanInfosMsg
+        );
+      case GetIsShowNewTokenFoundInMainMsg:
+        return handleGetIsShowNewTokenFoundInMainMsg(service)(
+          env,
+          msg as GetIsShowNewTokenFoundInMainMsg
+        );
+      case UpdateIsShowNewTokenFoundInMainMsg:
+        return handleUpdateIsShowNewTokenFoundInMainMsg(service)(
+          env,
+          msg as UpdateIsShowNewTokenFoundInMainMsg
+        );
+      case DismissNewTokenFoundInMainMsg:
+        return handleDismissNewTokenFoundInMainMsg(service)(
+          env,
+          msg as DismissNewTokenFoundInMainMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -64,5 +82,29 @@ const handleSyncTokenScanInfosMsg: (
       vaultId: msg.vaultId,
       tokenScans: service.getTokenScans(msg.vaultId),
     };
+  };
+};
+
+const handleGetIsShowNewTokenFoundInMainMsg: (
+  service: TokenScanService
+) => InternalHandler<GetIsShowNewTokenFoundInMainMsg> = (service) => {
+  return async (_, msg) => {
+    return service.getIsShowNewTokenFoundInMain(msg.vaultId);
+  };
+};
+
+const handleUpdateIsShowNewTokenFoundInMainMsg: (
+  service: TokenScanService
+) => InternalHandler<UpdateIsShowNewTokenFoundInMainMsg> = (service) => {
+  return async (_, msg) => {
+    return service.resetDismissIfNeeded(msg.vaultId);
+  };
+};
+
+const handleDismissNewTokenFoundInMainMsg: (
+  service: TokenScanService
+) => InternalHandler<DismissNewTokenFoundInMainMsg> = (service) => {
+  return async (_, msg) => {
+    return service.dismissNewTokenFoundInHome(msg.vaultId);
   };
 };
