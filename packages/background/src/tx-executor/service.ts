@@ -19,7 +19,7 @@ import {
   ExecutionTypeToHistoryData,
   TxExecutionResult,
   PendingTxExecutionResult,
-  IBCSwapHistoryData,
+  IBCSwapMinimalTrackingData,
 } from "./types";
 import {
   action,
@@ -247,7 +247,7 @@ export class BackgroundTxExecutorService {
     id: string,
     txIndex: number,
     signedTx: string,
-    ibcSwapData?: IBCSwapHistoryData
+    ibcSwapData?: IBCSwapMinimalTrackingData
   ): Promise<TxExecutionResult> {
     if (!env.isInternalMsg) {
       throw new KeplrError("direct-tx-executor", 101, "Not internal message");
@@ -265,7 +265,7 @@ export class BackgroundTxExecutorService {
     options?: {
       txIndex?: number;
       signedTx?: string;
-      ibcSwapData?: IBCSwapHistoryData;
+      ibcSwapData?: IBCSwapMinimalTrackingData;
     }
   ): Promise<TxExecutionResult> {
     const execution = this.getTxExecution(id);
@@ -368,17 +368,21 @@ export class BackgroundTxExecutorService {
                   if (result.txHash != null) {
                     this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
                       execution.historyId,
-                      { type: "evm", txHash: result.txHash }
+                      {
+                        type: "evm",
+                        chainId: currentTx.chainId,
+                        txHash: result.txHash,
+                      }
                     );
                   }
                   break;
                 }
                 case BackgroundTxType.COSMOS: {
                   const ibcSwapData = options?.ibcSwapData;
-                  if (ibcSwapData != null) {
+                  if (ibcSwapData != null && result.txHash != null) {
                     this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
                       execution.historyId,
-                      { type: "cosmos-ibc", ibcSwapData }
+                      { type: "cosmos-ibc", ibcSwapData, txHash: result.txHash }
                     );
                   }
                   break;
@@ -889,19 +893,19 @@ export class BackgroundTxExecutorService {
           ? execution.id
           : undefined;
 
-        const id = this.recentSendHistoryService.addRecentIBCTransferHistory(
-          historyData.sourceChainId,
-          historyData.destinationChainId,
-          historyData.sender,
-          historyData.recipient,
-          historyData.amount,
-          historyData.memo,
-          historyData.channels,
-          historyData.notificationInfo,
-          Buffer.from(tx.txHash, "hex"),
-          backgroundExecutionId
-        );
-        this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
+        const id =
+          this.recentSendHistoryService.addRecentIBCTransferHistoryWithTracking(
+            historyData.sourceChainId,
+            historyData.destinationChainId,
+            historyData.sender,
+            historyData.recipient,
+            historyData.amount,
+            historyData.memo,
+            historyData.channels,
+            historyData.notificationInfo,
+            Buffer.from(tx.txHash, "hex"),
+            backgroundExecutionId
+          );
 
         execution.historyId = id;
         break;
@@ -929,22 +933,22 @@ export class BackgroundTxExecutorService {
           ? execution.id
           : undefined;
 
-        const id = this.recentSendHistoryService.addRecentIBCSwapHistory(
-          historyData.swapType,
-          historyData.chainId,
-          historyData.destinationChainId,
-          historyData.sender,
-          historyData.amount,
-          historyData.memo,
-          historyData.ibcChannels,
-          historyData.destinationAsset,
-          historyData.swapChannelIndex,
-          historyData.swapReceiver,
-          historyData.notificationInfo,
-          Buffer.from(tx.txHash, "hex"),
-          backgroundExecutionId
-        );
-        this.recentSendHistoryService.trackIBCPacketForwardingRecursive(id);
+        const id =
+          this.recentSendHistoryService.addRecentIBCSwapHistoryWithTracking(
+            historyData.swapType,
+            historyData.chainId,
+            historyData.destinationChainId,
+            historyData.sender,
+            historyData.amount,
+            historyData.memo,
+            historyData.ibcChannels,
+            historyData.destinationAsset,
+            historyData.swapChannelIndex,
+            historyData.swapReceiver,
+            historyData.notificationInfo,
+            Buffer.from(tx.txHash, "hex"),
+            backgroundExecutionId
+          );
 
         execution.historyId = id;
         break;

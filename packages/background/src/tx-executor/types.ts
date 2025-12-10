@@ -13,6 +13,7 @@ export {
   IBCTransferHistoryData,
   IBCSwapHistoryData,
   SwapV2HistoryData,
+  IBCSwapMinimalTrackingData,
   HistoryData,
 } from "../recent-send-history";
 

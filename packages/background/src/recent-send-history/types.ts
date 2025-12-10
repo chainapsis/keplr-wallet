@@ -86,6 +86,12 @@ export interface IBCSwapHistoryData {
   };
 }
 
+// IBC swap 추가 트래킹에 필요한 최소 입력 데이터
+export type IBCSwapMinimalTrackingData = Pick<
+  IBCSwapHistoryData,
+  "chainId" | "swapReceiver" | "ibcChannels"
+>;
+
 /**
  * Stored IBC transfer history record (subset of IBCHistory).
  */
@@ -288,8 +294,24 @@ export interface SwapV2History extends SwapV2HistoryBase {
 
   // Multi TX swap 재개 시 추가 트래킹 데이터
   additionalTrackingData?:
-    | { type: "evm"; txHash: string } // EVM: debug_traceTransaction으로 추적
-    | { type: "cosmos-ibc"; ibcSwapData: IBCSwapHistoryData }; // Cosmos: IBC swap tracking
+    | { type: "evm"; chainId: string; txHash: string } // EVM: debug_traceTransaction으로 추적
+    | {
+        type: "cosmos-ibc";
+        chainId: string;
+        swapReceiver: string[];
+        txHash: string; // 시작 트랜잭션 해시
+        txFulfilled?: boolean; // 시작 트랜잭션 완료 여부
+        // 각 IBC hop의 tracking 상태 (필요 최소 데이터만 저장)
+        ibcHistory: {
+          portId: string;
+          channelId: string;
+          counterpartyChainId: string;
+          sequence?: string;
+          dstChannelId?: string;
+          completed: boolean;
+          error?: string;
+        }[];
+      };
   additionalTrackDone?: boolean; // additional tracking 완료 여부
   additionalTrackError?: string; // additional tracking 에러
 

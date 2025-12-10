@@ -9,6 +9,7 @@ import {
   GetTxExecutionMsg,
   HideSwapV2HistoryMsg,
   IBCHistory,
+  IBCSwapMinimalTrackingData,
   RemoveIBCHistoryMsg,
   RemoveSkipHistoryMsg,
   RemoveSwapV2HistoryMsg,
@@ -1431,8 +1432,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     ethereumAccountStore,
   } = useStore();
 
-  console.log("history", history);
-
   const theme = useTheme();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -1442,8 +1441,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     undefined
   );
   const [isLoading, setIsLoading] = useState(false);
-
-  console.log("txExecution", txExecution);
 
   useEffect(() => {
     const backgroundExecutionId = history.backgroundExecutionId;
@@ -1472,8 +1469,13 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return false;
     }
 
+    // additionalTrackingData가 있으면 additionalTrackDone도 완료되어야 함
+    if (history.additionalTrackingData && !history.additionalTrackDone) {
+      return false;
+    }
+
     // If there's a track error, check if assetLocationInfo exists (refund completed)
-    if (history.trackError) {
+    if (history.trackError || history.additionalTrackError) {
       return !!history.assetLocationInfo;
     }
 
@@ -1499,9 +1501,15 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     );
   }, [history]);
 
+  console.log("history", history, historyCompleted);
+
   const failedRouteIndex = useMemo(() => {
-    // Failed if status is FAILED or if there's a trackError
-    if (history.status === SwapV2TxStatus.FAILED || history.trackError) {
+    // Failed if status is FAILED or if there's a trackError/additionalTrackError
+    if (
+      history.status === SwapV2TxStatus.FAILED ||
+      history.trackError ||
+      history.additionalTrackError
+    ) {
       return history.routeIndex;
     }
     return -1;
@@ -1780,6 +1788,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
           const msg = aminoMsgs[0];
           let cosmosTx: MakeTxResponse;
+          let ibcSwapDataForResume: IBCSwapMinimalTrackingData | undefined;
 
           switch (msg.type) {
             case "cosmos-sdk/MsgTransfer": {
@@ -1792,11 +1801,86 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
               console.log("msg", msg);
 
+              // IBCSwapHistoryData 구성을 위한 채널 정보 추출
+              const ibcChannels: {
+                portId: string;
+                channelId: string;
+                counterpartyChainId: string;
+              }[] = [];
+              const swapReceiver: string[] = [];
+
+              // 첫 번째 채널의 counterpartyChainId 조회
+              const firstQueryClientState = queriesStore
+                .get(chainId)
+                .cosmos.queryIBCClientState.getClientState(
+                  msg.value.source_port,
+                  msg.value.source_channel
+                );
+              await firstQueryClientState.waitResponse();
+
+              const firstCounterpartyChainId =
+                firstQueryClientState.clientChainId ?? "";
+
+              ibcChannels.push({
+                portId: msg.value.source_port,
+                channelId: msg.value.source_channel,
+                counterpartyChainId: firstCounterpartyChainId,
+              });
+              swapReceiver.push(msg.value.receiver);
+
+              // memo에서 forward 정보 파싱하여 추가 채널 구성
+              try {
+                let memoObj = JSON.parse(msg.value.memo);
+                let currentChainId = firstCounterpartyChainId;
+
+                while (memoObj.forward) {
+                  const forward = memoObj.forward;
+
+                  // 다음 채널의 counterpartyChainId 조회
+                  const nextQueryClientState = queriesStore
+                    .get(currentChainId)
+                    .cosmos.queryIBCClientState.getClientState(
+                      forward.port,
+                      forward.channel
+                    );
+                  await nextQueryClientState.waitResponse();
+
+                  const nextCounterpartyChainId =
+                    nextQueryClientState.clientChainId ?? "";
+
+                  ibcChannels.push({
+                    portId: forward.port,
+                    channelId: forward.channel,
+                    counterpartyChainId: nextCounterpartyChainId,
+                  });
+                  swapReceiver.push(forward.receiver);
+
+                  currentChainId = nextCounterpartyChainId;
+
+                  // next forward가 있으면 계속
+                  if (forward.next && typeof forward.next === "string") {
+                    memoObj = JSON.parse(forward.next);
+                  } else if (forward.next && typeof forward.next === "object") {
+                    memoObj = forward.next;
+                  } else {
+                    break;
+                  }
+                }
+              } catch (e) {
+                console.log("Failed to parse memo for forward info:", e);
+              }
+
+              ibcSwapDataForResume = {
+                chainId,
+                ibcChannels,
+                swapReceiver,
+              };
+
               cosmosTx = account.cosmos.makeIBCTransferTx(
                 {
                   portId: msg.value.source_port,
                   channelId: msg.value.source_channel,
-                  counterpartyChainId: "", // NOTE: counterpartyChainId is not included in the server response
+                  counterpartyChainId: firstCounterpartyChainId,
                 },
                 normalizedAmount,
                 currency,
@@ -1867,6 +1951,8 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               throw new Error("Unsupported message type");
           }
 
+          console.log("ibc swap data for resume", ibcSwapDataForResume);
+
           const simulateResult = await cosmosTx.simulate({}, txData.memo);
 
           const pseudoFee = {
@@ -1878,7 +1964,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               },
             ],
             // TODO: margin 값 정해야함
-            gas: Math.floor(simulateResult.gasUsed * 1.3).toString(),
+            gas: Math.floor(simulateResult.gasUsed * 1.5).toString(),
           };
 
           const signResult = await cosmosTx.sign(pseudoFee, txData.memo, {
@@ -1894,7 +1980,8 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               new ResumeTxMsg(
                 history.backgroundExecutionId,
                 txIndex,
-                Buffer.from(signResult.tx).toString("base64")
+                Buffer.from(signResult.tx).toString("base64"),
+                ibcSwapDataForResume
               )
             );
           if (executeResult.status === TxExecutionStatus.FAILED) {
@@ -2212,26 +2299,34 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 return -1;
               })();
 
+              // 기본 tracking과 additional tracking 모두 완료 여부
+              const allTrackingDone =
+                !!history.trackDone &&
+                (!history.additionalTrackingData ||
+                  !!history.additionalTrackDone);
+              const hasTrackError =
+                !!history.trackError || !!history.additionalTrackError;
+
               return chainIds.map((chainId, i) => {
                 const chainInfo = chainStore.getChain(chainId);
                 // Asset이 릴리즈된 체인까지는 성공으로 처리
                 const completed =
                   i < history.routeIndex ||
                   (i === history.routeIndex &&
-                    !!history.trackDone &&
-                    !history.trackError) ||
+                    allTrackingDone &&
+                    !hasTrackError) ||
                   (assetReleasedRouteIndex >= 0 &&
                     i <= assetReleasedRouteIndex);
 
                 // 에러는 assetReleasedRouteIndex보다 큰 인덱스에서만 표시
                 const error =
-                  !!history.trackError &&
+                  hasTrackError &&
                   i >= failedRouteIndex &&
                   (assetReleasedRouteIndex < 0 || i > assetReleasedRouteIndex);
 
                 // 환불된 체인인지 확인 (에러가 있고, assetLocationInfo가 있고, 해당 체인이 환불 목적지인 경우)
                 const refunded =
-                  !!history.trackError &&
+                  hasTrackError &&
                   assetReleasedRouteIndex >= 0 &&
                   history.assetLocationInfo?.type === "refund" &&
                   i === assetReleasedRouteIndex;
@@ -2335,10 +2430,15 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
                 // status tracking이 오류로 끝난 경우
                 // SwapV2에서는 assetLocationInfo를 사용하여 환불 정보 표시
+                const allDone =
+                  !!history.trackDone &&
+                  (!history.additionalTrackingData ||
+                    !!history.additionalTrackDone);
+                const hasError =
+                  !!history.trackError || !!history.additionalTrackError;
                 if (
-                  history.trackDone &&
-                  (history.trackError ||
-                    history.status === SwapV2TxStatus.FAILED)
+                  allDone &&
+                  (hasError || history.status === SwapV2TxStatus.FAILED)
                 ) {
                   if (history.assetLocationInfo) {
                     if (
