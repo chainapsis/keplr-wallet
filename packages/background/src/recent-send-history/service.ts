@@ -238,6 +238,10 @@ export class RecentSendHistoryService {
 
     for (const history of this.getRecentSwapV2Histories()) {
       this.trackSwapV2Recursive(history.id);
+
+      if (history.additionalTrackingData && !history.additionalTrackDone) {
+        this.trackSwapV2AdditionalRecursive(history.id);
+      }
     }
 
     this.chainsService.addChainRemovedHandler(this.onChainRemoved);
@@ -1925,167 +1929,24 @@ export class RecentSendHistoryService {
     }
 
     if (this.chainsService.isEvmChain(history.destinationChainId)) {
-      const evmInfo = chainInfo.evm;
-      if (!evmInfo) {
-        onFulfill();
-        return;
-      }
-
-      simpleFetch<{
-        result: EthTxReceipt | null;
-        error?: Error;
-      }>(evmInfo.rpc, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "request-source": origin,
+      this.traceEVMTransactionResult({
+        chainId: history.destinationChainId,
+        txHash,
+        recipient: history.recipient,
+        targetDenom: history.destinationAsset.denom,
+        onResult: (result) => {
+          runInAction(() => {
+            if (result.success && result.resAmount) {
+              history.resAmount.push(result.resAmount);
+            } else if (result.refundInfo) {
+              history.trackError = result.error;
+              history.swapRefundInfo = result.refundInfo;
+            }
+            history.trackDone = true;
+          });
         },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_getTransactionReceipt",
-          params: [txHash],
-          id: 1,
-        }),
-      })
-        .then((res) => {
-          const txReceipt = res.data.result;
-          if (txReceipt) {
-            simpleFetch<{
-              result: any;
-              error?: Error;
-            }>(evmInfo.rpc, {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-                "request-source": origin,
-              },
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "debug_traceTransaction",
-                params: [txHash, { tracer: "callTracer" }],
-                id: 1,
-              }),
-            }).then((res) => {
-              runInAction(() => {
-                let isFoundFromCall = false;
-                if (res.data.result) {
-                  const searchForTransfers = (calls: any) => {
-                    for (const call of calls) {
-                      if (
-                        call.type === "CALL" &&
-                        call.to.toLowerCase() ===
-                          history.recipient.toLowerCase()
-                      ) {
-                        const isERC20Transfer =
-                          call.input.startsWith("0xa9059cbb");
-                        const value = BigInt(
-                          isERC20Transfer
-                            ? `0x${call.input.substring(74)}`
-                            : call.value
-                        );
-
-                        history.resAmount.push([
-                          {
-                            amount: value.toString(10),
-                            denom: history.destinationAsset.denom,
-                          },
-                        ]);
-                        isFoundFromCall = true;
-                      }
-
-                      if (call.calls && call.calls.length > 0) {
-                        searchForTransfers(call.calls);
-                      }
-                    }
-                  };
-
-                  searchForTransfers(res.data.result.calls || []);
-                }
-
-                if (isFoundFromCall) {
-                  history.trackDone = true;
-                  return;
-                }
-
-                const logs = txReceipt.logs;
-                const transferTopic = id("Transfer(address,address,uint256)");
-                const withdrawTopic = id("Withdrawal(address,uint256)");
-                const hyperlaneReceiveTopic = id(
-                  "ReceivedTransferRemote(uint32,bytes32,uint256)"
-                );
-                for (const log of logs) {
-                  if (log.topics[0] === transferTopic) {
-                    const to = "0x" + log.topics[2].slice(26);
-                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                      const destinationAssetDenom =
-                        history.destinationAsset.denom.replace("erc20:", "");
-
-                      const amount = BigInt(log.data).toString(10);
-                      if (log.address === destinationAssetDenom) {
-                        history.resAmount.push([
-                          {
-                            amount,
-                            denom: history.destinationAsset.denom,
-                          },
-                        ]);
-                      } else {
-                        console.log("refunded", log.address);
-                        // Transfer 토픽인 경우엔 ERC20의 tranfer 호출일텐데
-                        // 받을 토큰의 컨트랙트가 아닌 다른 컨트랙트에서 호출된 경우는 Swap을 실패한 것으로 추측
-                        // 고로 실제로 받은 토큰의 컨트랙트 주소로 환불 정보에 저장한다.
-                        history.trackError = "Swap failed";
-                        history.swapRefundInfo = {
-                          chainId: history.destinationChainId,
-                          amount: [
-                            {
-                              amount,
-                              denom: `erc20:${log.address.toLowerCase()}`,
-                            },
-                          ],
-                        };
-                      }
-
-                      history.trackDone = true;
-                      return;
-                    }
-                  } else if (log.topics[0] === withdrawTopic) {
-                    const to = "0x" + log.topics[1].slice(26);
-                    if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
-                      const amount = BigInt(log.data).toString(10);
-                      history.resAmount.push([
-                        { amount, denom: history.destinationAsset.denom },
-                      ]);
-                      history.trackDone = true;
-                      return;
-                    }
-                  } else if (log.topics[0] === hyperlaneReceiveTopic) {
-                    const to = "0x" + log.topics[2].slice(26);
-                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                      const amount = BigInt(log.data).toString(10);
-                      // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
-                      // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
-                      history.resAmount.push([
-                        {
-                          amount:
-                            history.destinationAsset.denom === "forma-native"
-                              ? `${amount}000000000000`
-                              : amount,
-                          denom: history.destinationAsset.denom,
-                        },
-                      ]);
-                      history.trackDone = true;
-                      return;
-                    }
-                  }
-                }
-              });
-            });
-          }
-        })
-        .finally(() => {
-          history.trackDone = true;
-          onFulfill();
-        });
+        onFulfill,
+      });
     } else {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.addEventListener("error", () => onFulfill());
@@ -2548,173 +2409,27 @@ export class RecentSendHistoryService {
     }
 
     if (this.chainsService.isEvmChain(targetChainId)) {
-      const evmInfo = chainInfo.evm;
-      if (!evmInfo) {
-        onFulfill();
-        return;
-      }
-
-      simpleFetch<{
-        result: EthTxReceipt | null;
-        error?: Error;
-      }>(evmInfo.rpc, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "request-source": origin,
+      this.traceEVMTransactionResult({
+        chainId: targetChainId,
+        txHash,
+        recipient: history.recipient,
+        targetDenom,
+        onResult: (result) => {
+          runInAction(() => {
+            if (result.success && result.resAmount) {
+              history.resAmount.push(result.resAmount);
+            } else if (result.refundInfo) {
+              history.trackError = result.error;
+              history.assetLocationInfo = {
+                ...result.refundInfo,
+                type: "refund",
+              };
+            }
+            history.trackDone = true;
+          });
         },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_getTransactionReceipt",
-          params: [txHash],
-          id: 1,
-        }),
-      })
-        .then((res) => {
-          const txReceipt = res.data.result;
-          if (txReceipt) {
-            simpleFetch<{
-              result: any;
-              error?: Error;
-            }>(evmInfo.rpc, {
-              method: "POST",
-              headers: {
-                "content-type": "application/json",
-                "request-source": origin,
-              },
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "debug_traceTransaction",
-                params: [txHash, { tracer: "callTracer" }],
-                id: 1,
-              }),
-            }).then((res) => {
-              runInAction(() => {
-                let isFoundFromCall = false;
-                if (res.data.result) {
-                  const searchForTransfers = (calls: any) => {
-                    for (const call of calls) {
-                      if (
-                        call.type === "CALL" &&
-                        call.to.toLowerCase() ===
-                          history.recipient.toLowerCase()
-                      ) {
-                        const isERC20Transfer =
-                          call.input.startsWith("0xa9059cbb");
-                        const value = BigInt(
-                          isERC20Transfer
-                            ? `0x${call.input.substring(74)}`
-                            : call.value
-                        );
-
-                        history.resAmount.push([
-                          {
-                            amount: value.toString(10),
-                            denom: targetDenom,
-                          },
-                        ]);
-                        isFoundFromCall = true;
-                      }
-
-                      if (call.calls && call.calls.length > 0) {
-                        searchForTransfers(call.calls);
-                      }
-                    }
-                  };
-
-                  searchForTransfers(res.data.result.calls || []);
-                }
-
-                if (isFoundFromCall) {
-                  history.trackDone = true;
-                  return;
-                }
-
-                const logs = txReceipt.logs;
-                const transferTopic = id("Transfer(address,address,uint256)");
-                const withdrawTopic = id("Withdrawal(address,uint256)");
-                const hyperlaneReceiveTopic = id(
-                  "ReceivedTransferRemote(uint32,bytes32,uint256)"
-                );
-                for (const log of logs) {
-                  if (log.topics[0] === transferTopic) {
-                    const to = "0x" + log.topics[2].slice(26);
-                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                      const expectedAssetDenom = targetDenom.replace(
-                        "erc20:",
-                        ""
-                      );
-
-                      const amount = BigInt(log.data).toString(10);
-                      if (
-                        log.address.toLowerCase() ===
-                        expectedAssetDenom.toLowerCase()
-                      ) {
-                        history.resAmount.push([
-                          {
-                            amount,
-                            denom: targetDenom,
-                          },
-                        ]);
-                      } else {
-                        console.log("refunded", log.address);
-                        // Transfer 토픽인 경우엔 ERC20의 tranfer 호출일텐데
-                        // 받을 토큰의 컨트랙트가 아닌 다른 컨트랙트에서 호출된 경우는 Swap을 실패한 것으로 추측
-                        // 고로 실제로 받은 토큰의 컨트랙트 주소로 환불 정보에 저장한다.
-                        history.trackError = "Swap failed";
-                        history.assetLocationInfo = {
-                          chainId: targetChainId,
-                          amount: [
-                            {
-                              amount,
-                              denom: `erc20:${log.address.toLowerCase()}`,
-                            },
-                          ],
-                          type: "refund",
-                        };
-                      }
-
-                      history.trackDone = true;
-                      return;
-                    }
-                  } else if (log.topics[0] === withdrawTopic) {
-                    const to = "0x" + log.topics[1].slice(26);
-
-                    if (to.toLowerCase() === txReceipt.to.toLowerCase()) {
-                      const amount = BigInt(log.data).toString(10);
-                      history.resAmount.push([{ amount, denom: targetDenom }]);
-                      history.trackDone = true;
-                      return;
-                    }
-                  } else if (log.topics[0] === hyperlaneReceiveTopic) {
-                    const to = "0x" + log.topics[2].slice(26);
-
-                    if (to.toLowerCase() === history.recipient.toLowerCase()) {
-                      const amount = BigInt(log.data).toString(10);
-                      // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
-                      // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
-                      history.resAmount.push([
-                        {
-                          amount:
-                            targetDenom === "forma-native"
-                              ? `${amount}000000000000`
-                              : amount,
-                          denom: targetDenom,
-                        },
-                      ]);
-                      history.trackDone = true;
-                      return;
-                    }
-                  }
-                }
-              });
-            });
-          }
-        })
-        .finally(() => {
-          history.trackDone = true;
-          onFulfill();
-        });
+        onFulfill,
+      });
     } else {
       const txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
       txTracer.addEventListener("error", () => onFulfill());
@@ -2749,6 +2464,239 @@ export class RecentSendHistoryService {
           onFulfill();
         });
     }
+  }
+
+  /**
+   * EVM 트랜잭션의 결과를 추적하는 공통 헬퍼 메서드
+   * debug_traceTransaction을 시도하고, 실패 시 logs를 파싱합니다.
+   */
+  protected traceEVMTransactionResult(params: {
+    chainId: string;
+    txHash: string;
+    recipient: string;
+    targetDenom: string;
+    onResult: (result: {
+      success: boolean;
+      resAmount?: { amount: string; denom: string }[];
+      refundInfo?: {
+        chainId: string;
+        amount: { amount: string; denom: string }[];
+      };
+      error?: string;
+    }) => void;
+    onFulfill: () => void;
+  }): void {
+    const { chainId, txHash, recipient, targetDenom, onResult, onFulfill } =
+      params;
+
+    const chainInfo = this.chainsService.getChainInfo(chainId);
+    if (!chainInfo) {
+      onResult({ success: false });
+      onFulfill();
+      return;
+    }
+
+    if (!this.chainsService.isEvmChain(chainId)) {
+      onResult({ success: false, error: "Not an EVM chain" });
+      onFulfill();
+      return;
+    }
+
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      onResult({ success: false });
+      onFulfill();
+      return;
+    }
+
+    simpleFetch<{
+      result: EthTxReceipt | null;
+      error?: Error;
+    }>(evmInfo.rpc, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "request-source": origin,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getTransactionReceipt",
+        params: [txHash],
+        id: 1,
+      }),
+    })
+      .then((res) => {
+        const txReceipt = res.data.result;
+        if (!txReceipt) {
+          onResult({ success: false });
+          return;
+        }
+
+        simpleFetch<{
+          result: any;
+          error?: Error;
+        }>(evmInfo.rpc, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "request-source": origin,
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "debug_traceTransaction",
+            params: [txHash, { tracer: "callTracer" }],
+            id: 1,
+          }),
+        }).then((traceRes) => {
+          let isFoundFromCall = false;
+          const foundResAmount: { amount: string; denom: string }[] = [];
+
+          if (traceRes.data.result) {
+            const searchForTransfers = (calls: any) => {
+              for (const call of calls) {
+                if (
+                  call.type === "CALL" &&
+                  call.to?.toLowerCase() === recipient.toLowerCase()
+                ) {
+                  const isERC20Transfer = call.input?.startsWith("0xa9059cbb");
+                  const value = BigInt(
+                    isERC20Transfer
+                      ? `0x${call.input.substring(74)}`
+                      : call.value || "0x0"
+                  );
+
+                  foundResAmount.push({
+                    amount: value.toString(10),
+                    denom: targetDenom,
+                  });
+                  isFoundFromCall = true;
+                }
+
+                if (call.calls && call.calls.length > 0) {
+                  searchForTransfers(call.calls);
+                }
+              }
+            };
+
+            searchForTransfers(traceRes.data.result.calls || []);
+          }
+
+          if (isFoundFromCall) {
+            onResult({ success: true, resAmount: foundResAmount });
+            return;
+          }
+
+          // fallback to logs if debug_traceTransaction fails
+          this.parseEVMTxReceiptLogs({
+            txReceipt,
+            recipient,
+            targetChainId: chainId,
+            targetDenom,
+            onResult,
+          });
+        });
+      })
+      .finally(() => {
+        onFulfill();
+      });
+  }
+
+  /**
+   * Parse the logs of an EVM transaction receipt to extract the transfer result.
+   */
+  protected parseEVMTxReceiptLogs(params: {
+    txReceipt: EthTxReceipt;
+    recipient: string;
+    targetChainId: string;
+    targetDenom: string;
+    onResult: (result: {
+      success: boolean;
+      resAmount?: { amount: string; denom: string }[];
+      refundInfo?: {
+        chainId: string;
+        amount: { amount: string; denom: string }[];
+      };
+      error?: string;
+    }) => void;
+  }): void {
+    const { txReceipt, recipient, targetChainId, targetDenom, onResult } =
+      params;
+
+    const logs = txReceipt.logs;
+    const transferTopic = id("Transfer(address,address,uint256)");
+    const withdrawTopic = id("Withdrawal(address,uint256)");
+    const hyperlaneReceiveTopic = id(
+      "ReceivedTransferRemote(uint32,bytes32,uint256)"
+    );
+
+    for (const log of logs) {
+      if (log.topics[0] === transferTopic) {
+        const to = "0x" + log.topics[2].slice(26);
+        if (to.toLowerCase() === recipient.toLowerCase()) {
+          const expectedAssetDenom = targetDenom.replace("erc20:", "");
+          const amount = BigInt(log.data).toString(10);
+
+          if (log.address.toLowerCase() === expectedAssetDenom.toLowerCase()) {
+            onResult({
+              success: true,
+              resAmount: [{ amount, denom: targetDenom }],
+            });
+          } else {
+            console.log("refunded", log.address);
+            // Transfer 토픽인 경우엔 ERC20의 tranfer 호출일텐데
+            // 받을 토큰의 컨트랙트가 아닌 다른 컨트랙트에서 호출된 경우는 Swap을 실패한 것으로 추측
+            // 고로 실제로 받은 토큰의 컨트랙트 주소로 환불 정보에 저장한다.
+            onResult({
+              success: false,
+              error: "Swap failed",
+              refundInfo: {
+                chainId: targetChainId,
+                amount: [
+                  {
+                    amount,
+                    denom: `erc20:${log.address.toLowerCase()}`,
+                  },
+                ],
+              },
+            });
+          }
+          return;
+        }
+      } else if (log.topics[0] === withdrawTopic) {
+        const to = "0x" + log.topics[1].slice(26);
+        if (to.toLowerCase() === txReceipt.to?.toLowerCase()) {
+          const amount = BigInt(log.data).toString(10);
+          onResult({
+            success: true,
+            resAmount: [{ amount, denom: targetDenom }],
+          });
+          return;
+        }
+      } else if (log.topics[0] === hyperlaneReceiveTopic) {
+        const to = "0x" + log.topics[2].slice(26);
+        if (to.toLowerCase() === recipient.toLowerCase()) {
+          const amount = BigInt(log.data).toString(10);
+          // Hyperlane을 통해 Forma로 TIA를 받는 경우 토큰 수량이 decimal 6으로 기록되는데,
+          // Forma에서는 decimal 18이기 때문에 12자리 만큼 0을 붙여준다.
+          onResult({
+            success: true,
+            resAmount: [
+              {
+                amount:
+                  targetDenom === "forma-native"
+                    ? `${amount}000000000000`
+                    : amount,
+                denom: targetDenom,
+              },
+            ],
+          });
+          return;
+        }
+      }
+    }
+
+    // 결과를 찾지 못한 경우
+    onResult({ success: false });
   }
 
   getRecentSwapV2History(id: string): SwapV2History | undefined {
@@ -2841,10 +2789,89 @@ export class RecentSendHistoryService {
     }
 
     history.additionalTrackingData = data;
+    history.additionalTrackDone = false;
+    history.additionalTrackError = undefined;
+
+    this.trackSwapV2AdditionalRecursive(id);
+
     return true;
   }
 
-  trackIBCSwapForSwapV2(id: string): void {
+  /**
+   * Start additional tracking.
+   * Track the result of the last transaction after resuming multi TX swap.
+   */
+  trackSwapV2AdditionalRecursive(id: string): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return;
+    }
+
+    // no additional tracking data
+    if (!history.additionalTrackingData) {
+      return;
+    }
+
+    // already done
+    if (history.additionalTrackDone) {
+      return;
+    }
+
+    if (history.additionalTrackingData.type === "evm") {
+      this.trackSwapV2AdditionalEVM(id);
+    } else if (history.additionalTrackingData.type === "cosmos-ibc") {
+      this.trackSwapV2AdditionalCosmosIBC(id);
+    }
+  }
+
+  /**
+   * EVM additional tracking
+   */
+  protected trackSwapV2AdditionalEVM(id: string): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      return;
+    }
+
+    if (history.additionalTrackingData?.type !== "evm") {
+      return;
+    }
+
+    const txHash = history.additionalTrackingData.txHash;
+
+    this.traceEVMTransactionResult({
+      chainId: history.toChainId,
+      txHash,
+      recipient: history.recipient,
+      targetDenom: history.destinationAsset.denom,
+      onResult: (result) => {
+        runInAction(() => {
+          if (result.success && result.resAmount) {
+            history.resAmount.push(result.resAmount);
+          } else if (result.refundInfo) {
+            history.additionalTrackError = result.error;
+            history.assetLocationInfo = {
+              ...result.refundInfo,
+              type: "refund",
+            };
+          }
+          history.additionalTrackDone = true;
+        });
+      },
+      onFulfill: () => {
+        // 추가 tracking 완료
+        runInAction(() => {
+          history.additionalTrackDone = true;
+        });
+      },
+    });
+  }
+
+  /**
+   * Cosmos IBC additional tracking
+   * IBC packet forwarding을 polling으로 추적합니다.
+   */
+  protected trackSwapV2AdditionalCosmosIBC(id: string): void {
     const history = this.getRecentSwapV2History(id);
     if (!history) {
       return;
@@ -2854,8 +2881,62 @@ export class RecentSendHistoryService {
       return;
     }
 
+    const ibcSwapData = history.additionalTrackingData.ibcSwapData;
+
     // TODO: IBC swap tracking 로직 구현
-    // history.additionalTrackingData.ibcSwapData를 사용하여 tracking
+    // ibcSwapData를 사용하여 IBC packet tracking
+    // 기존 trackIBCPacketForwardingRecursive와 유사한 로직 필요
+    // 결과에 따라 resAmount, assetLocationInfo 업데이트
+
+    retry(
+      () => {
+        return new Promise<void>((resolve, reject) => {
+          this.checkAndUpdateSwapV2AdditionalCosmosIBCRecursive(
+            id,
+            ibcSwapData,
+            resolve,
+            reject
+          );
+        });
+      },
+      {
+        maxRetries: 60,
+        waitMsAfterError: 1000,
+        maxWaitMsAfterError: 45000,
+      }
+    );
+  }
+
+  /**
+   * Cosmos IBC additional tracking의 recursive 체크
+   */
+  protected checkAndUpdateSwapV2AdditionalCosmosIBCRecursive(
+    id: string,
+    _ibcSwapData: IBCSwapHistoryData,
+    onFulfill: () => void,
+    _onError: () => void
+  ): void {
+    const history = this.getRecentSwapV2History(id);
+    if (!history) {
+      onFulfill();
+      return;
+    }
+
+    // 이미 완료된 경우
+    if (history.additionalTrackDone) {
+      onFulfill();
+      return;
+    }
+
+    // TODO: IBC packet status 체크 로직 구현
+    // ibcSwapData.ibcChannels를 사용하여 packet 상태 확인
+    // 완료 시 resAmount, assetLocationInfo 업데이트 후 additionalTrackDone = true
+
+    // 임시: 바로 완료 처리
+    runInAction(() => {
+      history.additionalTrackDone = true;
+    });
+    onFulfill();
   }
 
   @action

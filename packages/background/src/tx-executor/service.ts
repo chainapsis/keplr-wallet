@@ -358,32 +358,34 @@ export class BackgroundTxExecutorService {
             // [트랜잭션 타입별 처리]
             //   1. EVM: txHash를 additionalTrackingData에 저장 → debug_traceTransaction으로 추적
             //   2. Cosmos: 외부에서 IBC swap data를 받아 additionalTrackingData에 저장 → IBC swap tracking
-
             if (
               execution.type === TxExecutionType.SWAP_V2 &&
               execution.historyId != null
             ) {
               const currentTx = execution.txs[i];
-
-              if (currentTx.type === BackgroundTxType.EVM) {
-                // EVM: txHash를 저장하여 debug_traceTransaction으로 추적
-                if (result.txHash != null) {
-                  this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
-                    execution.historyId,
-                    { type: "evm", txHash: result.txHash }
-                  );
+              switch (currentTx.type) {
+                case BackgroundTxType.EVM: {
+                  if (result.txHash != null) {
+                    this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
+                      execution.historyId,
+                      { type: "evm", txHash: result.txHash }
+                    );
+                  }
+                  break;
                 }
-              } else if (currentTx.type === BackgroundTxType.COSMOS) {
-                // Cosmos: 외부에서 IBC swap data를 받아서 IBC swap tracking
-                const ibcSwapData = options?.ibcSwapData;
-                if (ibcSwapData != null) {
-                  this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
-                    execution.historyId,
-                    { type: "cosmos-ibc", ibcSwapData }
-                  );
-                  this.recentSendHistoryService.trackIBCSwapForSwapV2(
-                    execution.historyId
-                  );
+                case BackgroundTxType.COSMOS: {
+                  const ibcSwapData = options?.ibcSwapData;
+                  if (ibcSwapData != null) {
+                    this.recentSendHistoryService.setSwapV2AdditionalTrackingData(
+                      execution.historyId,
+                      { type: "cosmos-ibc", ibcSwapData }
+                    );
+                  }
+                  break;
+                }
+                default: {
+                  // noop
+                  break;
                 }
               }
             }

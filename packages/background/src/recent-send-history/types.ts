@@ -290,6 +290,8 @@ export interface SwapV2History extends SwapV2HistoryBase {
   additionalTrackingData?:
     | { type: "evm"; txHash: string } // EVM: debug_traceTransaction으로 추적
     | { type: "cosmos-ibc"; ibcSwapData: IBCSwapHistoryData }; // Cosmos: IBC swap tracking
+  additionalTrackDone?: boolean; // additional tracking 완료 여부
+  additionalTrackError?: string; // additional tracking 에러
 
   trackDone?: boolean; // status tracking이 완료되었는지 여부
   trackError?: string; // status tracking 중 에러가 발생했는지 여부
