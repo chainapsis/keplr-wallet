@@ -19,6 +19,7 @@
     "@keplr-wallet/crypto": "0.12.299",
     "@keplr-wallet/types": "0.12.299",
     "buffer": "^6.0.3",
-    "delay": "^4.4.0"
+    "delay": "^4.4.0",
+    "p-queue": "^6.6.2"
   }
 }

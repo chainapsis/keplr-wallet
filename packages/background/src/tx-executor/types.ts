@@ -159,6 +159,17 @@ export type TxExecution =
   | IBCSwapTxExecution
   | SwapV2TxExecution;
 
+export type TxExecutionEvent =
+  | {
+      type: "executable";
+      executionId: string;
+      executableChainIds: string[];
+    }
+  | {
+      type: "remove";
+      executionId: string;
+    };
+
 /**
  * Result of executing a single pending transaction.
  * Used to batch state updates and reduce autorun triggers.

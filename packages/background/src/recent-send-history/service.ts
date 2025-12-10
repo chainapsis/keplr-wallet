@@ -36,7 +36,8 @@ import {
 import { CoinPretty } from "@keplr-wallet/unit";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { id } from "@ethersproject/hash";
-import { Publisher, TxExecutableEvent } from "../tx-executor/internal";
+import { EventBusPublisher } from "@keplr-wallet/common";
+import { TxExecutionEvent } from "../tx-executor/types";
 import {
   requestSkipTxTrack,
   requestSwapV2TxStatus,
@@ -77,7 +78,7 @@ export class RecentSendHistoryService {
     protected readonly chainsService: ChainsService,
     protected readonly txService: BackgroundTxService,
     protected readonly notification: Notification,
-    protected readonly publisher: Publisher<TxExecutableEvent>
+    protected readonly publisher: EventBusPublisher<TxExecutionEvent>
   ) {
     makeObservable(this);
   }
@@ -1188,6 +1189,7 @@ export class RecentSendHistoryService {
 
           if (history.backgroundExecutionId) {
             this.publisher.publish({
+              type: "executable",
               executionId: history.backgroundExecutionId,
               executableChainIds: getExecutableChainIdsFromIBCHistory(history),
             });
@@ -1275,6 +1277,7 @@ export class RecentSendHistoryService {
 
           if (history.backgroundExecutionId) {
             this.publisher.publish({
+              type: "executable",
               executionId: history.backgroundExecutionId,
               executableChainIds: getExecutableChainIdsFromIBCHistory(history),
             });
@@ -2561,6 +2564,7 @@ export class RecentSendHistoryService {
       const executableChainIds =
         chainIds ?? getExecutableChainIdsFromSwapV2History(history);
       this.publisher.publish({
+        type: "executable",
         executionId: history.backgroundExecutionId,
         executableChainIds,
       });
@@ -2793,12 +2797,36 @@ export class RecentSendHistoryService {
 
   @action
   removeRecentSwapV2History(id: string): boolean {
-    return this.recentSwapV2HistoryMap.delete(id);
+    const history = this.getRecentSwapV2History(id);
+    const removed = this.recentSwapV2HistoryMap.delete(id);
+
+    if (removed && history?.backgroundExecutionId) {
+      this.publisher.publish({
+        type: "remove",
+        executionId: history.backgroundExecutionId,
+      });
+    }
+
+    return removed;
   }
 
   @action
   clearAllRecentSwapV2History(): void {
+    const executionIds: string[] = [];
+    for (const history of this.recentSwapV2HistoryMap.values()) {
+      if (history.backgroundExecutionId) {
+        executionIds.push(history.backgroundExecutionId);
+      }
+    }
+
     this.recentSwapV2HistoryMap.clear();
+
+    for (const executionId of executionIds) {
+      this.publisher.publish({
+        type: "remove",
+        executionId,
+      });
+    }
   }
 
   @action

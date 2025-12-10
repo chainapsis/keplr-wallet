@@ -1,14 +1,12 @@
 import PQueue from "p-queue";
 
-interface MessageQueueCore<T = unknown> {
+export interface EventBusCore<T = unknown> {
   enqueue(message: T): void;
   subscribe(handler: (msg: T) => Promise<void> | void): void;
   flush(): void;
 }
 
-class SingleChannelMessageQueueCore<T = unknown>
-  implements MessageQueueCore<T>
-{
+class SingleChannelEventBusCore<T = unknown> implements EventBusCore<T> {
   public subscriber: ((msg: T) => Promise<void> | void) | null = null;
   public buffer: T[] = [];
   public queue: PQueue;
@@ -30,17 +28,21 @@ class SingleChannelMessageQueueCore<T = unknown>
 
   flush() {
     if (this.isFlushing) return;
-    if (!this.subscriber) return;
+    const subscriber = this.subscriber;
+    if (!subscriber) return;
     if (this.buffer.length === 0) return;
 
     this.isFlushing = true;
 
     try {
       while (this.buffer.length > 0) {
-        const msg = this.buffer.shift()!;
+        const msg = this.buffer.shift();
+        if (msg === undefined) {
+          return;
+        }
         this.queue.add(async () => {
           try {
-            await this.subscriber!(msg);
+            await subscriber(msg);
           } catch (e) {
             console.error("error:", e);
           }
@@ -51,31 +53,27 @@ class SingleChannelMessageQueueCore<T = unknown>
     }
   }
 }
-export class Publisher<T = unknown> {
-  constructor(private core: MessageQueueCore<T>) {}
+
+export class EventBusPublisher<T = unknown> {
+  constructor(private core: EventBusCore<T>) {}
 
   publish(message: T) {
     this.core.enqueue(message);
   }
 }
 
-export class Subscriber<T = unknown> {
-  constructor(private core: MessageQueueCore<T>) {}
+export class EventBusSubscriber<T = unknown> {
+  constructor(private core: EventBusCore<T>) {}
 
   subscribe(handler: (msg: T) => Promise<void> | void) {
     this.core.subscribe(handler);
   }
 }
 
-export function createSingleChannelMessageQueue<T = unknown>(concurrency = 1) {
-  const core = new SingleChannelMessageQueueCore<T>(concurrency);
+export function createSingleChannelEventBus<T = unknown>(concurrency = 1) {
+  const core = new SingleChannelEventBusCore<T>(concurrency);
   return {
-    publisher: new Publisher<T>(core),
-    subscriber: new Subscriber<T>(core),
+    publisher: new EventBusPublisher<T>(core),
+    subscriber: new EventBusSubscriber<T>(core),
   };
-}
-
-export interface TxExecutableEvent {
-  readonly executionId: string;
-  readonly executableChainIds: string[];
 }

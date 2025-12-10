@@ -46,7 +46,8 @@ import {
   calculateCosmosStdFee,
 } from "./utils/cosmos";
 import { fillUnsignedEVMTx } from "./utils/evm";
-import { Subscriber, TxExecutableEvent } from "./internal";
+import { EventBusSubscriber } from "@keplr-wallet/common";
+import { TxExecutionEvent } from "./types";
 
 export class BackgroundTxExecutorService {
   @observable
@@ -64,7 +65,7 @@ export class BackgroundTxExecutorService {
     protected readonly backgroundTxEthereumService: BackgroundTxEthereumService,
     protected readonly analyticsService: AnalyticsService,
     protected readonly recentSendHistoryService: RecentSendHistoryService,
-    protected readonly subscriber: Subscriber<TxExecutableEvent>
+    protected readonly subscriber: EventBusSubscriber<TxExecutionEvent>
   ) {
     makeObservable(this);
   }
@@ -120,11 +121,16 @@ export class BackgroundTxExecutorService {
         });
     });
 
-    this.subscriber.subscribe((event) => this.handleTxExecutableEvent(event));
+    this.subscriber.subscribe((event) => this.handleTxExecutionEvent(event));
   }
 
   @action
-  protected handleTxExecutableEvent(event: TxExecutableEvent): void {
+  protected handleTxExecutionEvent(event: TxExecutionEvent): void {
+    if (event.type === "remove") {
+      this.removeTxExecution(event.executionId);
+      return;
+    }
+
     const { executionId, executableChainIds } = event;
 
     const execution = this.getTxExecution(executionId);

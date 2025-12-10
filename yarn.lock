@@ -5857,7 +5857,6 @@ __metadata:
     ledger-bitcoin: ^0.2.3
     long: ^4.0.0
     miscreant: 0.3.2
-    p-queue: ^6.6.2
     pbkdf2: ^3.1.2
     utility-types: ^3.10.0
   peerDependencies:
@@ -5889,6 +5888,7 @@ __metadata:
     "@keplr-wallet/types": 0.12.299
     buffer: ^6.0.3
     delay: ^4.4.0
+    p-queue: ^6.6.2
   languageName: unknown
   linkType: soft
 
