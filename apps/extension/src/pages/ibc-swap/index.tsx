@@ -534,16 +534,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const isSwap = swapConfigs.amountConfig.type === "swap";
 
   /**
-   * One-click swap is disabled when:
-   * 1. Requires multiple transactions
-   * 2. Hardware wallet
-   * 3. EVM gas simulation outcome is APPROVAL_ONLY_SIMULATED (approve tx only simulated, not swap tx)
+   * One-click swap is enabled only when:
+   * 1. Single transaction (or erc20 approval + swap bundle with bundle tx simulation)
+   * 2. Not a hardware wallet
+   * 3. EVM gas simulation is not APPROVAL_ONLY_SIMULATED
    */
-  const oneClickSwapDisabled =
-    swapConfigs.amountConfig.requiresMultipleTxs ||
-    isHardwareWallet ||
-    gasSimulator.evmSimulationOutcome ===
-      EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED;
+  const evmOutcome = gasSimulator.evmSimulationOutcome;
+  const oneClickSwapEnabled =
+    // single tx path
+    !swapConfigs.amountConfig.requiresMultipleTxs &&
+    // no hardware wallet
+    !isHardwareWallet &&
+    // wait until simulation result is available, and it must not be approval-only
+    evmOutcome != null &&
+    evmOutcome !== EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED;
 
   const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
     swapConfigs.amountConfig.currency,
@@ -1897,30 +1901,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         <Gutter size="0.75rem" />
 
-        {oneClickSwapDisabled ? (
-          <Button
-            type="submit"
-            disabled={
-              interactionBlocked ||
-              showUSDNWarning ||
-              showCelestiaWarning ||
-              (shouldTopUp && !isTopUpAvailable)
-            }
-            text={
-              shouldTopUp && remainingText
-                ? remainingText
-                : intl.formatMessage({
-                    id: "page.ibc-swap.title.swap",
-                  })
-            }
-            color="primary"
-            size="large"
-            isLoading={
-              uiConfigStore.ibcSwapConfig.isSwapLoading ||
-              accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
-            }
-          />
-        ) : (
+        {oneClickSwapEnabled ? (
           <HoldButton
             type="submit"
             holdDurationMs={1500}
@@ -1948,6 +1929,29 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             }
             onHoldStart={() => setIsButtonHolding(true)}
             onHoldEnd={() => setIsButtonHolding(false)}
+          />
+        ) : (
+          <Button
+            type="submit"
+            disabled={
+              interactionBlocked ||
+              showUSDNWarning ||
+              showCelestiaWarning ||
+              (shouldTopUp && !isTopUpAvailable)
+            }
+            text={
+              shouldTopUp && remainingText
+                ? remainingText
+                : intl.formatMessage({
+                    id: "page.ibc-swap.title.swap",
+                  })
+            }
+            color="primary"
+            size="large"
+            isLoading={
+              uiConfigStore.ibcSwapConfig.isSwapLoading ||
+              accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
+            }
           />
         )}
 
