@@ -513,6 +513,10 @@ export class BackgroundTxExecutorService {
         txHash = broadcastResult;
       } catch (e) {
         console.error(`[TxExecutor] tx broadcast failed:`, e);
+
+        // TODO: handle ethermint tx tracing error
+        //  Error: rejecting tx with unsupported extension option: /ethermint.types.v1.ExtensionOptionsWeb3Tx: unknown extension options
+
         return {
           status: BackgroundTxStatus.FAILED,
           txHash,

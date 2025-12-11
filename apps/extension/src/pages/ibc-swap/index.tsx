@@ -531,32 +531,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   //   swapFeeBps,
   // });
 
-  const isSwap = swapConfigs.amountConfig.type === "swap";
-
-  /**
-   * One-click swap is enabled only when:
-   * 1. Single transaction (or erc20 approval + swap bundle with bundle tx simulation)
-   * 2. Not a hardware wallet
-   * 3. EVM gas simulation is not APPROVAL_ONLY_SIMULATED
-   */
-  const evmOutcome = gasSimulator.evmSimulationOutcome;
-  const oneClickSwapEnabled =
-    // single tx path
-    !swapConfigs.amountConfig.requiresMultipleTxs &&
-    // no hardware wallet
-    !isHardwareWallet &&
-    // wait until simulation result is available, and it must not be approval-only
-    evmOutcome != null &&
-    evmOutcome !== EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED;
-
-  const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
-    swapConfigs.amountConfig.currency,
-    swapConfigs.amountConfig.chainId,
-    swapConfigs.amountConfig.outCurrency,
-    swapConfigs.amountConfig.outChainId,
-    uiConfigStore.ibcSwapConfig.celestiaDisabled
-  );
-
   /**
    * Topup related below
    */
@@ -567,6 +541,34 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   useEffect(() => {
     setTopUpForDisableSubFeeFromFaction(shouldTopUp);
   }, [shouldTopUp]);
+
+  const isSwap = swapConfigs.amountConfig.type === "swap";
+
+  /**
+   * One-click swap is enabled only when:
+   * 1. Single transaction (or erc20 approval + swap bundle with bundle tx simulation)
+   * 2. Not a hardware wallet
+   * 3. EVM gas simulation is not APPROVAL_ONLY_SIMULATED
+   * 4. Topup is not required
+   */
+  const evmOutcome = gasSimulator.evmSimulationOutcome;
+  const oneClickSwapEnabled =
+    // single tx path
+    !swapConfigs.amountConfig.requiresMultipleTxs &&
+    // no hardware wallet
+    !isHardwareWallet &&
+    // wait until simulation result is available, and it must not be approval-only
+    evmOutcome != null &&
+    evmOutcome !== EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED &&
+    !shouldTopUp;
+
+  const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
+    swapConfigs.amountConfig.currency,
+    swapConfigs.amountConfig.chainId,
+    swapConfigs.amountConfig.outCurrency,
+    swapConfigs.amountConfig.outChainId,
+    uiConfigStore.ibcSwapConfig.celestiaDisabled
+  );
 
   return (
     <MainHeaderLayout
@@ -1094,22 +1096,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           };
         }
 
-        try {
-          // set the signature progress state for multi tx swap or hardware wallet case
-          // totalSignatureCount > 1 covers APPROVAL_ONLY_SIMULATED case where txs.length is 1
-          // but approval + swap requires 2 signatures
-          const shouldShowSignatureProgress =
-            requiresMultipleTxs ||
-            isHardwareWallet ||
-            gasSimulator.evmSimulationOutcome ===
-              EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED;
-          if (shouldShowSignatureProgress) {
-            uiConfigStore.ibcSwapConfig.setSignatureProgress(
-              totalSignatureCount,
-              0
-            );
-          }
+        uiConfigStore.ibcSwapConfig.setSignatureProgress(
+          totalSignatureCount,
+          0,
+          totalSignatureCount > 1
+        );
 
+        try {
           for (const tx of txs) {
             if ("send" in tx) {
               const msgs = await tx.msgs();
@@ -1150,9 +1143,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 backgroundTx.feeType = feeType;
                 backgroundTx.feeCurrencyDenom = feeCurrencyDenom;
 
-                // if multiple txs are required or the wallet is hardware wallet,
+                // if multiple txs are required or the wallet is hardware wallet or topup is required,
                 // sign the tx here
-                if (requiresMultipleTxs || isHardwareWallet) {
+                if (requiresMultipleTxs || isHardwareWallet || shouldTopUp) {
                   const result = await tx.sign(
                     swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
                       swapConfigs.feeConfig.toStdFee(),
@@ -1169,8 +1162,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                   );
 
                   uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
-                } else if (shouldTopUp) {
-                  // TODO: top-up이 필요하며 실행가능한 첫 번째 트랜잭션인데 서명페이지까지 가지 않는 경우에 대한 처리
                 }
               }
 
@@ -1449,10 +1440,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           // Navigate back once for all sign pages to avoid multiple remounts
           // Sign pages use replace after the first one, so only 1 history entry is added
-          const signatureProgress =
-            uiConfigStore.ibcSwapConfig.signatureProgress;
-          if (signatureProgress.show && signatureProgress.completed > 0) {
+          if (uiConfigStore.ibcSwapConfig.hasSignatureNavigation) {
             navigate(-1);
+            // prevent multiple navigation in catch block if error occurs below
+            uiConfigStore.ibcSwapConfig.resetSignatureProgress();
           }
 
           const executeTxMsg = new RecordAndExecuteTxsMsg(
@@ -1644,10 +1635,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             // });
           }
 
-          // in case of error, navigate back to the previous page if at least one signature is completed
-          const signatureProgress =
-            uiConfigStore.ibcSwapConfig.signatureProgress;
-          if (signatureProgress.show && signatureProgress.completed > 0) {
+          // in case of error, navigate back to the previous page if signature flow is started
+          if (uiConfigStore.ibcSwapConfig.hasSignatureNavigation) {
             navigate(-1);
           }
 

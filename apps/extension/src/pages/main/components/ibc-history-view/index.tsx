@@ -1599,7 +1599,8 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     setIsLoading(true);
     uiConfigStore.ibcSwapConfig.setSignatureProgress(
       totalTxCount,
-      executedTxCount
+      executedTxCount,
+      true // multi tx always show signature progress
     );
 
     try {

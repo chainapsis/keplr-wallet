@@ -608,7 +608,7 @@ export const CosmosTxView: FunctionComponent<{
               return remainingText;
             }
             const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
-            if (progress.show && progress.total > 1) {
+            if (progress.show) {
               if (isLedgerInteracting) {
                 return intl.formatMessage({ id: "button.continue-on-ledger" });
               }
@@ -633,7 +633,7 @@ export const CosmosTxView: FunctionComponent<{
               return undefined;
             }
             const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
-            if (progress.show && progress.total > 1) {
+            if (progress.show) {
               return (
                 <StepIndicator
                   totalCount={progress.total}
@@ -652,7 +652,6 @@ export const CosmosTxView: FunctionComponent<{
           })(),
           ...(!(shouldTopUp && remainingText) &&
             uiConfigStore.ibcSwapConfig.signatureProgress.show &&
-            uiConfigStore.ibcSwapConfig.signatureProgress.total > 1 &&
             (isLedgerInteracting || isKeystoneInteracting) && {
               suppressDefaultLoadingIndicator: true,
               showTextWhileLoading: true,

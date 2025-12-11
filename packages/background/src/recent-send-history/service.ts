@@ -34,7 +34,6 @@ import {
   EthTxStatus,
 } from "@keplr-wallet/types";
 import { CoinPretty } from "@keplr-wallet/unit";
-import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { id } from "@ethersproject/hash";
 import { EventBusPublisher } from "@keplr-wallet/common";
 import { TxExecutionEvent } from "../tx-executor/types";
@@ -342,15 +341,10 @@ export class RecentSendHistoryService {
             if (shouldLegacyTrack) {
               // no wait
               setTimeout(() => {
-                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/swap/tx", {
-                  method: "POST",
-                  headers: {
-                    "content-type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    tx_hash: Buffer.from(tx.hash).toString("hex"),
-                    chain_id: sourceChainId,
-                  }),
+                requestSkipTxTrack({
+                  endpoint: SWAP_API_ENDPOINT,
+                  chainId: sourceChainId,
+                  txHash: Buffer.from(tx.hash).toString("hex"),
                 })
                   .then((result) => {
                     console.log(
@@ -467,15 +461,10 @@ export class RecentSendHistoryService {
             if (shouldLegacyTrack) {
               setTimeout(() => {
                 // no wait
-                simpleFetch<any>(SWAP_API_ENDPOINT, "/v1/swap/tx", {
-                  method: "POST",
-                  headers: {
-                    "content-type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    tx_hash: Buffer.from(tx.hash).toString("hex"),
-                    chain_id: sourceChainId,
-                  }),
+                requestSkipTxTrack({
+                  endpoint: SWAP_API_ENDPOINT,
+                  chainId: sourceChainId,
+                  txHash: Buffer.from(tx.hash).toString("hex"),
                 })
                   .then((result) => {
                     console.log(
@@ -3018,22 +3007,16 @@ export class RecentSendHistoryService {
     const { chainId, txHash, ibcHistory, swapReceiver, txFulfilled } =
       trackingData;
 
-    console.log("check trackSwapV2AdditionalCosmosIBCInternal", txFulfilled);
-
     // Step 1: tx가   완료되지 않았으면 tx 완료 대기
     if (!txFulfilled) {
-      console.log("check trackIBCTxFulfillment", trackingData);
       this.trackIBCTxFulfillment({
         chainId,
         txHash,
         ibcHistory,
         swapReceiver,
         onTxFulfilled: (_tx, hopUpdate, firstHopResAmount) => {
-          console.log("onTxFulfilled", JSON.stringify(firstHopResAmount));
           runInAction(() => {
             trackingData.txFulfilled = true;
-
-            console.log("firstHopResAmount", JSON.stringify(firstHopResAmount));
 
             if (firstHopResAmount) {
               history.resAmount.push(firstHopResAmount);
@@ -3073,8 +3056,6 @@ export class RecentSendHistoryService {
 
     const targetChannelIndex = ibcHistory.findIndex((h) => !h.completed);
     if (targetChannelIndex < 0 || !ibcHistory[targetChannelIndex].sequence) {
-      console.log("all hop completed");
-
       runInAction(() => {
         history.additionalTrackDone = true;
       });
@@ -3087,7 +3068,6 @@ export class RecentSendHistoryService {
       targetChannelIndex,
       swapReceiver,
       onHopCompleted: (resAmount) => {
-        console.log("onHopCompleted", JSON.stringify(resAmount));
         runInAction(() => {
           if (resAmount) {
             history.resAmount.push(resAmount);
@@ -3096,7 +3076,6 @@ export class RecentSendHistoryService {
         });
       },
       onAllCompleted: () => {
-        console.log("onAllCompleted");
         runInAction(() => {
           history.additionalTrackDone = true;
           // CHECK: resAmount에 아무것도 안들어있을 수 있음
@@ -3106,7 +3085,6 @@ export class RecentSendHistoryService {
         onFulfill();
       },
       onContinue: () => {
-        console.log("onContinue");
         onFulfill();
         this.trackIBCPacketForwardingRecursive(
           (onFulfill, onClose, onError) => {
@@ -3172,7 +3150,6 @@ export class RecentSendHistoryService {
 
     const chainInfo = this.chainsService.getChainInfo(chainId);
     if (!chainInfo) {
-      console.log("trackIBCTxFulfillment: no chain info");
       onFulfill();
       return;
     }
@@ -3186,7 +3163,6 @@ export class RecentSendHistoryService {
 
       if (tx.code != null && tx.code !== 0) {
         onTxError(tx.log || tx.raw_log || "Tx failed");
-        console.log("trackIBCTxFulfillment: tx failed", tx);
         onFulfill();
         return;
       }
@@ -3201,7 +3177,6 @@ export class RecentSendHistoryService {
         | undefined;
 
       if (swapReceiver && swapReceiver.length > 0) {
-        console.log("trackIBCTxFulfillment: getIBCSwapResAmountFromTx", tx);
         resAmount = this.getIBCSwapResAmountFromTx(tx, swapReceiver[0]);
       }
 
@@ -3274,29 +3249,17 @@ export class RecentSendHistoryService {
         ? ibcHistory[targetChannelIndex + 1]
         : undefined;
 
-    console.log("trackIBCHopRecvPacket: targetChannel", targetChannel);
-    console.log("trackIBCHopRecvPacket: nextChannel", nextChannel);
-
     if (!targetChannel || !targetChannel.sequence) {
-      console.log("trackIBCHopRecvPacket: no target channel or sequence");
       onAllCompleted();
       return;
     }
     const sequence = targetChannel.sequence;
 
-    console.log("trackIBCHopRecvPacket: sequence", sequence);
-
     const counterpartyChainInfo = this.chainsService.getChainInfo(
       targetChannel.counterpartyChainId
     );
 
-    console.log(
-      "trackIBCHopRecvPacket: counterpartyChainInfo",
-      counterpartyChainInfo
-    );
-
     if (!counterpartyChainInfo) {
-      console.log("trackIBCHopRecvPacket: no counterparty chain info");
       onFulfill();
       return;
     }
@@ -3323,7 +3286,6 @@ export class RecentSendHistoryService {
       txTracer.close();
 
       if (!res) {
-        console.log("trackIBCHopRecvPacket: no tx");
         onError();
         return;
       }
@@ -3342,19 +3304,12 @@ export class RecentSendHistoryService {
         return idx >= 0;
       });
 
-      console.log("trackIBCHopRecvPacket: matchedTx", matchedTx);
-
       const tx = matchedTx || txs[0];
-
-      console.log("trackIBCHopRecvPacket: tx", tx);
 
       targetChannel.completed = true;
 
       let resAmount: { amount: string; denom: string }[] | undefined;
       const receiverIndex = targetChannelIndex + 1;
-
-      console.log("trackIBCHopRecvPacket: receiverIndex", receiverIndex);
-      console.log("trackIBCHopRecvPacket: swapReceiver", swapReceiver);
 
       if (tx && swapReceiver && receiverIndex < swapReceiver.length) {
         const index = this.getIBCRecvPacketIndexFromTx(
@@ -3364,19 +3319,13 @@ export class RecentSendHistoryService {
           sequence
         );
 
-        console.log("recv_packet index", index);
-
         if (index >= 0) {
-          console.log("getIBCSwapResAmountFromTx", index, tx);
-
           resAmount = this.getIBCSwapResAmountFromTx(
             tx,
             swapReceiver[receiverIndex],
             index
           );
         }
-      } else {
-        console.log("trackIBCHopRecvPacket: no swap receiver");
       }
 
       onHopCompleted(resAmount, tx);
@@ -3390,17 +3339,13 @@ export class RecentSendHistoryService {
           sequence
         );
 
-        console.log("trackIBCHopRecvPacket: index", index);
-
         if (index >= 0) {
-          console.log("trackIBCHopRecvPacket: getIBCPacketSequenceFromTx", tx);
           nextChannel.sequence = this.getIBCPacketSequenceFromTx(
             tx,
             nextChannel.portId,
             nextChannel.channelId,
             index
           );
-          console.log("trackIBCHopRecvPacket: getDstChannelIdFromTx", tx);
           nextChannel.dstChannelId = this.getDstChannelIdFromTx(
             tx,
             nextChannel.portId,
@@ -3620,14 +3565,6 @@ export class RecentSendHistoryService {
     if (!Array.isArray(events)) {
       throw new Error("Invalid tx");
     }
-
-    console.log(
-      "getIBCAcknowledgementPacketIndexFromTx",
-      events,
-      sourcePortId,
-      sourceChannelId,
-      sequence
-    );
 
     // In injective, events from tendermint rpc is not encoded as base64.
     // I don't know that this is the difference from tendermint version, or just custom from injective.

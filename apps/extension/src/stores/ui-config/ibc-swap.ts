@@ -37,6 +37,8 @@ export class IBCSwapConfig {
   protected _completedSignatureCount: number | undefined = undefined;
   @observable
   protected _showSignatureProgress: boolean = false;
+  @observable
+  protected _signatureHistoryLength: number | undefined = undefined;
 
   constructor(
     kvStore: KVStore,
@@ -264,28 +266,30 @@ export class IBCSwapConfig {
     this._isSwapLoading = isLoading;
   }
 
-  get signatureProgress():
-    | { show: false }
-    | { show: true; total: number; completed: number } {
-    if (
-      this._showSignatureProgress &&
-      this._totalSignatureCount != null &&
-      this._completedSignatureCount != null
-    ) {
-      return {
-        show: true,
-        total: this._totalSignatureCount,
-        completed: this._completedSignatureCount,
-      };
-    }
-    return { show: false };
+  get signatureProgress(): { show: boolean; total: number; completed: number } {
+    const total = this._totalSignatureCount ?? 0;
+    const completed = this._completedSignatureCount ?? 0;
+
+    return {
+      show:
+        this._showSignatureProgress &&
+        this._totalSignatureCount != null &&
+        this._completedSignatureCount != null,
+      total,
+      completed,
+    };
   }
 
   @action
-  setSignatureProgress(total: number, completed: number) {
+  setSignatureProgress(total: number, completed: number, show: boolean) {
     this._totalSignatureCount = total;
     this._completedSignatureCount = completed;
-    this._showSignatureProgress = true;
+    this._showSignatureProgress = show;
+
+    // Capture the navigation depth once when signing starts.
+    if (typeof window !== "undefined" && this._signatureHistoryLength == null) {
+      this._signatureHistoryLength = window.history.length;
+    }
   }
 
   @action
@@ -300,5 +304,16 @@ export class IBCSwapConfig {
     this._totalSignatureCount = undefined;
     this._completedSignatureCount = undefined;
     this._showSignatureProgress = false;
+    this._signatureHistoryLength = undefined;
+  }
+
+  get hasSignatureNavigation(): boolean {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    if (this._signatureHistoryLength == null) {
+      return false;
+    }
+    return window.history.length > this._signatureHistoryLength;
   }
 }
