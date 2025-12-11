@@ -1180,7 +1180,8 @@ export class RecentSendHistoryService {
             this.publisher.publish({
               type: "executable",
               executionId: history.backgroundExecutionId,
-              executableChainIds: getExecutableChainIdsFromIBCHistory(history),
+              executableChainIds:
+                this.getExecutableChainIdsFromIBCHistory(history),
             });
           }
 
@@ -1268,7 +1269,8 @@ export class RecentSendHistoryService {
             this.publisher.publish({
               type: "executable",
               executionId: history.backgroundExecutionId,
-              executableChainIds: getExecutableChainIdsFromIBCHistory(history),
+              executableChainIds:
+                this.getExecutableChainIdsFromIBCHistory(history),
             });
           }
 
@@ -1544,6 +1546,7 @@ export class RecentSendHistoryService {
       });
   }
 
+  // CHECK: move tracing logic (requestEthTxReceipt, requestEthTxTrace, parseEVMTxReceiptLogs) to tx-ethereum service
   protected traceEVMTransactionResult(params: {
     chainId: string;
     txHash: string;
@@ -2519,7 +2522,7 @@ export class RecentSendHistoryService {
       if (status === SwapV2TxStatus.IN_PROGRESS) {
         onError();
       } else {
-        // CHECK: what if partial success?
+        // swap on single evm chain might not have steps
         history.trackDone = true;
         onFulfill();
       }
@@ -2551,7 +2554,7 @@ export class RecentSendHistoryService {
         return;
       }
       const executableChainIds =
-        chainIds ?? getExecutableChainIdsFromSwapV2History(history);
+        chainIds ?? this.getExecutableChainIdsFromSwapV2History(history);
       this.publisher.publish({
         type: "executable",
         executionId: history.backgroundExecutionId,
@@ -2608,13 +2611,15 @@ export class RecentSendHistoryService {
           if (isDestinationReached) {
             history.routeIndex = simpleRoute.length - 1;
             executableChainIdsToPublish =
-              getExecutableChainIdsFromSwapV2History(history, true);
+              this.getExecutableChainIdsFromSwapV2History(history, true);
             history.resAmount.push([
               {
                 amount: asset_location.amount,
                 denom: denomInKeplr,
               },
             ]);
+
+            this.notifySwapV2Success(history);
           } else {
             /*
               Determine the type of asset location:
@@ -2652,21 +2657,21 @@ export class RecentSendHistoryService {
               history.routeIndex = assetLocationChainIndex;
             }
             executableChainIdsToPublish =
-              getExecutableChainIdsFromSwapV2History(history);
+              this.getExecutableChainIdsFromSwapV2History(history);
           }
         } else if (status === SwapV2TxStatus.SUCCESS) {
           // For SUCCESS without asset_location, move routeIndex to end
           history.routeIndex = simpleRoute.length - 1;
-          executableChainIdsToPublish = getExecutableChainIdsFromSwapV2History(
-            history,
-            true
-          );
+          executableChainIdsToPublish =
+            this.getExecutableChainIdsFromSwapV2History(history, true);
+
+          this.notifySwapV2Success(history);
         }
 
         // Publish executable chains
         publishExecutableChains(executableChainIdsToPublish);
 
-        // assetLocationInfo가 있으면 해당 위치, 없으면 최종 destination 사용
+        // destination 체인/denom 기준으로만 추가 추적을 시도한다.
         const targetChainId = history.toChainId;
         const targetDenom = history.destinationAsset.denom;
 
@@ -2682,10 +2687,19 @@ export class RecentSendHistoryService {
           return targetStep?.tx_hash ?? currentStep.tx_hash;
         })();
 
-        // 이미 resAmount가 있거나 assetLocationInfo가 있으면 추가 트래킹 불필요
+        const isAtDestinationChain = (() => {
+          if (!currentStep.chain_id) {
+            return false;
+          }
+          const dest = targetChainId.replace("eip155:", "").toLowerCase();
+          return currentStep.chain_id.toLowerCase() === dest;
+        })();
+
         const skipAssetTracking =
-          history.resAmount.length > 0 || history.assetLocationInfo;
-        if (!skipAssetTracking && targetTxHash) {
+          history.resAmount.length > 0 || history.assetLocationInfo != null;
+
+        // resAmount 또는 assetLocationInfo가 없으면 추가적으로 자산 추적을 해야 한다.
+        if (targetTxHash && !skipAssetTracking && isAtDestinationChain) {
           this.trackSwapV2ReleasedAssetAmount(
             id,
             targetTxHash,
@@ -2693,11 +2707,10 @@ export class RecentSendHistoryService {
             targetDenom,
             onFulfill
           );
-          break;
+        } else {
+          history.trackDone = true;
+          onFulfill();
         }
-
-        history.trackDone = true;
-        onFulfill();
         break;
     }
   }
@@ -2735,6 +2748,8 @@ export class RecentSendHistoryService {
         runInAction(() => {
           history.resAmount.push(resAmount);
           history.trackDone = true;
+
+          this.notifySwapV2Success(history);
         });
       },
       onRefund: (refundInfo, error) => {
@@ -2816,6 +2831,58 @@ export class RecentSendHistoryService {
         executionId,
       });
     }
+  }
+
+  protected notifySwapV2Success(history: SwapV2History) {
+    const notificationInfo = history.notificationInfo;
+    if (!notificationInfo || history.notified) {
+      return;
+    }
+
+    const latestResAmount =
+      history.resAmount.length > 0
+        ? history.resAmount[history.resAmount.length - 1]
+        : undefined;
+    if (!latestResAmount || latestResAmount.length === 0) {
+      return;
+    }
+
+    const chainInfo = this.chainsService.getChainInfo(history.toChainId);
+    if (!chainInfo) {
+      return;
+    }
+
+    const assetsText = latestResAmount
+      .map((amt) => {
+        const currency = notificationInfo.currencies.find(
+          (cur) => cur.coinMinimalDenom === amt.denom
+        );
+        if (!currency) {
+          return undefined;
+        }
+        return new CoinPretty(currency, amt.amount)
+          .hideIBCMetadata(true)
+          .shrink(true)
+          .maxDecimals(6)
+          .inequalitySymbol(true)
+          .trim(true)
+          .toString();
+      })
+      .filter((text): text is string => Boolean(text));
+
+    if (assetsText.length === 0) {
+      return;
+    }
+
+    runInAction(() => {
+      history.notified = true;
+    });
+
+    this.notification.create({
+      iconRelativeUrl: "assets/logo-256.png",
+      title: "Swap Succeeded",
+      message: `${assetsText.join(", ")} received on ${chainInfo.chainName}`,
+    });
   }
 
   @action
@@ -2961,6 +3028,7 @@ export class RecentSendHistoryService {
           if (result.success && result.resAmount) {
             history.resAmount.push(result.resAmount);
             history.assetLocationInfo = undefined;
+            this.notifySwapV2Success(history);
           } else if (result.refundInfo) {
             history.additionalTrackError = result.error;
             history.assetLocationInfo = {
@@ -3020,6 +3088,7 @@ export class RecentSendHistoryService {
 
             if (firstHopResAmount) {
               history.resAmount.push(firstHopResAmount);
+              // TODO: history.simpleRoute 살펴보고 이동시키기
               history.routeIndex++;
             }
             if (hopUpdate) {
@@ -3055,6 +3124,7 @@ export class RecentSendHistoryService {
     }
 
     const targetChannelIndex = ibcHistory.findIndex((h) => !h.completed);
+
     if (targetChannelIndex < 0 || !ibcHistory[targetChannelIndex].sequence) {
       runInAction(() => {
         history.additionalTrackDone = true;
@@ -3078,9 +3148,8 @@ export class RecentSendHistoryService {
       onAllCompleted: () => {
         runInAction(() => {
           history.additionalTrackDone = true;
-          // CHECK: resAmount에 아무것도 안들어있을 수 있음
-          // ex. noble USDC -> osmosis OSMO 스왑 시, ibc_transfer 메시지의 memo를 파싱해야 할 수도 있음...
           history.assetLocationInfo = undefined;
+          this.notifySwapV2Success(history);
         });
         onFulfill();
       },
@@ -3539,6 +3608,7 @@ export class RecentSendHistoryService {
         if (split.length === 5) {
           const amount = split[1];
           const denom = split[3];
+
           return [
             {
               denom,
@@ -4068,48 +4138,49 @@ export class RecentSendHistoryService {
       }
     });
   };
-}
 
-// ============================================================================
-// Get executable chain ids from history
-// ============================================================================
-function getExecutableChainIdsFromIBCHistory(history: IBCHistory): string[] {
-  const chainIds: string[] = [history.chainId];
+  // ============================================================================
+  // Helper Functions
+  // ============================================================================
 
-  for (const channel of history.ibcHistory) {
-    if (channel.completed) {
-      chainIds.push(channel.counterpartyChainId);
-      if (channel.dstChannelId) {
-        chainIds.push(channel.dstChannelId);
+  private getExecutableChainIdsFromIBCHistory(history: IBCHistory): string[] {
+    const chainIds: string[] = [history.chainId];
+
+    for (const channel of history.ibcHistory) {
+      if (channel.completed) {
+        chainIds.push(channel.counterpartyChainId);
+        if (channel.dstChannelId) {
+          chainIds.push(channel.dstChannelId);
+        }
+      } else {
+        break;
       }
-    } else {
-      break;
     }
+
+    return chainIds;
   }
 
-  return chainIds;
-}
+  private getExecutableChainIdsFromSwapV2History(
+    history: SwapV2History,
+    includeAllChainIds: boolean = false
+  ): string[] {
+    const chainIds: string[] = [];
 
-function getExecutableChainIdsFromSwapV2History(
-  history: SwapV2History,
-  includeAllChainIds: boolean = false
-): string[] {
-  const chainIds: string[] = [];
+    const endIndex = includeAllChainIds
+      ? history.simpleRoute.length
+      : Math.max(0, history.routeIndex + 1);
 
-  const endIndex = includeAllChainIds
-    ? history.simpleRoute.length
-    : Math.max(0, history.routeIndex + 1);
+    for (let i = 0; i < endIndex; i++) {
+      chainIds.push(history.simpleRoute[i].chainId);
+    }
 
-  for (let i = 0; i < endIndex; i++) {
-    chainIds.push(history.simpleRoute[i].chainId);
+    if (
+      history.assetLocationInfo &&
+      history.assetLocationInfo.type === "intermediate"
+    ) {
+      chainIds.push(history.assetLocationInfo.chainId);
+    }
+
+    return chainIds;
   }
-
-  if (
-    history.assetLocationInfo &&
-    history.assetLocationInfo.type === "intermediate"
-  ) {
-    chainIds.push(history.assetLocationInfo.chainId);
-  }
-
-  return chainIds;
 }

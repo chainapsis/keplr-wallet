@@ -35,7 +35,7 @@ import {
 } from "@keplr-wallet/stores-eth";
 
 // TODO: remove after testing, leave the providers field empty
-const DEFAULT_PROVIDERS = [SwapProvider.SKIP];
+const DEFAULT_PROVIDERS = [SwapProvider.SQUID, SwapProvider.SKIP];
 
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;

@@ -91,7 +91,7 @@ export class BackgroundTxExecutorService {
       runInAction(() => {
         const entries = Object.entries(recentTxExecutionMapSaved);
         const sorted = entries
-          .map(([key, value]) => [key, JSON.parse(value)] as const)
+          .map(([key, value]) => [key, JSON.parse(value)])
           .sort(([, a], [, b]) => parseInt(a.id) - parseInt(b.id));
 
         for (const [key, execution] of sorted) {
@@ -1008,16 +1008,10 @@ export class BackgroundTxExecutorService {
     }
   }
 
-  /**
-   * Get all recent direct transactions executions
-   */
   getRecentTxExecutions(): TxExecution[] {
     return Array.from(this.recentTxExecutionMap.values());
   }
 
-  /**
-   * Get execution data by ID
-   */
   getTxExecution(id: string): TxExecution | undefined {
     const execution = this.recentTxExecutionMap.get(id);
     if (!execution) {

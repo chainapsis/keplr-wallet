@@ -548,19 +548,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
    * One-click swap is enabled only when:
    * 1. Single transaction (or erc20 approval + swap bundle with bundle tx simulation)
    * 2. Not a hardware wallet
-   * 3. EVM gas simulation is not APPROVAL_ONLY_SIMULATED
-   * 4. Topup is not required
+   * 3. EVM gas simulation is TX_SIMULATED or TX_BUNDLE_SIMULATED
+   * 4. Cosmos Top-up is not required
    */
   const evmOutcome = gasSimulator.evmSimulationOutcome;
+  const isCosmosOneClickSwapEnabled = !shouldTopUp;
+  const isEvmOneClickSwapEnabled =
+    isInChainEVMOnly &&
+    (evmOutcome === EvmGasSimulationOutcome.TX_SIMULATED ||
+      evmOutcome === EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED);
+
   const oneClickSwapEnabled =
-    // single tx path
     !swapConfigs.amountConfig.requiresMultipleTxs &&
-    // no hardware wallet
     !isHardwareWallet &&
-    // wait until simulation result is available, and it must not be approval-only
-    evmOutcome != null &&
-    evmOutcome !== EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED &&
-    !shouldTopUp;
+    (isCosmosOneClickSwapEnabled || isEvmOneClickSwapEnabled);
 
   const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
     swapConfigs.amountConfig.currency,
@@ -628,9 +629,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
 
-        // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
-        // swapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하므로 굳이 여기서 또 하지 않는다.
+        //================================================================================
+        // 1. Get route information and prepare txs
+        //================================================================================
+
         try {
+          // queryRoute는 ibc history를 추적하기 위한 채널 정보 등을 얻기 위해서 사용된다.
+          // swapConfigs.amountConfig.getTx에서 queryRoute.waitFreshResponse()를 하므로 굳이 여기서 또 하지 않는다.
           if (!queryRoute.response) {
             throw new Error("queryRoute.response is undefined");
           }
@@ -922,11 +927,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
         setCalculatingTxError(undefined);
 
-        // prepare txs to execute
-        const vaultId = selectedKeyInfo.id;
-        const isHardwareWallet =
-          selectedKeyInfo.type === "ledger" ||
-          selectedKeyInfo.type === "keystone";
+        //================================================================================
+        // 2. Prepare history data
+        //================================================================================
 
         let executionType: TxExecutionType;
         let historyData:
@@ -1029,6 +1032,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             },
           };
         }
+
+        //================================================================================
+        // 3. Process txs and prepare background txs
+        //================================================================================
+
+        const vaultId = selectedKeyInfo.id;
+        const isHardwareWallet =
+          selectedKeyInfo.type === "ledger" ||
+          selectedKeyInfo.type === "keystone";
 
         // only the first tx is executable with inChainId
         const executableChainIds = [inChainId];
@@ -1453,6 +1465,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             signatureNavigationCount = 0;
             navigate(-1);
           }
+
+          //================================================================================
+          // 4. Record and execute background txs
+          //================================================================================
 
           const executeTxMsg = new RecordAndExecuteTxsMsg(
             vaultId,
