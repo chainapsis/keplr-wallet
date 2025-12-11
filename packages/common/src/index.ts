@@ -11,3 +11,4 @@ export * from "./mnemonic";
 export * from "./coin";
 export * from "./service-worker";
 export * from "./async";
+export * from "./bigint";
