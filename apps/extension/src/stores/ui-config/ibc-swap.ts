@@ -196,9 +196,12 @@ export class IBCSwapConfig {
     );
 
     if (this._lastAmountOutMinimalDenom) {
-      return modularChainInfoImpl.forceFindCurrency(
+      const currency = modularChainInfoImpl.findCurrency(
         this._lastAmountOutMinimalDenom
       );
+      if (currency) {
+        return currency;
+      }
     }
 
     return modularChainInfoImpl.getCurrencies()[0];
