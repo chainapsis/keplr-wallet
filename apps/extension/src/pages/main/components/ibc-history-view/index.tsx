@@ -1603,6 +1603,10 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       true // multi tx always show signature progress
     );
 
+    let signedTx: string;
+    let ibcSwapDataForResume: IBCSwapMinimalTrackingData | undefined;
+    let navigatedToHome = false;
+
     try {
       // get tx execution
       switch (tx.type) {
@@ -1615,10 +1619,12 @@ const SwapV2HistoryViewItem: FunctionComponent<{
           const ethereumQueries = queriesStore.get(tx.chainId).ethereum;
 
           // estimate gas
-          const { gasUsed } = await ethereumAccount.simulateGas(
+          const result = await ethereumAccount.simulateGas(
             account.ethereumHexAddress,
             txData
           );
+
+          const gasUsed = Math.ceil(result.gasUsed * 1.3); // default gas adjustment value is 1.3
 
           // get fee (similar to getEIP1559TxFees logic, using "average" fee type)
           const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
@@ -1744,7 +1750,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
           }
 
           // sign and resume tx
-          const signedTx = await ethereumAccount.signEthereumTx(
+          signedTx = await ethereumAccount.signEthereumTx(
             account.ethereumHexAddress,
             {
               ...txData,
@@ -1754,27 +1760,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               nonceMethod: "pending",
             }
           );
-
-          // resume background tx execution
-          const executeResult =
-            await new InExtensionMessageRequester().sendMessage(
-              BACKGROUND_PORT,
-              new ResumeTxMsg(history.backgroundExecutionId, txIndex, signedTx)
-            );
-          if (executeResult.status === TxExecutionStatus.FAILED) {
-            throw new Error(
-              executeResult.error ?? "Transaction execution failed"
-            );
-          }
-
-          notification.show(
-            "success",
-            intl.formatMessage({ id: "notification.transaction-success" }),
-            ""
-          );
-
-          uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
-          navigate("/");
           break;
         }
         case BackgroundTxType.COSMOS: {
@@ -1789,7 +1774,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
           const msg = aminoMsgs[0];
           let cosmosTx: MakeTxResponse;
-          let ibcSwapDataForResume: IBCSwapMinimalTrackingData | undefined;
 
           switch (msg.type) {
             case "cosmos-sdk/MsgTransfer": {
@@ -1948,11 +1932,14 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               throw new Error("Unsupported message type");
           }
 
-          console.log("ibc swap data for resume", ibcSwapDataForResume);
-
           const simulateResult = await cosmosTx.simulate({}, txData.memo);
+          const gasAdjustment = chainStore
+            .getChain(chainId)
+            .hasFeature("feemarket")
+            ? 1.6
+            : 1.4;
 
-          const pseudoFee = {
+          const fee = {
             amount: [
               {
                 denom:
@@ -1960,49 +1947,48 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 amount: "1",
               },
             ],
-            // TODO: margin 값 정해야함
-            gas: Math.floor(simulateResult.gasUsed * 1.5).toString(),
+            gas: Math.ceil(simulateResult.gasUsed * gasAdjustment).toString(),
           };
 
-          const signResult = await cosmosTx.sign(pseudoFee, txData.memo, {
+          const signResult = await cosmosTx.sign(fee, txData.memo, {
             preferNoSetFee: false,
             preferNoSetMemo: false,
             // CHECK: topup 처리?
           });
 
-          // resume background tx execution
-          const executeResult =
-            await new InExtensionMessageRequester().sendMessage(
-              BACKGROUND_PORT,
-              new ResumeTxMsg(
-                history.backgroundExecutionId,
-                txIndex,
-                Buffer.from(signResult.tx).toString("base64"),
-                ibcSwapDataForResume
-              )
-            );
-          if (executeResult.status === TxExecutionStatus.FAILED) {
-            throw new Error(
-              executeResult.error ?? "Transaction execution failed"
-            );
-          }
-
-          notification.show(
-            "success",
-            intl.formatMessage({ id: "notification.transaction-success" }),
-            ""
-          );
-
-          uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
-          navigate("/");
+          signedTx = Buffer.from(signResult.tx).toString("base64");
           break;
         }
         default: {
           throw new Error("Invalid tx type");
         }
       }
+
+      uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
+      navigate("/");
+      navigatedToHome = true;
+
+      // resume background tx execution
+      const executeResult = await new InExtensionMessageRequester().sendMessage(
+        BACKGROUND_PORT,
+        new ResumeTxMsg(
+          history.backgroundExecutionId,
+          txIndex,
+          signedTx,
+          ibcSwapDataForResume
+        )
+      );
+      if (executeResult.status === TxExecutionStatus.FAILED) {
+        throw new Error(executeResult.error ?? "Transaction execution failed");
+      }
+
+      notification.show(
+        "success",
+        intl.formatMessage({ id: "notification.transaction-success" }),
+        ""
+      );
     } catch (error) {
-      console.error("Failed to continue signing:", error);
+      console.error("Failed to execute tx:", error);
       if (error?.message === "Request rejected") {
         return;
       }
@@ -2012,10 +1998,11 @@ const SwapV2HistoryViewItem: FunctionComponent<{
         intl.formatMessage({ id: "error.transaction-failed" }),
         ""
       );
-      navigate("/");
+
+      if (!navigatedToHome) {
+        navigate("/");
+      }
     } finally {
-      // navigate to home
-      // CHECK: 실패했을 때 홈으로 안가고 이상한데로 감
       setIsLoading(false);
       uiConfigStore.ibcSwapConfig.resetSignatureProgress();
     }

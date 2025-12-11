@@ -1267,7 +1267,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         evmTx
                       );
 
-                      gasLimit = result.gasUsed;
+                      gasLimit = Math.ceil(
+                        result.gasUsed * gasSimulator.gasAdjustment
+                      );
                     } else if (
                       evmSimulationOutcome ===
                         EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED ||
@@ -1286,7 +1288,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           evmTx
                         );
 
-                        gasLimit = result.gasUsed;
+                        gasLimit = Math.ceil(
+                          result.gasUsed * gasSimulator.gasAdjustment
+                        );
                       } else {
                         const result =
                           await ethereumAccount.simulateGasWithPendingErc20Approval(
@@ -1296,7 +1300,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                               requiredErc20Approvals: [erc20Approval!],
                             }
                           );
-                        gasLimit = result.gasUsed ?? 0;
+                        gasLimit = Math.ceil(
+                          (result.gasUsed ?? 0) * gasSimulator.gasAdjustment
+                        );
                       }
                     } else {
                       // evmSimulationOutcome is undefined, this should not happen
@@ -1308,13 +1314,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       throw new Error("Gas limit is not positive");
                     }
 
-                    // CHECK: need to add margin to the gas limit? 좀 간당간당한디
                     const feeObject = buildEvmFeeObject(gasLimit);
 
                     // if evmSimulationOutcome이 bundle인데 callback으로 erc20 approval만 계산되었다면,
                     // 이 시점에서 erc20 approval을 먼저 실행을해서 완전히 상태가 업데이트된 다음 swap 트랜잭션의 서명을 처리해줘야만 한다.
                     // 먼저 처리된 erc20 approval 트랜잭션의 status는 CONFIRMED로 설정하여 백그라운드에서 실행을 스킵한다.
-
                     if (
                       evmSimulationOutcome ===
                         EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED &&
