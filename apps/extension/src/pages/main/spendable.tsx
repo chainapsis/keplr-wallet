@@ -472,7 +472,10 @@ export const SpendableAssetView: FunctionComponent<{
       chainSearchFields
     ).filter(({ chainInfo }) => {
       if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-        if (chainStore.isEvmOnlyChain(chainInfo.chainId)) {
+        if (
+          chainStore.hasModularChain(chainInfo.chainId) &&
+          chainStore.isEvmOnlyChain(chainInfo.chainId)
+        ) {
           return true;
         }
 
