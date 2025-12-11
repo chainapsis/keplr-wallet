@@ -89,7 +89,7 @@ export interface IBCSwapHistoryData {
 // IBC swap 추가 트래킹에 필요한 최소 입력 데이터
 export type IBCSwapMinimalTrackingData = Pick<
   IBCSwapHistoryData,
-  "chainId" | "swapReceiver" | "ibcChannels"
+  "chainId" | "swapReceiver" | "ibcChannels" | "swapChannelIndex"
 >;
 
 /**
@@ -126,6 +126,18 @@ export interface IBCSwapHistory {
   };
 }
 
+export type IbcHop = {
+  portId: string;
+  channelId: string;
+  counterpartyChainId: string;
+  sequence?: string;
+  dstChannelId?: string;
+  completed: boolean;
+  error?: string;
+  rewound?: boolean;
+  rewoundButNextRewindingBlocked?: boolean;
+};
+
 /**
  * Stored IBC history record (union of IBCTransferHistory and IBCSwapHistory).
  */
@@ -150,25 +162,7 @@ export type IBCHistory = {
   txError?: string;
   packetTimeout?: boolean;
 
-  ibcHistory:
-    | {
-        portId: string;
-        channelId: string;
-        counterpartyChainId: string;
-
-        sequence?: string;
-        // 위의 channel id는 src channel id이고
-        // 얘는 dst channel id이다
-        // 각 tracking이 완료될때마다 events에서 찾아서 추가된다.
-        dstChannelId?: string;
-
-        completed: boolean;
-        error?: string;
-        rewound?: boolean;
-        // swap 이후에는 rewind가 불가능하기 때문에
-        // swap 등에서는 이 값이 true일 수 있음
-        rewoundButNextRewindingBlocked?: boolean;
-      }[];
+  ibcHistory: IbcHop[];
 
   // Already notified to user
   notified?: boolean;
@@ -299,18 +293,12 @@ export interface SwapV2History extends SwapV2HistoryBase {
         type: "cosmos-ibc";
         chainId: string;
         swapReceiver: string[];
+        swapChannelIndex: number;
         txHash: string; // 시작 트랜잭션 해시
         txFulfilled?: boolean; // 시작 트랜잭션 완료 여부
+        packetTimeout?: boolean;
         // 각 IBC hop의 tracking 상태 (필요 최소 데이터만 저장)
-        ibcHistory: {
-          portId: string;
-          channelId: string;
-          counterpartyChainId: string;
-          sequence?: string;
-          dstChannelId?: string;
-          completed: boolean;
-          error?: string;
-        }[];
+        ibcHistory: IbcHop[];
       };
   additionalTrackDone?: boolean; // additional tracking 완료 여부
   additionalTrackError?: string; // additional tracking 에러

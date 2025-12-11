@@ -1562,6 +1562,8 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     return true;
   }, [history]);
 
+  console.log("history", history);
+
   async function handleContinueSigning() {
     if (!history.backgroundExecutionId || !txExecution) {
       return;
@@ -1783,7 +1785,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 channelId: string;
                 counterpartyChainId: string;
               }[] = [];
-              const swapReceiver: string[] = [tx.chainId]; // should include source chain id
+              const swapReceiver: string[] = [account.bech32Address];
 
               const firstQueryClientState = queriesStore
                 .get(chainId)
@@ -1804,6 +1806,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
               swapReceiver.push(msg.value.receiver);
 
               // memo에서 forward 정보 파싱하여 추가 채널 구성
+              // CHECK: 이거 맞는지 모르겠음...
               try {
                 let memoObj = JSON.parse(msg.value.memo);
                 let currentChainId = firstCounterpartyChainId;
@@ -1849,6 +1852,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 chainId,
                 ibcChannels,
                 swapReceiver,
+                swapChannelIndex: ibcChannels.length - 1, // CHECK: 이거 맞는지 모르겠음...
               };
 
               cosmosTx = account.cosmos.makeIBCTransferTx(

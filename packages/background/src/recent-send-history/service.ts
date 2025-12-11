@@ -18,6 +18,7 @@ import { KVStore, retry } from "@keplr-wallet/common";
 import {
   IBCHistory,
   IBCSwapMinimalTrackingData,
+  IbcHop,
   RecentSendHistory,
   SkipHistory,
   SwapProvider,
@@ -834,18 +835,11 @@ export class RecentSendHistoryService {
         ibcHistory: history.ibcHistory,
         swapReceiver:
           "swapReceiver" in history ? history.swapReceiver : undefined,
-        onTxFulfilled: (_tx, hopUpdate, firstHopResAmount) => {
+        onTxFulfilled: (_tx, firstHopResAmount) => {
           runInAction(() => {
             history.txFulfilled = true;
             if ("swapReceiver" in history && firstHopResAmount) {
               history.resAmount.push(firstHopResAmount);
-            }
-            if (hopUpdate) {
-              const target = history.ibcHistory[hopUpdate.index];
-              if (target) {
-                target.sequence = hopUpdate.sequence;
-                target.dstChannelId = hopUpdate.dstChannelId;
-              }
             }
           });
           this.trackIBCPacketForwardingRecursive(
@@ -869,366 +863,70 @@ export class RecentSendHistoryService {
       return;
     }
 
-    const needRewind = (() => {
-      if (history.ibcHistory.length === 0) {
-        return false;
-      }
-
-      return history.ibcHistory.find((h) => h.error != null) != null;
-    })();
-
-    if (needRewind) {
-      if (history.ibcHistory.find((h) => h.rewoundButNextRewindingBlocked)) {
-        onFulfill();
-        return;
-      }
-      const isTimeoutPacket = history.packetTimeout || false;
-      const lastRewoundChannelIndex = history.ibcHistory.findIndex((h) => {
-        if (h.rewound) {
-          return true;
-        }
-      });
-      const targetChannel = (() => {
-        if (lastRewoundChannelIndex >= 0) {
-          if (lastRewoundChannelIndex === 0) {
-            return undefined;
-          }
-
-          return history.ibcHistory[lastRewoundChannelIndex - 1];
-        }
-        return history.ibcHistory.find((h) => h.error != null);
-      })();
-      const isSwapTargetChannel =
-        targetChannel &&
-        "swapChannelIndex" in history &&
-        history.ibcHistory.indexOf(targetChannel) ===
-          history.swapChannelIndex + 1;
-
-      if (targetChannel && targetChannel.sequence) {
-        const prevChainInfo = (() => {
-          const targetChannelIndex = history.ibcHistory.findIndex(
-            (h) => h === targetChannel
-          );
-          if (targetChannelIndex < 0) {
-            return undefined;
-          }
-          if (targetChannelIndex === 0) {
-            return this.chainsService.getChainInfo(history.chainId);
-          }
-          return this.chainsService.getChainInfo(
-            history.ibcHistory[targetChannelIndex - 1].counterpartyChainId
-          );
-        })();
-        if (prevChainInfo) {
-          const txTracer = new TendermintTxTracer(
-            prevChainInfo.rpc,
-            "/websocket"
-          );
-          txTracer.addEventListener("close", onClose);
-          txTracer.addEventListener("error", onError);
-          txTracer
-            .traceTx(
-              isTimeoutPacket
-                ? {
-                    // "timeout_packet.packet_src_port": targetChannel.portId,
-                    "timeout_packet.packet_src_channel":
-                      targetChannel.channelId,
-                    "timeout_packet.packet_sequence": targetChannel.sequence,
-                  }
-                : {
-                    // "acknowledge_packet.packet_src_port": targetChannel.portId,
-                    "acknowledge_packet.packet_src_channel":
-                      targetChannel.channelId,
-                    "acknowledge_packet.packet_sequence":
-                      targetChannel.sequence,
-                  }
-            )
-            .then((res: any) => {
-              txTracer.close();
-
-              if (!res) {
-                return;
+    if (
+      this.handleIbcRewindIfNeeded({
+        sourceChainId: history.chainId,
+        ibcHistory: history.ibcHistory,
+        packetTimeout: history.packetTimeout,
+        swapContext:
+          "swapReceiver" in history && "swapChannelIndex" in history
+            ? {
+                swapReceiver: history.swapReceiver,
+                swapChannelIndex: history.swapChannelIndex,
+                setSwapRefundInfo: (refundInfo) => {
+                  runInAction(() => {
+                    history.swapRefundInfo = refundInfo;
+                  });
+                },
               }
-
-              runInAction(() => {
-                if (isSwapTargetChannel) {
-                  const txs = res.txs
-                    ? res.txs.map((res: any) => res.tx_result || res)
-                    : [res.tx_result || res];
-                  if (txs && Array.isArray(txs)) {
-                    for (const tx of txs) {
-                      if (targetChannel.sequence && "swapReceiver" in history) {
-                        const index = isTimeoutPacket
-                          ? this.getIBCTimeoutPacketIndexFromTx(
-                              tx,
-                              targetChannel.portId,
-                              targetChannel.channelId,
-                              targetChannel.sequence
-                            )
-                          : this.getIBCAcknowledgementPacketIndexFromTx(
-                              tx,
-                              targetChannel.portId,
-                              targetChannel.channelId,
-                              targetChannel.sequence
-                            );
-                        if (index >= 0) {
-                          // 좀 빡치게 timeout packet은 refund 로직이 실행되고 나서 "timeout_packet" event가 발생한다.
-                          const refunded = isTimeoutPacket
-                            ? this.getIBCSwapResAmountFromTx(
-                                tx,
-                                history.swapReceiver[
-                                  history.swapChannelIndex + 1
-                                ],
-                                (() => {
-                                  const i =
-                                    this.getLastIBCTimeoutPacketBeforeIndexFromTx(
-                                      tx,
-                                      index
-                                    );
-
-                                  if (i < 0) {
-                                    return 0;
-                                  }
-                                  return i;
-                                })(),
-                                index
-                              )
-                            : this.getIBCSwapResAmountFromTx(
-                                tx,
-                                history.swapReceiver[
-                                  history.swapChannelIndex + 1
-                                ],
-                                index
-                              );
-                          history.swapRefundInfo = {
-                            chainId: prevChainInfo.chainId,
-                            amount: refunded,
-                          };
-
-                          targetChannel.rewoundButNextRewindingBlocked = true;
-                          break;
-                        }
-                      }
-                    }
-                  }
-                }
-                targetChannel.rewound = true;
-              });
-              onFulfill();
-              this.trackIBCPacketForwardingRecursive(
-                (onFulfill, onClose, onError) => {
-                  this.trackIBCPacketForwardingRecursiveInternal(
-                    id,
-                    onFulfill,
-                    onClose,
-                    onError
-                  );
-                }
+            : undefined,
+        onFulfill,
+        onClose,
+        onError,
+        onRewindComplete: () => {
+          this.trackIBCPacketForwardingRecursive(
+            (onFulfill, onClose, onError) => {
+              this.trackIBCPacketForwardingRecursiveInternal(
+                id,
+                onFulfill,
+                onClose,
+                onError
               );
-            });
-        }
-      }
+            }
+          );
+        },
+      })
+    ) {
       return;
     }
 
-    const targetChannelIndex = history.ibcHistory.findIndex((history) => {
-      return !history.completed;
-    });
-    const targetChannel =
-      targetChannelIndex >= 0
-        ? history.ibcHistory[targetChannelIndex]
-        : undefined;
-    if (targetChannel && targetChannel.sequence) {
-      const closables: {
-        readyState: WsReadyState;
-        close: () => void;
-      }[] = [];
-
-      const closeClosables = () => {
-        closables.forEach((closable) => {
-          if (
-            closable.readyState === WsReadyState.OPEN ||
-            closable.readyState === WsReadyState.CONNECTING
-          ) {
-            closable.close();
+    this.trackIbcHopFlowWithTimeout({
+      ibcHistory: history.ibcHistory,
+      sourceChainId: history.chainId,
+      swapReceiver:
+        "swapReceiver" in history ? history.swapReceiver : undefined,
+      onHopCompleted: (resAmount) => {
+        runInAction(() => {
+          if (resAmount && "resAmount" in history) {
+            history.resAmount.push(resAmount);
           }
         });
-      };
-
-      let _onFulfillOnce = false;
-      const onFulfillOnce = () => {
-        if (!_onFulfillOnce) {
-          _onFulfillOnce = true;
-          closeClosables();
-          onFulfill();
-        }
-      };
-
-      let _onCloseOnce = false;
-      const onCloseOnce = () => {
-        if (!_onCloseOnce) {
-          _onCloseOnce = true;
-          closeClosables();
-          onClose();
-        }
-      };
-
-      let _onErrorOnce = false;
-      const onErrorOnce = () => {
-        if (!_onErrorOnce) {
-          _onErrorOnce = true;
-          closeClosables();
-          onError();
-        }
-      };
-
-      const registerClosable = (closable: {
-        readyState: WsReadyState;
-        close: () => void;
-      }) => closables.push(closable);
-
-      let hopFailed = false;
-
-      const hopTracer = this.trackIBCHopRecvPacket({
-        ibcHistory: history.ibcHistory,
-        targetChannelIndex,
-        swapReceiver:
-          "swapReceiver" in history ? history.swapReceiver : undefined,
-        onHopCompleted: (resAmount, tx) => {
+      },
+      onAllCompleted: () => {
+        const notificationInfo = history.notificationInfo;
+        if (notificationInfo && !history.notified) {
           runInAction(() => {
-            if (resAmount && "resAmount" in history) {
-              history.resAmount.push(resAmount);
-            }
+            history.notified = true;
           });
 
-          const sequence = targetChannel.sequence;
-          if (!sequence) {
-            hopFailed = true;
-            onFulfillOnce();
-            return;
-          }
-
-          if (!tx) {
-            return;
-          }
-
-          const txs = tx.txs
-            ? tx.txs.map((res: any) => res.tx_result || res)
-            : [tx.tx_result || tx];
-
-          for (const txItem of txs) {
-            try {
-              const ack = this.getIBCWriteAcknowledgementAckFromTx(
-                txItem,
-                targetChannel.portId,
-                targetChannel.channelId,
-                sequence
-              );
-
-              if (ack && ack.length > 0) {
-                const str = Buffer.from(ack);
-                try {
-                  const decoded = JSON.parse(str.toString());
-                  if (decoded.error) {
-                    // XXX: {key: 'packet_ack', value: '{"error":"ABCI code: 6: error handling packet: see events for details"}'}
-                    //      오류가 있을 경우 이딴식으로 오류가 나오기 때문에 뭐 유저에게 보여줄 방법이 없다...
-                    runInAction(() => {
-                      targetChannel.error = "Packet processing failed";
-                    });
-                    hopFailed = true;
-                    onFulfillOnce();
-                    this.trackIBCPacketForwardingRecursive(
-                      (onFulfill, onClose, onError) => {
-                        this.trackIBCPacketForwardingRecursiveInternal(
-                          id,
-                          onFulfill,
-                          onClose,
-                          onError
-                        );
-                      }
-                    );
-                    return;
-                  }
-                } catch (e) {
-                  // decode가 실패한 경우 사실 방법이 없다.
-                  // 일단 packet이 성공했다고 치고 진행한다.
-                  console.log(e);
-                }
-              }
-            } catch {
-              // noop
-            }
-
-            const index = this.getIBCRecvPacketIndexFromTx(
-              txItem,
-              targetChannel.portId,
-              targetChannel.channelId,
-              sequence
-            );
-
-            if (index >= 0) {
-              break;
-            }
-          }
-        },
-        onAllCompleted: () => {
-          if (hopFailed) {
-            return;
-          }
-
-          if (history.backgroundExecutionId) {
-            this.publisher.publish({
-              type: "executable",
-              executionId: history.backgroundExecutionId,
-              executableChainIds:
-                this.getExecutableChainIdsFromIBCHistory(history),
-            });
-          }
-
-          const notificationInfo = history.notificationInfo;
-          if (notificationInfo && !history.notified) {
-            runInAction(() => {
-              history.notified = true;
-            });
-
-            const chainInfo = this.chainsService.getChainInfo(
-              history.destinationChainId
-            );
-            if (chainInfo) {
-              if ("swapType" in history) {
-                if (history.resAmount.length > 0) {
-                  const amount =
-                    history.resAmount[history.resAmount.length - 1];
-                  const assetsText = amount
-                    .map((amt) => {
-                      const currency = notificationInfo.currencies.find(
-                        (cur) => cur.coinMinimalDenom === amt.denom
-                      );
-                      if (!currency) {
-                        return undefined;
-                      }
-                      return new CoinPretty(currency, amt.amount)
-                        .hideIBCMetadata(true)
-                        .shrink(true)
-                        .maxDecimals(6)
-                        .inequalitySymbol(true)
-                        .trim(true)
-                        .toString();
-                    })
-                    .filter((text): text is string => Boolean(text));
-                  if (assetsText.length > 0) {
-                    // Notify user
-                    this.notification.create({
-                      iconRelativeUrl: "assets/logo-256.png",
-                      title: "IBC Swap Succeeded",
-                      message: `${assetsText.join(", ")} received on ${
-                        chainInfo.chainName
-                      }`,
-                    });
-                  }
-                }
-              } else {
-                const assetsText = history.amount
+          const chainInfo = this.chainsService.getChainInfo(
+            history.destinationChainId
+          );
+          if (chainInfo) {
+            if ("swapType" in history) {
+              if (history.resAmount.length > 0) {
+                const amount = history.resAmount[history.resAmount.length - 1];
+                const assetsText = amount
                   .map((amt) => {
                     const currency = notificationInfo.currencies.find(
                       (cur) => cur.coinMinimalDenom === amt.denom
@@ -1246,112 +944,79 @@ export class RecentSendHistoryService {
                   })
                   .filter((text): text is string => Boolean(text));
                 if (assetsText.length > 0) {
-                  // Notify user
                   this.notification.create({
                     iconRelativeUrl: "assets/logo-256.png",
-                    title: "IBC Transfer Succeeded",
-                    message: `${assetsText.join(", ")} sent to ${
+                    title: "IBC Swap Succeeded",
+                    message: `${assetsText.join(", ")} received on ${
                       chainInfo.chainName
                     }`,
                   });
                 }
               }
-            }
-          }
-          onFulfillOnce();
-        },
-        onContinue: () => {
-          if (hopFailed) {
-            return;
-          }
-
-          if (history.backgroundExecutionId) {
-            this.publisher.publish({
-              type: "executable",
-              executionId: history.backgroundExecutionId,
-              executableChainIds:
-                this.getExecutableChainIdsFromIBCHistory(history),
-            });
-          }
-
-          onFulfillOnce();
-          this.trackIBCPacketForwardingRecursive(
-            (onFulfill, onClose, onError) => {
-              this.trackIBCPacketForwardingRecursiveInternal(
-                id,
-                onFulfill,
-                onClose,
-                onError
-              );
-            }
-          );
-        },
-        onFulfill: onFulfillOnce,
-        onClose: onCloseOnce,
-        onError: onErrorOnce,
-      });
-
-      if (hopTracer) {
-        registerClosable(hopTracer);
-      }
-
-      let prevChainId: string = "";
-      if (targetChannelIndex > 0) {
-        prevChainId =
-          history.ibcHistory[targetChannelIndex - 1].counterpartyChainId;
-      } else {
-        prevChainId = history.chainId;
-      }
-      if (prevChainId) {
-        const prevChainInfo = this.chainsService.getChainInfo(prevChainId);
-        if (prevChainInfo) {
-          const queryEvents: any = {
-            // acknowledge_packet과는 다르게 timeout_packet은 이전의 체인의 이벤트로부터만 알 수 있다.
-            // 방법이 없기 때문에 여기서 이전의 체인으로부터 subscribe를 해서 이벤트를 받아야 한다.
-            // 하지만 이 경우 ibc error tracking 로직에서 이것과 똑같은 subscription을 한번 더 하게 된다.
-            // 이미 로직이 많이 복잡하기 때문에 로직을 덜 복잡하게 하기 위해서 이러한 비효율성(?)을 감수한다.
-            // "timeout_packet.packet_src_port": targetChannel.portId,
-            "timeout_packet.packet_src_channel": targetChannel.channelId,
-            "timeout_packet.packet_sequence": targetChannel.sequence,
-          };
-
-          const txTracer = new TendermintTxTracer(
-            prevChainInfo.rpc,
-            "/websocket"
-          );
-          registerClosable(txTracer);
-          txTracer.addEventListener("close", onCloseOnce);
-          txTracer.addEventListener("error", onErrorOnce);
-          txTracer.traceTx(queryEvents).then((res) => {
-            txTracer.close();
-
-            if (!res) {
-              return;
-            }
-
-            // 이 event가 발생한 시점에서 이미 timeout packet은 받은 상태이고
-            // 이 경우 따로 정보를 얻을 필요는 없으므로 이후에 res를 쓰지는 않는다.
-            // 위에 res null check는 사실 필요 없지만 혹시나 해서 넣어둔다.
-            runInAction(() => {
-              targetChannel.error = "Packet timeout";
-              history.packetTimeout = true;
-              hopFailed = true;
-              onFulfillOnce();
-              this.trackIBCPacketForwardingRecursive(
-                (onFulfill, onClose, onError) => {
-                  this.trackIBCPacketForwardingRecursiveInternal(
-                    id,
-                    onFulfill,
-                    onClose,
-                    onError
+            } else {
+              const assetsText = history.amount
+                .map((amt) => {
+                  const currency = notificationInfo.currencies.find(
+                    (cur) => cur.coinMinimalDenom === amt.denom
                   );
-                }
-              );
-            });
-          });
+                  if (!currency) {
+                    return undefined;
+                  }
+                  return new CoinPretty(currency, amt.amount)
+                    .hideIBCMetadata(true)
+                    .shrink(true)
+                    .maxDecimals(6)
+                    .inequalitySymbol(true)
+                    .trim(true)
+                    .toString();
+                })
+                .filter((text): text is string => Boolean(text));
+              if (assetsText.length > 0) {
+                this.notification.create({
+                  iconRelativeUrl: "assets/logo-256.png",
+                  title: "IBC Transfer Succeeded",
+                  message: `${assetsText.join(", ")} sent to ${
+                    chainInfo.chainName
+                  }`,
+                });
+              }
+            }
+          }
         }
-      }
-    }
+      },
+      onContinue: () => {
+        this.trackIBCPacketForwardingRecursive(
+          (onFulfill, onClose, onError) => {
+            this.trackIBCPacketForwardingRecursiveInternal(
+              id,
+              onFulfill,
+              onClose,
+              onError
+            );
+          }
+        );
+      },
+      onRetry: () => {
+        this.trackIBCPacketForwardingRecursive(
+          (onFulfill, onClose, onError) => {
+            this.trackIBCPacketForwardingRecursiveInternal(
+              id,
+              onFulfill,
+              onClose,
+              onError
+            );
+          }
+        );
+      },
+      onPacketTimeout: () => {
+        runInAction(() => {
+          history.packetTimeout = true;
+        });
+      },
+      onFulfill,
+      onClose,
+      onError,
+    });
   };
 
   protected checkAndTrackSwapTxFulfilledRecursive = (params: {
@@ -2955,8 +2620,10 @@ export class RecentSendHistoryService {
         type: "cosmos-ibc",
         chainId: data.ibcSwapData.chainId,
         swapReceiver: data.ibcSwapData.swapReceiver,
+        swapChannelIndex: data.ibcSwapData.swapChannelIndex,
         txHash: data.txHash,
         txFulfilled: false,
+        packetTimeout: false,
         ibcHistory: data.ibcSwapData.ibcChannels.map((ch) => ({
           portId: ch.portId,
           channelId: ch.channelId,
@@ -3075,27 +2742,28 @@ export class RecentSendHistoryService {
     const { chainId, txHash, ibcHistory, swapReceiver, txFulfilled } =
       trackingData;
 
-    // Step 1: tx가   완료되지 않았으면 tx 완료 대기
     if (!txFulfilled) {
       this.trackIBCTxFulfillment({
         chainId,
         txHash,
         ibcHistory,
         swapReceiver,
-        onTxFulfilled: (_tx, hopUpdate, firstHopResAmount) => {
+        onTxFulfilled: (_tx, firstHopResAmount) => {
           runInAction(() => {
             trackingData.txFulfilled = true;
 
             if (firstHopResAmount) {
               history.resAmount.push(firstHopResAmount);
-              // TODO: history.simpleRoute 살펴보고 이동시키기
-              history.routeIndex++;
-            }
-            if (hopUpdate) {
-              const target = ibcHistory[hopUpdate.index];
-              if (target) {
-                target.sequence = hopUpdate.sequence;
-                target.dstChannelId = hopUpdate.dstChannelId;
+              for (
+                let i = history.routeIndex;
+                i < history.simpleRoute.length;
+                i++
+              ) {
+                const route = history.simpleRoute[i];
+                if (route.chainId === chainId) {
+                  history.routeIndex = i + 1; // move to next route
+                  break;
+                }
               }
             }
           });
@@ -3123,26 +2791,75 @@ export class RecentSendHistoryService {
       return;
     }
 
-    const targetChannelIndex = ibcHistory.findIndex((h) => !h.completed);
+    if (
+      this.handleIbcRewindIfNeeded({
+        sourceChainId: chainId,
+        ibcHistory,
+        packetTimeout: trackingData.packetTimeout,
+        swapContext:
+          history.additionalTrackingData?.type === "cosmos-ibc"
+            ? {
+                swapReceiver,
+                swapChannelIndex:
+                  history.additionalTrackingData.swapChannelIndex,
+                setSwapRefundInfo: (refundInfo) => {
+                  runInAction(() => {
+                    history.assetLocationInfo = {
+                      ...refundInfo,
+                      type: "refund",
+                    };
+                  });
+                },
+              }
+            : undefined,
+        onFulfill,
+        onClose,
+        onError,
+        onRewindComplete: () => {
+          // rewound되었다면 실패 처리하는 것이 맞겠지...
+          runInAction(() => {
+            history.status = SwapV2TxStatus.FAILED;
+            history.additionalTrackDone = true;
 
-    if (targetChannelIndex < 0 || !ibcHistory[targetChannelIndex].sequence) {
-      runInAction(() => {
-        history.additionalTrackDone = true;
-      });
-      onFulfill();
+            const rewoundChainId = ibcHistory.find(
+              (h) => h.rewound
+            )?.counterpartyChainId;
+            if (rewoundChainId) {
+              for (let i = history.simpleRoute.length - 1; i >= 0; i--) {
+                const route = history.simpleRoute[i];
+                if (route.chainId === rewoundChainId) {
+                  history.routeIndex = i; // 실패한 채널 인덱스로 이동
+                  break;
+                }
+              }
+            }
+          });
+
+          this.trackIBCPacketForwardingRecursive(
+            (onFulfill, onClose, onError) => {
+              this.trackSwapV2AdditionalCosmosIBCInternal(
+                id,
+                onFulfill,
+                onClose,
+                onError
+              );
+            }
+          );
+        },
+      })
+    ) {
       return;
     }
 
-    this.trackIBCHopRecvPacket({
+    this.trackIbcHopFlowWithTimeout({
       ibcHistory,
-      targetChannelIndex,
+      sourceChainId: chainId,
       swapReceiver,
       onHopCompleted: (resAmount) => {
         runInAction(() => {
           if (resAmount) {
             history.resAmount.push(resAmount);
           }
-          history.routeIndex++;
         });
       },
       onAllCompleted: () => {
@@ -3151,10 +2868,8 @@ export class RecentSendHistoryService {
           history.assetLocationInfo = undefined;
           this.notifySwapV2Success(history);
         });
-        onFulfill();
       },
       onContinue: () => {
-        onFulfill();
         this.trackIBCPacketForwardingRecursive(
           (onFulfill, onClose, onError) => {
             this.trackSwapV2AdditionalCosmosIBCInternal(
@@ -3165,6 +2880,23 @@ export class RecentSendHistoryService {
             );
           }
         );
+      },
+      onRetry: () => {
+        this.trackIBCPacketForwardingRecursive(
+          (onFulfill, onClose, onError) => {
+            this.trackSwapV2AdditionalCosmosIBCInternal(
+              id,
+              onFulfill,
+              onClose,
+              onError
+            );
+          }
+        );
+      },
+      onPacketTimeout: () => {
+        runInAction(() => {
+          trackingData.packetTimeout = true;
+        });
       },
       onFulfill,
       onClose,
@@ -3177,27 +2909,15 @@ export class RecentSendHistoryService {
   // ============================================================================
 
   /**
-   * IBC tx 완료 대기 및 첫 번째 hop sequence 추출
+   * IBC tx 완료 대기 및 첫 번째 hop res amount 추출
    */
   protected trackIBCTxFulfillment(params: {
     chainId: string;
     txHash: string;
-    ibcHistory: {
-      portId: string;
-      channelId: string;
-      sequence?: string;
-      dstChannelId?: string;
-    }[];
+    ibcHistory: IbcHop[];
     swapReceiver?: string[];
     onTxFulfilled: (
       tx: any,
-      hopUpdate:
-        | {
-            index: number;
-            sequence?: string;
-            dstChannelId?: string;
-          }
-        | undefined,
       firstHopResAmount?: { amount: string; denom: string }[]
     ) => void;
     onTxError: (error: string) => void;
@@ -3237,13 +2957,6 @@ export class RecentSendHistoryService {
       }
 
       let resAmount: { amount: string; denom: string }[] | undefined;
-      let hopUpdate:
-        | {
-            index: number;
-            sequence?: string;
-            dstChannelId?: string;
-          }
-        | undefined;
 
       if (swapReceiver && swapReceiver.length > 0) {
         resAmount = this.getIBCSwapResAmountFromTx(tx, swapReceiver[0]);
@@ -3262,32 +2975,415 @@ export class RecentSendHistoryService {
           firstChannel.portId,
           firstChannel.channelId
         );
-
-        hopUpdate = {
-          index: 0,
-          sequence: firstChannel.sequence,
-          dstChannelId: firstChannel.dstChannelId,
-        };
       }
-
-      onTxFulfilled(tx, hopUpdate, resAmount);
+      onTxFulfilled(tx, resAmount);
       onFulfill();
     });
   }
 
   /**
-   * IBC hop recv_packet 이벤트 감시 및 다음 hop 설정
+   * IBC rewind 필요 여부 확인 및 rewind 처리
    */
+  protected handleIbcRewindIfNeeded(params: {
+    sourceChainId: string;
+    ibcHistory: IbcHop[];
+    packetTimeout?: boolean;
+    swapContext?: {
+      swapReceiver: string[];
+      swapChannelIndex: number;
+      setSwapRefundInfo?: (refundInfo: {
+        chainId: string;
+        amount: { amount: string; denom: string }[];
+      }) => void;
+    };
+    onFulfill: () => void;
+    onClose: () => void;
+    onError: () => void;
+    onRewindComplete: () => void;
+  }): boolean {
+    const {
+      sourceChainId,
+      ibcHistory,
+      packetTimeout,
+      swapContext,
+      onFulfill,
+      onClose,
+      onError,
+      onRewindComplete,
+    } = params;
+
+    if (ibcHistory.length === 0) {
+      return false;
+    }
+
+    const needRewind = ibcHistory.find((h) => h.error != null) != null;
+    if (!needRewind) {
+      return false;
+    }
+
+    if (ibcHistory.find((h) => h.rewoundButNextRewindingBlocked)) {
+      onFulfill();
+      return true;
+    }
+
+    const isTimeoutPacket = packetTimeout ?? false;
+    const lastRewoundChannelIndex = ibcHistory.findIndex((h) => {
+      if (h.rewound) {
+        return true;
+      }
+    });
+    const targetChannel = (() => {
+      if (lastRewoundChannelIndex >= 0) {
+        if (lastRewoundChannelIndex === 0) {
+          return undefined;
+        }
+
+        return ibcHistory[lastRewoundChannelIndex - 1];
+      }
+      return ibcHistory.find((h) => h.error != null);
+    })();
+    console.log("targetChannel", targetChannel);
+    const isSwapTargetChannel = !!(
+      targetChannel &&
+      swapContext &&
+      ibcHistory.indexOf(targetChannel) === swapContext.swapChannelIndex + 1
+    );
+    if (targetChannel !== undefined && targetChannel.sequence !== undefined) {
+      const targetSequence = targetChannel.sequence;
+      const prevChainInfo = (() => {
+        const targetChannelIndex = ibcHistory.findIndex(
+          (h) => h === targetChannel
+        );
+        if (targetChannelIndex < 0) {
+          return undefined;
+        }
+        if (targetChannelIndex === 0) {
+          return this.chainsService.getChainInfo(sourceChainId);
+        }
+        return this.chainsService.getChainInfo(
+          ibcHistory[targetChannelIndex - 1].counterpartyChainId
+        );
+      })();
+
+      if (prevChainInfo) {
+        const txTracer = new TendermintTxTracer(
+          prevChainInfo.rpc,
+          "/websocket"
+        );
+        txTracer.addEventListener("close", onClose);
+        txTracer.addEventListener("error", onError);
+        txTracer
+          .traceTx(
+            isTimeoutPacket
+              ? {
+                  // "timeout_packet.packet_src_port": targetChannel.portId,
+                  "timeout_packet.packet_src_channel": targetChannel.channelId,
+                  "timeout_packet.packet_sequence": targetChannel.sequence,
+                }
+              : {
+                  // "acknowledge_packet.packet_src_port": targetChannel.portId,
+                  "acknowledge_packet.packet_src_channel":
+                    targetChannel.channelId,
+                  "acknowledge_packet.packet_sequence": targetChannel.sequence,
+                }
+          )
+          .then((res: any) => {
+            txTracer.close();
+
+            if (!res) {
+              return;
+            }
+
+            runInAction(() => {
+              if (isSwapTargetChannel) {
+                const txs = res.txs
+                  ? res.txs.map((res: any) => res.tx_result || res)
+                  : [res.tx_result || res];
+                if (txs && Array.isArray(txs)) {
+                  for (const tx of txs) {
+                    const index = isTimeoutPacket
+                      ? this.getIBCTimeoutPacketIndexFromTx(
+                          tx,
+                          targetChannel.portId,
+                          targetChannel.channelId,
+                          targetSequence
+                        )
+                      : this.getIBCAcknowledgementPacketIndexFromTx(
+                          tx,
+                          targetChannel.portId,
+                          targetChannel.channelId,
+                          targetSequence
+                        );
+                    if (index >= 0) {
+                      // 좀 빡치게 timeout packet은 refund 로직이 실행되고 나서 "timeout_packet" event가 발생한다.
+                      const refunded = isTimeoutPacket
+                        ? this.getIBCSwapResAmountFromTx(
+                            tx,
+                            swapContext.swapReceiver[
+                              swapContext.swapChannelIndex + 1
+                            ],
+                            (() => {
+                              const i =
+                                this.getLastIBCTimeoutPacketBeforeIndexFromTx(
+                                  tx,
+                                  index
+                                );
+
+                              if (i < 0) {
+                                return 0;
+                              }
+                              return i;
+                            })(),
+                            index
+                          )
+                        : this.getIBCSwapResAmountFromTx(
+                            tx,
+                            swapContext.swapReceiver[
+                              swapContext.swapChannelIndex + 1
+                            ],
+                            index
+                          );
+
+                      swapContext.setSwapRefundInfo?.({
+                        chainId: prevChainInfo.chainId,
+                        amount: refunded,
+                      });
+
+                      targetChannel.rewoundButNextRewindingBlocked = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              targetChannel.rewound = true;
+            });
+            onFulfill();
+            onRewindComplete();
+          });
+      }
+    }
+    return true;
+  }
+
+  protected trackIbcHopFlowWithTimeout(params: {
+    ibcHistory: IbcHop[];
+    sourceChainId: string;
+    swapReceiver?: string[];
+    onHopCompleted?: (
+      resAmount?: { amount: string; denom: string }[],
+      tx?: any
+    ) => void;
+    onAllCompleted: () => void;
+    onContinue: () => void;
+    onRetry: () => void;
+    onPacketTimeout?: () => void;
+    onFulfill: () => void;
+    onClose: () => void;
+    onError: () => void;
+  }): void {
+    const {
+      ibcHistory,
+      sourceChainId,
+      swapReceiver,
+      onHopCompleted,
+      onAllCompleted,
+      onContinue,
+      onRetry,
+      onPacketTimeout,
+      onFulfill,
+      onClose,
+      onError,
+    } = params;
+
+    const targetChannelIndex = ibcHistory.findIndex((history) => {
+      return !history.completed;
+    });
+
+    const targetChannel = ibcHistory[targetChannelIndex];
+    if (!targetChannel || !targetChannel.sequence) {
+      onFulfill();
+      return;
+    }
+
+    const closables: {
+      readyState: WsReadyState;
+      close: () => void;
+    }[] = [];
+
+    const closeClosables = () => {
+      closables.forEach((closable) => {
+        if (
+          closable.readyState === WsReadyState.OPEN ||
+          closable.readyState === WsReadyState.CONNECTING
+        ) {
+          closable.close();
+        }
+      });
+    };
+
+    let _onFulfillOnce = false;
+    const onFulfillOnce = () => {
+      if (!_onFulfillOnce) {
+        _onFulfillOnce = true;
+        closeClosables();
+        onFulfill();
+      }
+    };
+
+    let _onCloseOnce = false;
+    const onCloseOnce = () => {
+      if (!_onCloseOnce) {
+        _onCloseOnce = true;
+        closeClosables();
+        onClose();
+      }
+    };
+
+    let _onErrorOnce = false;
+    const onErrorOnce = () => {
+      if (!_onErrorOnce) {
+        _onErrorOnce = true;
+        closeClosables();
+        onError();
+      }
+    };
+
+    const registerClosable = (closable: {
+      readyState: WsReadyState;
+      close: () => void;
+    }) => closables.push(closable);
+
+    let hopFailed = false;
+
+    const hopTracer = this.trackIBCHopRecvPacket({
+      ibcHistory,
+      targetChannelIndex,
+      swapReceiver,
+      onHopCompleted: (resAmount, tx) => {
+        onHopCompleted?.(resAmount, tx);
+
+        const sequence = targetChannel.sequence;
+        if (!sequence) {
+          hopFailed = true;
+          onFulfillOnce();
+          return;
+        }
+
+        if (!tx) {
+          return;
+        }
+
+        const txs = tx.txs
+          ? tx.txs.map((res: any) => res.tx_result || res)
+          : [tx.tx_result || tx];
+
+        for (const txItem of txs) {
+          try {
+            const ack = this.getIBCWriteAcknowledgementAckFromTx(
+              txItem,
+              targetChannel.portId,
+              targetChannel.channelId,
+              sequence
+            );
+
+            if (ack && ack.length > 0) {
+              const str = Buffer.from(ack);
+              try {
+                const decoded = JSON.parse(str.toString());
+                if (decoded.error) {
+                  runInAction(() => {
+                    targetChannel.error = "Packet processing failed";
+                  });
+                  hopFailed = true;
+                  onFulfillOnce();
+                  onRetry();
+                  return;
+                }
+              } catch (e) {
+                console.log(e);
+              }
+            }
+          } catch {
+            // noop
+          }
+
+          const index = this.getIBCRecvPacketIndexFromTx(
+            txItem,
+            targetChannel.portId,
+            targetChannel.channelId,
+            sequence
+          );
+
+          if (index >= 0) {
+            break;
+          }
+        }
+      },
+      onAllCompleted: () => {
+        if (hopFailed) {
+          return;
+        }
+        onAllCompleted();
+        onFulfillOnce();
+      },
+      onContinue: () => {
+        if (hopFailed) {
+          return;
+        }
+        onContinue();
+        onFulfillOnce();
+      },
+      onFulfill: onFulfillOnce,
+      onClose: onCloseOnce,
+      onError: onErrorOnce,
+    });
+
+    if (hopTracer) {
+      registerClosable(hopTracer);
+    }
+
+    let prevChainId: string | undefined;
+    if (targetChannelIndex > 0) {
+      prevChainId = ibcHistory[targetChannelIndex - 1].counterpartyChainId;
+    } else {
+      prevChainId = sourceChainId;
+    }
+    if (prevChainId) {
+      const prevChainInfo = this.chainsService.getChainInfo(prevChainId);
+      if (prevChainInfo) {
+        const queryEvents: any = {
+          "timeout_packet.packet_src_channel": targetChannel.channelId,
+          "timeout_packet.packet_sequence": targetChannel.sequence,
+        };
+
+        const txTracer = new TendermintTxTracer(
+          prevChainInfo.rpc,
+          "/websocket"
+        );
+        registerClosable(txTracer);
+        txTracer.addEventListener("close", onCloseOnce);
+        txTracer.addEventListener("error", onErrorOnce);
+        txTracer.traceTx(queryEvents).then((res) => {
+          txTracer.close();
+
+          if (!res) {
+            return;
+          }
+
+          runInAction(() => {
+            targetChannel.error = "Packet timeout";
+            onPacketTimeout?.();
+            hopFailed = true;
+            onFulfillOnce();
+            onRetry();
+          });
+        });
+      }
+    }
+  }
+
   protected trackIBCHopRecvPacket(params: {
-    ibcHistory: {
-      portId: string;
-      channelId: string;
-      counterpartyChainId: string;
-      sequence?: string;
-      dstChannelId?: string;
-      completed: boolean;
-      error?: string;
-    }[];
+    ibcHistory: IbcHop[];
     targetChannelIndex: number;
     swapReceiver?: string[];
     onHopCompleted: (
@@ -3400,7 +3496,6 @@ export class RecentSendHistoryService {
       onHopCompleted(resAmount, tx);
 
       if (nextChannel && tx) {
-        // 다음 hop 설정
         const index = this.getIBCRecvPacketIndexFromTx(
           tx,
           targetChannel.portId,
@@ -4142,23 +4237,6 @@ export class RecentSendHistoryService {
   // ============================================================================
   // Helper Functions
   // ============================================================================
-
-  private getExecutableChainIdsFromIBCHistory(history: IBCHistory): string[] {
-    const chainIds: string[] = [history.chainId];
-
-    for (const channel of history.ibcHistory) {
-      if (channel.completed) {
-        chainIds.push(channel.counterpartyChainId);
-        if (channel.dstChannelId) {
-          chainIds.push(channel.dstChannelId);
-        }
-      } else {
-        break;
-      }
-    }
-
-    return chainIds;
-  }
 
   private getExecutableChainIdsFromSwapV2History(
     history: SwapV2History,
