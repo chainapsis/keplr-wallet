@@ -601,16 +601,20 @@ export class ChainsService {
   }
 
   async tryUpdateChainInfoFromRpcOrRest(chainId: string): Promise<boolean> {
-    if (!this.hasChainInfo(chainId)) {
+    if (!this.hasModularChainInfo(chainId)) {
       throw new Error(`${chainId} is not registered`);
     }
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
-    const chainInfo = this.getChainInfoOrThrow(chainId);
+    const chainInfo = this.getModularChainInfoOrThrow(chainId);
 
     if (this.isEvmOnlyChain(chainInfo.chainId)) {
       // TODO: evm 체인에서의 chain info 업데이트 로직에 대해서는 나중에 구현한다.
+      return false;
+    }
+
+    if (!("cosmos" in chainInfo)) {
       return false;
     }
 
@@ -628,7 +632,7 @@ export class ChainsService {
             network: string;
           };
         }
-    >(chainInfo.rpc, "/status");
+    >(chainInfo.cosmos.rpc, "/status");
 
     const statusResult = (() => {
       if ("result" in statusResponse.data) {
@@ -654,7 +658,7 @@ export class ChainsService {
       });
     }
 
-    const toUpdateFeatures = await checkChainFeatures(chainInfo);
+    const toUpdateFeatures = await checkChainFeatures(chainInfo.cosmos);
 
     const featuresUpdated = toUpdateFeatures.length !== 0;
     if (featuresUpdated) {
@@ -663,7 +667,7 @@ export class ChainsService {
       }
 
       const features = [
-        ...new Set([...toUpdateFeatures, ...(chainInfo.features ?? [])]),
+        ...new Set([...toUpdateFeatures, ...(chainInfo.cosmos.features ?? [])]),
       ];
 
       this.setUpdatedChainInfo(chainId, {
@@ -697,11 +701,16 @@ export class ChainsService {
 
       this.updatedChainInfos = newChainInfos;
     } else {
-      const original = this.getChainInfoOrThrow(chainId);
+      const original = this.getModularChainInfoOrThrow(chainId);
+
+      if (!("cosmos" in original)) {
+        throw new Error(`${chainId} is not a cosmos chain`);
+      }
+
       const newChainInfos = this.updatedChainInfos.slice();
       newChainInfos.push({
         chainId: chainInfo.chainId || original.chainId,
-        features: chainInfo.features || original.features,
+        features: chainInfo.features || original.cosmos.features,
       });
 
       this.updatedChainInfos = newChainInfos;
@@ -1219,9 +1228,8 @@ export class ChainsService {
       if ("evm" in modularChainInfo) {
         const endpoint = this.getEndpoint(modularChainInfo.chainId);
 
-        const chainInfo = this.getChainInfoOrThrow(modularChainInfo.chainId);
         const mergedChainInfo = this.mergeChainInfosWithDynamics([
-          chainInfo,
+          convertModularChainInfoToChainInfo(modularChainInfo) as ChainInfo,
         ])[0];
 
         return {

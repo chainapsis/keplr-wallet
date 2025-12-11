@@ -147,19 +147,16 @@ export class TokenScanService {
   getTokenScans(vaultId: string): TokenScan[] {
     return (this.vaultToMap.get(vaultId) ?? [])
       .filter((tokenScan) => {
-        return (
-          this.chainsService.hasChainInfo(tokenScan.chainId) ||
-          this.chainsService.hasModularChainInfo(tokenScan.chainId)
-        );
+        return this.chainsService.hasModularChainInfo(tokenScan.chainId);
       })
       .sort((a, b) => {
         // Sort by chain name
-        const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
-          ? this.chainsService.getChainInfoOrThrow(a.chainId)
-          : this.chainsService.getModularChainInfoOrThrow(a.chainId);
-        const bModualrChainInfo = this.chainsService.hasChainInfo(b.chainId)
-          ? this.chainsService.getChainInfoOrThrow(b.chainId)
-          : this.chainsService.getModularChainInfoOrThrow(b.chainId);
+        const aChainInfo = this.chainsService.getModularChainInfoOrThrow(
+          a.chainId
+        );
+        const bModualrChainInfo = this.chainsService.getModularChainInfoOrThrow(
+          b.chainId
+        );
 
         return aChainInfo.chainName.localeCompare(bModualrChainInfo.chainName);
       });
@@ -170,8 +167,8 @@ export class TokenScanService {
       return;
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
       return;
     }
 
@@ -207,8 +204,8 @@ export class TokenScanService {
       return;
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if ("cosmos" in chainInfo && chainInfo.cosmos.hideInUI) {
       return;
     }
 
