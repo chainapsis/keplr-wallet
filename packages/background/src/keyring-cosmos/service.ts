@@ -429,7 +429,6 @@ export class KeyRingCosmosService {
       .filter((msg) => msg.type)
       .map((msg) => msg.type);
 
-    // CHECK: 필요함?
     try {
       this.trackError(chainInfo, signer, signDoc.sequence, {
         isInternal: true,
@@ -1049,6 +1048,76 @@ export class KeyRingCosmosService {
       signDoc,
       signOptions
     );
+  }
+
+  /**
+   * Sign a direct-encoded transaction with pre-authorization
+   * @dev only sign the transaction, not simulate or broadcast
+   */
+  async signDirectPreAuthorized(
+    origin: string,
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    signDoc: SignDoc
+  ): Promise<DirectSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+      throw new Error(
+        "Pre-authorized signing is not supported for hardware wallets"
+      );
+    }
+
+    const key = await this.getKey(vaultId, chainId);
+    const bech32Prefix =
+      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
+        ?.bech32PrefixAccAddr ?? "";
+    const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
+    if (signer !== bech32Address) {
+      throw new Error("Signer mismatched");
+    }
+
+    const signDocBytes = SignDoc.encode(signDoc).finish();
+    const _sig = await this.keyRingService.sign(
+      chainId,
+      vaultId,
+      signDocBytes,
+      isEthermintLike ? "keccak256" : "sha256"
+    );
+    const signature = new Uint8Array([..._sig.r, ..._sig.s]);
+
+    const msgTypes = TxBody.decode(signDoc.bodyBytes).messages.map(
+      (msg) => msg.typeUrl
+    );
+
+    try {
+      const authInfo = AuthInfo.decode(signDoc.authInfoBytes);
+      if (authInfo.signerInfos.length === 1) {
+        this.trackError(chainInfo, signer, authInfo.signerInfos[0].sequence, {
+          isInternal: true,
+          origin,
+          signMode: "direct",
+          msgTypes,
+        });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    return {
+      signed: {
+        ...signDoc,
+        accountNumber: Long.fromString(signDoc.accountNumber),
+      },
+      signature: encodeSecp256k1Signature(key.pubKey, signature),
+    };
   }
 
   async signDirectAux(
