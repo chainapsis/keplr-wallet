@@ -1102,6 +1102,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           totalSignatureCount > 1
         );
 
+        // Count how many signing prompts we trigger so we can navigate back once
+        let signatureNavigationCount = 0;
+
         try {
           for (const tx of txs) {
             if ("send" in tx) {
@@ -1146,6 +1149,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 // if multiple txs are required or the wallet is hardware wallet or topup is required,
                 // sign the tx here
                 if (requiresMultipleTxs || isHardwareWallet || shouldTopUp) {
+                  signatureNavigationCount += 1;
                   const result = await tx.sign(
                     swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
                       swapConfigs.feeConfig.toStdFee(),
@@ -1263,8 +1267,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         evmTx
                       );
 
-                      console.log("only one tx and tx is simulated", result);
-
                       gasLimit = result.gasUsed;
                     } else if (
                       evmSimulationOutcome ===
@@ -1284,8 +1286,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                           evmTx
                         );
 
-                        console.log("single tx is simulated", result);
-
                         gasLimit = result.gasUsed;
                       } else {
                         const result =
@@ -1296,7 +1296,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                               requiredErc20Approvals: [erc20Approval!],
                             }
                           );
-                        console.log("bundle tx is simulated", result);
                         gasLimit = result.gasUsed ?? 0;
                       }
                     } else {
@@ -1328,6 +1327,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       // before signing the swap tx
                       const erc20ApprovalTxHash = await new Promise<string>(
                         (resolve, reject) => {
+                          signatureNavigationCount += 1;
+
                           ethereumAccount
                             .sendEthereumTx(
                               sender,
@@ -1401,6 +1402,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                       uiConfigStore.ibcSwapConfig.incrementCompletedSignature();
                     } else {
+                      signatureNavigationCount += 1;
+
                       const signedTx = await ethereumAccount.signEthereumTx(
                         swapConfigs.senderConfig.sender,
                         {
@@ -1440,10 +1443,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
           // Navigate back once for all sign pages to avoid multiple remounts
           // Sign pages use replace after the first one, so only 1 history entry is added
-          if (uiConfigStore.ibcSwapConfig.hasSignatureNavigation) {
+          if (signatureNavigationCount > 0) {
+            // reset the signature navigation count
+            // to prevent multiple navigation in catch block if error occurs below
+            signatureNavigationCount = 0;
             navigate(-1);
-            // prevent multiple navigation in catch block if error occurs below
-            uiConfigStore.ibcSwapConfig.resetSignatureProgress();
           }
 
           const executeTxMsg = new RecordAndExecuteTxsMsg(
@@ -1635,8 +1639,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             // });
           }
 
-          // in case of error, navigate back to the previous page if signature flow is started
-          if (uiConfigStore.ibcSwapConfig.hasSignatureNavigation) {
+          // in case of error, navigate back to the previous page if any signing was attempted
+          if (signatureNavigationCount > 0) {
             navigate(-1);
           }
 

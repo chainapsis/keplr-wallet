@@ -37,8 +37,6 @@ export class IBCSwapConfig {
   protected _completedSignatureCount: number | undefined = undefined;
   @observable
   protected _showSignatureProgress: boolean = false;
-  @observable
-  protected _signatureHistoryLength: number | undefined = undefined;
 
   constructor(
     kvStore: KVStore,
@@ -285,11 +283,6 @@ export class IBCSwapConfig {
     this._totalSignatureCount = total;
     this._completedSignatureCount = completed;
     this._showSignatureProgress = show;
-
-    // Capture the navigation depth once when signing starts.
-    if (typeof window !== "undefined" && this._signatureHistoryLength == null) {
-      this._signatureHistoryLength = window.history.length;
-    }
   }
 
   @action
@@ -304,16 +297,5 @@ export class IBCSwapConfig {
     this._totalSignatureCount = undefined;
     this._completedSignatureCount = undefined;
     this._showSignatureProgress = false;
-    this._signatureHistoryLength = undefined;
-  }
-
-  get hasSignatureNavigation(): boolean {
-    if (typeof window === "undefined") {
-      return false;
-    }
-    if (this._signatureHistoryLength == null) {
-      return false;
-    }
-    return window.history.length > this._signatureHistoryLength;
   }
 }
