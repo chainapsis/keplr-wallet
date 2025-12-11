@@ -1469,7 +1469,11 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return false;
     }
 
-    // additionalTrackingData가 있으면 additionalTrackDone도 완료되어야 함
+    // there should be no backgroundExecutionId if multi txs swap is completed
+    if (history.backgroundExecutionId != null) {
+      return false;
+    }
+
     if (history.additionalTrackingData && !history.additionalTrackDone) {
       return false;
     }
@@ -1477,11 +1481,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     // If there's a track error, check if assetLocationInfo exists (refund completed)
     if (history.trackError || history.additionalTrackError) {
       return !!history.assetLocationInfo;
-    }
-
-    // TODO: 임시 조치임
-    if (history.assetLocationInfo?.type === "intermediate") {
-      return false;
     }
 
     // SUCCESS 상태에서 assetLocationInfo가 없으면 destination에 도달한 것
@@ -1501,25 +1500,23 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     );
   }, [history]);
 
-  console.log("history", history, historyCompleted);
-
-  const failedRouteIndex = useMemo(() => {
+  const { failedRouteIndex, failedRoute } = useMemo(() => {
     // Failed if status is FAILED or if there's a trackError/additionalTrackError
     if (
       history.status === SwapV2TxStatus.FAILED ||
       history.trackError ||
       history.additionalTrackError
     ) {
-      return history.routeIndex;
+      return {
+        failedRouteIndex: history.routeIndex,
+        failedRoute: history.simpleRoute[history.routeIndex],
+      };
     }
-    return -1;
+    return {
+      failedRouteIndex: -1,
+      failedRoute: undefined,
+    };
   }, [history]);
-
-  const failedRoute = useMemo(() => {
-    if (failedRouteIndex >= 0) {
-      return history.simpleRoute[failedRouteIndex];
-    }
-  }, [failedRouteIndex, history]);
 
   const hasExecutableTx = useMemo(() => {
     if (!txExecution || !history.backgroundExecutionId) {
@@ -1527,8 +1524,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     }
     return txExecution.txs.some(
       (tx) =>
-        (tx.status === BackgroundTxStatus.PENDING ||
-          tx.status === BackgroundTxStatus.BLOCKED) &&
+        tx.status === BackgroundTxStatus.BLOCKED &&
         txExecution.executableChainIds.includes(tx.chainId)
     );
   }, [txExecution, history.backgroundExecutionId]);
@@ -1558,6 +1554,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return false;
     }
 
+    // at least some asset is released to user address, so it's fine to delete history
     if (history.provider === SwapProvider.SKIP && history.assetLocationInfo) {
       return false;
     }
@@ -1567,23 +1564,18 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
   async function handleContinueSigning() {
     if (!history.backgroundExecutionId || !txExecution) {
-      console.log("tx execution is not found");
       return;
     }
 
     const txIndex = txExecution.txs.findIndex(
-      (tx) =>
-        tx.status === BackgroundTxStatus.PENDING ||
-        tx.status === BackgroundTxStatus.BLOCKED
+      (tx) => tx.status === BackgroundTxStatus.BLOCKED
     );
     if (txIndex < 0) {
-      console.log("tx index is not found");
       return;
     }
 
     const tx = txExecution.txs[txIndex];
     if (!tx) {
-      console.log("tx is not found");
       return;
     }
 
@@ -1592,7 +1584,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       (tx) => tx.status === BackgroundTxStatus.CONFIRMED
     ).length;
     if (totalTxCount <= 0 || executedTxCount >= totalTxCount) {
-      console.log("tx execution is completed");
       return;
     }
 
@@ -1600,7 +1591,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     uiConfigStore.ibcSwapConfig.setSignatureProgress(
       totalTxCount,
       executedTxCount,
-      true // multi tx always show signature progress
+      true // multi txs swap always show signature progress
     );
 
     let signedTx: string;
@@ -1618,19 +1609,12 @@ const SwapV2HistoryViewItem: FunctionComponent<{
 
           const ethereumQueries = queriesStore.get(tx.chainId).ethereum;
 
-          // estimate gas
-          const result = await ethereumAccount.simulateGas(
-            account.ethereumHexAddress,
-            txData
-          );
-
-          const gasUsed = Math.ceil(result.gasUsed * 1.3); // default gas adjustment value is 1.3
-
           // get fee (similar to getEIP1559TxFees logic, using "average" fee type)
           const ETH_FEE_HISTORY_BLOCK_COUNT = 20;
           const ETH_FEE_HISTORY_REWARD_PERCENTILES = [50];
           const ETH_FEE_HISTORY_NEWEST_BLOCK = "latest";
           const baseFeePercentageMultiplier = new Dec(1.25);
+          const gasAdjustment = 1.3;
           const percentile = 50;
 
           let feeObject:
@@ -1644,6 +1628,13 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                 gasPrice: string;
                 gasLimit: string;
               };
+
+          const result = await ethereumAccount.simulateGas(
+            account.ethereumHexAddress,
+            txData
+          );
+
+          const gasUsed = Math.ceil(result.gasUsed * gasAdjustment);
 
           if (ethereumQueries) {
             // Wait for queries to be ready
@@ -1767,6 +1758,9 @@ const SwapV2HistoryViewItem: FunctionComponent<{
           const txData = tx.txData;
           const aminoMsgs = txData.aminoMsgs;
           if (aminoMsgs == undefined || aminoMsgs.length === 0) {
+            // CHECK: direct sign might need to handle
+            // in case of forceDirectSign is true (injective, stride, ibc-go-v7-hot-fix)
+            // 현재로서는 optimistically skip 처리합니다..
             throw new Error("aminoMsgs is not found or empty");
           }
 

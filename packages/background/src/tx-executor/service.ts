@@ -37,6 +37,7 @@ import {
 import { TransactionTypes, serialize } from "@ethersproject/transactions";
 import { BaseAccount } from "@keplr-wallet/cosmos";
 import { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import { TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { Msg } from "@keplr-wallet/types";
 import {
   buildSignedTxFromAminoSignResponse,
@@ -44,6 +45,7 @@ import {
   simulateCosmosTx,
   getCosmosGasPrice,
   calculateCosmosStdFee,
+  prepareSignDocForDirectSigning,
 } from "./utils/cosmos";
 import { fillUnsignedEVMTx } from "./utils/evm";
 import { EventBusSubscriber } from "@keplr-wallet/common";
@@ -651,15 +653,7 @@ export class BackgroundTxExecutorService {
     };
     const memo = tx.txData.memo ?? "";
 
-    // NOTE: 백그라운드에서 자동으로 실행하는 것이므로 편의상 amino로 일관되게 처리한다
     const isDirectSign = aminoMsgs.length === 0;
-    if (isDirectSign) {
-      throw new KeplrError(
-        "direct-tx-executor",
-        141,
-        "Direct signing is not supported for now"
-      );
-    }
 
     if (protoMsgs.length === 0) {
       throw new Error("There is no msg to send");
@@ -703,35 +697,64 @@ export class BackgroundTxExecutorService {
       );
     }
 
-    const signDoc = prepareSignDocForAminoSigning({
-      chainInfo,
-      accountNumber: account.getAccountNumber().toString(),
-      sequence: account.getSequence().toString(),
-      aminoMsgs: tx.txData.aminoMsgs ?? [],
-      fee,
-      memo,
-      eip712Signing: false,
-      signer,
-    });
+    if (isDirectSign) {
+      const { signDoc, bodyBytes, authInfoBytes } =
+        prepareSignDocForDirectSigning({
+          chainInfo,
+          accountNumber: account.getAccountNumber().toString(),
+          sequence: account.getSequence().toString(),
+          protoMsgs,
+          fee,
+          memo,
+          pubKey: keyInfo.pubKey,
+        });
 
-    const signResponse: AminoSignResponse =
-      await this.keyRingCosmosService.signAminoPreAuthorized(
-        origin,
-        vaultId,
-        tx.chainId,
+      const { signature } =
+        await this.keyRingCosmosService.signDirectPreAuthorized(
+          origin,
+          vaultId,
+          tx.chainId,
+          signer,
+          signDoc
+        );
+
+      const signedTx = TxRaw.encode({
+        bodyBytes,
+        authInfoBytes,
+        signatures: [Buffer.from(signature.signature, "base64")],
+      }).finish();
+
+      return Buffer.from(signedTx).toString("base64");
+    } else {
+      const signDoc = prepareSignDocForAminoSigning({
+        chainInfo,
+        accountNumber: account.getAccountNumber().toString(),
+        sequence: account.getSequence().toString(),
+        aminoMsgs: tx.txData.aminoMsgs ?? [],
+        fee,
+        memo,
+        eip712Signing: false,
         signer,
-        signDoc
-      );
+      });
 
-    const signedTx = buildSignedTxFromAminoSignResponse({
-      protoMsgs,
-      signResponse,
-      chainInfo,
-      eip712Signing: false,
-      useEthereumSign: false,
-    });
+      const signResponse: AminoSignResponse =
+        await this.keyRingCosmosService.signAminoPreAuthorized(
+          origin,
+          vaultId,
+          tx.chainId,
+          signer,
+          signDoc
+        );
 
-    return Buffer.from(signedTx.tx).toString("base64");
+      const signedTx = buildSignedTxFromAminoSignResponse({
+        protoMsgs,
+        signResponse,
+        chainInfo,
+        eip712Signing: false,
+      });
+
+      return Buffer.from(signedTx.tx).toString("base64");
+    }
   }
 
   protected async broadcastTx(tx: BackgroundTx): Promise<string> {

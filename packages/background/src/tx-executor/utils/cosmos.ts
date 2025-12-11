@@ -15,6 +15,7 @@ import { Mutable } from "utility-types";
 import {
   AuthInfo,
   Fee,
+  SignDoc,
   SignerInfo,
   TxBody,
   TxRaw,
@@ -26,6 +27,8 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
 import { BackgroundTxFeeType } from "../types";
 
+// TODO: move helper functions to proper packages
+
 /**
  * Build a signed transaction from an AminoSignResponse
  */
@@ -34,18 +37,17 @@ export function buildSignedTxFromAminoSignResponse(params: {
   signResponse: AminoSignResponse;
   chainInfo: ChainInfo;
   eip712Signing: boolean;
-  useEthereumSign: boolean;
 }): {
   tx: Uint8Array;
   signDoc: StdSignDoc;
 } {
-  const { protoMsgs, signResponse, chainInfo, eip712Signing, useEthereumSign } =
-    params;
+  const { protoMsgs, signResponse, chainInfo, eip712Signing } = params;
 
   const chainIsInjective = chainInfo.chainId.startsWith("injective");
-  const chainIsStratos = chainInfo.chainId.startsWith("stratos");
   const ethSignPlainJson: boolean =
     chainInfo.features?.includes("evm-ledger-sign-plain-json") === true;
+
+  const pubKeyTypeUrl = getCosmosPubKeyTypeUrl(chainInfo);
 
   return {
     tx: TxRaw.encode({
@@ -98,29 +100,7 @@ export function buildSignedTxFromAminoSignResponse(params: {
         signerInfos: [
           {
             publicKey: {
-              typeUrl: (() => {
-                if (!useEthereumSign) {
-                  return "/cosmos.crypto.secp256k1.PubKey";
-                }
-
-                if (chainIsInjective) {
-                  return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                }
-
-                if (chainIsStratos) {
-                  return "/stratos.crypto.v1.ethsecp256k1.PubKey";
-                }
-
-                if (chainInfo.features?.includes("eth-secp256k1-cosmos")) {
-                  return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
-                }
-
-                if (chainInfo.features?.includes("eth-secp256k1-initia")) {
-                  return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
-                }
-
-                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
-              })(),
+              typeUrl: pubKeyTypeUrl,
               value: PubKey.encode({
                 key: Buffer.from(
                   signResponse.signature.pub_key.value,
@@ -222,6 +202,100 @@ export function prepareSignDocForAminoSigning(params: {
   }
 
   return sortObjectByKey(signDocRaw);
+}
+
+export function prepareSignDocForDirectSigning(params: {
+  chainInfo: ChainInfo;
+  accountNumber: string;
+  sequence: string;
+  protoMsgs: Any[];
+  fee: StdFee;
+  memo: string;
+  pubKey: Uint8Array;
+}): {
+  signDoc: SignDoc;
+  bodyBytes: Uint8Array;
+  authInfoBytes: Uint8Array;
+} {
+  const { chainInfo, accountNumber, sequence, protoMsgs, fee, memo, pubKey } =
+    params;
+
+  const bodyBytes = TxBody.encode(
+    TxBody.fromPartial({
+      messages: protoMsgs,
+      memo,
+    })
+  ).finish();
+
+  const pubKeyTypeUrl = getCosmosPubKeyTypeUrl(chainInfo);
+
+  const authInfoBytes = AuthInfo.encode({
+    signerInfos: [
+      SignerInfo.fromPartial({
+        publicKey: {
+          typeUrl: pubKeyTypeUrl,
+          value: PubKey.encode({
+            key: pubKey,
+          }).finish(),
+        },
+        modeInfo: {
+          single: {
+            mode: SignMode.SIGN_MODE_DIRECT,
+          },
+        },
+        sequence,
+      }),
+    ],
+    fee: Fee.fromPartial({
+      amount: fee.amount.map((amount) => ({
+        amount: amount.amount,
+        denom: amount.denom,
+      })),
+      gasLimit: fee.gas,
+    }),
+  }).finish();
+
+  const signDoc = SignDoc.fromPartial({
+    bodyBytes,
+    authInfoBytes,
+    chainId: chainInfo.chainId,
+    accountNumber,
+  });
+
+  return {
+    signDoc,
+    bodyBytes,
+    authInfoBytes,
+  };
+}
+
+/**
+ * Resolve the correct pub key typeUrl for a chain, accounting for ethermint/initia/injective variants.
+ */
+export function getCosmosPubKeyTypeUrl(chainInfo: ChainInfo): string {
+  const useEthereumSign = chainInfo.features?.includes("eth-key-sign") === true;
+
+  if (!useEthereumSign) {
+    return "/cosmos.crypto.secp256k1.PubKey";
+  }
+
+  if (chainInfo.chainId.startsWith("injective")) {
+    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+  }
+
+  if (chainInfo.chainId.startsWith("stratos")) {
+    return "/stratos.crypto.v1.ethsecp256k1.PubKey";
+  }
+
+  if (chainInfo.features?.includes("eth-secp256k1-cosmos")) {
+    return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
+  }
+
+  if (chainInfo.features?.includes("eth-secp256k1-initia")) {
+    return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
+  }
+
+  return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
 }
 
 export async function simulateCosmosTx(
@@ -620,7 +694,6 @@ async function getInitiaDynamicFeeGasPrice(
   }
 }
 
-// TODO: enhance the logic if required...
 async function getEIP1559GasPrice(
   chainInfo: ChainInfo,
   feeType: BackgroundTxFeeType
