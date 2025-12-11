@@ -125,12 +125,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get tokenScans(): TokenScan[] {
     return this._tokenScans.filter((scan) => {
-      if (
-        !this.hasModularChain(scan.chainId) &&
-        !this.getModularChainInfoImpl(scan.chainId).matchModules({
-          or: ["cosmos", "evm"],
-        })
-      ) {
+      if (!this.hasModularChain(scan.chainId)) {
         return false;
       }
 
