@@ -720,9 +720,12 @@ export const SpendableAssetView: FunctionComponent<{
                 </React.Fragment>
               </VerticalCollapseTransition>
 
-              {numFoundToken > 0 && (
+              {numFoundToken > 0 && chainStore.isShowNewTokenFoundInMain && (
                 <NewTokenFoundButtonContainer
-                  onClick={() => setIsFoundTokenModalOpen(true)}
+                  onClick={() => {
+                    chainStore.dismissNewTokenFoundInMain();
+                    setIsFoundTokenModalOpen(true);
+                  }}
                 >
                   <XAxis alignY="center">
                     <Subtitle3>
