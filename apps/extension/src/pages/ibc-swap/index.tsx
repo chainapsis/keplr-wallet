@@ -552,7 +552,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
    * 4. Cosmos Top-up is not required
    */
   const evmOutcome = gasSimulator.evmSimulationOutcome;
-  const isCosmosOneClickSwapEnabled = !shouldTopUp;
+  const isCosmosOneClickSwapEnabled = !isInChainEVMOnly && !shouldTopUp; // NOTE: currently top-up is only supported for cosmos chains
   const isEvmOneClickSwapEnabled =
     isInChainEVMOnly &&
     (evmOutcome === EvmGasSimulationOutcome.TX_SIMULATED ||
