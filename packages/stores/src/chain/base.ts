@@ -1713,6 +1713,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainId: chainInfo.chainId,
           chainName: chainInfo.chainName,
           chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+          isTestnet: chainInfo.isTestnet,
           isNative: true,
           cosmos: chainInfo as C,
           ...(chainInfo.evm && {
@@ -1777,6 +1778,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
           chainId: cosmos.chainId,
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
+          isTestnet: cosmos.isTestnet,
           isNative: chainInfo.isNative || !cosmos.beta,
           cosmos,
           ...(cosmos.evm && {
