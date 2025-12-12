@@ -187,7 +187,17 @@ export class HugeQueriesStore {
                   currency.coinMinimalDenom
                 )
               ) {
-                continue;
+                // However, if currency is native currency and not ibc, and same with currencies[0],
+                // just show it as 0 balance.
+                if (
+                  modularChainInfo.evm.currencies.length > 0 &&
+                  modularChainInfo.evm.currencies[0].coinMinimalDenom ===
+                    currency.coinMinimalDenom
+                ) {
+                  // 위의 if 문을 뒤집기(?) 귀찮아서 그냥 빈 if-else로 처리한다...
+                } else {
+                  continue;
+                }
               }
 
               keysUsed.set(key, true);
@@ -473,7 +483,17 @@ export class HugeQueriesStore {
             balance.balance.toDec().equals(HugeQueriesStore.zeroDec) &&
             (denomHelper.type === "native" || denomHelper.type === "erc20")
           ) {
-            continue;
+            // However, if currency is native currency and not ibc, and same with currencies[0],
+            // just show it as 0 balance.
+            if (
+              modularChainInfo.evm.currencies.length > 0 &&
+              modularChainInfo.evm.currencies[0].coinMinimalDenom ===
+                currency.coinMinimalDenom
+            ) {
+              // 위의 if 문을 뒤집기(?) 귀찮아서 그냥 빈 if-else로 처리한다...
+            } else {
+              continue;
+            }
           }
 
           tokensByChainId.get(chainIdentifier)!.push({
