@@ -16,7 +16,14 @@ import {
   WalletStatus,
 } from "@keplr-wallet/stores";
 import { useState } from "react";
-import { action, computed, makeObservable, observable, override } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  override,
+  autorun,
+} from "mobx";
 import {
   RouteResponseV2,
   RouteStepType,
@@ -48,6 +55,8 @@ export class SwapAmountConfig extends AmountConfig {
   protected _swapFeeBps: number;
   @observable
   protected _allowSwaps?: boolean;
+  @observable.ref
+  private _lastRequiresMultipleTxs?: boolean;
 
   @observable.ref
   protected _getSlippageTolerancePercent: () => number;
@@ -86,6 +95,20 @@ export class SwapAmountConfig extends AmountConfig {
     this._getSlippageTolerancePercent = getSlippageTolerancePercent;
     this._oldValue = this._value;
     makeObservable(this);
+
+    /**
+     * 1. route query → tx query → swap txs를 생성하는 과정에서 (꽤 시간이 걸릴 수 있음),
+     *    일시적으로 빈 배열이 반환되면서 버튼 유형이 플리커링 되는 현상이 UI에서 발생할 수 있음
+     * 2. 이를 방지하기 위해 swap txs의 마지막 계산 결과(requiresMultipleTxs 여부)를 저장하고 있다가,
+     *    getTxsIfReady에서 결과가 반환되는 동안 UI 상태 일관성을 보장
+     * 3. one-click swap 버튼 활성화(hold 가능)는 'isQuoteReady'와 조합하여, 조건이 모두 만족될 때에만 허용되도록 함
+     */
+    autorun(() => {
+      const txs = this.getTxsIfReady();
+      if (txs) {
+        this._lastRequiresMultipleTxs = txs.length > 1;
+      }
+    });
 
     // CHECK: autorun으로 in, out chain id가 변경되면 계정 초기화 하기 필요?
   }
@@ -153,6 +176,24 @@ export class SwapAmountConfig extends AmountConfig {
     return this._value;
   }
 
+  get isQuoteReady(): boolean {
+    const amountIn = this.amount[0];
+    if (!amountIn) {
+      return false;
+    }
+
+    if (!amountIn.toDec().gt(new Dec(0))) {
+      return false;
+    }
+
+    const queryRoute = this.getQueryRoute();
+    if (!queryRoute) {
+      return false;
+    }
+
+    return queryRoute.outAmount.toDec().gt(new Dec(0));
+  }
+
   get outAmount(): CoinPretty {
     return (
       this.getQueryRoute()?.outAmount ?? new CoinPretty(this.outCurrency, "0")
@@ -185,8 +226,9 @@ export class SwapAmountConfig extends AmountConfig {
 
   get requiresMultipleTxs(): boolean {
     const txs = this.getTxsIfReady();
+
     if (!txs) {
-      return false;
+      return this._lastRequiresMultipleTxs ?? false;
     }
 
     return txs.length > 1;
@@ -317,7 +359,8 @@ export class SwapAmountConfig extends AmountConfig {
       }
     }
 
-    const requiredChainIds = routeResponse.data.required_chain_ids;
+    // Normalize order so the tx query cache key stays stable across refetches.
+    const requiredChainIds = [...routeResponse.data.required_chain_ids].sort();
 
     const chainIdsToAddresses: Record<string, string> = {};
 

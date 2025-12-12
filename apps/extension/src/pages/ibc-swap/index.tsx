@@ -559,6 +559,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
       evmOutcome === EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED);
 
   const oneClickSwapEnabled =
+    swapConfigs.amountConfig.isQuoteReady &&
     !swapConfigs.amountConfig.requiresMultipleTxs &&
     !isHardwareWallet &&
     (isCosmosOneClickSwapEnabled || isEvmOneClickSwapEnabled);

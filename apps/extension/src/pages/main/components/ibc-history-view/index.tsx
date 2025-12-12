@@ -1562,8 +1562,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     return true;
   }, [history]);
 
-  console.log("history", history);
-
   async function handleContinueSigning() {
     if (!history.backgroundExecutionId || !txExecution) {
       return;
