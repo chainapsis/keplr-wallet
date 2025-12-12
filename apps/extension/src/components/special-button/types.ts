@@ -10,5 +10,7 @@ export interface SpecialButtonProps {
   onClick?: () => void;
 
   isLoading?: boolean;
+  suppressDefaultLoadingIndicator?: boolean;
+  showTextWhileLoading?: boolean;
   textOverrideIcon?: React.ReactNode;
 }

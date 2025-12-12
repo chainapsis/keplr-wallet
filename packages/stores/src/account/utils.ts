@@ -161,3 +161,20 @@ export const getEip712TypedDataBasedOnChainInfo = (
   // Return default types for Evmos
   return types;
 };
+
+export function decodeBase64(base64: string): Uint8Array {
+  try {
+    const bin = atob(base64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) {
+      arr[i] = bin.charCodeAt(i);
+    }
+    return arr;
+  } catch (e) {
+    throw new Error(
+      `Failed to decode Base64: ${
+        e instanceof Error ? e.message : "Unknown error"
+      }`
+    );
+  }
+}

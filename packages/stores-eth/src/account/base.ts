@@ -2,8 +2,10 @@ import { ChainGetter } from "@keplr-wallet/stores";
 import {
   AppCurrency,
   ERC20Currency,
+  EvmGasSimulationOutcome,
   EthSignType,
   EthTxReceipt,
+  JsonRpcResponse,
   Keplr,
 } from "@keplr-wallet/types";
 import { DenomHelper, retry } from "@keplr-wallet/common";
@@ -18,6 +20,13 @@ import {
 import { getAddress as getEthAddress } from "@ethersproject/address";
 import { action, makeObservable, observable } from "mobx";
 import { Interface } from "@ethersproject/abi";
+import {
+  AccountStateDiffTracerResult,
+  SimulateGasWithPendingErc20ApprovalResult,
+  StateOverride,
+  UnsignedEVMTransactionWithErc20Approvals,
+} from "../types";
+import { simpleFetch } from "@keplr-wallet/simple-fetch";
 
 const opStackGasPriceOracleProxyAddress =
   "0x420000000000000000000000000000000000000F";
@@ -31,6 +40,80 @@ const opStackGasPriceOracleABI = new Interface([
     type: "function",
   },
 ]);
+
+async function traceCallWithDiff(
+  rpcUrl: string,
+  tx: { from: string; to: string; data: string; value?: string },
+  blockTag: string = "latest"
+): Promise<AccountStateDiffTracerResult> {
+  const response = await simpleFetch<
+    JsonRpcResponse<AccountStateDiffTracerResult>
+  >(rpcUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      method: "debug_traceCall",
+      params: [
+        tx,
+        blockTag,
+        {
+          tracer: "prestateTracer",
+          tracerConfig: {
+            diffMode: true,
+          },
+        },
+      ],
+      id: 1,
+    }),
+  });
+
+  const data = response.data;
+
+  if (data.error) {
+    throw new Error(data.error.message);
+  }
+
+  if (!data.result) {
+    throw new Error("Unknown error");
+  }
+
+  return data.result;
+}
+
+function diffResultToStateOverride(
+  diffResult: AccountStateDiffTracerResult,
+  allowedAddresses: string[],
+  useStateDiff: boolean = false
+): StateOverride {
+  const override: StateOverride = {};
+
+  const allowed = new Set(allowedAddresses.map((addr) => addr.toLowerCase()));
+
+  for (const [address, state] of Object.entries(diffResult.post)) {
+    if (!allowed.has(address.toLowerCase())) {
+      continue;
+    }
+
+    if (state.storage && Object.keys(state.storage).length > 0) {
+      if (useStateDiff) {
+        // 개별 슬롯만 패치 (stateDiff)
+        override[address] = {
+          stateDiff: state.storage,
+        };
+      } else {
+        // 전체 스토리지 override (state)
+        // 시스템 컨트랙트의 전체 상태를 덮어쓰려고 하면 오류가 발생할 수 있다.
+        // 가능한 이 기능을 사용하지 않도록 하자.
+        override[address] = {
+          state: state.storage,
+        };
+      }
+    }
+  }
+
+  return override;
+}
 
 export class EthereumAccountBase {
   @observable
@@ -53,7 +136,11 @@ export class EthereumAccountBase {
     return this._isSendingTx;
   }
 
-  async simulateGas(sender: string, unsignedTx: UnsignedTransaction) {
+  async simulateGas(
+    sender: string,
+    unsignedTx: UnsignedTransaction,
+    stateOverride?: StateOverride
+  ) {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     const evmInfo = chainInfo.evm;
     if (!evmInfo) {
@@ -64,16 +151,23 @@ export class EthereumAccountBase {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const keplr = (await this.getKeplr())!;
+
+    const params: unknown[] = [
+      {
+        from: sender,
+        to,
+        value,
+        data,
+      },
+    ];
+
+    if (stateOverride) {
+      params.push("latest", stateOverride);
+    }
+
     const gasEstimated = await keplr.ethereum.request<string | undefined>({
       method: "eth_estimateGas",
-      params: [
-        {
-          from: sender,
-          to,
-          value,
-          data,
-        },
-      ],
+      params,
       chainId: this.chainId,
     });
 
@@ -129,6 +223,101 @@ export class EthereumAccountBase {
     return this.simulateGas(sender, unsignedTx);
   }
 
+  async simulateGasWithPendingErc20Approval(
+    sender: string,
+    unsignedTx: UnsignedEVMTransactionWithErc20Approvals
+  ): Promise<SimulateGasWithPendingErc20ApprovalResult> {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
+
+    const { to, value, data, requiredErc20Approvals } = unsignedTx;
+
+    const erc20ApprovalTxs = requiredErc20Approvals?.map((approval) => {
+      return {
+        to: approval.tokenAddress,
+        value: "0x0",
+        data: erc20ContractInterface.encodeFunctionData("approve", [
+          approval.spender,
+          hexValue(BigInt(approval.amount)),
+        ]),
+      };
+    });
+
+    if (!erc20ApprovalTxs || erc20ApprovalTxs?.length === 0) {
+      const result = await this.simulateGas(sender, unsignedTx);
+      return {
+        outcome: EvmGasSimulationOutcome.TX_SIMULATED,
+        gasUsed: result.gasUsed,
+      };
+    }
+
+    if (erc20ApprovalTxs.length > 1) {
+      throw new Error("Multiple ERC20 approvals are not supported");
+    }
+
+    const erc20Approval = requiredErc20Approvals?.[0];
+    if (!erc20Approval) {
+      throw new Error("Invalid ERC20 approval");
+    }
+
+    const erc20ApprovalTx = erc20ApprovalTxs[0];
+
+    // First, estimate gas for the ERC20 approval tx itself.
+    // This result is reused whether the bundle simulation with state diff succeeds or falls back.
+    const erc20ApprovalSimResult = await this.simulateGas(
+      sender,
+      erc20ApprovalTx
+    );
+
+    try {
+      // State diff tracing for the ERC20 approval transaction
+      const approvalStateDiff = await traceCallWithDiff(chainInfo.rpc, {
+        from: sender,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        to: erc20ApprovalTx.to!,
+        value: erc20ApprovalTx.value,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        data: erc20ApprovalTx.data!,
+      });
+
+      // estimate gas with state override with approval state diff
+      const result = await this.simulateGas(
+        sender,
+        {
+          to,
+          value,
+          data,
+        },
+        diffResultToStateOverride(
+          approvalStateDiff,
+          [
+            sender,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            erc20ApprovalTx.to!,
+            erc20Approval.spender,
+          ],
+          true
+        )
+      );
+
+      return {
+        outcome: EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED,
+        gasUsed: result.gasUsed,
+        erc20ApprovalGasUsed: erc20ApprovalSimResult.gasUsed,
+      };
+    } catch (e) {
+      console.error("Failed to simulate gas with pending ERC20 approval", e);
+
+      return {
+        outcome: EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED,
+        erc20ApprovalGasUsed: erc20ApprovalSimResult.gasUsed,
+      };
+    }
+  }
+
   async simulateOpStackL1Fee(unsignedTx: UnsignedTransaction): Promise<string> {
     const chainInfo = this.chainGetter.getChain(this.chainId);
     if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
@@ -158,6 +347,76 @@ export class EthereumAccountBase {
     });
 
     return l1Fee;
+  }
+
+  async simulateOpStackL1FeeWithPendingErc20Approval(
+    unsignedTx: UnsignedEVMTransactionWithErc20Approvals
+  ): Promise<string> {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    if (!chainInfo.features.includes("op-stack-l1-data-fee")) {
+      throw new Error("The chain isn't built with OP Stack");
+    }
+
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM chain info provided");
+    }
+
+    const txsToSimulate: UnsignedTransaction[] = [
+      {
+        to: unsignedTx.to,
+        gasLimit: unsignedTx.gasLimit,
+        value: unsignedTx.value,
+        data: unsignedTx.data,
+        chainId: unsignedTx.chainId,
+      },
+    ];
+
+    // If there's a pending ERC20 approval, add it to the batch
+    const erc20Approval = unsignedTx.requiredErc20Approvals?.[0];
+    if (erc20Approval != null) {
+      txsToSimulate.push({
+        to: erc20Approval.tokenAddress,
+        data: erc20ContractInterface.encodeFunctionData("approve", [
+          erc20Approval.spender,
+          hexValue(BigInt(erc20Approval.amount)),
+        ]),
+        chainId: unsignedTx.chainId,
+      });
+    }
+
+    const batchRequests = txsToSimulate.map((tx, index) => ({
+      jsonrpc: "2.0" as const,
+      method: "eth_call",
+      params: [
+        {
+          to: opStackGasPriceOracleProxyAddress,
+          data: opStackGasPriceOracleABI.encodeFunctionData("getL1Fee", [
+            serialize(tx),
+          ]),
+        },
+        "latest",
+      ],
+      id: index + 1,
+    }));
+
+    const response = await simpleFetch<JsonRpcResponse<string>[]>(evmInfo.rpc, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(batchRequests),
+    });
+
+    let totalL1Fee = BigInt(0);
+    for (const result of response.data) {
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+      if (result.result) {
+        totalL1Fee += BigInt(result.result);
+      }
+    }
+
+    return "0x" + totalL1Fee.toString(16);
   }
 
   makeSendTokenTx({
@@ -247,6 +506,64 @@ export class EthereumAccountBase {
       value,
       data,
     };
+  }
+
+  /**
+   * Sign an Ethereum transaction.
+   * @param sender - The sender address.
+   * @param unsignedTx - The unsigned transaction to sign.
+   * @param options - The options for the transaction.
+   * @returns The signed transaction in serialized format.
+   */
+  async signEthereumTx(
+    sender: string,
+    unsignedTx: UnsignedEVMTransactionWithErc20Approvals,
+    options?: {
+      nonceMethod?: "pending" | "latest";
+      // Whether to offset nonce by the number of required ERC20 approvals
+      considerRequiredErc20ApprovalsForNonce?: boolean;
+    }
+  ) {
+    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const evmInfo = chainInfo.evm;
+    if (!evmInfo) {
+      throw new Error("No EVM info provided");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const keplr = (await this.getKeplr())!;
+
+    const transactionCount = await keplr.ethereum.request<string>({
+      method: "eth_getTransactionCount",
+      params: [sender, options?.nonceMethod || "pending"],
+      chainId: this.chainId,
+    });
+
+    unsignedTx = {
+      ...unsignedTx,
+      nonce:
+        parseInt(transactionCount) +
+        (options?.considerRequiredErc20ApprovalsForNonce
+          ? unsignedTx.requiredErc20Approvals?.length ?? 0
+          : 0),
+    };
+
+    const signEthereum = keplr.signEthereum.bind(keplr);
+
+    const signature = await signEthereum(
+      this.chainId,
+      sender,
+      JSON.stringify(unsignedTx),
+      EthSignType.TRANSACTION
+    );
+
+    const isEIP1559 =
+      !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+    if (isEIP1559) {
+      unsignedTx.type = TransactionTypes.eip1559;
+    }
+
+    return serialize(unsignedTx, signature);
   }
 
   async sendEthereumTx(

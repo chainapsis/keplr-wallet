@@ -11,6 +11,7 @@ export * from "./arrow-up";
 export * from "./camera";
 export * from "./check";
 export * from "./check-toggle";
+export * from "./chevron-right";
 export * from "./close";
 export * from "./code-bracket";
 export * from "./copy-fill";

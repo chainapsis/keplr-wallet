@@ -611,7 +611,7 @@ export class IBCSwapAmountConfig extends AmountConfig {
         requiredErc20Approvals: msg.requiredErc20Approvals,
       };
     } else if (msg.type === "MsgCCTP") {
-      const tx = sourceAccount.cosmos.makeCCTPTx(
+      const tx = sourceAccount.cosmos.makeCCTPDepositForBurnWithCallerTx(
         msg.msgs[0].msg,
         msg.msgs[1].msg
       );

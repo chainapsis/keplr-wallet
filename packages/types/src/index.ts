@@ -9,3 +9,5 @@ export * from "./cosmjs";
 export * from "./cosmjs-alt";
 export * from "./secretjs";
 export * from "./settled";
+export * from "./json-rpc";
+export * from "./swap";

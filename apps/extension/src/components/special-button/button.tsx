@@ -56,6 +56,8 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
   text,
   right,
   isLoading,
+  suppressDefaultLoadingIndicator,
+  showTextWhileLoading,
   disabled,
   textOverrideIcon,
 }) => {
@@ -230,7 +232,7 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
       >
         {left ? <Styles.Left>{left}</Styles.Left> : null}
 
-        {isLoading ? (
+        {isLoading && !suppressDefaultLoadingIndicator ? (
           <Styles.Loading>
             <LoadingIcon width="1rem" height="1rem" />
           </Styles.Loading>
@@ -240,7 +242,12 @@ export const SpecialButton: FunctionComponent<SpecialButtonProps> = ({
           <Styles.TextOverrideIcon>{textOverrideIcon}</Styles.TextOverrideIcon>
         ) : null}
 
-        <Box style={{ opacity: isLoading || textOverrideIcon ? 0 : 1 }}>
+        <Box
+          style={{
+            opacity:
+              (isLoading && !showTextWhileLoading) || textOverrideIcon ? 0 : 1,
+          }}
+        >
           {text}
         </Box>
 
