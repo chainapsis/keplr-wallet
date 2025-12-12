@@ -161,8 +161,8 @@ export function performSearch<T>(
       }
 
       for (let i = 0; i < fields.length; i++) {
-        const scoreA = a.fieldMatchScores[i] || SCORE_NONE;
-        const scoreB = b.fieldMatchScores[i] || SCORE_NONE;
+        const scoreA = a.fieldMatchScores[i] ?? SCORE_NONE;
+        const scoreB = b.fieldMatchScores[i] ?? SCORE_NONE;
 
         if (scoreA !== scoreB) {
           return scoreB - scoreA;
