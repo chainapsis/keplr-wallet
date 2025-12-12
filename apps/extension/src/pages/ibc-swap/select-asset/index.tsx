@@ -12,10 +12,11 @@ import { useFocusOnMount } from "../../../hooks/use-focus-on-mount";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router";
 import { useIntl } from "react-intl";
+import { ChainStore } from "../../../stores/chain";
 import { HugeQueriesStore } from "../../../stores/huge-queries";
 import { ViewToken } from "../../main";
 import { autorun, computed, IReactionDisposer, makeObservable } from "mobx";
-import { ObservableQueryIbcSwap } from "@keplr-wallet/stores-internal";
+import { ObservableQuerySwapHelper } from "@keplr-wallet/stores-internal";
 import { Currency } from "@keplr-wallet/types";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
 import { FixedSizeList } from "react-window";
@@ -32,7 +33,10 @@ import { ChainIdHelper } from "@keplr-wallet/cosmos";
 class IBCSwapDestinationState {
   constructor(
     protected readonly hugeQueriesStore: HugeQueriesStore,
-    protected readonly queryIBCSwap: ObservableQueryIbcSwap
+    protected readonly swapHelper: ObservableQuerySwapHelper,
+    protected readonly chainStore: ChainStore,
+    protected readonly sourceChainId?: string,
+    protected readonly sourceDenom?: string
   ) {
     makeObservable(this);
   }
@@ -48,65 +52,75 @@ class IBCSwapDestinationState {
     }[];
     isLoading: boolean;
   } {
-    const zeroDec = new Dec(0);
+    if (!this.sourceChainId || !this.sourceDenom) {
+      return {
+        tokens: [],
+        remaining: [],
+        isLoading: false,
+      };
+    }
 
-    const destinationMap = this.queryIBCSwap.swapDestinationCurrenciesMap;
+    const balances = this.hugeQueriesStore
+      .getAllBalances({
+        allowIBCToken: false,
+        enableFilterDisabledAssetToken: false,
+      })
+      .filter((tokenView) => tokenView.token.toDec().gt(new Dec(0)));
 
-    // Swap destination은 ibc currency는 보여주지 않는다.
-    let tokens = this.hugeQueriesStore.getAllBalances({
-      allowIBCToken: false,
-      enableFilterDisabledAssetToken: false,
-    });
+    const tokens: ViewToken[] = [];
     let remaining: {
       currency: Currency;
       chainInfo: IChainInfoImpl;
     }[] = [];
+    const ownedKeys = new Set<string>();
 
-    tokens = tokens
-      .filter((token) => {
-        return token.token.toDec().gt(zeroDec);
-      })
-      .filter((token) => {
-        if (!("currencies" in token.chainInfo)) {
-          return false;
-        }
-
-        const map = destinationMap.get(token.chainInfo.chainIdentifier);
-        if (map) {
-          return (
-            map.currencies.find(
-              (cur) =>
-                cur.coinMinimalDenom === token.token.currency.coinMinimalDenom
-            ) != null
-          );
-        }
-
-        return false;
-      });
-
-    // tokens에 존재했는지 체크 용으로 사용
-    // key: {chain_identifier}/{coinMinimalDenom}
-    const tokensKeyMap = new Map<string, boolean>();
-
-    for (const token of tokens) {
-      if ("currencies" in token.chainInfo) {
-        tokensKeyMap.set(
-          `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`,
-          true
-        );
+    for (const token of balances) {
+      if (!("currencies" in token.chainInfo)) {
+        continue;
       }
+      const key = `${token.chainInfo.chainIdentifier}/${token.token.currency.coinMinimalDenom}`;
+      const isEligible = this.swapHelper.isSwapDestinationOrAlternatives(
+        this.sourceChainId,
+        this.sourceDenom,
+        token.chainInfo.chainId,
+        token.token.currency.coinMinimalDenom
+      );
+
+      if (!isEligible) {
+        continue;
+      }
+
+      tokens.push(token);
+      ownedKeys.add(key);
     }
 
-    for (const [chainIdentifier, map] of destinationMap) {
-      for (const currency of map.currencies) {
-        if (
-          !tokensKeyMap.has(`${chainIdentifier}/${currency.coinMinimalDenom}`)
-        ) {
-          remaining.push({
-            currency,
-            chainInfo: map.chainInfo,
-          });
+    for (const chainInfo of this.chainStore.chainInfosInUI) {
+      if (!("currencies" in chainInfo)) {
+        continue;
+      }
+
+      for (const currency of chainInfo.currencies) {
+        const key = `${chainInfo.chainIdentifier}/${currency.coinMinimalDenom}`;
+
+        if (ownedKeys.has(key)) {
+          continue;
         }
+
+        const isEligible = this.swapHelper.isSwapDestinationOrAlternatives(
+          this.sourceChainId,
+          this.sourceDenom,
+          chainInfo.chainId,
+          currency.coinMinimalDenom
+        );
+
+        if (!isEligible) {
+          continue;
+        }
+
+        remaining.push({
+          currency,
+          chainInfo,
+        });
       }
     }
 
@@ -129,7 +143,8 @@ class IBCSwapDestinationState {
     return {
       tokens,
       remaining,
-      isLoading: this.queryIBCSwap.isLoadingSwapDestinationCurrenciesMap,
+      // NOTE: validate target assets 쿼리가 여럿 발생하나, 응답이 빠르기 때문에 우선 로딩 처리 안함
+      isLoading: false,
     };
   }
 }
@@ -172,7 +187,7 @@ const remainingSearchFields = [
 // /send/select-asset 페이지와 세트로 관리하셈
 export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
   () => {
-    const { hugeQueriesStore, chainStore, skipQueriesStore } = useStore();
+    const { hugeQueriesStore, chainStore, swapQueriesStore } = useStore();
     const navigate = useNavigate();
     const intl = useIntl();
     const [searchParams] = useSearchParams();
@@ -189,6 +204,8 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
     const paramNavigateReplace = searchParams.get("navigateReplace");
     // {chain_identifier}/{coinMinimalDenom}
     const excludeKey = searchParams.get("excludeKey");
+    const inChainId = searchParams.get("inChainId") ?? undefined;
+    const inDenom = searchParams.get("inDenom") ?? undefined;
 
     const [search, setSearch] = useState("");
 
@@ -198,7 +215,10 @@ export const IBCSwapDestinationSelectAssetPage: FunctionComponent = observer(
       () =>
         new IBCSwapDestinationState(
           hugeQueriesStore,
-          skipQueriesStore.queryIBCSwap
+          swapQueriesStore.querySwapHelper,
+          chainStore,
+          inChainId,
+          inDenom
         )
     );
 
