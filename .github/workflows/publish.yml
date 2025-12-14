@@ -4,6 +4,9 @@ on:
     tags:
       - v*
 
+permissions:
+  id-token: write
+
 jobs:
   publish:
     if: github.repository == 'chainapsis/keplr-wallet'
@@ -59,7 +62,6 @@ jobs:
       - run: sudo apt-get install gh
       - run: npx zx ./scripts/publish.mjs
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   check-firefox-archive:
     if: github.repository == 'chainapsis/keplr-wallet'
