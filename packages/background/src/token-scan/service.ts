@@ -35,15 +35,12 @@ export type TokenScan = {
   chainId: string;
   infos: TokenScanInfo[];
   linkedChainKey?: string;
-  prevInfos?: TokenScanInfo[];
+  dismissedInfos?: TokenScanInfo[];
 };
 
 export class TokenScanService {
   @observable
   protected vaultToMap = new Map<string, TokenScan[]>();
-
-  @observable
-  protected _showNewTokenFoundInMainMap: Map<string, boolean> = new Map();
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -76,34 +73,10 @@ export class TokenScanService {
       this.kvStore.set("vaultToMap", obj);
     });
 
-    const savedIsShowNewTokenFoundInMainMap = await this.kvStore.get<
-      Record<string, boolean>
-    >("showNewTokenFoundInMainMap");
-    if (savedIsShowNewTokenFoundInMainMap) {
-      runInAction(() => {
-        for (const [key, value] of Object.entries(
-          savedIsShowNewTokenFoundInMainMap
-        )) {
-          this._showNewTokenFoundInMainMap.set(key, value);
-        }
-      });
-    }
-
-    autorun(() => {
-      const js = toJS(this._showNewTokenFoundInMainMap);
-      const obj = Object.fromEntries(js);
-
-      this.kvStore.set<Record<string, boolean>>(
-        "showNewTokenFoundInMainMap",
-        obj
-      );
-    });
-
     this.vaultService.addVaultRemovedHandler(
       (type: string, vaultId: string) => {
         if (type === "keyRing") {
           this.vaultToMap.delete(vaultId);
-          this._showNewTokenFoundInMainMap.delete(vaultId);
         }
       }
     );
@@ -257,6 +230,12 @@ export class TokenScanService {
           tokenScan.chainId
         ).identifier;
 
+        const prevTokenScan = prevTokenScans.find((scan) => {
+          return (
+            ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+          );
+        });
+
         prevTokenScans = prevTokenScans.filter((scan) => {
           const prevChainIdentifier = ChainIdHelper.parse(
             scan.chainId
@@ -264,15 +243,9 @@ export class TokenScanService {
           return chainIdentifier !== prevChainIdentifier;
         });
 
-        const prevTokenScan = prevTokenScans.find((scan) => {
-          return (
-            ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
-          );
-        });
-
         prevTokenScans.push({
+          ...prevTokenScan,
           ...tokenScan,
-          prevInfos: prevTokenScan?.prevInfos,
         });
 
         this.vaultToMap.set(vaultId, prevTokenScans);
@@ -306,23 +279,13 @@ export class TokenScanService {
 
       promises.push(
         (async () => {
-          const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
-          const chainIdentifier = ChainIdHelper.parse(
-            modularChainInfo.chainId
-          ).identifier;
-          const prevScan = prevTokenScans.find((scan) => {
-            return (
-              ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
-            );
-          });
-
           const tokenScan = await this.calculateTokenScan(
             vaultId,
             modularChainInfo.chainId
           );
 
           if (tokenScan) {
-            tokenScans.push({ ...tokenScan, prevInfos: prevScan?.prevInfos });
+            tokenScans.push(tokenScan);
           }
         })()
       );
@@ -339,6 +302,13 @@ export class TokenScanService {
           const chainIdentifier = ChainIdHelper.parse(
             tokenScan.chainId
           ).identifier;
+
+          const prevTokenScan = prevTokenScans.find((scan) => {
+            return (
+              ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+            );
+          });
+
           prevTokenScans = prevTokenScans.filter((scan) => {
             const prevChainIdentifier = ChainIdHelper.parse(
               scan.chainId
@@ -346,7 +316,10 @@ export class TokenScanService {
             return chainIdentifier !== prevChainIdentifier;
           });
 
-          prevTokenScans.push(tokenScan);
+          prevTokenScans.push({
+            ...prevTokenScan,
+            ...tokenScan,
+          });
         }
 
         this.vaultToMap.set(vaultId, prevTokenScans);
@@ -688,54 +661,26 @@ export class TokenScanService {
     return undefined;
   }
 
-  syncPreviousAndCurrentTokenScan(vaultId: string) {
-    runInAction(() => {
-      const tokenScans = this.vaultToMap.get(vaultId) ?? [];
-      const updated = tokenScans.map((scan) => ({
-        ...scan,
-        prevInfos: scan.infos,
-      }));
-      this.vaultToMap.set(vaultId, updated);
-    });
-  }
-
-  getIsShowNewTokenFoundInMain(vaultId: string): boolean {
-    const isShow = this._showNewTokenFoundInMainMap.get(vaultId);
-    if (isShow !== undefined) {
-      return isShow;
-    }
-
-    return this.getTokenScans(vaultId).length > 0;
-  }
-
   dismissNewTokenFoundInHome(vaultId: string) {
-    runInAction(() => {
-      this._showNewTokenFoundInMainMap.set(vaultId, false);
-    });
-
-    this.syncPreviousAndCurrentTokenScan(vaultId);
-    return false;
-  }
-
-  resetDismissIfNeeded(vaultId: string) {
-    const tokenScans = this.getTokenScans(vaultId);
-
-    const needReset = tokenScans.some((scan) =>
-      this.isMeaningfulTokenScanChange(scan)
-    );
-
-    if (needReset) {
-      runInAction(() => {
-        this._showNewTokenFoundInMainMap.set(vaultId, true);
-      });
-      return true;
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    for (const prevTokenScan of prevTokenScans) {
+      prevTokenScan.dismissedInfos = prevTokenScan.infos;
     }
-
-    return false;
+    this.vaultToMap.set(vaultId, prevTokenScans);
   }
 
-  protected isMeaningfulTokenScanChange(tokenScan: TokenScan): boolean {
-    if (!tokenScan.prevInfos || tokenScan.prevInfos.length === 0) {
+  resetDismiss(vaultId: string) {
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    for (const prevTokenScan of prevTokenScans) {
+      prevTokenScan.dismissedInfos = undefined;
+    }
+    this.vaultToMap.set(vaultId, prevTokenScans);
+  }
+
+  public isMeaningfulTokenScanChangeBetweenDismissed(
+    tokenScan: TokenScan
+  ): boolean {
+    if (!tokenScan.dismissedInfos || tokenScan.dismissedInfos.length === 0) {
       return tokenScan.infos.length > 0;
     }
 
@@ -757,11 +702,11 @@ export class TokenScanService {
       }
     };
 
-    const prevTokenInfosMap = new Map<string, TokenScanInfo>();
-    for (const info of tokenScan.prevInfos ?? []) {
+    const dismissedTokenInfosMap = new Map<string, TokenScanInfo>();
+    for (const info of tokenScan.dismissedInfos ?? []) {
       const key = makeKey(info);
       if (key) {
-        prevTokenInfosMap.set(key, info);
+        dismissedTokenInfosMap.set(key, info);
       }
     }
 
@@ -771,22 +716,24 @@ export class TokenScanService {
         continue;
       }
 
-      const prevTokenInfo = prevTokenInfosMap.get(key);
+      const dismissedTokenInfo = dismissedTokenInfosMap.get(key);
 
-      if (!prevTokenInfo) {
+      if (!dismissedTokenInfo) {
         if (info.assets.length > 0) {
           return true;
         }
         continue;
       }
 
-      const prevAssetMap = new Map<string, Asset>();
-      for (const asset of prevTokenInfo.assets) {
-        prevAssetMap.set(asset.currency.coinMinimalDenom, asset);
+      const dismissedAssetMap = new Map<string, Asset>();
+      for (const asset of dismissedTokenInfo.assets) {
+        dismissedAssetMap.set(asset.currency.coinMinimalDenom, asset);
       }
 
       for (const asset of info.assets) {
-        const prevAsset = prevAssetMap.get(asset.currency.coinMinimalDenom);
+        const prevAsset = dismissedAssetMap.get(
+          asset.currency.coinMinimalDenom
+        );
 
         // 없던 토큰이 생긴경우
         if (!prevAsset) {

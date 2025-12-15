@@ -8,7 +8,7 @@ import {
   toJS,
 } from "mobx";
 
-import { AppCurrency, ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
@@ -25,7 +25,6 @@ import {
   EnableVaultsWithCosmosAddressMsg,
   GetChainInfosWithCoreTypesMsg,
   GetEnabledChainIdentifiersMsg,
-  GetIsShowNewTokenFoundInMainMsg,
   GetTokenScansMsg,
   RemoveSuggestedChainInfoMsg,
   RevalidateTokenScansMsg,
@@ -35,16 +34,10 @@ import {
   TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
   DismissNewTokenFoundInMainMsg,
-  UpdateIsShowNewTokenFoundInMainMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-
-type Asset = {
-  currency: AppCurrency;
-  amount: string;
-};
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
@@ -57,15 +50,11 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @observable.ref
   protected _tokenScans: TokenScan[] = [];
+  @observable.ref
+  protected _tokenScansWithoutDismissed: TokenScan[] = [];
 
   @observable
   protected _lastTokenScanRevalidateTimestamp: Map<string, number> = new Map();
-
-  @observable
-  protected _newTokenFoundDismissed: Map<string, boolean> = new Map();
-
-  @observable
-  protected _isShowNewTokenFoundInMain: boolean = false;
 
   constructor(
     protected readonly kvStore: KVStore,
@@ -138,89 +127,26 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @computed
   get tokenScans(): TokenScan[] {
-    return this._tokenScans
-      .filter((scan) => {
-        if (
-          !this.hasChain(scan.chainId) &&
-          !this.hasModularChain(scan.chainId)
-        ) {
-          return false;
-        }
+    return this._tokenScans.filter((scan) => {
+      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
+        return false;
+      }
 
-        const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
-        return !this.enabledChainIdentifiesMap.get(chainIdentifier);
-      })
-      .map((scan) => {
-        const newInfos = scan.infos.map((info) => {
-          const newAssets = info.assets
-            .map((asset) => {
-              const cur = this.resolveCurrency(
-                scan.chainId,
-                asset.currency.coinMinimalDenom
-              );
-              if (!cur) return undefined;
-              return {
-                ...asset,
-                currency: cur,
-              };
-            })
-            .filter((a): a is Asset => !!a);
-
-          return {
-            ...info,
-            assets: newAssets,
-          };
-        });
-
-        return {
-          ...scan,
-          infos: newInfos,
-        };
-      });
+      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
   }
 
-  private resolveCurrency(
-    chainId: string,
-    denom: string
-  ): AppCurrency | undefined {
-    const chainInfo = this.hasChain(chainId) ? this.getChain(chainId) : null;
-    const modularChainInfo = this.hasModularChain(chainId)
-      ? this.getModularChain(chainId)
-      : null;
-
-    if (chainInfo) {
-      const found = chainInfo.forceFindCurrency(denom);
-      if (!found.coinDenom.startsWith("ibc/")) {
-        return found;
+  @computed
+  get tokenScansWithoutDismissed(): TokenScan[] {
+    return this._tokenScansWithoutDismissed.filter((scan) => {
+      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
+        return false;
       }
-    }
 
-    const currencies: AppCurrency[] = (() => {
-      if (chainInfo) return chainInfo.currencies;
-      if (modularChainInfo) {
-        if ("cosmos" in modularChainInfo) {
-          return modularChainInfo.cosmos.currencies;
-        }
-
-        if ("bitcoin" in modularChainInfo) {
-          return modularChainInfo.bitcoin.currencies;
-        }
-
-        if ("starknet" in modularChainInfo) {
-          return modularChainInfo.starknet.currencies;
-        }
-      }
-      return [];
-    })();
-
-    if (modularChainInfo) {
-      const found = currencies.find((cur) => cur.coinMinimalDenom === denom);
-      if (found) {
-        return found;
-      }
-    }
-
-    return undefined;
+      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
   }
 
   @computed
@@ -319,10 +245,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   get enabledChainIdentifiers(): string[] {
     return this._enabledChainIdentifiers;
-  }
-
-  get isShowNewTokenFoundInMain(): boolean {
-    return this._isShowNewTokenFoundInMain;
   }
 
   @computed
@@ -495,9 +417,10 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    runInAction(() => {
-      this._isShowNewTokenFoundInMain = res;
-    });
+    if (this.keyRingStore.selectedKeyInfo?.id === msg.vaultId) {
+      this._tokenScans = res.tokenScans;
+      this._tokenScansWithoutDismissed = res.tokenScansWithoutDismissed;
+    }
   }
 
   @flow
@@ -529,12 +452,6 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
           obj
         );
       });
-    });
-
-    autorun(() => {
-      const js = toJS(this._newTokenFoundDismissed);
-      const obj = Object.fromEntries(js);
-      this.kvStore.set<Record<string, boolean>>("dismissedNewTokenFound", obj);
     });
 
     yield Promise.all([
@@ -621,16 +538,15 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this._tokenScans = yield* toGenerator(
+    const getTokenScansResult = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
     );
 
-    this._isShowNewTokenFoundInMain = yield* toGenerator(
-      this.requester.sendMessage(
-        BACKGROUND_PORT,
-        new GetIsShowNewTokenFoundInMainMsg(id)
-      )
-    );
+    if (this.keyRingStore.selectedKeyInfo?.id === getTokenScansResult.vaultId) {
+      this._tokenScans = getTokenScansResult.tokenScans;
+      this._tokenScansWithoutDismissed =
+        getTokenScansResult.tokenScansWithoutDismissed;
+    }
 
     (async () => {
       await new Promise<void>((resolve) => {
@@ -664,15 +580,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
           runInAction(() => {
             this._tokenScans = res.tokenScans;
-          });
-
-          const updateRes = await this.requester.sendMessage(
-            BACKGROUND_PORT,
-            new UpdateIsShowNewTokenFoundInMainMsg(id)
-          );
-
-          runInAction(() => {
-            this._isShowNewTokenFoundInMain = updateRes;
+            this._tokenScansWithoutDismissed = res.tokenScansWithoutDismissed;
           });
         }
       }
