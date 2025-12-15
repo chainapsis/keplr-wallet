@@ -114,15 +114,15 @@ export const TokenDetailModal: FunctionComponent<{
   );
   const balance = (() => {
     const queryBalances = queriesStore.get(chainId).queryBalances;
-    if ("evm" in modularChainInfo) {
-      return queryBalances
-        .getQueryEthereumHexAddress(account.ethereumHexAddress)
-        .getBalance(currency);
-    }
-
     if ("cosmos" in modularChainInfo) {
       return queryBalances
         .getQueryBech32Address(account.bech32Address)
+        .getBalance(currency);
+    }
+
+    if ("evm" in modularChainInfo) {
+      return queryBalances
+        .getQueryEthereumHexAddress(account.ethereumHexAddress)
         .getBalance(currency);
     }
 
