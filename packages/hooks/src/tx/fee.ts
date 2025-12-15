@@ -787,10 +787,14 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           ).block;
         const latestBaseFeePerGas = parseInt(block?.baseFeePerGas ?? "0");
         if (latestBaseFeePerGas !== 0) {
+          const multiplier =
+            ETH_FEE_SETTINGS_BY_FEE_TYPE[feeType].baseFeePercentageMultiplier;
           const baseFeePerGasDec = new Dec(latestBaseFeePerGas);
+          const baseFeePerGasWithMargin = baseFeePerGasDec.mul(multiplier);
           const maxPriorityFeePerGas =
             this.calculateOptimalMaxPriorityFeePerGas(ethereumQueries, feeType);
-          const maxFeePerGas = baseFeePerGasDec.add(maxPriorityFeePerGas);
+          const maxFeePerGas =
+            baseFeePerGasWithMargin.add(maxPriorityFeePerGas);
 
           return {
             maxPriorityFeePerGas: maxPriorityFeePerGas.truncateDec(),
