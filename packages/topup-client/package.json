@@ -8,6 +8,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainapsis/keplr-wallet.git"
+  },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
     "build": "npx tsc",

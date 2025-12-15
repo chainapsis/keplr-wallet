@@ -6,6 +6,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainapsis/keplr-wallet.git"
+  },
   "scripts": {
     "clean": "npx zx ./proto-types-gen/scripts/clean.mjs; rm -rf node_modules; rm -rf proto-types-gen/build; rm -rf proto-types-gen/src",
     "build": "npx zx ./proto-types-gen/scripts/proto-gen.mjs",
