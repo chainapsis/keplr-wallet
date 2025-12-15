@@ -2343,10 +2343,10 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         {
           type: "erc20",
           contractAddress:
-            "0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
+            "0x033068f6539f8e6e6b131e6b2b814e6c34a5224bc66947c47dab9dfee93b35fb",
           coinDenom: "USDC",
           coinMinimalDenom:
-            "erc20:0x033068F6539f8e6e6b131e6B2B814e6c34A5224bC66947c47DaB9dFeE93b35fb",
+            "erc20:0x033068f6539f8e6e6b131e6b2b814e6c34a5224bc66947c47dab9dfee93b35fb",
           coinDecimals: 6,
           coinGeckoId: "usd-coin",
           coinImageUrl:
