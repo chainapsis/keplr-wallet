@@ -2932,6 +2932,8 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     bip44: {
       coinType: 60,
     },
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:957/chain.png",
     currencies: [
       {
         coinDenom: "ETH",
