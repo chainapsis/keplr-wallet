@@ -5,7 +5,7 @@ on:
       - v*
 
 permissions:
-  id-token: write
+  contents: read
 
 jobs:
   publish:
@@ -13,6 +13,9 @@ jobs:
     name: Publish to npm and create release
     runs-on: ubuntu-24.04-l
     timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v3
         with:
