@@ -444,12 +444,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
             !isEvmOnlyChainId(ci.chainId)
           );
         case "EVM":
-          return (
-            cosmosChainInfo != null &&
-            !("bech32Config" in cosmosChainInfo) &&
-            "evm" in cosmosChainInfo &&
-            isEvmOnlyChainId(ci.chainId)
-          );
+          return "evm" in ci && isEvmOnlyChainId(ci.chainId);
         case "Bitcoin":
           return "bitcoin" in ci;
         case "Starknet":
