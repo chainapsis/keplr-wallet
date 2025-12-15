@@ -821,14 +821,13 @@ export const EnableChainsScene: FunctionComponent<{
           },
           chainIdentifier: string
         ) => {
-          const addresses = candidateAddressesMap.get(chainIdentifier);
           const account = accountStore.getAccount(modularChainInfo.chainId);
 
           if ("evm" in modularChainInfo) {
             const queries = queriesStore.get(modularChainInfo.chainId);
             const mainCurrency = modularChainInfo.evm.currencies[0];
 
-            if (addresses && addresses.length > 0) {
+            if (account.ethereumHexAddress) {
               const queryBalance =
                 queries.queryBalances.getQueryEthereumHexAddress(
                   account.ethereumHexAddress
@@ -842,6 +841,7 @@ export const EnableChainsScene: FunctionComponent<{
 
             return new CoinPretty(mainCurrency, "0");
           } else if ("cosmos" in modularChainInfo) {
+            const addresses = candidateAddressesMap.get(chainIdentifier);
             const queries = queriesStore.get(modularChainInfo.chainId);
 
             const mainCurrency =
