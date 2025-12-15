@@ -298,7 +298,10 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
         align="bottom"
         close={() => setIsFoundTokenModalOpen(false)}
       >
-        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
+        <TokenFoundModal
+          tokenScans={chainStore.tokenScans}
+          close={() => setIsFoundTokenModalOpen(false)}
+        />
       </Modal>
     </HeaderLayout>
   );
