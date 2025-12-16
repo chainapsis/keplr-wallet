@@ -50,7 +50,7 @@ interface Key {
 
 :::info
 Hardware Wallet Support:
-- Ledger wallets typically use the Amino JSON sign mode due to limited support for Protobuf-based SIGN_MODE_DIRECT. Check more details [here](../use-with/cosmjs#types-of-offline-signers).
+- Ledger wallets typically use the Amino JSON sign mode due to limited support for Protobuf-based SIGN_MODE_DIRECT. Check more details [here](../use-with/cosmjs.md#types-of-offline-signers).
 - Use the `isNanoLedger` and `isKeystone` properties to determine the appropriate signing mode for hardware wallets.
 :::
 
