@@ -126,7 +126,7 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
       const hex = Buffer.from(msg.txHash.replace("0x", ""), "hex")
         .toString("hex")
         .toUpperCase();
-      return `0x${hex.slice(0, 5)}...${hex.slice(-5)}`;
+      return `${hex.slice(0, 5)}...${hex.slice(-5)}`;
     } catch {
       return "Unknown";
     }
@@ -326,7 +326,7 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
 
               copyIconButtonRef.current?.startAnimation();
 
-              navigator.clipboard.writeText("0x" + msg.txHash);
+              navigator.clipboard.writeText(msg.txHash);
             }}
           >
             <XAxis alignY="center">

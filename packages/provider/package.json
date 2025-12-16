@@ -1,11 +1,15 @@
 {
   "name": "@keplr-wallet/provider",
-  "version": "0.12.300-rc.0",
+  "version": "0.12.305",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainapsis/keplr-wallet.git"
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
@@ -16,13 +20,13 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/router": "0.12.300-rc.0",
-    "@keplr-wallet/types": "0.12.300-rc.0",
+    "@keplr-wallet/router": "0.12.305",
+    "@keplr-wallet/types": "0.12.305",
     "buffer": "^6.0.3",
     "deepmerge": "^4.2.2",
     "long": "^4.0.0"
   },
   "peerDependencies": {
-    "starknet": "^7"
+    "starknet": "^8"
   }
 }

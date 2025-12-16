@@ -1,11 +1,15 @@
 {
   "name": "@keplr-wallet/cosmos",
-  "version": "0.12.300-rc.0",
+  "version": "0.12.305",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainapsis/keplr-wallet.git"
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
@@ -17,12 +21,12 @@
   },
   "dependencies": {
     "@ethersproject/address": "^5.6.0",
-    "@keplr-wallet/common": "0.12.300-rc.0",
-    "@keplr-wallet/crypto": "0.12.300-rc.0",
-    "@keplr-wallet/proto-types": "0.12.300-rc.0",
-    "@keplr-wallet/simple-fetch": "0.12.300-rc.0",
-    "@keplr-wallet/types": "0.12.300-rc.0",
-    "@keplr-wallet/unit": "0.12.300-rc.0",
+    "@keplr-wallet/common": "0.12.305",
+    "@keplr-wallet/crypto": "0.12.305",
+    "@keplr-wallet/proto-types": "0.12.305",
+    "@keplr-wallet/simple-fetch": "0.12.305",
+    "@keplr-wallet/types": "0.12.305",
+    "@keplr-wallet/unit": "0.12.305",
     "bech32": "^1.1.4",
     "buffer": "^6.0.3",
     "long": "^4.0.0",

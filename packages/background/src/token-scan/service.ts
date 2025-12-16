@@ -14,23 +14,28 @@ import { CairoUint256 } from "starknet";
 import { KeyRingBitcoinService } from "../keyring-bitcoin";
 import { MessageRequester } from "@keplr-wallet/router";
 
+type Asset = {
+  currency: AppCurrency;
+  amount: string;
+};
+
+export type TokenScanInfo = {
+  bech32Address?: string;
+  ethereumHexAddress?: string;
+  starknetHexAddress?: string;
+  bitcoinAddress?: {
+    bech32Address: string;
+    paymentType: SupportedPaymentType;
+  };
+  coinType?: number;
+  assets: Asset[];
+};
+
 export type TokenScan = {
   chainId: string;
-  infos: {
-    bech32Address?: string;
-    ethereumHexAddress?: string;
-    starknetHexAddress?: string;
-    bitcoinAddress?: {
-      bech32Address: string;
-      paymentType: SupportedPaymentType;
-    };
-    coinType?: number;
-    assets: {
-      currency: AppCurrency;
-      amount: string;
-    }[];
-  }[];
+  infos: TokenScanInfo[];
   linkedChainKey?: string;
+  dismissedInfos?: TokenScanInfo[];
 };
 
 export class TokenScanService {
@@ -127,27 +132,28 @@ export class TokenScanService {
         });
       }
     );
-    this.chainsUIService.addChainUIEnabledChangedHandler(
-      (vaultId, chainIdentifiers) => {
-        runInAction(() => {
-          let prevTokenScans = this.vaultToMap.get(vaultId);
-          if (prevTokenScans) {
-            prevTokenScans = prevTokenScans.filter((tokenScan) => {
-              return !chainIdentifiers.includes(
-                ChainIdHelper.parse(tokenScan.chainId).identifier
-              );
-            });
-            this.vaultToMap.set(vaultId, prevTokenScans);
-          }
-        });
-      }
-    );
+
+    this.chainsService.addChainRemovedHandler((chainInfo) => {
+      runInAction(() => {
+        for (const [vaultId, tokenScans] of this.vaultToMap.entries()) {
+          let prevTokenScans = tokenScans;
+          prevTokenScans = prevTokenScans.filter((scan) => {
+            return scan.chainId !== chainInfo.chainId;
+          });
+
+          this.vaultToMap.set(vaultId, prevTokenScans);
+        }
+      });
+    });
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
     return (this.vaultToMap.get(vaultId) ?? [])
       .filter((tokenScan) => {
-        return this.chainsService.hasModularChainInfo(tokenScan.chainId);
+        return (
+          this.chainsService.hasModularChainInfo(tokenScan.chainId) &&
+          !this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)
+        );
       })
       .sort((a, b) => {
         // Sort by chain name
@@ -222,6 +228,13 @@ export class TokenScanService {
         const chainIdentifier = ChainIdHelper.parse(
           tokenScan.chainId
         ).identifier;
+
+        const prevTokenScan = prevTokenScans.find((scan) => {
+          return (
+            ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+          );
+        });
+
         prevTokenScans = prevTokenScans.filter((scan) => {
           const prevChainIdentifier = ChainIdHelper.parse(
             scan.chainId
@@ -229,7 +242,10 @@ export class TokenScanService {
           return chainIdentifier !== prevChainIdentifier;
         });
 
-        prevTokenScans.push(tokenScan);
+        prevTokenScans.push({
+          ...prevTokenScan,
+          ...tokenScan,
+        });
 
         this.vaultToMap.set(vaultId, prevTokenScans);
       });
@@ -285,6 +301,13 @@ export class TokenScanService {
           const chainIdentifier = ChainIdHelper.parse(
             tokenScan.chainId
           ).identifier;
+
+          const prevTokenScan = prevTokenScans.find((scan) => {
+            return (
+              ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+            );
+          });
+
           prevTokenScans = prevTokenScans.filter((scan) => {
             const prevChainIdentifier = ChainIdHelper.parse(
               scan.chainId
@@ -292,12 +315,11 @@ export class TokenScanService {
             return chainIdentifier !== prevChainIdentifier;
           });
 
-          prevTokenScans.push(tokenScan);
+          prevTokenScans.push({
+            ...prevTokenScan,
+            ...tokenScan,
+          });
         }
-
-        prevTokenScans = prevTokenScans.filter((scan) => {
-          return !this.chainsUIService.isEnabled(vaultId, scan.chainId);
-        });
 
         this.vaultToMap.set(vaultId, prevTokenScans);
       });
@@ -494,28 +516,26 @@ export class TokenScanService {
               .toBigInt()
               .toString(10);
 
-            if (amount !== "0") {
-              // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
-              //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
-              if (tokenScan.infos.length === 0) {
-                tokenScan.infos.push({
-                  starknetHexAddress,
-                  assets: [
-                    {
-                      currency,
-                      amount,
-                    },
-                  ],
-                });
-              } else {
-                if (
-                  tokenScan.infos[0].starknetHexAddress === starknetHexAddress
-                ) {
-                  tokenScan.infos[0].assets.push({
+            // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
+            //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
+            if (tokenScan.infos.length === 0) {
+              tokenScan.infos.push({
+                starknetHexAddress,
+                assets: [
+                  {
                     currency,
                     amount,
-                  });
-                }
+                  },
+                ],
+              });
+            } else {
+              if (
+                tokenScan.infos[0].starknetHexAddress === starknetHexAddress
+              ) {
+                tokenScan.infos[0].assets.push({
+                  currency,
+                  amount,
+                });
               }
             }
           }
@@ -605,40 +625,125 @@ export class TokenScanService {
           );
         }
 
-        let hasNonZeroAmount = false;
-
-        for (const bitcoinScanInfo of bitcoinScanInfos) {
-          // 우선 main currency만 처리한다.
-          if (
-            bitcoinScanInfo.assets.length > 0 &&
-            bitcoinScanInfo.assets[0].amount !== "0"
-          ) {
-            hasNonZeroAmount = true;
-            break;
-          }
-        }
-
-        // 하나라도 0이 아닌 값이 있으면 연결된 모든 체인에 대해 토큰 스캔 정보를 추가한다.
-        if (hasNonZeroAmount) {
-          tokenScan.infos.push(...bitcoinScanInfos);
-        }
+        tokenScan.infos.push(...bitcoinScanInfos);
       } else {
         const bitcoinScanInfo = await getBitcoinScanInfo(
           vaultId,
           chainId,
-          false
+          true
         );
-
         if (bitcoinScanInfo) {
           tokenScan.infos.push(bitcoinScanInfo);
         }
       }
     }
-
     if (tokenScan.infos.length > 0) {
       return tokenScan;
     }
 
     return undefined;
+  }
+
+  dismissNewTokenFoundInHome(vaultId: string) {
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    for (const prevTokenScan of prevTokenScans) {
+      prevTokenScan.dismissedInfos = prevTokenScan.infos;
+    }
+    this.vaultToMap.set(vaultId, prevTokenScans);
+  }
+
+  resetDismiss(vaultId: string) {
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    for (const prevTokenScan of prevTokenScans) {
+      prevTokenScan.dismissedInfos = undefined;
+    }
+    this.vaultToMap.set(vaultId, prevTokenScans);
+  }
+
+  public isMeaningfulTokenScanChangeBetweenDismissed(
+    tokenScan: TokenScan
+  ): boolean {
+    if (!tokenScan.dismissedInfos || tokenScan.dismissedInfos.length === 0) {
+      return tokenScan.infos.length > 0;
+    }
+
+    const makeKey = (info: TokenScanInfo): string | undefined => {
+      if (info.bech32Address) return `bech32:${info.bech32Address}`;
+      if (info.ethereumHexAddress) return `eth:${info.ethereumHexAddress}`;
+      if (info.starknetHexAddress) return `stark:${info.starknetHexAddress}`;
+      if (info.bitcoinAddress?.bech32Address)
+        return `btc:${info.bitcoinAddress.bech32Address}`;
+      if (info.coinType != null) return `coin:${info.coinType}`;
+      return undefined;
+    };
+
+    const toBigIntSafe = (v: string): bigint | undefined => {
+      try {
+        return BigInt(v);
+      } catch {
+        return undefined;
+      }
+    };
+
+    const dismissedTokenInfosMap = new Map<string, TokenScanInfo>();
+    for (const info of tokenScan.dismissedInfos ?? []) {
+      const key = makeKey(info);
+      if (key) {
+        dismissedTokenInfosMap.set(key, info);
+      }
+    }
+
+    for (const info of tokenScan.infos) {
+      const key = makeKey(info);
+      if (!key) {
+        continue;
+      }
+
+      const dismissedTokenInfo = dismissedTokenInfosMap.get(key);
+
+      if (!dismissedTokenInfo) {
+        if (info.assets.length > 0) {
+          return true;
+        }
+        continue;
+      }
+
+      const dismissedAssetMap = new Map<string, Asset>();
+      for (const asset of dismissedTokenInfo.assets) {
+        dismissedAssetMap.set(asset.currency.coinMinimalDenom, asset);
+      }
+
+      for (const asset of info.assets) {
+        const prevAsset = dismissedAssetMap.get(
+          asset.currency.coinMinimalDenom
+        );
+
+        // 없던 토큰이 생긴경우
+        if (!prevAsset) {
+          return true;
+        }
+
+        const prevAmount = toBigIntSafe(prevAsset.amount);
+        const curAmount = toBigIntSafe(asset.amount);
+        if (prevAmount == null || curAmount == null) {
+          continue;
+        }
+
+        // 이전에 0이였다가 밸런스가 생긴경우.
+        if (prevAmount === BigInt(0) && curAmount > BigInt(0)) {
+          return true;
+        }
+
+        // 이전 밸런스에 배해서 10% 밸런스가 증가한 경우
+        if (
+          prevAmount > BigInt(0) &&
+          curAmount * BigInt(10) >= prevAmount * BigInt(11)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

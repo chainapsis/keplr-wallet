@@ -1,10 +1,14 @@
 {
   "name": "@keplr-wallet/proto-types",
-  "version": "0.12.300-rc.0",
+  "version": "0.12.305",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainapsis/keplr-wallet.git"
   },
   "scripts": {
     "clean": "npx zx ./proto-types-gen/scripts/clean.mjs; rm -rf node_modules; rm -rf proto-types-gen/build; rm -rf proto-types-gen/src",
