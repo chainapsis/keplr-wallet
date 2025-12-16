@@ -49,6 +49,11 @@ export class KeplrQRCodeModalV2 {
     }
   }
 
+  /**
+   * Opens the QR code modal with the provided URI.
+   * @param uri - The WalletConnect URI to display in the QR code
+   * @param cb - Callback function to execute when the modal is closed (used for cleanup logic)
+   */
   open(uri: string, cb: any) {
     const wrapper = document.createElement("div");
     wrapper.setAttribute("id", "keplr-qrcode-modal-v2");
