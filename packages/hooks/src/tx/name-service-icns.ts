@@ -173,8 +173,17 @@ export class ICNSNameService implements NameService {
         },
       });
 
+      const resolverChain = this.chainGetter.getModularChain(
+        this._icns.chainId
+      );
+      if (!("cosmos" in resolverChain)) {
+        throw new Error(
+          "ICNS resolver deployment chain must be a cosmos chain"
+        );
+      }
+
       const res = await simpleFetch<{ data?: { bech32_address: string } }>(
-        chainInfo.cosmos.rest,
+        resolverChain.cosmos.rest,
         `/cosmwasm/wasm/v1/contract/${
           this._icns.resolverContractAddress
         }/smart/${Buffer.from(queryData).toString("base64")}`
