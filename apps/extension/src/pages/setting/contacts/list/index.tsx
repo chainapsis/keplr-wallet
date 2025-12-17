@@ -49,26 +49,12 @@ export const SettingContactsList: FunctionComponent = observer(() => {
     }
   }, [chainStore.modularChainInfos, paramChainId, setSearchParams]);
 
-  const items = chainStore.modularChainInfos
-    .map((chainInfo) => {
-      return {
-        key: chainInfo.chainId,
-        label: chainInfo.chainName,
-      };
-    })
-    .concat(
-      chainStore.groupedModularChainInfos
-        .filter(
-          (modularChainInfo) =>
-            "starknet" in modularChainInfo || "bitcoin" in modularChainInfo
-        )
-        .map((modularChainInfo) => {
-          return {
-            key: modularChainInfo.chainId,
-            label: modularChainInfo.chainName,
-          };
-        })
-    );
+  const items = chainStore.groupedModularChainInfos.map((modularChainInfo) => {
+    return {
+      key: modularChainInfo.chainId,
+      label: modularChainInfo.chainName,
+    };
+  });
 
   const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
 
