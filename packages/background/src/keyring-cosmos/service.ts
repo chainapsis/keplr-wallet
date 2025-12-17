@@ -1676,12 +1676,13 @@ Salt: ${salt}`;
     chainId: string
   ) {
     if (
-      !chainId.startsWith("evmos_") &&
       !chainId.startsWith("injective") &&
-      !chainId.startsWith("dymension_") &&
       !chainId.startsWith("nim_") &&
-      !chainId.startsWith("dimension_") &&
-      !chainId.startsWith("zetachain_") &&
+      // NOTE: disable xpla and dymension as EIP712 signing is not supported on cosmos/evm module atm.
+      // !chainId.startsWith("dymension_") &&
+      // !chainId.startsWith("dimension_") &&
+      // NOTE: disable zetachain as it has bug where legacy config and cosmos/evm module are mixed up.
+      // !chainId.startsWith("zetachain_") &&
       !chainId.startsWith("eip155:")
     ) {
       throw new KeplrError(
