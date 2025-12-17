@@ -8,15 +8,19 @@ export function useTotalPrices() {
     useStakedTotalPrice();
 
   const totalPrice = useMemo(() => {
-    if (!spendableTotalPrice) {
+    if (spendableTotalPrice && stakedTotalPrice) {
+      return spendableTotalPrice.add(stakedTotalPrice);
+    }
+
+    if (spendableTotalPrice) {
       return spendableTotalPrice;
     }
 
-    if (!stakedTotalPrice) {
+    if (stakedTotalPrice) {
       return stakedTotalPrice;
     }
 
-    return spendableTotalPrice.add(stakedTotalPrice);
+    return undefined;
   }, [spendableTotalPrice, stakedTotalPrice]);
 
   return {
