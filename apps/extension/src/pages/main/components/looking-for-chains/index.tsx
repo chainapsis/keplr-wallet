@@ -139,7 +139,12 @@ export const LookingForChainItem: FunctionComponent<{
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {
               try {
-                if ("cosmos" in chainInfo && chainInfo.cosmos.bech32Config) {
+                const isCosmosChain =
+                  "cosmos" in chainInfo && chainInfo.cosmos.bech32Config;
+                const isEvmOnlyChain =
+                  "evm" in chainInfo && !("cosmos" in chainInfo);
+
+                if (isCosmosChain || isEvmOnlyChain) {
                   const convertedChainInfo =
                     convertModularChainInfoToChainInfo(chainInfo);
 
@@ -156,7 +161,8 @@ export const LookingForChainItem: FunctionComponent<{
 
                   dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
                 }
-              } catch {
+              } catch (e) {
+                console.error("Failed to suggest chain", e);
                 return;
               }
             }

@@ -68,7 +68,7 @@ export function convertModularChainInfoToChainInfo(
       chainName: modularChainInfo.chainName,
       chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
       rpc: modularChainInfo.evm.rpc,
-      rest: "",
+      rest: modularChainInfo.evm.rpc, // NOTE: When adding a suggested chain, the 'rest' field must not be empty, so we use 'rpc' instead.
       bip44: modularChainInfo.evm.bip44,
       currencies: modularChainInfo.evm.currencies,
       feeCurrencies: modularChainInfo.evm.feeCurrencies,
