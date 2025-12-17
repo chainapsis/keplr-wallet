@@ -409,6 +409,11 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
               );
               return true;
             } catch {
+              // NOTE: 이미 enable된 체인이면 일단 표시되도록 하여 사용자가 disable 처리할 수 있도록 한다.
+              if (chainStore.isEnabledChain(cosmosChainInfo.chainId)) {
+                return true;
+              }
+
               return false;
             }
           })();

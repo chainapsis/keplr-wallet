@@ -128,6 +128,10 @@ export const useGetAllNonNativeChain = ({
               );
               return true;
             } catch {
+              // NOTE: 이미 enable된 체인이면 일단 표시되도록 하여 사용자가 disable 처리할 수 있도록 한다.
+              if (chainStore.isEnabledChain(chainInfo.chainId)) {
+                return true;
+              }
               return false;
             }
           })();
@@ -154,7 +158,13 @@ export const useGetAllNonNativeChain = ({
     }
 
     setLedgerFilteredChains(chains);
-  }, [chains, fallbackEthereumLedgerApp, fallbackStarknetLedgerApp, keyType]);
+  }, [
+    chainStore,
+    chains,
+    fallbackEthereumLedgerApp,
+    fallbackStarknetLedgerApp,
+    keyType,
+  ]);
 
   const searchedChains = useSearch(ledgerFilteredChains, search, searchFields);
 

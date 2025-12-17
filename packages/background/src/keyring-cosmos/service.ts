@@ -1676,6 +1676,7 @@ Salt: ${salt}`;
     chainId: string
   ) {
     if (
+      // !chainId.startsWith("evmos_") &&
       !chainId.startsWith("injective") &&
       !chainId.startsWith("nim_") &&
       // NOTE: disable xpla and dymension as EIP712 signing is not supported on cosmos/evm module atm.
