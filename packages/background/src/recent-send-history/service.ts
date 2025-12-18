@@ -3042,7 +3042,6 @@ export class RecentSendHistoryService {
       }
       return ibcHistory.find((h) => h.error != null);
     })();
-    console.log("targetChannel", targetChannel);
     const isSwapTargetChannel = !!(
       targetChannel &&
       swapContext &&
@@ -3352,6 +3351,11 @@ export class RecentSendHistoryService {
       const prevChainInfo = this.chainsService.getChainInfo(prevChainId);
       if (prevChainInfo) {
         const queryEvents: any = {
+          // acknowledge_packet과는 다르게 timeout_packet은 이전의 체인의 이벤트로부터만 알 수 있다.
+          // 방법이 없기 때문에 여기서 이전의 체인으로부터 subscribe를 해서 이벤트를 받아야 한다.
+          // 하지만 이 경우 ibc error tracking 로직에서 이것과 똑같은 subscription을 한번 더 하게 된다.
+          // 이미 로직이 많이 복잡하기 때문에 로직을 덜 복잡하게 하기 위해서 이러한 비효율성(?)을 감수한다.
+          // "timeout_packet.packet_src_port": targetChannel.portId,
           "timeout_packet.packet_src_channel": targetChannel.channelId,
           "timeout_packet.packet_sequence": targetChannel.sequence,
         };
@@ -3429,23 +3433,18 @@ export class RecentSendHistoryService {
       return;
     }
 
+    const queryEvents: any = {
+      // "recv_packet.packet_src_port": targetChannel.portId,
+      "recv_packet.packet_dst_channel": targetChannel.dstChannelId,
+      "recv_packet.packet_sequence": targetChannel.sequence,
+    };
+
     const txTracer = new TendermintTxTracer(
       counterpartyChainInfo.rpc,
       "/websocket"
     );
     txTracer.addEventListener("close", onClose);
     txTracer.addEventListener("error", onError);
-
-    // recv_packet 이벤트 감시 (dstChannelId가 있으면 사용, 없으면 src_channel 사용)
-    const queryEvents: Record<string, string> = targetChannel.dstChannelId
-      ? {
-          "recv_packet.packet_dst_channel": targetChannel.dstChannelId,
-          "recv_packet.packet_sequence": sequence,
-        }
-      : {
-          "recv_packet.packet_src_channel": targetChannel.channelId,
-          "recv_packet.packet_sequence": sequence,
-        };
 
     txTracer.traceTx(queryEvents).then((res) => {
       txTracer.close();

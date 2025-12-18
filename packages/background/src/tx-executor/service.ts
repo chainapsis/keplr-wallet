@@ -170,7 +170,6 @@ export class BackgroundTxExecutorService {
     }
   }
 
-  @action
   async recordAndExecuteTxs<T extends TxExecutionType>(
     env: Env,
     vaultId: string,
@@ -226,7 +225,9 @@ export class BackgroundTxExecutorService {
       }
     }
 
-    const id = (this.recentTxExecutionSeq++).toString();
+    const id = runInAction(() => {
+      return (this.recentTxExecutionSeq++).toString();
+    });
 
     const execution = {
       id,
@@ -242,7 +243,9 @@ export class BackgroundTxExecutorService {
       ...(type !== TxExecutionType.UNDEFINED ? { historyData } : {}),
     } as TxExecution;
 
-    this.recentTxExecutionMap.set(id, execution);
+    runInAction(() => {
+      this.recentTxExecutionMap.set(id, execution);
+    });
 
     return await this.executeTxs(id);
   }
