@@ -4196,29 +4196,167 @@ export class RecentSendHistoryService {
   // ============================================================================
   protected readonly onChainRemoved = (chainInfo: ChainInfo) => {
     const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
+    try {
+      this.removeIBCHistoriesByChainIdentifier(chainIdentifier);
+      this.removeSkipHistoriesByChainIdentifier(chainIdentifier);
+      this.removeSwapV2HistoriesByChainIdentifier(chainIdentifier);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-    runInAction(() => {
-      const removingIds: string[] = [];
-      for (const history of this.recentIBCHistoryMap.values()) {
-        if (
-          ChainIdHelper.parse(history.chainId).identifier === chainIdentifier
-        ) {
-          removingIds.push(history.id);
-          continue;
-        }
+  @action
+  protected removeIBCHistoriesByChainIdentifier(chainIdentifier: string): void {
+    const removingIds: string[] = [];
+    for (const history of this.recentIBCHistoryMap.values()) {
+      if (ChainIdHelper.parse(history.chainId).identifier === chainIdentifier) {
+        removingIds.push(history.id);
+        continue;
+      }
 
-        if (
-          ChainIdHelper.parse(history.destinationChainId).identifier ===
+      if (
+        ChainIdHelper.parse(history.destinationChainId).identifier ===
+        chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        history.ibcHistory.some((history) => {
+          return (
+            ChainIdHelper.parse(history.counterpartyChainId).identifier ===
+            chainIdentifier
+          );
+        })
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+    }
+
+    for (const id of removingIds) {
+      this.recentIBCHistoryMap.delete(id);
+    }
+  }
+
+  @action
+  protected removeSkipHistoriesByChainIdentifier(
+    chainIdentifier: string
+  ): void {
+    const removingIds: string[] = [];
+    for (const history of this.recentSkipHistoryMap.values()) {
+      if (ChainIdHelper.parse(history.chainId).identifier === chainIdentifier) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        ChainIdHelper.parse(history.destinationChainId).identifier ===
+        chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        ChainIdHelper.parse(history.destinationAsset.chainId).identifier ===
+        chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        history.simpleRoute.some(
+          (route) =>
+            ChainIdHelper.parse(route.chainId).identifier === chainIdentifier
+        )
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        history.swapRefundInfo &&
+        ChainIdHelper.parse(history.swapRefundInfo.chainId).identifier ===
           chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (history.transferAssetRelease) {
+        const chainId = history.transferAssetRelease.chain_id;
+        const isOnlyEvm = parseInt(chainId) > 0;
+        const chainIdInKeplr = isOnlyEvm ? `eip155:${chainId}` : chainId;
+        if (
+          ChainIdHelper.parse(chainIdInKeplr).identifier === chainIdentifier
+        ) {
+          removingIds.push(history.id);
+          continue;
+        }
+      }
+    }
+
+    for (const id of removingIds) {
+      this.recentSkipHistoryMap.delete(id);
+    }
+  }
+
+  @action
+  protected removeSwapV2HistoriesByChainIdentifier(
+    chainIdentifier: string
+  ): void {
+    const removingIds: string[] = [];
+    for (const history of this.recentSwapV2HistoryMap.values()) {
+      if (
+        ChainIdHelper.parse(history.fromChainId).identifier === chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        ChainIdHelper.parse(history.toChainId).identifier === chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        history.simpleRoute.some(
+          (route) =>
+            ChainIdHelper.parse(route.chainId).identifier === chainIdentifier
+        )
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (
+        history.assetLocationInfo &&
+        ChainIdHelper.parse(history.assetLocationInfo.chainId).identifier ===
+          chainIdentifier
+      ) {
+        removingIds.push(history.id);
+        continue;
+      }
+
+      if (history.additionalTrackingData) {
+        if (
+          ChainIdHelper.parse(history.additionalTrackingData.chainId)
+            .identifier === chainIdentifier
         ) {
           removingIds.push(history.id);
           continue;
         }
 
         if (
-          history.ibcHistory.some((history) => {
+          history.additionalTrackingData.type === "cosmos-ibc" &&
+          history.additionalTrackingData.ibcHistory.some((h) => {
             return (
-              ChainIdHelper.parse(history.counterpartyChainId).identifier ===
+              ChainIdHelper.parse(h.counterpartyChainId).identifier ===
               chainIdentifier
             );
           })
@@ -4227,12 +4365,12 @@ export class RecentSendHistoryService {
           continue;
         }
       }
+    }
 
-      for (const id of removingIds) {
-        this.recentIBCHistoryMap.delete(id);
-      }
-    });
-  };
+    for (const id of removingIds) {
+      this.recentSwapV2HistoryMap.delete(id);
+    }
+  }
 
   // ============================================================================
   // Helper Functions
