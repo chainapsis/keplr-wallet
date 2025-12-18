@@ -2050,8 +2050,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       ibcSwapConfigs.amountConfig.outAmount,
                       priceStore.defaultVsCurrency
                     );
-                    const lossAmount =
-                      inPrice && outPrice ? inPrice.sub(outPrice) : undefined;
+                    if (!inPrice || !outPrice) {
+                      return undefined;
+                    }
+                    const lossAmount = inPrice.sub(outPrice);
                     return intl.formatMessage(
                       {
                         id: "page.ibc-swap.warning.high-price-impact-title",
