@@ -600,15 +600,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const evmOutcome = gasSimulator.evmSimulationOutcome;
   const isCosmosOneClickSwapEnabled = !shouldTopUp;
   const isEvmOneClickSwapEnabled =
-    isInChainEVMOnly &&
-    (evmOutcome === EvmGasSimulationOutcome.TX_SIMULATED ||
-      evmOutcome === EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED);
+    evmOutcome === EvmGasSimulationOutcome.TX_SIMULATED ||
+    evmOutcome === EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED;
 
   const oneClickSwapEnabled =
     swapConfigs.amountConfig.isQuoteReady &&
     !swapConfigs.amountConfig.requiresMultipleTxs &&
     !isHardwareWallet &&
-    (isCosmosOneClickSwapEnabled || isEvmOneClickSwapEnabled);
+    (isInChainEVMOnly ? isEvmOneClickSwapEnabled : isCosmosOneClickSwapEnabled);
 
   const { showUSDNWarning, showCelestiaWarning } = getSwapWarnings(
     swapConfigs.amountConfig.currency,
