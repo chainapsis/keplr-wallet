@@ -562,7 +562,13 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
         await applyEnableChange(first.chainId, true);
         await chainStore.disableChainInfoInUIWithVaultId(
           vaultId,
-          ...rest.map((ci) => ci.chainId)
+          ...rest.flatMap((ci) => {
+            const ids = [ci.chainId];
+            if (ci.linkedModularChainInfos) {
+              ids.push(...ci.linkedModularChainInfos.map((lc) => lc.chainId));
+            }
+            return ids;
+          })
         );
       }
     } else {

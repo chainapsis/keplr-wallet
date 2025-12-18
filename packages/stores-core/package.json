@@ -1,11 +1,15 @@
 {
   "name": "@keplr-wallet/stores-core",
-  "version": "0.12.300",
+  "version": "0.12.305",
   "main": "build/index.js",
   "author": "chainapsis",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chainapsis/keplr-wallet.git"
   },
   "scripts": {
     "clean": "rm -rf node_modules; rm -rf build",
@@ -16,13 +20,13 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/background": "0.12.300",
-    "@keplr-wallet/common": "0.12.300",
-    "@keplr-wallet/cosmos": "0.12.300",
-    "@keplr-wallet/router": "0.12.300",
-    "@keplr-wallet/simple-fetch": "0.12.300",
-    "@keplr-wallet/stores": "0.12.300",
-    "@keplr-wallet/types": "0.12.300",
+    "@keplr-wallet/background": "0.12.305",
+    "@keplr-wallet/common": "0.12.305",
+    "@keplr-wallet/cosmos": "0.12.305",
+    "@keplr-wallet/router": "0.12.305",
+    "@keplr-wallet/simple-fetch": "0.12.305",
+    "@keplr-wallet/stores": "0.12.305",
+    "@keplr-wallet/types": "0.12.305",
     "buffer": "^6.0.3"
   },
   "peerDependencies": {
