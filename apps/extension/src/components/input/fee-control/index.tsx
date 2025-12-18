@@ -297,11 +297,15 @@ export const FeeControl: FunctionComponent<{
                         const chainInfo = chainStore.getModularChainInfoImpl(
                           feeConfig.chainId
                         );
+
+                        const stakeCurrency =
+                          "cosmos" in chainInfo.embedded
+                            ? chainInfo.embedded.cosmos.stakeCurrency
+                            : undefined;
+
                         return [
                           new CoinPretty(
-                            ("cosmos" in chainInfo.embedded &&
-                              chainInfo.embedded.cosmos.stakeCurrency) ||
-                              chainInfo.getCurrencies()[0],
+                            stakeCurrency || chainInfo.getCurrencies()[0],
                             new Dec(0)
                           ),
                         ];
