@@ -102,9 +102,7 @@ export const useGetSearchChains = ({
 
         // search text가 eth 또는 eth~ethereum일 경우 evm 체인은 모두 보여준다.
         if (trimSearch.startsWith("eth")) {
-          const isEVM = !("bech32Config" in chainInfo);
-
-          if (isEVM) {
+          if (chainStore.isEvmChain(chainInfo.chainId)) {
             return true;
           }
         }
