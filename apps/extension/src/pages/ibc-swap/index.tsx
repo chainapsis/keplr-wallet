@@ -1563,6 +1563,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ""
           );
 
+          // reset amount config
+          swapConfigs.amountConfig.setValue("");
+
           // update balance for inChainId
           updateBalanceCallback?.();
 
@@ -1971,10 +1974,13 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               (shouldTopUp && !isTopUpAvailable)
             }
             text={
-              shouldTopUp && remainingText
-                ? remainingText
+              isInChainEVMOnly &&
+              evmOutcome === EvmGasSimulationOutcome.TX_BUNDLE_SIMULATED
+                ? intl.formatMessage({
+                    id: "page.ibc-swap.button.hold-to-approve-and-swap",
+                  })
                 : intl.formatMessage({
-                    id: "page.ibc-swap.button.hold-to-approve",
+                    id: "page.ibc-swap.button.hold-to-swap",
                   })
             }
             holdingText={intl.formatMessage({

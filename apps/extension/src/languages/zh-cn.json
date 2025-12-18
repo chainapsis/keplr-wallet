@@ -405,7 +405,8 @@
 
   "page.ibc-swap.title.swap": "兑换",
   "page.ibc-swap.button.next": "交换",
-  "page.ibc-swap.button.hold-to-approve": "按住以批准并交换",
+  "page.ibc-swap.button.hold-to-swap": "按住以交换",
+  "page.ibc-swap.button.hold-to-approve-and-swap": "按住以批准并交换",
   "page.ibc-swap.button.keep-holding": "请继续按住...",
   "page.ibc-swap.error.no-route-found": "找不到此兑换的路线",
   "page.ibc-swap.warning.unable-to-populate-price": "无法从Coingecko检索到{assets}的价格。在点击“交换”之前从其他来源检查输入和输出的法定价值。",

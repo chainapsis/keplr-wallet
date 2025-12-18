@@ -441,7 +441,8 @@
 
   "page.ibc-swap.title.swap": "Swap",
   "page.ibc-swap.button.next": "Swap",
-  "page.ibc-swap.button.hold-to-approve": "Hold to Approve & Swap",
+  "page.ibc-swap.button.hold-to-swap": "Hold to Swap",
+  "page.ibc-swap.button.hold-to-approve-and-swap": "Hold to Approve & Swap",
   "page.ibc-swap.button.keep-holding": "Keep holding...",
   "page.ibc-swap.error.no-route-found": "No routes found for this swap",
   "page.ibc-swap.warning.unable-to-populate-price": "Unable to retrieve {assets} price from Coingecko. Check the fiat values of input and output from other sources before clicking \"Swap\".",
