@@ -110,10 +110,14 @@ export class CosmwasmAccountImpl {
         throw new Error("Currency is not cw20");
       }
 
+      const chainInfo = this.chainGetter.getModularChain(this.chainId);
+      if (!("cosmos" in chainInfo)) {
+        throw new Error("cosmos module is not supported on this chain");
+      }
+
       Bech32Address.validate(
         recipient,
-        this.chainGetter.getChain(this.chainId).bech32Config
-          ?.bech32PrefixAccAddr
+        chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
       );
 
       return this.makeExecuteContractTx(
@@ -160,9 +164,14 @@ export class CosmwasmAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       contractAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixAccAddr
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
     const msg = {

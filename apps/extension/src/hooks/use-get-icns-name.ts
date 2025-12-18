@@ -5,7 +5,10 @@ export const useGetIcnsName = (bech32Address?: string) => {
   const icnsPrimaryName = (() => {
     if (
       uiConfigStore.icnsInfo &&
-      chainStore.hasChain(uiConfigStore.icnsInfo.chainId) &&
+      chainStore.hasModularChain(uiConfigStore.icnsInfo.chainId) &&
+      chainStore
+        .getModularChainInfoImpl(uiConfigStore.icnsInfo.chainId)
+        .matchModule("cosmos") &&
       bech32Address
     ) {
       const queries = queriesStore.get(uiConfigStore.icnsInfo.chainId);

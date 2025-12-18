@@ -35,40 +35,26 @@ export const SettingContactsList: FunctionComponent = observer(() => {
   // Handle "chainId" state by search params to persist the state between page changes.
   const paramChainId = searchParams.get("chainId");
 
-  const chainId = paramChainId || chainStore.chainInfos[0].chainId;
+  const chainId = paramChainId || chainStore.modularChainInfos[0].chainId;
   const confirm = useConfirm();
 
   useLayoutEffect(() => {
     if (!paramChainId) {
       setSearchParams(
-        { chainId: chainStore.chainInfos[0].chainId },
+        { chainId: chainStore.modularChainInfos[0].chainId },
         {
           replace: true,
         }
       );
     }
-  }, [chainStore.chainInfos, paramChainId, setSearchParams]);
+  }, [chainStore.modularChainInfos, paramChainId, setSearchParams]);
 
-  const items = chainStore.chainInfos
-    .map((chainInfo) => {
-      return {
-        key: chainInfo.chainId,
-        label: chainInfo.chainName,
-      };
-    })
-    .concat(
-      chainStore.groupedModularChainInfos
-        .filter(
-          (modularChainInfo) =>
-            "starknet" in modularChainInfo || "bitcoin" in modularChainInfo
-        )
-        .map((modularChainInfo) => {
-          return {
-            key: modularChainInfo.chainId,
-            label: modularChainInfo.chainName,
-          };
-        })
-    );
+  const items = chainStore.groupedModularChainInfos.map((modularChainInfo) => {
+    return {
+      key: modularChainInfo.chainId,
+      label: modularChainInfo.chainName,
+    };
+  });
 
   const addresses = uiConfigStore.addressBookConfig.getAddressBook(chainId);
 

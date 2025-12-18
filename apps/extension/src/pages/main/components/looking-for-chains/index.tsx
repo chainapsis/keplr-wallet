@@ -2,7 +2,7 @@ import React, { FunctionComponent } from "react";
 import { Box } from "../../../../components/box";
 import { TokenTitleView } from "../token";
 import { ColorPalette } from "../../../../styles";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { Gutter } from "../../../../components/gutter";
 import { ChainImageFallback } from "../../../../components/image";
 import { Column, Columns } from "../../../../components/column";
@@ -18,6 +18,7 @@ import { dispatchGlobalEventExceptSelf } from "../../../../utils/global-events";
 import { Stack } from "../../../../components/stack";
 import { NativeChainMarkIcon } from "../../../../components/icon";
 import { useNavigate } from "react-router";
+import { convertModularChainInfoToChainInfo } from "@keplr-wallet/common";
 import { useKeyCoinTypeFinalize } from "../../../manage-chains/hooks/use-key-coin-type-finalize";
 import { determineLedgerApp } from "../../../../utils/determine-ledger-app";
 
@@ -25,7 +26,7 @@ export const LookingForChains: FunctionComponent<{
   lookingForChains: {
     embedded: boolean;
     stored: boolean;
-    chainInfo: ChainInfo | ModularChainInfo;
+    chainInfo: ModularChainInfo;
   }[];
   search: string;
 }> = ({ lookingForChains }) => {
@@ -55,7 +56,7 @@ export const LookingForChains: FunctionComponent<{
 };
 
 export const LookingForChainItem: FunctionComponent<{
-  chainInfo: ChainInfo | ModularChainInfo;
+  chainInfo: ModularChainInfo;
   embedded: boolean;
   stored: boolean;
 }> = observer(({ chainInfo, embedded, stored }) => {
@@ -138,15 +139,30 @@ export const LookingForChainItem: FunctionComponent<{
             // add the chain internally and refresh the store.
             if (!embedded && !stored) {
               try {
-                if ("bech32Config" in chainInfo) {
-                  await window.keplr?.experimentalSuggestChain(chainInfo);
+                const isCosmosChain =
+                  "cosmos" in chainInfo && chainInfo.cosmos.bech32Config;
+                const isEvmOnlyChain =
+                  "evm" in chainInfo && !("cosmos" in chainInfo);
+
+                if (isCosmosChain || isEvmOnlyChain) {
+                  const convertedChainInfo =
+                    convertModularChainInfoToChainInfo(chainInfo);
+
+                  if (!convertedChainInfo) {
+                    return;
+                  }
+
+                  await window.keplr?.experimentalSuggestChain(
+                    convertedChainInfo
+                  );
                   await keyRingStore.refreshKeyRingStatus();
                   await chainStore.updateChainInfosFromBackground();
                   await chainStore.updateEnabledChainIdentifiersFromBackground();
 
                   dispatchGlobalEventExceptSelf("keplr_suggested_chain_added");
                 }
-              } catch {
+              } catch (e) {
+                console.error("Failed to suggest chain", e);
                 return;
               }
             }
@@ -157,8 +173,12 @@ export const LookingForChainItem: FunctionComponent<{
                 chainName: chainInfo.chainName,
               });
 
-              if (chainStore.hasChain(chainId)) {
-                const chainInfo = chainStore.getChain(chainId);
+              if (
+                chainStore.hasModularChain(chainId) &&
+                chainStore
+                  .getModularChainInfoImpl(chainId)
+                  .matchModule("cosmos")
+              ) {
                 const needModal = await needFinalizeKeyCoinTypeAction(
                   keyRingStore.selectedKeyInfo.id,
                   chainInfo
@@ -171,10 +191,9 @@ export const LookingForChainItem: FunctionComponent<{
 
               if (chainStore.hasModularChain(chainId)) {
                 if (keyRingStore.selectedKeyInfo?.type === "ledger") {
-                  const modularChainInfo = chainStore.getModularChain(chainId);
                   const ledgerApp = determineLedgerApp(
                     chainStore,
-                    modularChainInfo,
+                    chainInfo,
                     chainId
                   );
 

@@ -10,6 +10,7 @@ import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
 import { NEUTRON_CHAIN_ID, NOBLE_CHAIN_ID } from "../config.ui";
 import { ModularChainInfo } from "@keplr-wallet/types";
 import { ClaimAllEachState } from "../stores/claim-rewards-state";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export interface ViewClaimToken extends Omit<ViewToken, "chainInfo"> {
   modularChainInfo: ModularChainInfo;
@@ -78,19 +79,15 @@ export function useRewards() {
           });
         }
       } else if ("cosmos" in modularChainInfo) {
-        const isEVMOnly = chainStore.isEvmOnlyChain(chainId);
-        if (isEVMOnly) {
-          continue;
-        }
-
         const accountAddress = account.bech32Address;
-        const chainInfo = chainStore.getChain(chainId);
         const queries = queriesStore.get(chainId);
 
         if (chainId === NOBLE_CHAIN_ID) {
           const queryYield =
             queries.noble.queryYield.getQueryBech32Address(accountAddress);
-          const usdnCurrency = chainInfo.findCurrency("uusdn") || USDN_CURRENCY;
+          const usdnCurrency =
+            chainStore.getModularChainInfoImpl(chainId).findCurrency("uusdn") ||
+            USDN_CURRENCY;
           const rawAmount = queryYield.claimableAmount;
           const amount = new CoinPretty(usdnCurrency, rawAmount);
           if (amount.toDec().gt(new Dec(0))) {
@@ -110,19 +107,22 @@ export function useRewards() {
           queries.cosmos.queryRewards.getQueryBech32Address(accountAddress);
 
         const targetDenom = (() => {
-          if (chainInfo.chainIdentifier === "dydx-mainnet") {
+          const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
+          if (chainIdentifier === "dydx-mainnet") {
             return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
           }
 
-          if (chainInfo.chainIdentifier === "elys") {
+          if (chainIdentifier === "elys") {
             return "ueden";
           }
 
-          return chainInfo.stakeCurrency?.coinMinimalDenom;
+          return modularChainInfo.cosmos.stakeCurrency?.coinMinimalDenom;
         })();
 
         if (targetDenom) {
-          const currency = chainInfo.findCurrency(targetDenom);
+          const currency = chainStore
+            .getModularChainInfoImpl(chainId)
+            .findCurrency(targetDenom);
           if (currency) {
             const reward = queryRewards.rewards.find(
               (r) => r.currency.coinMinimalDenom === targetDenom

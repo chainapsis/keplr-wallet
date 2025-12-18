@@ -27,9 +27,12 @@ export class ObservableQueryTxFeesFeeTokens extends ObservableChainQuery<FeeToke
   ) {
     super.onReceiveResponse(response);
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
     const denoms = response.data.fee_tokens.map((token) => token.denom);
-    chainInfo.addUnknownDenoms(...denoms);
+    chainInfo.addUnknownDenoms({
+      module: "cosmos",
+      coinMinimalDenoms: denoms,
+    });
   }
 
   @computed
@@ -63,9 +66,10 @@ export class ObservableQueryTxFeesFeeTokens extends ObservableChainQuery<FeeToke
 
     const res: FeeCurrency[] = [];
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
     for (const token of this.response.data.fee_tokens) {
-      const currency = chainInfo.findCurrency(token.denom);
+      const currency = this.chainGetter
+        .getModularChainInfoImpl(this.chainId)
+        .findCurrency(token.denom);
       if (currency) {
         res.push(currency);
       }

@@ -1,4 +1,5 @@
 import {
+  convertModularChainInfoToChainInfo,
   DenomHelper,
   KVStore,
   PrefixKVStore,
@@ -9,6 +10,7 @@ import {
   ChainInfo,
   ChainInfoWithoutEndpoints,
   EVMInfo,
+  EVMNativeChainInfo,
   ModularChainInfo,
   StarknetChainInfo,
 } from "@keplr-wallet/types";
@@ -43,8 +45,13 @@ type ChainSuggestedHandler = (
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
-  static getEVMInfo(chainInfo: ChainInfo): EVMInfo | undefined {
-    return chainInfo.evm;
+  static getEVMInfo(
+    chainInfo: ModularChainInfo
+  ): EVMNativeChainInfo | undefined {
+    if ("evm" in chainInfo) {
+      return chainInfo.evm;
+    }
+    return undefined;
   }
 
   @observable.ref
@@ -102,17 +109,48 @@ export class ChainsService {
         ) => void | Promise<void>)
       | undefined
   ) {
-    this.modularChainInfos = embedModularChainInfos.map((modularChainInfo) => {
+    this.modularChainInfos = (
+      embedModularChainInfos as ChainInfoWithCoreTypes[]
+    ).map((modularChainInfo) => {
+      if (
+        modularChainInfo.evm &&
+        modularChainInfo.chainId.split(":")[0] === "eip155"
+      ) {
+        return {
+          chainId: modularChainInfo.chainId,
+          chainName: modularChainInfo.chainName,
+          chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
+          isNative: true,
+          evm: {
+            ...modularChainInfo.evm,
+            currencies: modularChainInfo.currencies,
+            feeCurrencies: modularChainInfo.feeCurrencies,
+            bip44: modularChainInfo.bip44,
+          },
+        };
+      }
+
       if ("currencies" in modularChainInfo) {
         return {
           chainId: modularChainInfo.chainId,
           chainName: modularChainInfo.chainName,
           chainSymbolImageUrl: modularChainInfo.chainSymbolImageUrl,
           cosmos: modularChainInfo,
+          isNative: true,
+          ...(modularChainInfo.evm && {
+            evm: {
+              ...modularChainInfo.evm,
+              currencies: modularChainInfo.currencies,
+              feeCurrencies: modularChainInfo.feeCurrencies,
+              bip44: modularChainInfo.bip44,
+            },
+          }),
         };
       }
-      return modularChainInfo;
+
+      return { ...(modularChainInfo as ModularChainInfo), isNative: true };
     });
+
     this.embedChainInfos = embedModularChainInfos
       .filter(
         (modularChainInfo) =>
@@ -468,7 +506,7 @@ export class ChainsService {
   );
 
   async tryUpdateChainInfoFromRepo(chainId: string): Promise<boolean> {
-    if (!this.hasChainInfo(chainId)) {
+    if (!this.hasModularChainInfo(chainId)) {
       throw new Error(`${chainId} is not registered`);
     }
 
@@ -482,7 +520,7 @@ export class ChainsService {
     const isEvmOnlyChain = this.isEvmOnlyChain(chainId);
     const chainInfo = await this.fetchFromRepo(chainId, isEvmOnlyChain);
 
-    if (!this.hasChainInfo(chainId)) {
+    if (!this.hasModularChainInfo(chainId)) {
       throw new Error(`${chainId} became unregistered after fetching`);
     }
 
@@ -563,16 +601,20 @@ export class ChainsService {
   }
 
   async tryUpdateChainInfoFromRpcOrRest(chainId: string): Promise<boolean> {
-    if (!this.hasChainInfo(chainId)) {
+    if (!this.hasModularChainInfo(chainId)) {
       throw new Error(`${chainId} is not registered`);
     }
 
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
-    const chainInfo = this.getChainInfoOrThrow(chainId);
+    const chainInfo = this.getModularChainInfoOrThrow(chainId);
 
     if (this.isEvmOnlyChain(chainInfo.chainId)) {
       // TODO: evm 체인에서의 chain info 업데이트 로직에 대해서는 나중에 구현한다.
+      return false;
+    }
+
+    if (!("cosmos" in chainInfo)) {
       return false;
     }
 
@@ -590,7 +632,7 @@ export class ChainsService {
             network: string;
           };
         }
-    >(chainInfo.rpc, "/status");
+    >(chainInfo.cosmos.rpc, "/status");
 
     const statusResult = (() => {
       if ("result" in statusResponse.data) {
@@ -607,7 +649,7 @@ export class ChainsService {
     if (chainInfo.chainId !== chainIdFromRPC) {
       chainIdUpdated = true;
 
-      if (!this.hasChainInfo(chainId)) {
+      if (!this.hasModularChainInfo(chainId)) {
         throw new Error(`${chainId} became unregistered after fetching`);
       }
 
@@ -616,16 +658,16 @@ export class ChainsService {
       });
     }
 
-    const toUpdateFeatures = await checkChainFeatures(chainInfo);
+    const toUpdateFeatures = await checkChainFeatures(chainInfo.cosmos);
 
     const featuresUpdated = toUpdateFeatures.length !== 0;
     if (featuresUpdated) {
-      if (!this.hasChainInfo(chainId)) {
+      if (!this.hasModularChainInfo(chainId)) {
         throw new Error(`${chainId} became unregistered after fetching`);
       }
 
       const features = [
-        ...new Set([...toUpdateFeatures, ...(chainInfo.features ?? [])]),
+        ...new Set([...toUpdateFeatures, ...(chainInfo.cosmos.features ?? [])]),
       ];
 
       this.setUpdatedChainInfo(chainId, {
@@ -641,7 +683,7 @@ export class ChainsService {
     chainId: string,
     chainInfo: Partial<Pick<UpdatedChainInfo, "chainId" | "features">>
   ): void {
-    if (!this.hasChainInfo(chainId)) {
+    if (!this.hasModularChainInfo(chainId)) {
       throw new Error(`${chainId} is not registered`);
     }
 
@@ -659,11 +701,16 @@ export class ChainsService {
 
       this.updatedChainInfos = newChainInfos;
     } else {
-      const original = this.getChainInfoOrThrow(chainId);
+      const original = this.getModularChainInfoOrThrow(chainId);
+
+      if (!("cosmos" in original)) {
+        throw new Error(`${chainId} is not a cosmos chain`);
+      }
+
       const newChainInfos = this.updatedChainInfos.slice();
       newChainInfos.push({
         chainId: chainInfo.chainId || original.chainId,
-        features: chainInfo.features || original.features,
+        features: chainInfo.features || original.cosmos.features,
       });
 
       this.updatedChainInfos = newChainInfos;
@@ -686,7 +733,7 @@ export class ChainsService {
       handlerOptions?: Record<string, any>
     ) => {
       // approve 이후에 이미 등록되어있으면 아무것도 하지 않는다...
-      if (this.hasChainInfo(receivedChainInfo.chainId)) {
+      if (this.hasModularChainInfo(receivedChainInfo.chainId)) {
         return;
       }
 
@@ -1151,14 +1198,51 @@ export class ChainsService {
     modularChainInfos: ModularChainInfo[]
   ): ModularChainInfo[] {
     return modularChainInfos.map((modularChainInfo) => {
-      if (this.hasChainInfo(modularChainInfo.chainId)) {
-        const cosmos = this.getChainInfoOrThrow(modularChainInfo.chainId);
+      if ("cosmos" in modularChainInfo) {
+        const chainInfo = convertModularChainInfoToChainInfo(
+          modularChainInfo
+        ) as ChainInfo;
+        const mergedCosmos = this.mergeChainInfosWithDynamics([chainInfo])[0];
+
+        const { evm, ...cosmos } = mergedCosmos;
+
         return {
           chainId: cosmos.chainId,
           chainName: cosmos.chainName,
           chainSymbolImageUrl: cosmos.chainSymbolImageUrl,
           isTestnet: cosmos.isTestnet,
-          cosmos: this.mergeChainInfosWithDynamics([cosmos])[0],
+          isNative: !mergedCosmos.beta,
+          cosmos,
+          ...(!!evm && {
+            evm: {
+              ...evm,
+              currencies: mergedCosmos.currencies,
+              feeCurrencies: mergedCosmos.feeCurrencies,
+              bip44: mergedCosmos.bip44,
+              features: mergedCosmos.features,
+            },
+          }),
+        };
+      }
+
+      if ("evm" in modularChainInfo) {
+        const endpoint = this.getEndpoint(modularChainInfo.chainId);
+
+        const mergedChainInfo = this.mergeChainInfosWithDynamics([
+          convertModularChainInfoToChainInfo(modularChainInfo) as ChainInfo,
+        ])[0];
+
+        return {
+          ...modularChainInfo,
+          isNative:
+            modularChainInfo.isNative ?? !(mergedChainInfo.beta ?? false),
+          evm: {
+            ...modularChainInfo.evm,
+            currencies: mergedChainInfo.currencies,
+            feeCurrencies: mergedChainInfo.feeCurrencies,
+            rpc: endpoint?.rpc || modularChainInfo.evm.rpc,
+            features: mergedChainInfo.features,
+          },
         };
       }
 
@@ -1242,8 +1326,8 @@ export class ChainsService {
   }
 
   isEvmChain(chainId: string): boolean {
-    const chainInfo = this.getChainInfoOrThrow(chainId);
-    return chainInfo.evm !== undefined;
+    const chainInfo = this.getModularChainInfoOrThrow(chainId);
+    return "evm" in chainInfo && chainInfo.evm !== undefined;
   }
 
   isEvmOnlyChain(chainId: string): boolean {
@@ -1251,8 +1335,8 @@ export class ChainsService {
   }
 
   getEVMInfoOrThrow(chainId: string): EVMInfo {
-    const chainInfo = this.getChainInfoOrThrow(chainId);
-    if (chainInfo.evm === undefined) {
+    const chainInfo = this.getModularChainInfoOrThrow(chainId);
+    if (!("evm" in chainInfo) || chainInfo.evm === undefined) {
       throw new Error(`There is no EVM info for ${chainId}`);
     }
 
@@ -1266,11 +1350,38 @@ export class ChainsService {
       ).concat(
         this.mergeChainInfosWithDynamics(this.suggestedChainInfos).map(
           (chainInfo) => {
+            if (chainInfo.chainId.split(":")[0] === "eip155") {
+              return {
+                chainId: chainInfo.chainId,
+                chainName: chainInfo.chainName,
+                chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
+                isNative: false,
+                evm: {
+                  ...chainInfo.evm,
+                  currencies: chainInfo.currencies,
+                  feeCurrencies: chainInfo.feeCurrencies,
+                  bip44: chainInfo.bip44,
+                  features: chainInfo.features,
+                },
+              } as ModularChainInfo;
+            }
+
+            const { evm, ...cosmos } = chainInfo;
+
             return {
               chainId: chainInfo.chainId,
               chainName: chainInfo.chainName,
               chainSymbolImageUrl: chainInfo.chainSymbolImageUrl,
-              cosmos: chainInfo,
+              isNative: false,
+              cosmos,
+              ...(!!evm && {
+                evm: {
+                  ...evm,
+                  currencies: chainInfo.currencies,
+                  feeCurrencies: chainInfo.feeCurrencies,
+                  bip44: chainInfo.bip44,
+                },
+              }),
             };
           }
         )

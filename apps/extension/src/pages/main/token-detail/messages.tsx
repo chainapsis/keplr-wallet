@@ -100,7 +100,7 @@ export const RenderMessages: FunctionComponent<{
                 })();
 
                 const currency = chainStore
-                  .getChain(msg.msg.chainId)
+                  .getModularChainInfoImpl(msg.msg.chainId)
                   .findCurrency(denom);
                 // 알려진 currency가 있는 경우에만 렌더링한다.
                 // 사실 토큰 디테일에서 렌더링 되는 경우에는 이 로직이 필요가 없지만

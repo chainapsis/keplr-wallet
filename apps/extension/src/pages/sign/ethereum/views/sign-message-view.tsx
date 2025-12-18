@@ -51,7 +51,7 @@ export const EthereumSignMessageView: FunctionComponent<{
 
   const { message, chainId } = interactionData.data;
 
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
 
   const signerInfo = {
     name:

@@ -18,6 +18,7 @@ import { InsufficientFeeError, ShouldTopUpWarning } from "./errors";
 import { QueriesStore } from "./internal";
 import { DenomHelper } from "@keplr-wallet/common";
 import { EthereumQueriesImpl } from "@keplr-wallet/stores-eth";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class FeeConfig extends TxChainSetter implements IFeeConfig {
   @observable.ref
@@ -128,13 +129,20 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return undefined;
     }
 
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
     if ("type" in this._fee) {
       const coinMinimalDenom = this._fee.currency.coinMinimalDenom;
-      const feeCurrency = this.chainGetter
-        .getChain(this.chainId)
-        .feeCurrencies.find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
+      const feeCurrency =
+        "cosmos" in modularChainInfoImpl.embedded
+          ? modularChainInfoImpl.embedded.cosmos.feeCurrencies.find(
+              (cur) => cur.coinMinimalDenom === coinMinimalDenom
+            )
+          : undefined;
       const currency = this.chainGetter
-        .getChain(this.chainId)
+        .getModularChainInfoImpl(this.chainId)
         .forceFindCurrency(coinMinimalDenom);
 
       return {
@@ -148,12 +156,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     return this._fee.map((coin) => {
       const coinMinimalDenom = coin.currency.coinMinimalDenom;
-      const feeCurrency = this.chainGetter
-        .getChain(this.chainId)
-        .feeCurrencies.find((cur) => cur.coinMinimalDenom === coinMinimalDenom);
-      const currency = this.chainGetter
-        .getChain(this.chainId)
-        .forceFindCurrency(coinMinimalDenom);
+      const feeCurrency = modularChainInfoImpl.feeCurrencies?.find(
+        (cur) => cur.coinMinimalDenom === coinMinimalDenom
+      );
+      const currency = modularChainInfoImpl.forceFindCurrency(coinMinimalDenom);
 
       return new CoinPretty(
         {
@@ -194,20 +200,26 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   @computed
   get selectableFeeCurrencies(): FeeCurrency[] {
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
     if (
-      this.chainInfo.bip44.coinType === 60 ||
-      this.chainInfo.hasFeature("eth-address-gen") ||
-      this.chainInfo.hasFeature("eth-key-sign") ||
+      ("cosmos" in this.chainInfo &&
+        (this.chainInfo.cosmos.bip44.coinType === 60 ||
+          this.chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          this.chainInfo.cosmos.features?.includes("eth-key-sign"))) ||
       ("evm" in this.chainInfo && this.chainInfo.evm)
     ) {
-      return this.chainInfo.feeCurrencies.slice(0, 1);
+      return modularChainInfoImpl.feeCurrencies?.slice(0, 1) ?? [];
     }
 
     if (this.chainInfo.chainId === "atomone-1") {
       //현재 atomone에서는 MsgMintPhoton를 제외하면 ATONE을 fee로 사용해서 안됨, 그래서 하드코딩으로 옵션을 적용
-      const feeCurrenciesWithoutAtone = this.chainInfo.feeCurrencies.filter(
-        (cur) => cur.coinMinimalDenom !== "uatone"
-      );
+      const feeCurrenciesWithoutAtone =
+        modularChainInfoImpl.feeCurrencies?.filter(
+          (cur) => cur.coinMinimalDenom !== "uatone"
+        ) ?? [];
 
       if (
         feeCurrenciesWithoutAtone.length > 0 &&
@@ -228,7 +240,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         // To reduce the confusion, add the priority to native (not ibc token) currency.
         // And, put the most priority to the base denom.
         // Remainings are sorted in alphabetical order.
-        return this.chainInfo.feeCurrencies
+        return (modularChainInfoImpl.feeCurrencies ?? [])
           .concat(txFees.feeCurrencies)
           .filter((cur) => {
             if (!exists[cur.coinMinimalDenom]) {
@@ -265,11 +277,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           });
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
-      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
-        return this.chainInfo.feeCurrencies.slice(0, 1);
-      }
-      if (this.chainInfo.hasFeature("evm-feemarket")) {
-        return this.chainInfo.feeCurrencies.slice(0, 1);
+      if (
+        modularChainInfoImpl.hasFeature("initia-dynamicfee") ||
+        modularChainInfoImpl.hasFeature("evm-feemarket")
+      ) {
+        return modularChainInfoImpl.feeCurrencies?.slice(0, 1) ?? [];
       }
 
       const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
@@ -278,16 +290,15 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
         const found: FeeCurrency[] = [];
         for (const gasPrice of gasPrices) {
-          const cur = this.chainInfo.findCurrency(gasPrice.denom);
+          const cur = modularChainInfoImpl.findCurrency(gasPrice.denom);
           if (cur) {
             found.push(cur);
           }
         }
 
-        const firstFeeDenom =
-          this.chainInfo.feeCurrencies.length > 0
-            ? this.chainInfo.feeCurrencies[0].coinMinimalDenom
-            : "";
+        const firstFeeDenom = !!modularChainInfoImpl.feeCurrencies?.length
+          ? modularChainInfoImpl.feeCurrencies?.[0].coinMinimalDenom
+          : "";
         return found.sort((cur1, cur2) => {
           // firstFeeDenom should be the first.
           // others should be sorted in alphabetical order.
@@ -304,8 +315,10 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
     const res: FeeCurrency[] = [];
 
-    for (const feeCurrency of this.chainInfo.feeCurrencies) {
-      const cur = this.chainInfo.findCurrency(feeCurrency.coinMinimalDenom);
+    for (const feeCurrency of modularChainInfoImpl.feeCurrencies ?? []) {
+      const cur = modularChainInfoImpl.findCurrency(
+        feeCurrency.coinMinimalDenom
+      );
       if (cur) {
         res.push({
           ...feeCurrency,
@@ -380,8 +393,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (
       res.length > 0 &&
       this.computeTerraClassicTax &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("terra-classic-fee")
+      this.chainGetter
+        .getModularChainInfoImpl(this.chainId)
+        .hasFeature("terra-classic-fee")
     ) {
       const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
       if (
@@ -437,7 +451,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canOsmosisTxFeesAndReady(): boolean {
-    if (this.chainInfo.hasFeature("osmosis-txfees")) {
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+
+    if (modularChainInfoImpl.hasFeature("osmosis-txfees")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.osmosis) {
         console.log(
@@ -450,7 +468,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
       if (
         queryBaseDenom.baseDenom &&
-        this.chainInfo.feeCurrencies.find(
+        modularChainInfoImpl.feeCurrencies?.find(
           (cur) => cur.coinMinimalDenom === queryBaseDenom.baseDenom
         )
       ) {
@@ -465,7 +483,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (this.chainInfo.chainId.startsWith("cheqd-mainnet-")) {
       return false;
     }
-    if (this.chainInfo.hasFeature("feemarket")) {
+
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+    if (modularChainInfoImpl.hasFeature("feemarket")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.cosmos) {
         console.log(
@@ -483,16 +505,16 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       for (let i = 0; i < queryFeeMarketGasPrices.gasPrices.length; i++) {
         const gasPrice = queryFeeMarketGasPrices.gasPrices[i];
         // 일단 모든 currency에 대해서 find를 시도한다.
-        this.chainInfo.findCurrency(gasPrice.denom);
+        modularChainInfoImpl.findCurrency(gasPrice.denom);
       }
 
       return (
         queryFeeMarketGasPrices.gasPrices.find((gasPrice) =>
-          this.chainInfo.findCurrency(gasPrice.denom)
+          modularChainInfoImpl.findCurrency(gasPrice.denom)
         ) != null
       );
     }
-    if (this.chainInfo.hasFeature("evm-feemarket")) {
+    if (modularChainInfoImpl.hasFeature("evm-feemarket")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.cosmos) {
         console.log(
@@ -505,7 +527,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return queryEvmFeeMarketBaseFee.baseFee != null;
     }
 
-    if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+    if (modularChainInfoImpl.hasFeature("initia-dynamicfee")) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.keplrETC) {
         console.log(
@@ -527,7 +549,11 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
   }
 
   protected canEIP1559TxFeesAndReady(isRefresh?: boolean): boolean {
-    if (this.chainInfo.evm && this.senderConfig.sender.startsWith("0x")) {
+    if (
+      "evm" in this.chainInfo &&
+      this.chainInfo.evm &&
+      this.senderConfig.sender.startsWith("0x")
+    ) {
       const queries = this.queriesStore.get(this.chainId);
       if (!queries.ethereum) {
         console.log("Chain supports EVM. But no ethereum queries provided.");
@@ -604,8 +630,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   readonly getGasPriceForFeeCurrency = computedFn(
     (feeCurrency: FeeCurrency, feeType: FeeType): Dec => {
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+
       if (
-        this.chainInfo.hasFeature("osmosis-base-fee-beta") ||
+        modularChainInfoImpl.hasFeature("osmosis-base-fee-beta") ||
         this.canOsmosisTxFeesAndReady()
       ) {
         const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
@@ -614,9 +644,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           let baseFeeCurrency =
             this.selectableFeeCurrencies.find(
               (c) => c.coinMinimalDenom === baseDenom
-            ) || this.chainInfo.feeCurrencies[0];
+            ) || modularChainInfoImpl.feeCurrencies![0];
 
-          if (this.chainInfo.hasFeature("osmosis-base-fee-beta")) {
+          if (modularChainInfoImpl.hasFeature("osmosis-base-fee-beta")) {
             const remoteBaseFeeStep = this.queriesStore.simpleQuery.queryGet<{
               low?: number;
               average?: number;
@@ -703,7 +733,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
           }
         }
       } else if (this.canFeeMarketTxFeesAndReady()) {
-        if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+        if (modularChainInfoImpl.hasFeature("initia-dynamicfee")) {
           const queryEtc = this.queriesStore.get(this.chainId).keplrETC;
           if (queryEtc) {
             const gasPrice = queryEtc.queryInitiaDynamicFee.baseGasPrice;
@@ -719,7 +749,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
               }
             }
           }
-        } else if (this.chainInfo.hasFeature("evm-feemarket")) {
+        } else if (modularChainInfoImpl.hasFeature("evm-feemarket")) {
           const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
           if (queryCosmos) {
             const baseFee = queryCosmos.queryEvmFeeMarketBaseFee.baseFee;
@@ -919,6 +949,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       return {};
     }
 
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
     let priorWarning: Error | undefined = undefined;
     let priorIsLoadingState = false;
     const makeReturn = (uiProperties: UIProperties): UIProperties => {
@@ -956,8 +989,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     if (
       fee.length > 0 &&
       this.computeTerraClassicTax &&
-      this.chainInfo.features &&
-      this.chainInfo.features.includes("terra-classic-fee")
+      modularChainInfoImpl.hasFeature("terra-classic-fee")
     ) {
       const etcQueries = this.queriesStore.get(this.chainId).keplrETC;
       if (etcQueries) {
@@ -995,7 +1027,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       }
     }
 
-    if (this.chainInfo.hasFeature("osmosis-base-fee-beta")) {
+    if (modularChainInfoImpl.hasFeature("osmosis-base-fee-beta")) {
       const queryOsmosis = this.queriesStore.get(this.chainId).osmosis;
       if (queryOsmosis) {
         const queryBaseFee = queryOsmosis.queryBaseFee;
@@ -1013,7 +1045,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         }
       }
     } else if (this.canFeeMarketTxFeesAndReady()) {
-      if (this.chainInfo.hasFeature("initia-dynamicfee")) {
+      if (modularChainInfoImpl.hasFeature("initia-dynamicfee")) {
         const queryEtc = this.queriesStore.get(this.chainId).keplrETC;
         if (queryEtc) {
           const queryInitiaDynamicFee = queryEtc.queryInitiaDynamicFee;
@@ -1029,7 +1061,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
             priorIsLoadingState = true;
           }
         }
-      } else if (this.chainInfo.hasFeature("evm-feemarket")) {
+      } else if (modularChainInfoImpl.hasFeature("evm-feemarket")) {
         const queryCosmos = this.queriesStore.get(this.chainId).cosmos;
         if (queryCosmos) {
           const queryEvmFeeMarketBaseFee = queryCosmos.queryEvmFeeMarketBaseFee;
@@ -1326,7 +1358,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
       let topUpOverrideStdFee: StdFee | undefined = undefined;
 
       if (this.forceTopUp || shouldTopUp) {
-        const baseFeeCurrency = this.chainInfo.feeCurrencies[0];
+        const baseFeeCurrency = this.chainGetter.getModularChainInfoImpl(
+          this.chainId
+        ).feeCurrencies?.[0];
         if (baseFeeCurrency) {
           const feeAmount = this.getFeeTypePrettyForFeeCurrency(
             baseFeeCurrency,
@@ -1439,7 +1473,9 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         };
       }
       const specific =
-        multificationConfig.response.data[this.chainInfo.chainIdentifier];
+        multificationConfig.response.data[
+          ChainIdHelper.parse(this.chainId).identifier
+        ];
       if (
         specific &&
         specific.low != null &&

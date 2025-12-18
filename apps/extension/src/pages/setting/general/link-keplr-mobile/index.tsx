@@ -31,6 +31,7 @@ import {
   exportUpload,
   exportGenerateQRCodeDataByInterval,
 } from "keplr-wallet-private";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const Styles = {
   Container: styled(Stack)`
@@ -299,11 +300,12 @@ const QRCodeView: FunctionComponent<{
           [chainId: string]: AddressBookData[] | undefined;
         } = {};
 
-        for (const chainInfo of chainStore.chainInfos) {
+        for (const chainInfo of chainStore.modularChainInfos) {
           const addressBookData =
             uiConfigStore.addressBookConfig.getAddressBook(chainInfo.chainId);
 
-          addressBooks[chainInfo.chainIdentifier] = toJS(addressBookData);
+          addressBooks[ChainIdHelper.parse(chainInfo.chainId).identifier] =
+            toJS(addressBookData);
         }
 
         const enabledChainIdentifiers: Record<string, string[] | undefined> =

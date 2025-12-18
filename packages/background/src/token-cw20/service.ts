@@ -49,7 +49,7 @@ export class TokenCW20Service {
   async init(): Promise<void> {
     const migrated = await this.kvStore.get<boolean>("migrated/v2");
     if (!migrated) {
-      for (const chainInfo of this.chainsService.getChainInfos()) {
+      for (const chainInfo of this.chainsService.getModularChainInfos()) {
         const identifier = ChainIdHelper.parse(chainInfo.chainId).identifier;
         const globalTokens = await this.legacyKVStore.get<AppCurrency[]>(
           identifier
@@ -215,8 +215,12 @@ export class TokenCW20Service {
     viewingKey?: string
   ) {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    this.validateChainInfoFeatures(chainInfo);
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
+
+    this.validateChainInfoFeatures(chainInfo.cosmos);
 
     const existing = this.getToken(
       chainId,
@@ -251,7 +255,7 @@ export class TokenCW20Service {
     // Validate the contract address.
     Bech32Address.validate(
       contractAddress,
-      chainInfo.bech32Config?.bech32PrefixAccAddr
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
     const params = {
@@ -305,8 +309,12 @@ export class TokenCW20Service {
     associatedAccountAddress: string
   ): Promise<void> {
     this.validateAssociatedAccountAddress(associatedAccountAddress);
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    this.validateChainInfoFeatures(chainInfo);
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
+
+    this.validateChainInfoFeatures(chainInfo.cosmos);
     const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
 
     if (!this.tokenMap.has(chainIdentifier)) {
@@ -317,7 +325,10 @@ export class TokenCW20Service {
 
     const tokens = this.tokenMap.get(chainIdentifier)!;
 
-    currency = await TokenCW20Service.validateCurrency(chainInfo, currency);
+    currency = await TokenCW20Service.validateCurrency(
+      chainInfo.cosmos,
+      currency
+    );
 
     if (
       !("type" in currency) ||

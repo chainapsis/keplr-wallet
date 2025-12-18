@@ -36,7 +36,6 @@ import {
   UnlockKeyRingMsg,
 } from "@keplr-wallet/background";
 import type { MultiAccounts } from "@keplr-wallet/background";
-import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class KeyRingStore {
@@ -151,7 +150,7 @@ export class KeyRingStore {
     this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
-  needKeyCoinTypeFinalize(vaultId: string, chainInfo: ChainInfo): boolean {
+  needKeyCoinTypeFinalize(vaultId: string, chainId: string): boolean {
     const keyInfo = this.keyInfos.find((keyInfo) => keyInfo.id === vaultId);
     if (!keyInfo) {
       return false;
@@ -162,7 +161,7 @@ export class KeyRingStore {
     }
 
     const coinTypeTag = `keyRing-${
-      ChainIdHelper.parse(chainInfo.chainId).identifier
+      ChainIdHelper.parse(chainId).identifier
     }-coinType`;
 
     return keyInfo.insensitive[coinTypeTag] == null;

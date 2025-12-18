@@ -38,7 +38,10 @@ export class BackgroundTxService {
       onFulfill?: (tx: any) => void;
     }
   ): Promise<Uint8Array> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
 
     if (!options.silent) {
       this.notification.create({
@@ -73,7 +76,7 @@ export class BackgroundTxService {
 
     try {
       const result = await simpleFetch<any>(
-        chainInfo.rest,
+        chainInfo.cosmos.rest,
         isProtoTx ? "/cosmos/tx/v1beta1/txs" : "/txs",
         {
           method: "POST",
@@ -98,7 +101,7 @@ export class BackgroundTxService {
         () => {
           return new Promise<void>((resolve, reject) => {
             const txTracer = new TendermintTxTracer(
-              chainInfo.rpc,
+              chainInfo.cosmos.rpc,
               "/websocket"
             );
             txTracer.addEventListener("close", () => {

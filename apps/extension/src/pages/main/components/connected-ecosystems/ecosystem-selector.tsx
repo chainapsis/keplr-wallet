@@ -22,7 +22,7 @@ import {
 import { EcosystemType, EcosystemSection, EcosystemTypeToText } from "./types";
 import { ChainSelector } from "./chain-selector";
 import { EcosystemSpecificOptionsSelector } from "./option-selector";
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { parseEcosystemSpecificOptions } from "./utils";
 import { Gutter } from "../../../../components/gutter";
 import { XAxis } from "../../../../components/axis";
@@ -79,9 +79,10 @@ export const EcosystemsSelector: FunctionComponent<{
           "bitcoin" in chain &&
           chain.bitcoin.chainId === representativeSection.chainId
       );
-    } else if (representativeSection.type === "evm") {
-      return chainStore.getChain(representativeSection.chainId);
-    } else if (representativeSection.type === "starknet") {
+    } else if (
+      representativeSection.type === "evm" ||
+      representativeSection.type === "starknet"
+    ) {
       return chainStore.getModularChain(representativeSection.chainId);
     }
 
@@ -410,7 +411,7 @@ export const EcosystemOverview: FunctionComponent<{
   return (
     <React.Fragment>
       {ecosystemSections.map((section, index) => {
-        let chainInfo: ModularChainInfo | ChainInfo | undefined;
+        let chainInfo: ModularChainInfo | undefined;
 
         if (section.type === "bitcoin") {
           chainInfo = section.chainInfos.find(

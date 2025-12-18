@@ -16,7 +16,7 @@ export const MsgRelationUndelegate: FunctionComponent<{
 }> = observer(({ msg, prices, targetDenom, isInAllActivitiesPage }) => {
   const { chainStore, queriesStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const chainInfo = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const amountPretty = useMemo(() => {
     const currency = chainInfo.forceFindCurrency(targetDenom);

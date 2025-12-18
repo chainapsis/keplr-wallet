@@ -31,7 +31,6 @@ import { StakedBalance } from "./staked-balance";
 import { MsgItemSkeleton } from "./msg-items/skeleton";
 import { Stack } from "../../../components/stack";
 import { EmptyView } from "../../../components/empty-view";
-import { DenomHelper } from "@keplr-wallet/common";
 import { Bech32Address, ChainIdHelper } from "@keplr-wallet/cosmos";
 import { EarnApyBanner } from "./banners/earn-apy-banner";
 import {
@@ -42,6 +41,7 @@ import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { MintPhotonButton } from "./mint-photon-button";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import Joi from "joi";
 
 const Styles = {
@@ -94,42 +94,11 @@ export const TokenDetailModal: FunctionComponent<{
   const theme = useTheme();
 
   const account = accountStore.getAccount(chainId);
-  const modularChainInfo = chainStore.getModularChain(chainId);
-  const currency = (() => {
-    if ("cosmos" in modularChainInfo) {
-      return chainStore.getChain(chainId).forceFindCurrency(coinMinimalDenom);
-    }
-    // TODO: 일단 cosmos가 아니면 대충에기에다가 force currency 로직을 박아놓는다...
-    //       나중에 이런 기능을 chain store 자체에다가 만들어야한다.
-    const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
-    const currencies =
-      "bitcoin" in modularChainInfo
-        ? modularChainInfoImpl.getCurrencies("bitcoin")
-        : modularChainInfoImpl.getCurrencies("starknet");
-    const res = currencies.find(
-      (cur) => cur.coinMinimalDenom === coinMinimalDenom
-    );
-    if (res) {
-      return res;
-    }
-    return {
-      coinMinimalDenom,
-      coinDenom: coinMinimalDenom,
-      coinDecimals: 0,
-    };
-  })();
-  const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-  const isERC20 = denomHelper.type === "erc20";
-  const isMainCurrency = (() => {
-    if ("cosmos" in modularChainInfo) {
-      const chainInfo = chainStore.getChain(chainId);
-      return (
-        (chainInfo.stakeCurrency || chainInfo.currencies[0])
-          .coinMinimalDenom === currency.coinMinimalDenom
-      );
-    }
-    return false;
-  })();
+  const modularChainInfo: ModularChainInfo =
+    chainStore.getModularChain(chainId);
+  const currency = chainStore
+    .getModularChainInfoImpl(chainId)
+    .forceFindCurrency(coinMinimalDenom);
 
   const isIBCCurrency = "paths" in currency;
 
@@ -144,15 +113,17 @@ export const TokenDetailModal: FunctionComponent<{
     (serviceInfo) => !!serviceInfo.getBuyUrl
   );
   const balance = (() => {
+    const queryBalances = queriesStore.get(chainId).queryBalances;
     if ("cosmos" in modularChainInfo) {
-      const queryBalances = queriesStore.get(chainId).queryBalances;
-      return chainStore.isEvmChain(chainId) && (isMainCurrency || isERC20)
-        ? queryBalances
-            .getQueryEthereumHexAddress(account.ethereumHexAddress)
-            .getBalance(currency)
-        : queryBalances
-            .getQueryBech32Address(account.bech32Address)
-            .getBalance(currency);
+      return queryBalances
+        .getQueryBech32Address(account.bech32Address)
+        .getBalance(currency);
+    }
+
+    if ("evm" in modularChainInfo) {
+      return queryBalances
+        .getQueryEthereumHexAddress(account.ethereumHexAddress)
+        .getBalance(currency);
     }
 
     if ("starknet" in modularChainInfo) {
@@ -195,29 +166,25 @@ export const TokenDetailModal: FunctionComponent<{
   );
 
   const isSupported: boolean = useMemo(() => {
-    if ("cosmos" in modularChainInfo) {
-      if (
-        chainId.startsWith("eip155:") &&
-        coinMinimalDenom !== "ethereum-native"
-      ) {
-        // 현재 evm msg들은 denoms에 네이티브 minimal denom값만 저장하고 있어서 erc20 주소로 msg를 필터링하는 기능은 제공되지 않는 상태
-        return false;
-      }
-
-      const chainInfo = chainStore.getChain(modularChainInfo.chainId);
-      const map = new Map<string, boolean>();
-      for (const chainIdentifier of querySupported.response?.data ?? []) {
-        map.set(chainIdentifier, true);
-      }
-
-      return map.get(chainInfo.chainIdentifier) ?? false;
+    if (!("cosmos" in modularChainInfo) && !("evm" in modularChainInfo)) {
+      return false;
     }
-    return false;
+
+    const map = new Map<string, boolean>();
+    for (const chainIdentifier of querySupported.response?.data ?? []) {
+      map.set(chainIdentifier, true);
+    }
+
+    // 현재 evm msg들은 denoms에 네이티브 minimal denom값만 저장하고 있어서 erc20 주소로 msg를 필터링하는 기능은 제공되지 않는 상태
+    if ("evm" in modularChainInfo && coinMinimalDenom !== "ethereum-native") {
+      return false;
+    }
+
+    return map.get(ChainIdHelper.parse(chainId).identifier) ?? false;
   }, [
-    chainStore,
     modularChainInfo,
-    querySupported.response,
     chainId,
+    querySupported.response?.data,
     coinMinimalDenom,
   ]);
 
@@ -297,7 +264,7 @@ export const TokenDetailModal: FunctionComponent<{
       onClick: () => {
         navigate(
           `/ibc-swap?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}&outChainId=${
-            chainStore.getChain("noble").chainId
+            chainStore.getModularChain("noble").chainId
           }&outCoinMinimalDenom=uusdc&entryPoint=token_detail`
         );
       },
@@ -326,7 +293,7 @@ export const TokenDetailModal: FunctionComponent<{
       ),
       text: "Send",
       onClick: () => {
-        if ("cosmos" in modularChainInfo) {
+        if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
           navigate(
             `/send?chainId=${chainId}&coinMinimalDenom=${coinMinimalDenom}`
           );
@@ -351,10 +318,11 @@ export const TokenDetailModal: FunctionComponent<{
       return `/history/v2/msgs/${
         ChainIdHelper.parse(chainId).identifier
       }/${(() => {
+        if ("evm" in modularChainInfo) {
+          return account.ethereumHexAddress;
+        }
         if ("cosmos" in modularChainInfo) {
-          return account.hasEthereumHexAddress
-            ? account.ethereumHexAddress
-            : Bech32Address.fromBech32(account.bech32Address).toHex();
+          return Bech32Address.fromBech32(account.bech32Address).toHex();
         }
         if ("starknet" in modularChainInfo) {
           return accountStore.getAccount(chainId).starknetHexAddress;
@@ -619,19 +587,18 @@ export const TokenDetailModal: FunctionComponent<{
 
           {(() => {
             if ("cosmos" in modularChainInfo) {
-              const chainInfo = chainStore.getChain(chainId);
-
               if (validateIsUsdcFromNoble(currency, chainId)) {
                 return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
               }
 
               if (
-                chainInfo.stakeCurrency &&
-                chainInfo.stakeCurrency.coinMinimalDenom ===
+                modularChainInfo.cosmos.stakeCurrency &&
+                modularChainInfo.cosmos.stakeCurrency.coinMinimalDenom ===
                   currency.coinMinimalDenom &&
-                chainInfo.walletUrlForStaking &&
-                !Joi.string().uri().validate(chainInfo.walletUrlForStaking)
-                  .error
+                modularChainInfo.cosmos.walletUrlForStaking &&
+                !Joi.string()
+                  .uri()
+                  .validate(modularChainInfo.cosmos.walletUrlForStaking).error
               ) {
                 return (
                   <React.Fragment>
@@ -731,8 +698,8 @@ export const TokenDetailModal: FunctionComponent<{
             if ("paths" in currency && currency.paths.length > 0) {
               const path = currency.paths[currency.paths.length - 1];
               if (path.clientChainId) {
-                const chainName = chainStore.hasChain(path.clientChainId)
-                  ? chainStore.getChain(path.clientChainId).chainName
+                const chainName = chainStore.hasModularChain(path.clientChainId)
+                  ? chainStore.getModularChain(path.clientChainId).chainName
                   : path.clientChainId;
                 infos.push({
                   title: "Channel",
@@ -826,7 +793,8 @@ export const TokenDetailModal: FunctionComponent<{
               // TODO: 아직 cosmos 체인이 아니면 embedded인지 아닌지 구분할 수 없다.
               if (
                 ("cosmos" in modularChainInfo &&
-                  chainStore.getChain(chainId).embedded.embedded) ||
+                  chainStore.getModularChain(chainId).isNative) ||
+                "evm" in modularChainInfo ||
                 "starknet" in modularChainInfo ||
                 "bitcoin" in modularChainInfo
               ) {
