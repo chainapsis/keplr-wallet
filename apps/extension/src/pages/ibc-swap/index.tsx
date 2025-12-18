@@ -2,6 +2,7 @@ import React, {
   FunctionComponent,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 import { useNavigate } from "react-router";
@@ -421,8 +422,53 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const [isButtonHolding, setIsButtonHolding] = useState(false);
 
-  // 10초마다 route query 자동 refresh
   const queryRoute = swapConfigs.amountConfig.getQueryRoute();
+
+  const prevIsSwapLoadingRef = useRef(
+    uiConfigStore.ibcSwapConfig.isSwapLoading
+  );
+  const prevIsButtonHoldingRef = useRef(isButtonHolding);
+
+  // 사용자가 스왑 버튼을 홀딩하다가 중간에 손을 떼었을 때 (isButtonHolding이 true에서 false로 변경되었을 때)
+  // 또는 tx 처리 중에 오류가 발생했을 때 (isSwapLoading이 true에서 false로 변경되었을 때)
+  // quote expired가 발생할 수 있으므로 3초 후 쿼리 리프레시
+  useEffect(() => {
+    const prevIsSwapLoading = prevIsSwapLoadingRef.current;
+    const prevIsButtonHolding = prevIsButtonHoldingRef.current;
+    const currentIsSwapLoading = uiConfigStore.ibcSwapConfig.isSwapLoading;
+    const currentIsButtonHolding = isButtonHolding;
+
+    if (
+      queryRoute &&
+      !queryRoute.isFetching &&
+      ((prevIsSwapLoading && !currentIsSwapLoading) ||
+        (prevIsButtonHolding && !currentIsButtonHolding))
+    ) {
+      const timeoutId = setTimeout(() => {
+        if (
+          queryRoute &&
+          !queryRoute.isFetching &&
+          !uiConfigStore.ibcSwapConfig.isSwapLoading &&
+          !isButtonHolding
+        ) {
+          queryRoute.fetch();
+        }
+      }, 3000);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+
+    prevIsSwapLoadingRef.current = currentIsSwapLoading;
+    prevIsButtonHoldingRef.current = currentIsButtonHolding;
+  }, [
+    queryRoute,
+    queryRoute?.isFetching,
+    uiConfigStore.ibcSwapConfig.isSwapLoading,
+    isButtonHolding,
+  ]);
+
+  // 10초마다 route query 자동 refresh
   useEffect(() => {
     if (
       queryRoute &&
