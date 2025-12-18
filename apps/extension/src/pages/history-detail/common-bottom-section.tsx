@@ -126,7 +126,10 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
       const hex = Buffer.from(msg.txHash.replace("0x", ""), "hex")
         .toString("hex")
         .toUpperCase();
-      return `${hex.slice(0, 5)}...${hex.slice(-5)}`;
+      const shortText = `${hex.slice(0, 5)}...${hex.slice(-5)}`;
+      return chainStore.isEvmOnlyChain(msg.chainId)
+        ? `0x${shortText}`
+        : shortText;
     } catch {
       return "Unknown";
     }
@@ -326,7 +329,11 @@ export const HistoryDetailCommonBottomSection: FunctionComponent<{
 
               copyIconButtonRef.current?.startAnimation();
 
-              navigator.clipboard.writeText(msg.txHash);
+              navigator.clipboard.writeText(
+                chainStore.isEvmOnlyChain(msg.chainId)
+                  ? `0x${msg.txHash}`
+                  : msg.txHash
+              );
             }}
           >
             <XAxis alignY="center">

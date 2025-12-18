@@ -116,9 +116,7 @@ export function useRewards() {
             return "ueden";
           }
 
-          return "cosmos" in modularChainInfo
-            ? modularChainInfo.cosmos.stakeCurrency?.coinMinimalDenom
-            : undefined;
+          return modularChainInfo.cosmos.stakeCurrency?.coinMinimalDenom;
         })();
 
         if (targetDenom) {
