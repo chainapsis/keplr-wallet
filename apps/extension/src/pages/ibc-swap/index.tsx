@@ -72,7 +72,7 @@ import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
 import { RouteStepType, SwapProvider } from "@keplr-wallet/stores-internal";
 import { Button } from "../../components/button";
 import { EvmGasSimulationOutcome, EthTxStatus } from "@keplr-wallet/types";
-// import { useSwapAnalytics } from "./hooks/use-swap-analytics";
+import { useSwapAnalytics } from "./hooks/use-swap-analytics";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -568,14 +568,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     Error | undefined
   >();
 
-  // const { logSwapSignOpened, logEvent, quoteIdRef } = useSwapAnalytics({
-  //   inChainId: inChainId,
-  //   inCurrency: inCurrency,
-  //   outChainId: outChainId,
-  //   outCurrency: outCurrency,
-  //   swapConfigs: swapConfigs,
-  //   swapFeeBps,
-  // });
+  const { logSwapSignOpened, logEvent, quoteIdRef } = useSwapAnalytics({
+    inChainId: inChainId,
+    inCurrency: inCurrency,
+    outChainId: outChainId,
+    outCurrency: outCurrency,
+    swapConfigs: swapConfigs,
+    swapFeeBps,
+  });
 
   /**
    * Topup related below
@@ -634,7 +634,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (interactionBlocked) {
           return;
         }
-        // logSwapSignOpened();
+        logSwapSignOpened();
 
         const selectedKeyInfo = keyRingStore.selectedKeyInfo;
         if (!selectedKeyInfo) {
@@ -1404,17 +1404,17 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                                     erc20ApprovalTx &&
                                     e?.message === "Request rejected"
                                   ) {
-                                    // logEvent("erc20_approve_sign_canceled", {
-                                    //   quote_id: quoteIdRef.current,
-                                    // });
+                                    logEvent("erc20_approve_sign_canceled", {
+                                      quote_id: quoteIdRef.current,
+                                    });
                                   }
 
                                   reject(e ?? new Error("Broadcast failed"));
                                 },
                                 onBroadcasted: () => {
-                                  // logEvent("erc20_approve_tx_submitted", {
-                                  //   quote_id: quoteIdRef.current,
-                                  // });
+                                  logEvent("erc20_approve_tx_submitted", {
+                                    quote_id: quoteIdRef.current,
+                                  });
                                 },
                                 onFulfill: (txReceipt) => {
                                   const queryBalances = queriesStore.get(
@@ -1569,11 +1569,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           // update balance for inChainId
           updateBalanceCallback?.();
 
-          //   if (isSwap) {
-          //     // logEvent("swap_tx_submitted", {
-          //     //   quote_id: quoteIdRef.current,
-          //     // });
-          //   }
+          if (isSwap) {
+            logEvent("swap_tx_submitted", {
+              quote_id: quoteIdRef.current,
+            });
+          }
 
           //   const params: Record<
           //     string,
@@ -1693,19 +1693,19 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         } catch (e) {
           if (e?.message === "Request rejected") {
             if (isSwap) {
-              // logEvent("swap_sign_canceled", {
-              //   quote_id: quoteIdRef.current,
-              // });
+              logEvent("swap_sign_canceled", {
+                quote_id: quoteIdRef.current,
+              });
             }
 
             return;
           }
 
           if (isSwap) {
-            // logEvent("swap_tx_failed", {
-            //   quote_id: quoteIdRef.current,
-            //   error_message: e?.message,
-            // });
+            logEvent("swap_tx_failed", {
+              quote_id: quoteIdRef.current,
+              error_message: e?.message,
+            });
           }
 
           // in case of error, navigate back to the previous page if any signing was attempted
