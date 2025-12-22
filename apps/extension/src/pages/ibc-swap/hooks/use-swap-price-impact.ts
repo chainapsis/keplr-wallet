@@ -2,7 +2,7 @@ import {
   IBCSwapAmountConfig,
   SwapAmountConfig,
 } from "@keplr-wallet/hooks-internal";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { autorun } from "mobx";
 import { useStore } from "../../../stores";
@@ -20,24 +20,46 @@ export const useSwapPriceImpact = (
   // 가끔씩 바보같이 coingecko에 올라가있지도 않은데 지 맘대로 coingecko id를 넣는 얘들도 있어서
   // 실제로 쿼리를 해보고 있는지 아닌지 판단하는 로직도 있음
   // coingecko로부터 가격이 undefined거나 0이면 알 수 없는 것으로 처리함.
-  // 근데 쿼리에 걸리는 시간도 있으니 이 경우는 1000초 쉼.
   const [inOrOutChangedDelay, setInOrOutChangedDelay] = useState(true);
+  const debounceCompletedRef = useRef(false);
+
+  // 자산 변경이 감지되면 1초 대기 후 debounce 완료 표시
   useEffect(() => {
     setInOrOutChangedDelay(true);
+    debounceCompletedRef.current = false;
+
     const timeoutId = setTimeout(() => {
-      setInOrOutChangedDelay(false);
+      debounceCompletedRef.current = true;
     }, 1000);
 
     return () => {
       clearTimeout(timeoutId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     amountConfig.currency.coinMinimalDenom,
     amountConfig.outCurrency.coinMinimalDenom,
   ]);
 
+  // debounce 완료 후 price fetching이 완료되면 딜레이 해제
+  useEffect(() => {
+    if (
+      inOrOutChangedDelay &&
+      debounceCompletedRef.current &&
+      !priceStore.isFetching
+    ) {
+      setInOrOutChangedDelay(false);
+    }
+  }, [inOrOutChangedDelay, priceStore.isFetching]);
+
+  const isFetching =
+    amountConfig.isFetchingInAmount || amountConfig.isFetchingOutAmount;
+  const shouldCheckPrice = !inOrOutChangedDelay && !isFetching;
+
   const unableToPopulatePrices = (() => {
+    if (!shouldCheckPrice) {
+      return [];
+    }
+
     const r: string[] = [];
 
     const inCurrency = amountConfig.currency;
@@ -51,7 +73,7 @@ export const useSwapPriceImpact = (
       } else {
         r.push(CoinPretty.makeCoinDenomPretty(inCurrency.coinDenom));
       }
-    } else if (!inOrOutChangedDelay) {
+    } else {
       const price = priceStore.getPrice(inCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
@@ -71,7 +93,7 @@ export const useSwapPriceImpact = (
       } else {
         r.push(CoinPretty.makeCoinDenomPretty(outCurrency.coinDenom));
       }
-    } else if (!inOrOutChangedDelay) {
+    } else {
       const price = priceStore.getPrice(outCurrency.coinGeckoId, "usd");
       if (!price) {
         if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
