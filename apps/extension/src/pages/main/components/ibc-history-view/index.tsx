@@ -1430,6 +1430,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     uiConfigStore,
     accountStore,
     ethereumAccountStore,
+    keyRingStore,
   } = useStore();
 
   const theme = useTheme();
@@ -1440,7 +1441,6 @@ const SwapV2HistoryViewItem: FunctionComponent<{
   const [txExecution, setTxExecution] = useState<TxExecution | undefined>(
     undefined
   );
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const backgroundExecutionId = history.backgroundExecutionId;
@@ -1562,6 +1562,17 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     return true;
   }, [history]);
 
+  const swapLoadingKey = useMemo(() => {
+    const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+    if (!selectedKeyInfo) {
+      return "default";
+    }
+    return `${selectedKeyInfo.id}-${history.id}`;
+  }, [history, keyRingStore.selectedKeyInfo]);
+
+  const isSwapLoading =
+    uiConfigStore.ibcSwapConfig.getIsSwapLoading(swapLoadingKey);
+
   async function handleContinueSigning() {
     if (!history.backgroundExecutionId || !txExecution) {
       return;
@@ -1587,7 +1598,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return;
     }
 
-    setIsLoading(true);
+    uiConfigStore.ibcSwapConfig.setIsSwapLoading(true, swapLoadingKey);
     uiConfigStore.ibcSwapConfig.setSignatureProgress(
       totalTxCount,
       executedTxCount,
@@ -1999,7 +2010,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
         navigate("/");
       }
     } finally {
-      setIsLoading(false);
+      uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
       uiConfigStore.ibcSwapConfig.resetSignatureProgress();
     }
   }
@@ -2605,9 +2616,9 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                       padding: 0,
                       height: "auto",
                     }}
-                    isLoading={isLoading}
+                    isLoading={isSwapLoading}
                     right={
-                      isLoading ? null : (
+                      isSwapLoading ? null : (
                         <ChevronRightIcon width="1rem" height="1rem" />
                       )
                     }

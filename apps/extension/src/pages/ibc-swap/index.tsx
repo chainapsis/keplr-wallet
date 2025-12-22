@@ -2,6 +2,7 @@ import React, {
   FunctionComponent,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -420,13 +421,24 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     }
   }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
 
+  // NOTE: key ring id와 inChainId만 사용하여 swap loading key를 생성하는 이유는
+  // 동일한 체인에서 연달아 스왑을 실행하는 경우를 우선적으로 방지하기 위함
+  const swapLoadingKey = useMemo(() => {
+    const selectedKeyInfo = keyRingStore.selectedKeyInfo;
+    if (!selectedKeyInfo) {
+      return "default";
+    }
+    return `${selectedKeyInfo.id}-${inChainId}`;
+  }, [keyRingStore.selectedKeyInfo, inChainId]);
+
+  const isSwapLoading =
+    uiConfigStore.ibcSwapConfig.getIsSwapLoading(swapLoadingKey);
+
   const [isButtonHolding, setIsButtonHolding] = useState(false);
 
   const queryRoute = swapConfigs.amountConfig.getQueryRoute();
 
-  const prevIsSwapLoadingRef = useRef(
-    uiConfigStore.ibcSwapConfig.isSwapLoading
-  );
+  const prevIsSwapLoadingRef = useRef(isSwapLoading);
   const prevIsButtonHoldingRef = useRef(isButtonHolding);
 
   // 사용자가 스왑 버튼을 홀딩하다가 중간에 손을 떼었을 때 (isButtonHolding이 true에서 false로 변경되었을 때)
@@ -435,7 +447,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   useEffect(() => {
     const prevIsSwapLoading = prevIsSwapLoadingRef.current;
     const prevIsButtonHolding = prevIsButtonHoldingRef.current;
-    const currentIsSwapLoading = uiConfigStore.ibcSwapConfig.isSwapLoading;
+    const currentIsSwapLoading = isSwapLoading;
     const currentIsButtonHolding = isButtonHolding;
 
     if (
@@ -448,7 +460,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (
           queryRoute &&
           !queryRoute.isFetching &&
-          !uiConfigStore.ibcSwapConfig.isSwapLoading &&
+          !isSwapLoading &&
           !isButtonHolding
         ) {
           queryRoute.fetch();
@@ -461,27 +473,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
     prevIsSwapLoadingRef.current = currentIsSwapLoading;
     prevIsButtonHoldingRef.current = currentIsButtonHolding;
-  }, [
-    queryRoute,
-    queryRoute?.isFetching,
-    uiConfigStore.ibcSwapConfig.isSwapLoading,
-    isButtonHolding,
-  ]);
+  }, [queryRoute, queryRoute?.isFetching, isSwapLoading, isButtonHolding]);
 
   // 10초마다 route query 자동 refresh
   useEffect(() => {
     if (
       queryRoute &&
       !queryRoute.isFetching &&
-      !uiConfigStore.ibcSwapConfig.isSwapLoading &&
+      !isSwapLoading &&
       !isButtonHolding
     ) {
       const timeoutId = setTimeout(() => {
-        if (
-          !queryRoute.isFetching &&
-          !uiConfigStore.ibcSwapConfig.isSwapLoading &&
-          !isButtonHolding
-        ) {
+        if (!queryRoute.isFetching && !isSwapLoading && !isButtonHolding) {
           queryRoute.fetch();
         }
       }, 10000);
@@ -494,12 +497,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     // queryRoute.isFetching는 현재 fetch중인지 아닌지를 알려주는 값이므로 deps에 꼭 넣어야한다.
     // queryRoute는 input이 같으면 reference가 같으므로 eslint에서 추천하는대로 queryRoute만 deps에 넣으면
     // queryRoute.isFetching이 무시되기 때문에 수동으로 넣어줌
-  }, [
-    queryRoute,
-    queryRoute?.isFetching,
-    uiConfigStore.ibcSwapConfig.isSwapLoading,
-    isButtonHolding,
-  ]);
+  }, [queryRoute, queryRoute?.isFetching, isSwapLoading, isButtonHolding]);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -673,7 +671,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         let isInterChainSwap: boolean = false;
         let isSingleEVMChainOperation: boolean = false;
 
-        uiConfigStore.ibcSwapConfig.setIsSwapLoading(true);
+        uiConfigStore.ibcSwapConfig.setIsSwapLoading(true, swapLoadingKey);
 
         //================================================================================
         // 1. Get route information and prepare txs
@@ -967,7 +965,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           txs = _txs;
         } catch (e) {
           setCalculatingTxError(e);
-          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false);
+          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
           return;
         }
 
@@ -1720,7 +1718,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ""
           );
         } finally {
-          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false);
+          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
           uiConfigStore.ibcSwapConfig.resetSignatureProgress();
         }
       }}
@@ -1989,7 +1987,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              uiConfigStore.ibcSwapConfig.isSwapLoading ||
+              isSwapLoading ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
             onHoldStart={() => setIsButtonHolding(true)}
@@ -2014,7 +2012,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              uiConfigStore.ibcSwapConfig.isSwapLoading ||
+              isSwapLoading ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
           />

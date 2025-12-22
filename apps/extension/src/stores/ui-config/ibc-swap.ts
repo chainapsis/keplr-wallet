@@ -28,7 +28,7 @@ export class IBCSwapConfig {
   protected _celestiaDisabled: boolean = false;
 
   @observable
-  protected _isSwapLoading: boolean = false;
+  protected _isSwapLoading: Map<string, boolean> = new Map();
 
   // multi tx swap signature progress state
   @observable
@@ -256,12 +256,20 @@ export class IBCSwapConfig {
   }
 
   get isSwapLoading(): boolean {
-    return this._isSwapLoading;
+    return this._isSwapLoading.get("default") ?? false;
+  }
+
+  getIsSwapLoading(key: string): boolean {
+    return this._isSwapLoading.get(key) ?? false;
   }
 
   @action
-  setIsSwapLoading(isLoading: boolean) {
-    this._isSwapLoading = isLoading;
+  setIsSwapLoading(isLoading: boolean, key: string = "default") {
+    if (isLoading) {
+      this._isSwapLoading.set(key, isLoading);
+    } else {
+      this._isSwapLoading.delete(key);
+    }
   }
 
   get signatureProgress(): { show: boolean; total: number; completed: number } {

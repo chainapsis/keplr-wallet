@@ -377,7 +377,7 @@ export const SwapFeeInfo: FunctionComponent<{
                     color={
                       theme.mode === "light"
                         ? ColorPalette["gray-300"]
-                        : ColorPalette["gray-300"]
+                        : ColorPalette["gray-200"]
                     }
                   >
                     <FormattedMessage id="components.fee-info.bridge-fee" />
