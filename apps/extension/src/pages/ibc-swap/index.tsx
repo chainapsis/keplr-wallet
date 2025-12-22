@@ -1858,17 +1858,16 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                       swapConfigs.amountConfig.outAmount,
                       "usd"
                     );
+                    if (!inPrice || !outPrice) {
+                      return undefined;
+                    }
+                    const lossAmount = inPrice.sub(outPrice);
                     return intl.formatMessage(
                       {
                         id: "page.ibc-swap.warning.high-price-impact-title",
                       },
                       {
-                        inPrice: inPrice?.toString(),
-                        srcChain: swapConfigs.amountConfig.chainInfo.chainName,
-                        outPrice: outPrice?.toString(),
-                        dstChain: chainStore.getChain(
-                          swapConfigs.amountConfig.outChainId
-                        ).chainName,
+                        lossAmount: lossAmount?.toString(),
                       }
                     );
                   })()
