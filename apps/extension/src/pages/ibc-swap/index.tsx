@@ -48,7 +48,7 @@ import {
   IBCTransferHistoryData,
   IBCSwapHistoryData,
   SwapV2HistoryData,
-  // LogAnalyticsEventMsg,
+  LogAnalyticsEventMsg,
   RecordAndExecuteTxsMsg,
   TxExecutionType,
   TxExecutionStatus,
@@ -70,6 +70,8 @@ import { getShouldTopUpSignOptions } from "../../utils/should-top-up-sign-option
 import { useSwapFeeBps } from "./hooks/use-swap-fee-bps";
 import { useSwapPriceImpact } from "./hooks/use-swap-price-impact";
 import { RouteStepType, SwapProvider } from "@keplr-wallet/stores-internal";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { amountToAmbiguousString, amountToAmbiguousAverage } from "../../utils";
 import { Button } from "../../components/button";
 import { EvmGasSimulationOutcome, EthTxStatus } from "@keplr-wallet/types";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
@@ -135,7 +137,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     keyRingStore,
     hugeQueriesStore,
     priceStore,
-    // analyticsStore,
+    analyticsStore,
   } = useStore();
   const theme = useTheme();
   const intl = useIntl();
@@ -1585,121 +1587,96 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             });
           }
 
-          //   const params: Record<
-          //     string,
-          //     | number
-          //     | string
-          //     | boolean
-          //     | number[]
-          //     | string[]
-          //     | undefined
-          //   > = {
-          //     inChainId: inChainId,
-          //     inChainIdentifier:
-          //       ChainIdHelper.parse(inChainId).identifier,
-          //     inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
-          //     inCurrencyDenom: inCurrency.coinDenom,
-          //     inCurrencyCommonMinimalDenom: inCurrency.coinMinimalDenom,
-          //     inCurrencyCommonDenom: inCurrency.coinDenom,
-          //     outChainId: outChainId,
-          //     outChainIdentifier:
-          //       ChainIdHelper.parse(outChainId).identifier,
-          //     outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
-          //     outCurrencyDenom: outCurrency.coinDenom,
-          //     outCurrencyCommonMinimalDenom:
-          //       outCurrency.coinMinimalDenom,
-          //     outCurrencyCommonDenom: outCurrency.coinDenom,
-          //     swapType: swapConfigs.amountConfig.type,
-          //   };
-          //   if (
-          //     "originChainId" in inCurrency &&
-          //     inCurrency.originChainId
-          //   ) {
-          //     const originChainId = inCurrency.originChainId;
-          //     params["inOriginChainId"] = originChainId;
-          //     params["inOriginChainIdentifier"] =
-          //       ChainIdHelper.parse(originChainId).identifier;
+          const params: Record<
+            string,
+            number | string | boolean | number[] | string[] | undefined
+          > = {
+            inChainId: inChainId,
+            inChainIdentifier: ChainIdHelper.parse(inChainId).identifier,
+            inCurrencyMinimalDenom: inCurrency.coinMinimalDenom,
+            inCurrencyDenom: inCurrency.coinDenom,
+            inCurrencyCommonMinimalDenom: inCurrency.coinMinimalDenom,
+            inCurrencyCommonDenom: inCurrency.coinDenom,
+            outChainId: outChainId,
+            outChainIdentifier: ChainIdHelper.parse(outChainId).identifier,
+            outCurrencyMinimalDenom: outCurrency.coinMinimalDenom,
+            outCurrencyDenom: outCurrency.coinDenom,
+            outCurrencyCommonMinimalDenom: outCurrency.coinMinimalDenom,
+            outCurrencyCommonDenom: outCurrency.coinDenom,
+            swapType: swapConfigs.amountConfig.type,
+            provider: provider,
+          };
+          if ("originChainId" in inCurrency && inCurrency.originChainId) {
+            const originChainId = inCurrency.originChainId;
+            params["inOriginChainId"] = originChainId;
+            params["inOriginChainIdentifier"] =
+              ChainIdHelper.parse(originChainId).identifier;
 
-          //     params["inToDifferentChain"] = true;
-          //   }
-          //   if (
-          //     "originCurrency" in inCurrency &&
-          //     inCurrency.originCurrency
-          //   ) {
-          //     params["inCurrencyCommonMinimalDenom"] =
-          //       inCurrency.originCurrency.coinMinimalDenom;
-          //     params["inCurrencyCommonDenom"] =
-          //       inCurrency.originCurrency.coinDenom;
-          //   }
-          //   if (
-          //     "originChainId" in outCurrency &&
-          //     outCurrency.originChainId
-          //   ) {
-          //     const originChainId = outCurrency.originChainId;
-          //     params["outOriginChainId"] = originChainId;
-          //     params["outOriginChainIdentifier"] =
-          //       ChainIdHelper.parse(originChainId).identifier;
+            params["inToDifferentChain"] = true;
+          }
+          if ("originCurrency" in inCurrency && inCurrency.originCurrency) {
+            params["inCurrencyCommonMinimalDenom"] =
+              inCurrency.originCurrency.coinMinimalDenom;
+            params["inCurrencyCommonDenom"] =
+              inCurrency.originCurrency.coinDenom;
+          }
+          if ("originChainId" in outCurrency && outCurrency.originChainId) {
+            const originChainId = outCurrency.originChainId;
+            params["outOriginChainId"] = originChainId;
+            params["outOriginChainIdentifier"] =
+              ChainIdHelper.parse(originChainId).identifier;
 
-          //     params["outToDifferentChain"] = true;
-          //   }
-          //   if (
-          //     "originCurrency" in outCurrency &&
-          //     outCurrency.originCurrency
-          //   ) {
-          //     params["outCurrencyCommonMinimalDenom"] =
-          //       outCurrency.originCurrency.coinMinimalDenom;
-          //     params["outCurrencyCommonDenom"] =
-          //       outCurrency.originCurrency.coinDenom;
-          //   }
-          //   params["inRange"] = amountToAmbiguousString(
-          //     swapConfigs.amountConfig.amount[0]
-          //   );
-          //   params["outRange"] = amountToAmbiguousString(
-          //     swapConfigs.amountConfig.outAmount
-          //   );
+            params["outToDifferentChain"] = true;
+          }
+          if ("originCurrency" in outCurrency && outCurrency.originCurrency) {
+            params["outCurrencyCommonMinimalDenom"] =
+              outCurrency.originCurrency.coinMinimalDenom;
+            params["outCurrencyCommonDenom"] =
+              outCurrency.originCurrency.coinDenom;
+          }
+          params["inRange"] = amountToAmbiguousString(
+            swapConfigs.amountConfig.amount[0]
+          );
+          params["outRange"] = amountToAmbiguousString(
+            swapConfigs.amountConfig.outAmount
+          );
 
-          //   // UI 상에서 in currency의 가격은 in input에서 표시되고
-          //   // out currency의 가격은 swap fee에서 표시된다.
-          //   // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
-          //   const inCurrencyPrice = priceStore.calculatePrice(
-          //     swapConfigs.amountConfig.amount[0],
-          //     "usd"
-          //   );
-          //   if (inCurrencyPrice) {
-          //     params["inFiatRange"] =
-          //       amountToAmbiguousString(inCurrencyPrice);
-          //     params["inFiatAvg"] =
-          //       amountToAmbiguousAverage(inCurrencyPrice);
-          //   }
-          //   const outCurrencyPrice = priceStore.calculatePrice(
-          //     swapConfigs.amountConfig.outAmount,
-          //     "usd"
-          //   );
-          //   if (outCurrencyPrice) {
-          //     params["outFiatRange"] =
-          //       amountToAmbiguousString(outCurrencyPrice);
-          //     params["outFiatAvg"] =
-          //       amountToAmbiguousAverage(outCurrencyPrice);
-          //   }
+          // UI 상에서 in currency의 가격은 in input에서 표시되고
+          // out currency의 가격은 swap fee에서 표시된다.
+          // price store에서 usd는 무조건 쿼리하므로 in, out currency의 usd는 보장된다.
+          const inCurrencyPrice = priceStore.calculatePrice(
+            swapConfigs.amountConfig.amount[0],
+            "usd"
+          );
+          if (inCurrencyPrice) {
+            params["inFiatRange"] = amountToAmbiguousString(inCurrencyPrice);
+            params["inFiatAvg"] = amountToAmbiguousAverage(inCurrencyPrice);
+          }
+          const outCurrencyPrice = priceStore.calculatePrice(
+            swapConfigs.amountConfig.outAmount,
+            "usd"
+          );
+          if (outCurrencyPrice) {
+            params["outFiatRange"] = amountToAmbiguousString(outCurrencyPrice);
+            params["outFiatAvg"] = amountToAmbiguousAverage(outCurrencyPrice);
+          }
 
-          //   new InExtensionMessageRequester().sendMessage(
-          //     BACKGROUND_PORT,
-          //     new LogAnalyticsEventMsg("ibc_swap", params)
-          //   );
+          new InExtensionMessageRequester().sendMessage(
+            BACKGROUND_PORT,
+            new LogAnalyticsEventMsg("ibc_swap", params)
+          );
 
-          //   analyticsStore.logEvent("swap_occurred", {
-          //     in_chain_id: inChainId,
-          //     in_chain_identifier:
-          //       ChainIdHelper.parse(inChainId).identifier,
-          //     in_currency_minimal_denom: inCurrency.coinMinimalDenom,
-          //     in_currency_denom: inCurrency.coinDenom,
-          //     out_chain_id: outChainId,
-          //     out_chain_identifier:
-          //       ChainIdHelper.parse(outChainId).identifier,
-          //     out_currency_minimal_denom: outCurrency.coinMinimalDenom,
-          //     out_currency_denom: outCurrency.coinDenom,
-          //   });
-          // },
+          analyticsStore.logEvent("swap_occurred", {
+            in_chain_id: inChainId,
+            in_chain_identifier: ChainIdHelper.parse(inChainId).identifier,
+            in_currency_minimal_denom: inCurrency.coinMinimalDenom,
+            in_currency_denom: inCurrency.coinDenom,
+            out_chain_id: outChainId,
+            out_chain_identifier: ChainIdHelper.parse(outChainId).identifier,
+            out_currency_minimal_denom: outCurrency.coinMinimalDenom,
+            out_currency_denom: outCurrency.coinDenom,
+            provider: provider,
+          });
         } catch (e) {
           if (e?.message === "Request rejected") {
             if (isSwap) {
