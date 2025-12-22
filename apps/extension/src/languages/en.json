@@ -32,7 +32,7 @@
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
-  "pages.register.components.help-desk-button.title": "Help Desk",
+  "pages.register.components.help-desk-button.title": "Get Support",
   "pages.register.components.help-desk-button.question": "?",
   "pages.register.components.copy-to-clipboard.button-before": "Copy to clipboard",
   "pages.register.components.copy-to-clipboard.button-after": "Copied",
@@ -233,7 +233,7 @@
   "page.setting.list.security-privacy": "Security & Privacy",
   "page.setting.list.more": "More",
 
-  "page.setting.helpdesk.title": "HelpDesk",
+  "page.setting.helpdesk.title": "Support",
 
   "page.setting.title": "Settings",
   "page.setting.general-title": "General",
