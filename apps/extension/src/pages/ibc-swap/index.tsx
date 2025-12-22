@@ -1516,6 +1516,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           // 4. Record and execute background txs
           //================================================================================
 
+          if (isSwap) {
+            logEvent("swap_tx_submitted", {
+              quote_id: quoteIdRef.current,
+            });
+          }
+
           const executeTxMsg = new RecordAndExecuteTxsMsg(
             vaultId,
             executionType,
@@ -1570,7 +1576,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           updateBalanceCallback?.();
 
           if (isSwap) {
-            logEvent("swap_tx_submitted", {
+            logEvent("swap_tx_success", {
               quote_id: quoteIdRef.current,
             });
           }
