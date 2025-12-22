@@ -634,7 +634,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (interactionBlocked) {
           return;
         }
-        logSwapSignOpened();
+        logSwapSignOpened(oneClickSwapEnabled);
 
         const selectedKeyInfo = keyRingStore.selectedKeyInfo;
         if (!selectedKeyInfo) {
@@ -1519,6 +1519,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           if (isSwap) {
             logEvent("swap_tx_submitted", {
               quote_id: quoteIdRef.current,
+              is_one_click_swap: oneClickSwapEnabled,
             });
           }
 
@@ -1578,6 +1579,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           if (isSwap) {
             logEvent("swap_tx_success", {
               quote_id: quoteIdRef.current,
+              is_one_click_swap: oneClickSwapEnabled,
             });
           }
 
@@ -1711,6 +1713,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             logEvent("swap_tx_failed", {
               quote_id: quoteIdRef.current,
               error_message: e?.message,
+              is_one_click_swap: oneClickSwapEnabled,
             });
           }
 

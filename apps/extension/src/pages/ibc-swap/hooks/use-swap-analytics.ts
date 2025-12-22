@@ -381,24 +381,28 @@ export const useSwapAnalytics = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryRouteForLog?.error]);
 
-  const logSwapSignOpened = useCallback(() => {
-    logEvent("swap_sign_opened", {
-      quote_id: quoteIdRef.current,
-      gas_estimate: swapConfigs.gasConfig.gas,
-      price_impact_pct: swapConfigs.amountConfig.swapPriceImpact
-        ? Number(
-            swapConfigs.amountConfig.swapPriceImpact
-              .toDec()
-              .mul(new Dec(100))
-              .toString()
-          )
-        : undefined,
-    });
-  }, [
-    logEvent,
-    swapConfigs.gasConfig.gas,
-    swapConfigs.amountConfig.swapPriceImpact,
-  ]);
+  const logSwapSignOpened = useCallback(
+    (isOneClickSwap: boolean) => {
+      logEvent("swap_sign_opened", {
+        quote_id: quoteIdRef.current,
+        gas_estimate: swapConfigs.gasConfig.gas,
+        price_impact_pct: swapConfigs.amountConfig.swapPriceImpact
+          ? Number(
+              swapConfigs.amountConfig.swapPriceImpact
+                .toDec()
+                .mul(new Dec(100))
+                .toString()
+            )
+          : undefined,
+        is_one_click_swap: isOneClickSwap,
+      });
+    },
+    [
+      logEvent,
+      swapConfigs.gasConfig.gas,
+      swapConfigs.amountConfig.swapPriceImpact,
+    ]
+  );
 
   useEffect(() => {
     const debouncedFunctions = debouncedEventMapRef.current;
