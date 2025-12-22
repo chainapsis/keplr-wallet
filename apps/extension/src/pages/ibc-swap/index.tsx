@@ -634,7 +634,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         if (interactionBlocked) {
           return;
         }
-        logSwapSignOpened(oneClickSwapEnabled);
+        if (isSwap && !oneClickSwapEnabled) {
+          logSwapSignOpened();
+        }
 
         const selectedKeyInfo = keyRingStore.selectedKeyInfo;
         if (!selectedKeyInfo) {
