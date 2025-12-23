@@ -1,82 +1,102 @@
 import { useMemo } from "react";
 import { useStore } from "../stores";
-import { performSearch } from "./use-search";
-import { ViewToken } from "../pages/main";
+import { performSearch, performSearchWithScore } from "./use-search";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { sortByPrice, sortTokenGroups } from "../utils/token-sort";
+import { ViewToken } from "../pages/main";
 
 export function useGroupedTokensMap(search: string) {
   const { hugeQueriesStore, uiConfigStore } = useStore();
-  const groupedTokensMap = useMemo(() => {
-    if (uiConfigStore.assetViewMode === "grouped") {
-      const filteredMap = new Map<string, ViewToken[]>();
+  const groupedTokensMap: typeof hugeQueriesStore.groupedTokensMap =
+    useMemo(() => {
+      if (uiConfigStore.assetViewMode === "grouped") {
+        const filteredMap: typeof hugeQueriesStore.groupedTokensMap = new Map();
+        const originalMap = hugeQueriesStore.groupedTokensMap;
 
-      const originalMap = hugeQueriesStore.groupedTokensMap;
+        originalMap.forEach((tokens, groupKey) => {
+          if (tokens.length > 0) {
+            if (uiConfigStore.isHideLowBalance) {
+              const { lowBalanceTokens } =
+                hugeQueriesStore.filterLowBalanceTokens(tokens);
 
-      originalMap.forEach((tokens, groupKey) => {
-        if (tokens.length > 0) {
-          if (uiConfigStore.isHideLowBalance) {
-            const { lowBalanceTokens } =
-              hugeQueriesStore.filterLowBalanceTokens(tokens);
+              if (lowBalanceTokens.length === tokens.length) {
+                return;
+              }
 
-            if (lowBalanceTokens.length === tokens.length) {
-              return;
-            }
+              const map = new Map<string, boolean>();
+              for (const token of lowBalanceTokens) {
+                map.set(
+                  `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`,
+                  true
+                );
+              }
 
-            const map = new Map<string, boolean>();
-            for (const token of lowBalanceTokens) {
-              map.set(
-                `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`,
-                true
+              const nonLowBalanceTokens = tokens.filter(
+                (token) =>
+                  !map.get(
+                    `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`
+                  )
               );
+
+              filteredMap.set(groupKey, nonLowBalanceTokens);
+            } else {
+              filteredMap.set(groupKey, tokens);
             }
-
-            const nonLowBalanceTokens = tokens.filter(
-              (token) =>
-                !map.get(
-                  `${token.chainInfo.chainId}/${token.token.currency.coinMinimalDenom}`
-                )
-            );
-
-            filteredMap.set(groupKey, nonLowBalanceTokens);
-          } else {
-            filteredMap.set(groupKey, tokens);
           }
-        }
-      });
+        });
 
-      const isAllLowBalanceTokens = filteredMap.size === 0;
-      if (isAllLowBalanceTokens) {
-        return originalMap;
+        const isAllLowBalanceTokens = filteredMap.size === 0;
+        if (isAllLowBalanceTokens) {
+          return originalMap;
+        }
+
+        return filteredMap;
       }
 
-      return filteredMap;
-    }
+      return new Map();
 
-    return new Map<string, ViewToken[]>();
-  }, [
-    uiConfigStore.assetViewMode,
-    uiConfigStore.isHideLowBalance,
-    hugeQueriesStore.groupedTokensMap,
-    hugeQueriesStore.filterLowBalanceTokens,
-  ]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+      uiConfigStore.assetViewMode,
+      uiConfigStore.isHideLowBalance,
+      hugeQueriesStore.groupedTokensMap,
+      hugeQueriesStore.filterLowBalanceTokens,
+    ]);
 
   const searchedGroupedTokensMap = useMemo(() => {
-    const sortedEntries = performSearch(
+    const searchedWithScores = performSearchWithScore(
       Array.from(groupedTokensMap.entries()),
       search,
       groupedTokensSearchFields
     );
 
-    const resultMap = new Map<string, ViewToken[]>();
-    for (const [groupKey, tokens] of sortedEntries) {
-      const searchResults = performSearch(tokens, search, tokenSearchFields);
+    const entriesWithScores = [];
 
+    for (const {
+      item: [groupKey, tokens],
+      score,
+    } of searchedWithScores) {
+      const searchResults = performSearch(
+        tokens,
+        search,
+        tokenSearchFields,
+        sortByPrice
+      );
       if (searchResults.length > 0) {
-        resultMap.set(groupKey, searchResults);
+        entriesWithScores.push({ groupKey, tokens: searchResults, score });
       }
     }
 
-    return resultMap;
+    entriesWithScores.sort((a, b) => {
+      if (a.score !== b.score) {
+        return b.score - a.score;
+      }
+      return sortTokenGroups(a.tokens, b.tokens);
+    });
+
+    return new Map(
+      entriesWithScores.map(({ groupKey, tokens }) => [groupKey, tokens])
+    );
   }, [groupedTokensMap, search]);
 
   return {
@@ -117,7 +137,7 @@ const groupedTokensSearchFields = [
   },
   {
     key: "chainInfo.chainName[]",
-    function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
+    function: (entries: [string, { chainInfo: { chainName: string } }[]]) => {
       return entries[1].map((token) => {
         return token.chainInfo.chainName;
       });
