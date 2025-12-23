@@ -137,7 +137,7 @@ const groupedTokensSearchFields = [
   },
   {
     key: "chainInfo.chainName[]",
-    function: (entries: [string, { chainInfo: { chainName: string } }[]]) => {
+    function: (entries: [groupKey: string, tokens: ViewToken[]]) => {
       return entries[1].map((token) => {
         return token.chainInfo.chainName;
       });

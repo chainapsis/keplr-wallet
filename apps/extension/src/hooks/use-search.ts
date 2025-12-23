@@ -91,9 +91,18 @@ const THROTTLE_DELAY = 500;
 
 function performSearchInternal<T>(
   data: T[],
-  queryLower: string,
+  query: string,
   fields: SearchField<T>[]
 ): { item: T; maxScore: number; fieldMatchScores: number[] }[] {
+  const queryLower = query.toLowerCase().trim();
+  if (!queryLower) {
+    return data.map((item) => ({
+      item,
+      maxScore: 0,
+      fieldMatchScores: fields.map(() => 0),
+    }));
+  }
+
   const matchedItems = data
     .map((item) => {
       const fieldMatchScores = fields.map((field, index) => {
@@ -157,12 +166,10 @@ export function performSearch<T>(
   fields: SearchField<T>[],
   tiebreaker?: (a: T, b: T) => number
 ): T[] {
-  const queryLower = query.toLowerCase().trim();
-  if (!queryLower) {
+  const matchedItems = performSearchInternal(data, query, fields);
+  if (matchedItems.length > 0 && matchedItems[0].maxScore === 0) {
     return data;
   }
-
-  const matchedItems = performSearchInternal(data, queryLower, fields);
 
   const sortedItems = matchedItems
     .sort((a, b) => {
@@ -194,12 +201,10 @@ export function performSearchWithScore<T>(
   query: string,
   fields: SearchField<T>[]
 ): { item: T; score: number }[] {
-  const queryLower = query.toLowerCase().trim();
-  if (!queryLower) {
+  const matchedItems = performSearchInternal(data, query, fields);
+  if (matchedItems.length > 0 && matchedItems[0].maxScore === 0) {
     return data.map((item) => ({ item, score: 0 }));
   }
-
-  const matchedItems = performSearchInternal(data, queryLower, fields);
 
   const sortedItems = matchedItems
     .sort((a, b) => {
