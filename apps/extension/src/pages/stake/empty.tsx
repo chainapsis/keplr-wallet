@@ -26,7 +26,15 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
   const { hugeQueriesStore, priceStore } = useStore();
 
   const stakableTokens = hugeQueriesStore.stakables
-    .filter((token) => token.token.toDec().gt(zeroDec))
+    .filter((token) => {
+      if (!token.token.toDec().gt(zeroDec)) {
+        return false;
+      }
+      const isStarknet = "starknet" in token.chainInfo;
+      const hasStakingUrl =
+        isStarknet || "walletUrlForStaking" in token.chainInfo;
+      return hasStakingUrl;
+    })
     .sort((a, b) => {
       const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
       const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
