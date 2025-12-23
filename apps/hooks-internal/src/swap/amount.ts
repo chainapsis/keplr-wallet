@@ -676,6 +676,9 @@ export class SwapAmountConfig extends AmountConfig {
         );
         break;
       }
+      // NOTE: For same chain and same asset, MsgSend is used,
+      // but since this is not a swap, it's intentionally not supported here.
+      case "cosmos-sdk/MsgSend":
       default:
         throw new Error("Unsupported message type");
     }
@@ -725,9 +728,70 @@ export class SwapAmountConfig extends AmountConfig {
     return isContainsSwap;
   }
 
+  private isSameInOutCurrency(
+    inChainId: string,
+    inCurrencyDenom: string
+  ): boolean {
+    return (
+      inCurrencyDenom === this.outCurrency.coinMinimalDenom &&
+      this.chainGetter.getChain(inChainId).chainIdentifier ===
+        this.chainGetter.getChain(this.outChainId).chainIdentifier
+    );
+  }
+
   @override
   override get uiProperties(): UIProperties {
     const prev = super.uiProperties;
+
+    // In과 out currency가 같은지 체크 (불필요한 쿼리 실행 전에 먼저 체크)
+    if (
+      this.amount.length > 0 &&
+      this.isSameInOutCurrency(
+        this.chainId,
+        this.amount[0].currency.coinMinimalDenom
+      )
+    ) {
+      return {
+        ...prev,
+        error: new Error("In and out currency is same"),
+      };
+    }
+
+    // CHECK: select assets 페이지 또는 asset details 페이지에서 이미 swappable인 자산들만 swap 페이지로 이동할 수 있도록
+    // 굳이 다시 체크할 필요가 있을지 확인 필요. 다만 to amount는 체크가 필요함.
+    // if (this.amount.length > 0) {
+    //   if (
+    //     !this.swapQueries.querySwapHelper.isSwappableCurrency(
+    //       this.chainId,
+    //       this.amount[0].currency
+    //     )
+    //   ) {
+    //     return {
+    //       ...prev,
+    //       error: new Error(
+    //         "The currency you are swapping from is currently not supported"
+    //       ),
+    //     };
+    //   }
+    // }
+
+    if (
+      this.amount.length > 0 &&
+      !this.swapQueries.querySwapHelper.isSwapDestinationOrAlternatives(
+        this.chainId,
+        this.amount[0].currency.coinMinimalDenom,
+        this.outChainId,
+        this.outCurrency.coinMinimalDenom
+      )
+    ) {
+      return {
+        ...prev,
+        error: new Error(
+          "The currency you are swapping to is currently not supported"
+        ),
+      };
+    }
+
     // max amount인 경우엔 route를 두 번 쿼리하기 때문에 첫 번째 쿼리도 체크한다.
     if (this.fraction === 1) {
       const querySwapHelper = this.getQuerySwapHelper(this.maxAmount);
@@ -882,111 +946,6 @@ export class SwapAmountConfig extends AmountConfig {
       }
     }
 
-    if (
-      this.amount.length > 0 &&
-      this.amount[0].currency.coinMinimalDenom ===
-        this.outAmount.currency.coinMinimalDenom &&
-      this.chainGetter.getChain(this.chainId).chainIdentifier ===
-        this.chainGetter.getChain(this.outChainId).chainIdentifier
-    ) {
-      return {
-        ...prev,
-        error: new Error("In and out currency is same"),
-      };
-    }
-
-    if (this.amount.length > 0) {
-      if (
-        !this.swapQueries.querySwapHelper.isSwappableCurrency(
-          this.chainId,
-          this.amount[0].currency
-        )
-      ) {
-        return {
-          ...prev,
-          error: new Error(
-            "The currency you are swapping from is currently not supported"
-          ),
-        };
-      }
-    }
-
-    if (
-      this.amount.length > 0 &&
-      !this.swapQueries.querySwapHelper.isSwapDestinationOrAlternatives(
-        this.chainId,
-        this.amount[0].currency.coinMinimalDenom,
-        this.outChainId,
-        this.outCurrency.coinMinimalDenom
-      )
-    ) {
-      return {
-        ...prev,
-        error: new Error(
-          "The currency you are swapping to is currently not supported"
-        ),
-      };
-    }
-
-    // if (this.feeConfig) {
-    //   const feeUIProperties = this.feeConfig.uiProperties;
-    //   if (
-    //     !feeUIProperties.error ||
-    //     !(feeUIProperties.error instanceof InsufficientFeeError)
-    //   ) {
-    //     const amount = this.amount;
-    //     const fees = this.feeConfig.fees;
-
-    //     const needs = this.otherFees.slice();
-    //     for (let i = 0; i < needs.length; i++) {
-    //       const need = needs[i];
-    //       for (const amt of amount) {
-    //         if (
-    //           need.currency.coinMinimalDenom === amt.currency.coinMinimalDenom
-    //         ) {
-    //           needs[i] = needs[i].add(amt);
-    //         }
-    //       }
-    //       for (const fee of fees) {
-    //         if (
-    //           need.currency.coinMinimalDenom === fee.currency.coinMinimalDenom
-    //         ) {
-    //           needs[i] = needs[i].add(fee);
-    //         }
-    //       }
-    //     }
-
-    //     for (let i = 0; i < needs.length; i++) {
-    //       const need = needs[i];
-
-    //       if (need.toDec().lte(new Dec(0))) {
-    //         continue;
-    //       }
-
-    //       const bal = this.queriesStore
-    //         .get(this.chainId)
-    //         .queryBalances.getQueryBech32Address(this.senderConfig.value)
-    //         .balances.find(
-    //           (bal) =>
-    //             bal.currency.coinMinimalDenom === need.currency.coinMinimalDenom
-    //         );
-
-    //       if (bal && !bal.response) {
-    //         return {
-    //           loadingState: "loading",
-    //         };
-    //       }
-
-    //       if (bal && bal.balance.toDec().lt(need.toDec())) {
-    //         return {
-    //           error: new InsufficientFeeError("Insufficient fee"),
-    //           loadingState: bal.isFetching ? "loading" : undefined,
-    //         };
-    //       }
-    //     }
-    //   }
-    // }
-
     return {
       ...prev,
     };
@@ -1000,6 +959,13 @@ export class SwapAmountConfig extends AmountConfig {
     }
 
     const amountIn = amount ?? this.amount[0];
+
+    if (
+      this.isSameInOutCurrency(this.chainId, amountIn.currency.coinMinimalDenom)
+    ) {
+      return;
+    }
+
     const fromAddress = this.getAddressSync(this.chainId);
     const toAddress = this.getAddressSync(this.outChainId);
     if (!fromAddress || !toAddress) {
@@ -1026,6 +992,13 @@ export class SwapAmountConfig extends AmountConfig {
     }
 
     const amountIn = amount ?? this.amount[0];
+
+    if (
+      this.isSameInOutCurrency(this.chainId, amountIn.currency.coinMinimalDenom)
+    ) {
+      return;
+    }
+
     const fromAddress = this.getAddressSync(this.chainId);
     const toAddress = this.getAddressSync(this.outChainId);
     if (!fromAddress || !toAddress) {
