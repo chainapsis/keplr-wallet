@@ -5,13 +5,9 @@ import { useStore } from "../../../stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { AppCurrency } from "@keplr-wallet/types";
-import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
-import {
-  FeeConfig,
-  GasConfig,
-  MemoConfig,
-  SenderConfig,
-} from "@keplr-wallet/hooks";
+import { SwapAmountConfig } from "@keplr-wallet/hooks-internal";
+import { FeeConfig, GasConfig, SenderConfig } from "@keplr-wallet/hooks";
+import { RouteStepType, SwapProvider } from "@keplr-wallet/stores-internal";
 import debounce from "lodash.debounce";
 import { v4 as uuidv4 } from "uuid";
 
@@ -29,9 +25,8 @@ interface SwapAnalyticsArgs {
   inCurrency: AppCurrency;
   outChainId: string;
   outCurrency: AppCurrency;
-  ibcSwapConfigs: {
-    amountConfig: IBCSwapAmountConfig;
-    memoConfig: MemoConfig;
+  swapConfigs: {
+    amountConfig: SwapAmountConfig;
     gasConfig: GasConfig;
     feeConfig: FeeConfig;
     senderConfig: SenderConfig;
@@ -44,7 +39,7 @@ export const useSwapAnalytics = ({
   inCurrency,
   outChainId,
   outCurrency,
-  ibcSwapConfigs,
+  swapConfigs,
   swapFeeBps,
 }: SwapAnalyticsArgs) => {
   const [searchParams] = useSearchParams();
@@ -205,12 +200,12 @@ export const useSwapAnalytics = ({
 
   // MAX button clicked
   useEffect(() => {
-    const currentFraction = ibcSwapConfigs.amountConfig.fraction;
+    const currentFraction = swapConfigs.amountConfig.fraction;
     if (prevFractionRef.current !== currentFraction && currentFraction === 1) {
       logEvent("swap_max_btn_clicked");
     }
     prevFractionRef.current = currentFraction;
-  }, [ibcSwapConfigs.amountConfig.fraction, analyticsAmplitudeStore, logEvent]);
+  }, [swapConfigs.amountConfig.fraction, analyticsAmplitudeStore, logEvent]);
 
   // Slippage changed
   useEffect(() => {
@@ -232,15 +227,13 @@ export const useSwapAnalytics = ({
   ]);
 
   // Quote requested
-  const queryIBCSwapForLog = ibcSwapConfigs.amountConfig.getQueryIBCSwap();
-  const queryRouteForLog = queryIBCSwapForLog?.getQueryRoute();
+  const queryRouteForLog = swapConfigs.amountConfig.getQueryRoute();
 
-  const amount = ibcSwapConfigs.amountConfig.amount[0];
-  const inAmountRaw = amount.toCoin().amount.toString();
-  const inAmountUsd = priceStore
-    .calculatePrice(amount, "usd")
-    ?.toDec()
-    .toString();
+  const amount = swapConfigs.amountConfig.amount[0];
+  const inAmountRaw = amount?.toCoin().amount.toString();
+  const inAmountUsd = amount
+    ? priceStore.calculatePrice(amount, "usd")?.toDec().toString()
+    : undefined;
 
   useEffect(() => {
     if (!queryRouteForLog || !amount) {
@@ -270,15 +263,12 @@ export const useSwapAnalytics = ({
   useEffect(() => {
     if (!queryRouteForLog?.response) return;
 
-    const {
-      source_asset_denom,
-      source_asset_chain_id,
-      dest_asset_denom,
-      dest_asset_chain_id,
-      amount_in,
-      amount_out,
-    } = queryRouteForLog.response.data;
-    const currentKey = `${source_asset_denom}-${source_asset_chain_id}-${dest_asset_denom}-${dest_asset_chain_id}-${amount_in}-${amount_out}`;
+    const { fromChainId, fromDenom, fromAmount, toChainId, toDenom } =
+      queryRouteForLog;
+    const { amount_out, estimated_time, steps, provider } =
+      queryRouteForLog.response.data;
+
+    const currentKey = `${fromDenom}-${fromChainId}-${toDenom}-${toChainId}-${fromAmount}-${amount_out}`;
     if (prevRouteKeyRef.current === currentKey) return;
 
     const {
@@ -289,9 +279,9 @@ export const useSwapAnalytics = ({
     } = getChainProperties(
       chainStore,
       priceStore,
-      source_asset_chain_id,
-      source_asset_denom,
-      amount_in
+      fromChainId,
+      fromDenom,
+      fromAmount
     );
 
     const {
@@ -302,10 +292,33 @@ export const useSwapAnalytics = ({
     } = getChainProperties(
       chainStore,
       priceStore,
-      dest_asset_chain_id,
-      dest_asset_denom,
+      toChainId,
+      toDenom,
       amount_out
     );
+
+    const doesSwap = steps.some((step) => step.type === RouteStepType.SWAP);
+
+    const responseData = queryRouteForLog.response.data;
+    let swapVenues: string[] | undefined;
+    if (responseData.provider === SwapProvider.SKIP) {
+      const venueSet = new Set<string>();
+      for (const op of responseData.skip_operations) {
+        if ("swap" in op && op.swap.swap_venues) {
+          for (const venue of op.swap.swap_venues) {
+            if (venue.name) venueSet.add(venue.name);
+          }
+        }
+        if ("evm_swap" in op && op.evm_swap.swap_venues) {
+          for (const venue of op.evm_swap.swap_venues) {
+            if (venue.name) venueSet.add(venue.name);
+          }
+        }
+      }
+      if (venueSet.size > 0) {
+        swapVenues = Array.from(venueSet);
+      }
+    }
 
     const quoteId = uuidv4();
 
@@ -320,26 +333,17 @@ export const useSwapAnalytics = ({
       in_chain_identifier: sourceChainIdentifier,
       in_chain_name: sourceChainName,
       in_coin_denom: sourceCoinDenom,
-      in_amount_raw: amount_in,
+      in_amount_raw: fromAmount,
       in_amount_usd: sourceAmountUsd,
       out_chain_identifier: destChainIdentifier,
       out_chain_name: destChainName,
       out_coin_denom: destCoinDenom,
       out_amount_est_raw: amount_out,
       out_amount_est_usd: destAmountUsd,
-      provider: "skip",
-      does_swap: queryRouteForLog.response.data.does_swap,
-      txs_required: queryRouteForLog.response.data.txs_required,
-      route_duration_estimate_sec:
-        queryRouteForLog.response.data.estimated_route_duration_seconds,
-      swap_venues: (
-        queryRouteForLog.response.data.swap_venues ?? [
-          queryRouteForLog.response.data.swap_venue,
-        ]
-      )
-        .filter(Boolean)
-        .map((v: any) => v.name ?? v.dex)
-        .filter(Boolean),
+      provider,
+      does_swap: doesSwap,
+      route_duration_estimate_sec: estimated_time,
+      swap_venues: swapVenues,
     });
     quoteIdRef.current = quoteId;
     prevRouteKeyRef.current = currentKey;
@@ -355,6 +359,10 @@ export const useSwapAnalytics = ({
       : undefined;
     requestStartedAtRef.current = undefined;
 
+    const errorData = queryRouteForLog.error.data as
+      | { message?: string; code?: number }
+      | undefined;
+
     logEvent("swap_quote_failed", {
       duration_ms: durationMs,
       in_chain_identifier: inChainIdentifier,
@@ -365,11 +373,9 @@ export const useSwapAnalytics = ({
       out_coin_denom: outCurrency.coinDenom,
       in_amount_raw: inAmountRaw,
       in_amount_usd: inAmountUsd,
-      provider: "skip",
-      error_message:
-        queryRouteForLog.error.message ?? queryRouteForLog.error.data?.message,
+      error_message: queryRouteForLog.error.message ?? errorData?.message,
       error_status: queryRouteForLog.error.status,
-      error_code: queryRouteForLog.error.data?.code ?? undefined,
+      error_code: errorData?.code ?? undefined,
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -378,10 +384,10 @@ export const useSwapAnalytics = ({
   const logSwapSignOpened = useCallback(() => {
     logEvent("swap_sign_opened", {
       quote_id: quoteIdRef.current,
-      gas_estimate: ibcSwapConfigs.gasConfig.gas,
-      price_impact_pct: ibcSwapConfigs.amountConfig.swapPriceImpact
+      gas_estimate: swapConfigs.gasConfig.gas,
+      price_impact_pct: swapConfigs.amountConfig.swapPriceImpact
         ? Number(
-            ibcSwapConfigs.amountConfig.swapPriceImpact
+            swapConfigs.amountConfig.swapPriceImpact
               .toDec()
               .mul(new Dec(100))
               .toString()
@@ -390,8 +396,8 @@ export const useSwapAnalytics = ({
     });
   }, [
     logEvent,
-    ibcSwapConfigs.gasConfig.gas,
-    ibcSwapConfigs.amountConfig.swapPriceImpact,
+    swapConfigs.gasConfig.gas,
+    swapConfigs.amountConfig.swapPriceImpact,
   ]);
 
   useEffect(() => {

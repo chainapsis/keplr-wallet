@@ -14,6 +14,7 @@ export const Button: FunctionComponent<ButtonProps> = ({
   right,
   isLoading,
   suppressDefaultLoadingIndicator,
+  showTextWhileLoading,
   textOverrideIcon,
   type,
   buttonStyle,
@@ -53,7 +54,12 @@ export const Button: FunctionComponent<ButtonProps> = ({
           <Styles.TextOverrideIcon>{textOverrideIcon}</Styles.TextOverrideIcon>
         ) : null}
 
-        <Box style={{ opacity: isLoading || textOverrideIcon ? 0 : 1 }}>
+        <Box
+          style={{
+            opacity:
+              (isLoading && !showTextWhileLoading) || textOverrideIcon ? 0 : 1,
+          }}
+        >
           {text}
         </Box>
 

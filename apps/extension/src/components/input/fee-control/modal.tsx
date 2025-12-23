@@ -33,7 +33,10 @@ import { Gutter } from "../../gutter";
 import { VerticalCollapseTransition } from "../../transition/vertical-collapse";
 import { Tooltip } from "../../tooltip";
 import { InformationOutlineIcon } from "../../icon";
-import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
+import {
+  IBCSwapAmountConfig,
+  SwapAmountConfig,
+} from "@keplr-wallet/hooks-internal";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
 
@@ -61,6 +64,7 @@ export const TransactionFeeModal: FunctionComponent<{
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
   ibcSwapAmountConfig?: IBCSwapAmountConfig;
+  swapAmountConfig?: SwapAmountConfig;
   gasSimulator?: IGasSimulator;
   disableAutomaticFeeSet?: boolean;
   isExternalMsg?: boolean;
@@ -74,6 +78,7 @@ export const TransactionFeeModal: FunctionComponent<{
     feeConfig,
     gasConfig,
     ibcSwapAmountConfig,
+    swapAmountConfig,
     gasSimulator,
     disableAutomaticFeeSet,
     isExternalMsg,
@@ -85,6 +90,8 @@ export const TransactionFeeModal: FunctionComponent<{
       useStore();
     const intl = useIntl();
     const theme = useTheme();
+
+    const amountConfig = ibcSwapAmountConfig ?? swapAmountConfig;
 
     const showExternalFeeSetGuide = isExternalMsg && disableAutomaticFeeSet;
 
@@ -167,8 +174,8 @@ export const TransactionFeeModal: FunctionComponent<{
     const isShowingFeeWithGasEstimated =
       !!isGasSimulatorEnabled && !!gasSimulator?.gasEstimated && isFeeSetByUser;
 
-    const swapFeeRate = ibcSwapAmountConfig
-      ? new IntPretty(ibcSwapAmountConfig.swapFeeBps)
+    const swapFeeRate = amountConfig
+      ? new IntPretty(amountConfig.swapFeeBps)
           .moveDecimalPointLeft(2)
           .trim(true)
           .maxDecimals(4)
@@ -564,7 +571,7 @@ export const TransactionFeeModal: FunctionComponent<{
           </VerticalCollapseTransition>
           <Gutter size="0" />
 
-          {ibcSwapAmountConfig?.swapFeeBps ? (
+          {amountConfig?.swapFeeBps ? (
             <YAxis alignX="center">
               <XAxis alignY="center" gap="0.25rem">
                 <Subtitle4
@@ -583,7 +590,7 @@ export const TransactionFeeModal: FunctionComponent<{
                   content={intl.formatMessage(
                     {
                       id:
-                        ibcSwapAmountConfig.swapFeeBps === 10
+                        amountConfig.swapFeeBps === 10
                           ? "page.ibc-swap.components.swap-fee-info.button.service-fee-stable-coin.paragraph"
                           : "page.ibc-swap.components.swap-fee-info.button.service-fee.paragraph",
                     },

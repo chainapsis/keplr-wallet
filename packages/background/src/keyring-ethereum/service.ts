@@ -11,6 +11,7 @@ import {
   ChainInfo,
   EthereumSignResponse,
   EthSignType,
+  JsonRpcResponse,
 } from "@keplr-wallet/types";
 import { Bech32Address } from "@keplr-wallet/cosmos";
 import { Buffer } from "buffer/";
@@ -112,6 +113,17 @@ export class KeyRingEthereumService {
       const unsignedTx = JSON.parse(Buffer.from(message).toString());
       if (unsignedTx.authorizationList) {
         throw new Error("EIP-7702 transactions are not supported.");
+      }
+
+      const hasRequiredErc20Approvals =
+        unsignedTx.requiredErc20Approvals &&
+        Array.isArray(unsignedTx.requiredErc20Approvals) &&
+        unsignedTx.requiredErc20Approvals.length > 0;
+
+      if (!env.isInternalMsg && hasRequiredErc20Approvals) {
+        throw new Error(
+          "Required ERC20 approvals are not supported for external messages"
+        );
       }
     }
 
@@ -316,6 +328,96 @@ export class KeyRingEthereumService {
         };
       }
     );
+  }
+
+  /**
+   * Sign an Ethereum transaction with pre-authorization
+   * @dev only sign the transaction, not simulate or broadcast
+   */
+  async signEthereumPreAuthorized(
+    vaultId: string,
+    chainId: string,
+    signer: string,
+    message: Uint8Array,
+    signType: EthSignType
+  ): Promise<EthereumSignResponse> {
+    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    // if (chainInfo.hideInUI) {
+    //   throw new Error("Can't sign for hidden chain");
+    // }
+    const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
+    const evmInfo = ChainsService.getEVMInfo(chainInfo);
+
+    if (!isEthermintLike && !evmInfo) {
+      throw new Error("Not ethermint like and EVM chain");
+    }
+
+    const keyInfo = this.keyRingService.getKeyInfo(vaultId);
+    if (!keyInfo) {
+      throw new Error("Null key info");
+    }
+
+    if (keyInfo.type === "ledger" || keyInfo.type === "keystone") {
+      throw new Error(
+        "Pre-authorized signing is not supported for hardware wallets"
+      );
+    }
+
+    if (signType === EthSignType.TRANSACTION) {
+      const unsignedTx = JSON.parse(Buffer.from(message).toString());
+      if (unsignedTx.authorizationList) {
+        throw new Error("EIP-7702 transactions are not supported.");
+      }
+    }
+
+    try {
+      Bech32Address.validate(signer);
+    } catch {
+      // Ignore mixed-case checksum
+      signer = (
+        signer.substring(0, 2) === "0x" ? signer : "0x" + signer
+      ).toLowerCase();
+    }
+
+    const key = await this.keyRingCosmosService.getKey(vaultId, chainId);
+    if (
+      signer !== key.bech32Address &&
+      signer !== key.ethereumHexAddress.toLowerCase()
+    ) {
+      throw new Error("Signer mismatched");
+    }
+
+    if (signType !== EthSignType.TRANSACTION) {
+      throw new Error(
+        "Pre-authorized signing is only supported for transaction for now"
+      );
+    }
+
+    const unsignedTx: UnsignedTransaction = JSON.parse(
+      Buffer.from(message).toString()
+    );
+    const isEIP1559 =
+      !!unsignedTx.maxFeePerGas || !!unsignedTx.maxPriorityFeePerGas;
+    if (isEIP1559) {
+      unsignedTx.type = TransactionTypes.eip1559;
+    }
+
+    const signature = await this.keyRingService.sign(
+      chainId,
+      vaultId,
+      Buffer.from(serialize(unsignedTx).replace("0x", ""), "hex"),
+      "keccak256"
+    );
+
+    return {
+      signingData: Buffer.from(JSON.stringify(unsignedTx), "utf8"),
+      signature: Buffer.concat([
+        signature.r,
+        signature.s,
+        // The metamask doesn't seem to consider the chain id in this case... (maybe bug on metamask?)
+        signature.v ? Buffer.from("1c", "hex") : Buffer.from("1b", "hex"),
+      ]),
+    };
   }
 
   async request<T = any>(
@@ -1190,12 +1292,7 @@ export class KeyRingEthereumService {
             this.chainsService.getEVMInfoOrThrow(currentChainId);
 
           return (
-            await simpleFetch<{
-              jsonrpc: string;
-              id: number;
-              result: any;
-              error?: Error;
-            }>(currentChainEVMInfo.rpc, {
+            await simpleFetch<JsonRpcResponse<any>>(currentChainEVMInfo.rpc, {
               method: "POST",
               headers: {
                 "content-type": "application/json",

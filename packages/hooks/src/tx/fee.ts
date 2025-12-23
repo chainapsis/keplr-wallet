@@ -363,13 +363,18 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
         },
       ];
     } else {
+      const l1DataFeeToAdd = this.chainInfo.features?.includes(
+        "op-stack-l1-data-fee"
+      )
+        ? this.l1DataFee ?? new Dec(0)
+        : new Dec(0);
       res = this.fee.map((fee) => {
         return {
           amount: fee
             .add(
-              this.l1DataFee?.quo(
+              l1DataFeeToAdd.quo(
                 DecUtils.getTenExponentN(fee.currency.coinDecimals)
-              ) ?? new Dec(0)
+              )
             )
             .toCoin().amount,
           currency: fee.currency,
@@ -592,9 +597,12 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
     (feeCurrency: FeeCurrency, feeType: FeeType) => {
       const gas = this.gasConfig.gas;
       const gasPrice = this.getGasPriceForFeeCurrency(feeCurrency, feeType);
-      const feeAmount = gasPrice
-        .mul(new Dec(gas))
-        .add(this.l1DataFee ?? new Dec(0));
+      const l1DataFeeToAdd = this.chainInfo.features?.includes(
+        "op-stack-l1-data-fee"
+      )
+        ? this.l1DataFee ?? new Dec(0)
+        : new Dec(0);
+      const feeAmount = gasPrice.mul(new Dec(gas)).add(l1DataFeeToAdd);
 
       return new CoinPretty(feeCurrency, feeAmount.roundUp()).maxDecimals(
         feeCurrency.coinDecimals
