@@ -20,12 +20,12 @@ export const useSwapPriceImpact = (
   // 가끔씩 바보같이 coingecko에 올라가있지도 않은데 지 맘대로 coingecko id를 넣는 얘들도 있어서
   // 실제로 쿼리를 해보고 있는지 아닌지 판단하는 로직도 있음
   // coingecko로부터 가격이 undefined거나 0이면 알 수 없는 것으로 처리함.
-  const [inOrOutChangedDelay, setInOrOutChangedDelay] = useState(true);
+  const [isPriceCheckDelayed, setIsPriceCheckDelayed] = useState(true);
   const debounceCompletedRef = useRef(false);
 
   // 자산 변경이 감지되면 1초 대기 후 debounce 완료 표시
   useEffect(() => {
-    setInOrOutChangedDelay(true);
+    setIsPriceCheckDelayed(true);
     debounceCompletedRef.current = false;
 
     const timeoutId = setTimeout(() => {
@@ -43,17 +43,17 @@ export const useSwapPriceImpact = (
   // debounce 완료 후 price fetching이 완료되면 딜레이 해제
   useEffect(() => {
     if (
-      inOrOutChangedDelay &&
+      isPriceCheckDelayed &&
       debounceCompletedRef.current &&
       !priceStore.isFetching
     ) {
-      setInOrOutChangedDelay(false);
+      setIsPriceCheckDelayed(false);
     }
-  }, [inOrOutChangedDelay, priceStore.isFetching]);
+  }, [isPriceCheckDelayed, priceStore.isFetching]);
 
   const isFetching =
     amountConfig.isFetchingInAmount || amountConfig.isFetchingOutAmount;
-  const shouldCheckPrice = !inOrOutChangedDelay && !isFetching;
+  const shouldCheckPrice = !isPriceCheckDelayed && !isFetching;
 
   const unableToPopulatePrices = (() => {
     if (!shouldCheckPrice) {
@@ -157,6 +157,12 @@ export const useSwapPriceImpact = (
                 .sub(outPrice.toDec())
                 .quo(inPrice.toDec())
                 .mul(new Dec(100));
+
+              console.log(
+                "priceImpact w price comparison",
+                priceImpact.toString()
+              );
+
               // price impact가 2.5% 이상이면 경고
               if (priceImpact.gt(new Dec(2.5))) {
                 setIsHighPriceImpact(true);
@@ -180,5 +186,6 @@ export const useSwapPriceImpact = (
   return {
     isHighPriceImpact,
     unableToPopulatePrices,
+    isPriceCheckDelayed,
   };
 };

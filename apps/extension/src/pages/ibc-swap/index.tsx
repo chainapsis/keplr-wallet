@@ -226,9 +226,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   );
 
   const swapFeeBps = useSwapFeeBps(swapConfigs.amountConfig);
-  const { isHighPriceImpact, unableToPopulatePrices } = useSwapPriceImpact(
-    swapConfigs.amountConfig
-  );
+  const { isHighPriceImpact, unableToPopulatePrices, isPriceCheckDelayed } =
+    useSwapPriceImpact(swapConfigs.amountConfig);
 
   swapConfigs.amountConfig.setCurrency(inCurrency);
   swapConfigs.amountConfig.setSwapFeeBps(swapFeeBps);
@@ -1824,7 +1823,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition collapsed={shouldTopUp}>
+        <VerticalCollapseTransition
+          collapsed={shouldTopUp || isPriceCheckDelayed}
+        >
           <WarningGuideBox
             showUSDNWarning={showUSDNWarning}
             showCelestiaWarning={showCelestiaWarning}
