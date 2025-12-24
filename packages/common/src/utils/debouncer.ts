@@ -4,7 +4,7 @@ export class Debouncer {
   ): (...args: ArgumentsType) => Promise<ReturnType> {
     let currentPromise: PromiseLike<ReturnType> | ReturnType | undefined;
 
-    return async (...arguments_) => {
+    return async function (this: unknown, ...arguments_: ArgumentsType): Promise<ReturnType> {
       if (currentPromise) {
         return currentPromise;
       }
