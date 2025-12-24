@@ -2,6 +2,7 @@
 
 import "zx/globals";
 import path from "path";
+import fs from "fs/promises";
 
 (async () => {
   try {
