@@ -440,6 +440,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "Source Channel ID",
 
   "page.ibc-swap.title.swap": "Swap",
+  "page.ibc-swap.info.required-approvals": "{total} approvals required",
   "page.ibc-swap.button.next": "Swap",
   "page.ibc-swap.button.hold-to-swap": "Hold to Swap",
   "page.ibc-swap.button.hold-to-approve-and-swap": "Hold to Approve & Swap",

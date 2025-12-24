@@ -434,6 +434,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "채널 ID를 입력하세요.",
 
   "page.ibc-swap.title.swap": "토큰 교환",
+  "page.ibc-swap.info.required-approvals": "{total}개의 승인이 필요합니다.",
   "page.ibc-swap.button.next": "교환",
   "page.ibc-swap.button.hold-to-swap": "꾹 눌러서 교환",
   "page.ibc-swap.button.hold-to-approve-and-swap": "꾹 눌러서 승인 & 교환",
