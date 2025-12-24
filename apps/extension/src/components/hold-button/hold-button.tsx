@@ -51,7 +51,11 @@ export const HoldButton: FunctionComponent<HoldButtonProps> = ({
   }, []);
 
   const startHold = useCallback(() => {
-    if (disabled || isLoading) return;
+    if (disabled || isLoading) {
+      return;
+    }
+
+    clearHoldInterval();
 
     confirmedRef.current = false;
     setIsHolding(true);
@@ -60,7 +64,9 @@ export const HoldButton: FunctionComponent<HoldButtonProps> = ({
     onHoldStart?.();
 
     intervalRef.current = window.setInterval(() => {
-      if (holdStartTimeRef.current === null) return;
+      if (holdStartTimeRef.current === null) {
+        return;
+      }
 
       const elapsed = Date.now() - holdStartTimeRef.current;
       const newProgress = Math.min(
@@ -99,14 +105,18 @@ export const HoldButton: FunctionComponent<HoldButtonProps> = ({
   ]);
 
   const endHold = useCallback(() => {
-    if (!isHolding) return;
+    // Check if there's an active interval or hold instead of relying on state
+    // This prevents race conditions when quickly holding and releasing
+    if (intervalRef.current === null && holdStartTimeRef.current === null) {
+      return;
+    }
 
     clearHoldInterval();
     setIsHolding(false);
     setProgress(0);
     holdStartTimeRef.current = null;
     onHoldEnd?.();
-  }, [isHolding, clearHoldInterval, onHoldEnd]);
+  }, [clearHoldInterval, onHoldEnd]);
 
   useEffect(() => {
     return () => {

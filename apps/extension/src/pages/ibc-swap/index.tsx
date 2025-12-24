@@ -33,7 +33,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { H4, Subtitle4 } from "../../components/typography";
+import { Body3, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -76,6 +76,7 @@ import { amountToAmbiguousString, amountToAmbiguousAverage } from "../../utils";
 import { Button } from "../../components/button";
 import { EvmGasSimulationOutcome, EthTxStatus } from "@keplr-wallet/types";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
+import { StepIndicator } from "../../components/step-indicator";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -226,9 +227,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   );
 
   const swapFeeBps = useSwapFeeBps(swapConfigs.amountConfig);
-  const { isHighPriceImpact, unableToPopulatePrices } = useSwapPriceImpact(
-    swapConfigs.amountConfig
-  );
+  const { isHighPriceImpact, unableToPopulatePrices, isPriceCheckDelayed } =
+    useSwapPriceImpact(swapConfigs.amountConfig);
 
   swapConfigs.amountConfig.setCurrency(inCurrency);
   swapConfigs.amountConfig.setSwapFeeBps(swapFeeBps);
@@ -546,7 +546,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const oneClickSwapEnabled =
     swapConfigs.amountConfig.isQuoteReady &&
-    !swapConfigs.amountConfig.requiresMultipleTxs &&
+    !swapConfigs.amountConfig.requiresMultipleTxBundles &&
     !isHardwareWallet &&
     (isInChainEVMOnly ? isEvmOneClickSwapEnabled : isCosmosOneClickSwapEnabled);
 
@@ -1037,7 +1037,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
         })[] = [];
 
-        const requiresMultipleTxs = txs.length > 1;
+        const requiresMultipleTxBundles = txs.length > 1;
         const totalSignatureCount = txs.reduce((acc, curr) => {
           if ("send" in curr) {
             return acc + 1;
@@ -1149,7 +1149,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 // if multiple txs are required or the wallet is hardware wallet or topup is required,
                 // sign the tx here
-                if (requiresMultipleTxs || isHardwareWallet || shouldTopUp) {
+                if (
+                  requiresMultipleTxBundles ||
+                  isHardwareWallet ||
+                  shouldTopUp
+                ) {
                   signatureNavigationCount += 1;
                   const result = await tx.sign(
                     swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
@@ -1253,7 +1257,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         };
 
                   if (
-                    requiresMultipleTxs ||
+                    requiresMultipleTxBundles ||
                     isHardwareWallet ||
                     gasSimulator.evmSimulationOutcome ===
                       EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
@@ -1805,7 +1809,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             );
           }}
         />
-        <Gutter size="0.75rem" />
+        <Gutter size="1rem" />
         <VerticalCollapseTransition collapsed={shouldTopUp}>
           <SwapFeeInfo
             senderConfig={swapConfigs.senderConfig}
@@ -1824,7 +1828,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition collapsed={shouldTopUp}>
+        <VerticalCollapseTransition
+          collapsed={shouldTopUp || isPriceCheckDelayed}
+        >
           <WarningGuideBox
             showUSDNWarning={showUSDNWarning}
             showCelestiaWarning={showCelestiaWarning}
@@ -1887,12 +1893,53 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           />
         </VerticalCollapseTransition>
 
-        <Gutter size="0.75rem" />
+        <Gutter size="1rem" />
+        <VerticalCollapseTransition
+          collapsed={
+            oneClickSwapEnabled ||
+            swapConfigs.amountConfig.totalIndividualTxCount <= 1 ||
+            swapConfigs.amountConfig.isFetchingInAmount ||
+            swapConfigs.amountConfig.isFetchingOutAmount ||
+            gasSimulator.isSimulating
+          }
+        >
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <StepIndicator
+              totalCount={swapConfigs.amountConfig.totalIndividualTxCount}
+              completedCount={0}
+              blinkCurrentStep={true}
+            />
+            <Gutter size="0.25rem" />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage
+                id="page.ibc-swap.info.required-approvals"
+                values={{
+                  total: swapConfigs.amountConfig.totalIndividualTxCount,
+                }}
+              />
+            </Body3>
+          </Box>
+          <Gutter size="0.75rem" />
+        </VerticalCollapseTransition>
 
         {oneClickSwapEnabled ? (
           <HoldButton
             type="submit"
-            holdDurationMs={1500}
+            holdDurationMs={1000}
             disabled={
               interactionBlocked ||
               showUSDNWarning ||

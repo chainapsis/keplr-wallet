@@ -180,7 +180,9 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
       return undefined;
     }
 
-    return new RatePretty(new Dec(this.response.data.price_impact_percent));
+    return new RatePretty(
+      new Dec(this.response.data.price_impact_percent).quoTruncate(new Dec(100))
+    );
   }
 
   protected override async fetchResponse(
