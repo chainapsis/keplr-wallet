@@ -1892,7 +1892,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         {oneClickSwapEnabled ? (
           <HoldButton
             type="submit"
-            holdDurationMs={1500}
+            holdDurationMs={1000}
             disabled={
               interactionBlocked ||
               showUSDNWarning ||
