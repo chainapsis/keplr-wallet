@@ -1,6 +1,6 @@
 {
   "name": "@keplr-wallet/topup-client",
-  "version": "0.12.307-rc.0",
+  "version": "0.12.307",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "author": "chainapsis",
@@ -21,7 +21,7 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
-    "@keplr-wallet/simple-fetch": "0.12.307-rc.0",
-    "@keplr-wallet/types": "0.12.307-rc.0"
+    "@keplr-wallet/simple-fetch": "0.12.307",
+    "@keplr-wallet/types": "0.12.307"
   }
 }
