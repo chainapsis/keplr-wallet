@@ -485,6 +485,7 @@ export const MainPage: FunctionComponent<{
               for (const scene of info.scenes) {
                 res.push({
                   title: scene.title,
+                  subtitle: scene.subtitle,
                   image:
                     scene.image && scene.aspectRatio
                       ? {
@@ -495,7 +496,8 @@ export const MainPage: FunctionComponent<{
                       : undefined,
                   paragraph: scene.paragraph,
                   links: scene.links,
-                  isSidePanelBeta: info.isSidePanelBeta,
+                  closeText: scene.closeText,
+                  closeLink: scene.closeLink,
                 });
               }
             }

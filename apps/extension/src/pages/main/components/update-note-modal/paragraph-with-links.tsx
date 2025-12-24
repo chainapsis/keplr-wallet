@@ -3,6 +3,7 @@ import { FormattedMessage } from "react-intl";
 import styled from "styled-components";
 import { ColorPalette } from "../../../../styles";
 import { UpdateNotePageData } from ".";
+import { Gutter } from "../../../../components/gutter";
 
 const Styles = {
   Link: styled.span`
@@ -26,7 +27,10 @@ export const ParagraphWithLinks: FunctionComponent<{
       defaultMessage={paragraph}
       values={{
         br: <br />,
-        b: (...chunks: React.ReactNode[]) => <b>{chunks}</b>,
+        b: (...chunks: React.ReactNode[]) => (
+          <b style={{ fontWeight: 500 }}>{chunks}</b>
+        ),
+        gutter: <Gutter size="0.625rem" />,
         link: links
           ? (...chunks: React.ReactNode[]) => {
               const flattenedChunks: React.ReactNode[] = [];
