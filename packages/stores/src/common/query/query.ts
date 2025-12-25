@@ -382,7 +382,7 @@ export abstract class ObservableQuery<T = unknown, E = unknown>
       this.cancel("__fetching__proceed__next__");
     }
 
-    // If there is no existing response, try to load saved reponse.
+    // If there is no existing response, try to load saved response.
     if (!this._response) {
       this._isFetching = true;
 
