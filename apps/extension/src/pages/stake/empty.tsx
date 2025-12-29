@@ -38,15 +38,11 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
       if ("bitcoin" in token.chainInfo) {
         return false;
       }
-      const chainId =
-        "cosmos" in token.chainInfo
-          ? token.chainInfo.cosmos.chainId
-          : token.chainInfo.chainId;
-      const chainInfo = chainStore.getChain(chainId);
+      const chainInfo = chainStore.getChain(token.chainInfo.chainId);
       const hasNativeUrl =
         !!chainInfo.embedded.embedded &&
         !!chainInfo.embedded.walletUrlForStaking;
-      return hasNativeUrl || hasKcrStakingUrl(chainId);
+      return hasNativeUrl || hasKcrStakingUrl(token.chainInfo.chainId);
     })
     .sort((a, b) => {
       const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
@@ -106,14 +102,11 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
             if ("starknet" in viewToken.chainInfo) {
               return "https://dashboard.endur.fi/stake";
             }
-            if (!chainStore.hasChain(viewToken.chainInfo.chainId)) {
-              return undefined;
-            }
             const chainInfo = chainStore.getChain(viewToken.chainInfo.chainId);
-            if (chainInfo.embedded.walletUrlForStaking) {
-              return chainInfo.embedded.walletUrlForStaking;
-            }
-            return getKcrStakingUrl(viewToken.chainInfo.chainId);
+            return (
+              chainInfo.embedded.walletUrlForStaking ||
+              getKcrStakingUrl(viewToken.chainInfo.chainId)
+            );
           })();
 
           const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);
