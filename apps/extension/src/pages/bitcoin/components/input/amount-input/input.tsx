@@ -29,7 +29,8 @@ export const AmountInput: FunctionComponent<{
   amountConfig: IAmountConfig;
   availableBalance: CoinPretty | undefined;
   isLoading: boolean;
-}> = observer(({ amountConfig, availableBalance, isLoading }) => {
+  isUnfiltered?: boolean;
+}> = observer(({ amountConfig, availableBalance, isLoading, isUnfiltered }) => {
   if (amountConfig.amount.length !== 1) {
     throw new Error(
       `Amount input component only handles single amount: ${amountConfig.amount
@@ -115,7 +116,13 @@ export const AmountInput: FunctionComponent<{
             <Tooltip
               enabled={!!availableBalance}
               content={
-                <FormattedMessage id="components.input.amount-input.available-balance-tooltip" />
+                <FormattedMessage
+                  id={
+                    isUnfiltered
+                      ? "components.input.amount-input.available-balance-tooltip-unfiltered"
+                      : "components.input.amount-input.available-balance-tooltip"
+                  }
+                />
               }
               forceWidth="15.875rem"
               hideArrow={true}

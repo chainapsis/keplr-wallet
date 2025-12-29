@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DUST_THRESHOLD } from "@keplr-wallet/stores-bitcoin";
 import { useStore } from "../../stores";
 import { useGetInscriptionsByAddress } from "./use-get-inscriptions";
@@ -10,6 +11,8 @@ export const useGetUTXOs = (
   inscriptionProtected: boolean,
   runesProtected: boolean
 ) => {
+  const [allowUnfilteredOnApiError, setAllowUnfilteredOnApiError] =
+    useState(false);
   const { chainStore, bitcoinQueriesStore } = useStore();
 
   const modularChainInfo = chainStore.getModularChain(chainId);
@@ -33,30 +36,56 @@ export const useGetUTXOs = (
 
   const confirmedUTXOs = queryUTXOs?.confirmedUTXOs || [];
 
-  // Extract inscribed UTXOs
-  const inscribedUTXOs = inscriptionsPages
-    ?.flatMap((page) => page.response?.data ?? [])
-    .map((inscription) => {
-      const { satpoint } = inscription;
-      const [txid, vout] = satpoint.split(":");
-      return {
-        txid,
-        vout: Number(vout),
-      };
-    });
+  const hasInscriptionsApiError =
+    inscriptionProtected &&
+    inscriptionsPages?.some((page) => page.error) &&
+    !isFetchingInscriptions;
+  const hasRunesApiError =
+    runesProtected &&
+    runesPages?.some((page) => page.error) &&
+    !isFetchingRunesOutputs;
 
-  // Extract runes UTXOs
-  const runesUTXOs = runesPages
-    ?.flatMap((page) => page.response?.data ?? [])
-    .filter(Boolean)
-    .map((runesOutput) => {
-      const { output } = runesOutput;
-      const [txid, vout] = output.split(":");
-      return {
-        txid,
-        vout: Number(vout),
-      };
-    });
+  const indexerIsHealthy =
+    !queryUTXOs?.error &&
+    (!queryUTXOs?.isFetching || confirmedUTXOs.length > 0);
+
+  const hasApiError = hasInscriptionsApiError || hasRunesApiError;
+
+  const shouldSkipFiltering =
+    allowUnfilteredOnApiError && indexerIsHealthy && hasApiError;
+
+  const isUnfiltered = hasApiError && indexerIsHealthy;
+
+  const inscribedUTXOs =
+    hasInscriptionsApiError && !shouldSkipFiltering
+      ? []
+      : inscriptionsPages
+          ?.filter((page) => !page.error)
+          ?.flatMap((page) => page.response?.data ?? [])
+          .map((inscription) => {
+            const { satpoint } = inscription;
+            const [txid, vout] = satpoint.split(":");
+            return {
+              txid,
+              vout: Number(vout),
+            };
+          });
+
+  const runesUTXOs =
+    hasRunesApiError && !shouldSkipFiltering
+      ? []
+      : runesPages
+          ?.filter((page) => !page.error)
+          ?.flatMap((page) => page.response?.data ?? [])
+          .filter(Boolean)
+          .map((runesOutput) => {
+            const { output } = runesOutput;
+            const [txid, vout] = output.split(":");
+            return {
+              txid,
+              vout: Number(vout),
+            };
+          });
 
   // Create lookup maps for faster filtering
   const protectedUTXOs = new Set(
@@ -88,23 +117,30 @@ export const useGetUTXOs = (
   const isFetching =
     isFetchingInscriptions || isFetchingRunesOutputs || queryUTXOs?.isFetching;
 
-  // Determine if there's an error
-  const error =
-    queryUTXOs?.error ||
-    (inscriptionsPages?.some((page) => page.error)
+  const indexerError = queryUTXOs?.error;
+  const apiError =
+    (hasInscriptionsApiError
       ? inscriptionsPages.find((page) => page.error)?.error
       : undefined) ||
-    (runesPages?.some((page) => page.error)
+    (hasRunesApiError
       ? runesPages.find((page) => page.error)?.error
       : undefined);
+
+  const error = indexerError || apiError;
 
   return {
     isFetching,
     error,
+    indexerError,
+    apiError,
     confirmedUTXOs,
     inscribedUTXOs,
     runesUTXOs,
     availableUTXOs,
     availableBalance,
+    shouldSkipFiltering,
+    isUnfiltered,
+    allowUnfilteredOnApiError,
+    setAllowUnfilteredOnApiError,
   };
 };

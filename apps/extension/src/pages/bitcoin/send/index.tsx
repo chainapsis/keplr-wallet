@@ -15,7 +15,7 @@ import { useSearchParams } from "react-router-dom";
 import { useStore } from "../../../stores";
 import { useNavigate } from "react-router";
 import { TokenItem } from "../../main/components";
-import { Subtitle3 } from "../../../components/typography";
+import { Body2, Subtitle3 } from "../../../components/typography";
 import { Box } from "../../../components/box";
 import { YAxis } from "../../../components/axis";
 import { Gutter } from "../../../components/gutter";
@@ -51,6 +51,9 @@ import {
 } from "@keplr-wallet/background";
 import { IPsbtInput, RemainderStatus } from "@keplr-wallet/stores-bitcoin";
 import { BitcoinGuideBox } from "../components/guide-box";
+import { GuideBox } from "../../../components/guide-box";
+import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
+import { Checkbox } from "../../../components/checkbox";
 
 const Styles = {
   Flex1: styled.div`
@@ -155,9 +158,14 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   // 페이지가 렌더링될 때 한 번만 호출해도 충분할 것으로 예상된다.
   const {
     isFetching: isFetchingAvailableUTXOs,
-    error: availableUTXOsError,
+
+    indexerError: availableUTXOsIndexerError,
+    apiError: availableUTXOsApiError,
     availableUTXOs,
     availableBalance,
+    isUnfiltered: isAvailableBalanceUnfiltered,
+    allowUnfilteredOnApiError,
+    setAllowUnfilteredOnApiError,
   } = useGetUTXOs(chainId, sender, paymentType === "taproot", true);
 
   const sendConfigs = useSendTxConfig(
@@ -175,7 +183,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   useEffect(() => {
     if (
       isFetchingAvailableUTXOs ||
-      availableUTXOsError ||
+      availableUTXOsIndexerError ||
       isAvailableBalanceInitialized
     ) {
       return;
@@ -191,7 +199,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     availableBalance,
     sendConfigs.availableBalanceConfig,
     isFetchingAvailableUTXOs,
-    availableUTXOsError,
+    availableUTXOsIndexerError,
     isAvailableBalanceInitialized,
   ]);
 
@@ -276,7 +284,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
         throw new Error("Fetching available utxos");
       }
 
-      if (availableUTXOsError) {
+      if (availableUTXOsIndexerError) {
         throw new Error("Can't find available utxos");
       }
 
@@ -424,7 +432,15 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
 
   const historyType = "basic-send/bitcoin";
 
-  const isUnableToGetUTXOs = !isFetchingAvailableUTXOs && !!availableUTXOsError;
+  const isUnableToGetUTXOs =
+    !isFetchingAvailableUTXOs && !!availableUTXOsIndexerError;
+  const needsUnfilteredConsent =
+    !!availableUTXOsApiError && !allowUnfilteredOnApiError;
+
+  const buttonDisabled =
+    txConfigsValidate.interactionBlocked ||
+    isUnableToGetUTXOs ||
+    needsUnfilteredConsent;
 
   return (
     <HeaderLayout
@@ -454,7 +470,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       }
       bottomButtons={[
         {
-          disabled: txConfigsValidate.interactionBlocked || isUnableToGetUTXOs,
+          disabled: buttonDisabled,
           text: intl.formatMessage({ id: "button.next" }),
           color: "primary",
           size: "large",
@@ -592,6 +608,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
               sender
             )}
             isLoading={!!isFetchingAvailableUTXOs}
+            isUnfiltered={isAvailableBalanceUnfiltered}
           />
           <BitcoinGuideBox isUnableToGetUTXOs={isUnableToGetUTXOs} />
 
@@ -604,6 +621,49 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
             feeRateConfig={sendConfigs.feeRateConfig}
             psbtSimulator={psbtSimulator}
           />
+          <VerticalCollapseTransition
+            collapsed={isFetchingAvailableUTXOs || !availableUTXOsApiError}
+          >
+            <GuideBox
+              color="warning"
+              hideInformationIcon={true}
+              title={intl.formatMessage({
+                id: "page.send.bitcoin.amount.unfiltered-assets-warning.title",
+              })}
+            />
+            <Gutter size="0.5rem" />
+            <Box
+              cursor="pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                setAllowUnfilteredOnApiError(!allowUnfilteredOnApiError);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "row",
+                gap: "0.625rem",
+                width: "fit-content",
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              <Checkbox
+                size="small"
+                checked={allowUnfilteredOnApiError}
+                onChange={() => {
+                  // noop
+                }}
+              />
+              <Body2>
+                {intl.formatMessage({
+                  id: "page.send.bitcoin.amount.unfiltered-assets-warning.consent",
+                })}
+              </Body2>
+            </Box>
+            <Gutter size="0.5rem" />
+          </VerticalCollapseTransition>
         </Stack>
       </Box>
     </HeaderLayout>

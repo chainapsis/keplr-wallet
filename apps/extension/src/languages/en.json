@@ -624,6 +624,8 @@
   "page.send.amount.warning.expected-amount-too-small": "Bridge fee is high compared to the amount used. Big drop in received amount is expected. Click \"Next\" if you still want to proceed.",
   "page.send.amount.warning.expected-amount-too-small-title": "{inAmount} on {srcChain} → {outAmount} on {dstChain}",
   "page.send.amount.bridge-fee-info.expected-amount": "You will receive",
+  "page.send.bitcoin.amount.unfiltered-assets-warning.title": "Some assets like inscriptions, BRC20, Runes, or NFTs may not be filtered correctly right now.",
+  "page.send.bitcoin.amount.unfiltered-assets-warning.consent": "I understand and wish to proceed.",
 
   "page.main.search-placeholder": "Search for asset or chain (i.e. ATOM, Cosmos)",
   "page.main.spendable.spendable-balance-title": "Spendable Assets",
@@ -827,6 +829,7 @@
   "components.input.amount-input.max-button": "Max",
   "components.input.amount-input.available-balance-label": "Available: {balance}",
   "components.input.amount-input.available-balance-tooltip": "Amount you can use right now after accounting for pending transactions or any holds on your wallet by the protocol.",
+  "components.input.amount-input.available-balance-tooltip-unfiltered": "Amount you can use right now after accounting for pending transactions. Protocol assets may not be filtered.",
   "components.input.memo-input.memo-label": "Memo",
   "components.input.memo-input.optional-placeholder": "Optional",
   "components.input.fee-control.fee": "Tx Fee: {assets}",
