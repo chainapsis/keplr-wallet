@@ -16,6 +16,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { MainH1 } from "../../components/typography/main-h1";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
 import { EarnRewardsIcon } from "./components/earn-rewards-icon";
+import { useKcrStakingUrls } from "../../hooks/use-kcr-staking-urls";
 
 const zeroDec = new Dec(0);
 
@@ -23,17 +24,29 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const navigate = useNavigate();
   const intl = useIntl();
-  const { hugeQueriesStore, priceStore } = useStore();
+  const { chainStore, hugeQueriesStore, priceStore } = useStore();
+  const { getKcrStakingUrl, hasKcrStakingUrl } = useKcrStakingUrls();
 
   const stakableTokens = hugeQueriesStore.stakables
     .filter((token) => {
       if (!token.token.toDec().gt(zeroDec)) {
         return false;
       }
-      const isStarknet = "starknet" in token.chainInfo;
-      const hasStakingUrl =
-        isStarknet || "walletUrlForStaking" in token.chainInfo;
-      return hasStakingUrl;
+      if ("starknet" in token.chainInfo) {
+        return true;
+      }
+      if ("bitcoin" in token.chainInfo) {
+        return false;
+      }
+      const chainId =
+        "cosmos" in token.chainInfo
+          ? token.chainInfo.cosmos.chainId
+          : token.chainInfo.chainId;
+      const chainInfo = chainStore.getChain(chainId);
+      const hasNativeUrl =
+        !!chainInfo.embedded.embedded &&
+        !!chainInfo.embedded.walletUrlForStaking;
+      return hasNativeUrl || hasKcrStakingUrl(chainId);
     })
     .sort((a, b) => {
       const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
@@ -89,12 +102,19 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         {stakableTokens.map((viewToken) => {
-          const isStarknet = "starknet" in viewToken.chainInfo;
-          const stakingUrl = isStarknet
-            ? "https://dashboard.endur.fi/stake"
-            : "walletUrlForStaking" in viewToken.chainInfo
-            ? viewToken.chainInfo.walletUrlForStaking
-            : undefined;
+          const stakingUrl = (() => {
+            if ("starknet" in viewToken.chainInfo) {
+              return "https://dashboard.endur.fi/stake";
+            }
+            if (!chainStore.hasChain(viewToken.chainInfo.chainId)) {
+              return undefined;
+            }
+            const chainInfo = chainStore.getChain(viewToken.chainInfo.chainId);
+            if (chainInfo.embedded.walletUrlForStaking) {
+              return chainInfo.embedded.walletUrlForStaking;
+            }
+            return getKcrStakingUrl(viewToken.chainInfo.chainId);
+          })();
 
           const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);
 
