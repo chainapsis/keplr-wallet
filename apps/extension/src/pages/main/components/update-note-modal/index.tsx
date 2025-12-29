@@ -2,9 +2,9 @@ import React, { FunctionComponent, useEffect, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 import { Box } from "../../../../components/box";
 import { ColorPalette } from "../../../../styles";
-import { Body2, Body3, H5, Subtitle4 } from "../../../../components/typography";
+import { BaseTypography, Body2 } from "../../../../components/typography";
 import { Button } from "../../../../components/button";
-import { XAxis, YAxis } from "../../../../components/axis";
+import { YAxis } from "../../../../components/axis";
 import { Gutter } from "../../../../components/gutter";
 import { ArrowLeftIcon, ArrowRightIcon } from "../../../../components/icon";
 import {
@@ -14,17 +14,12 @@ import {
 import { Image as CompImage } from "../../../../components/image";
 import { FormattedMessage, useIntl } from "react-intl";
 import SimpleBar from "simplebar-react";
-import { Tag } from "../../../../components/tag";
-import { Toggle } from "../../../../components/toggle";
-import { SetSidePanelEnabledMsg } from "@keplr-wallet/background";
-import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../../../stores";
 import { ParagraphWithLinks } from "./paragraph-with-links";
 
 export type UpdateNotePageData = {
   title: string;
+  subtitle?: string;
   image:
     | {
         default: string;
@@ -36,7 +31,8 @@ export type UpdateNotePageData = {
   links?: {
     [key: string]: string;
   };
-  isSidePanelBeta?: boolean;
+  closeText?: string;
+  closeLink?: string;
 };
 
 export const UpdateNoteModal: FunctionComponent<{
@@ -94,15 +90,15 @@ export const UpdateNoteModal: FunctionComponent<{
         position="relative"
         width="95%"
         maxWidth="20rem"
-        paddingTop="1.5rem"
-        paddingBottom="1.25rem"
-        paddingX={updateNotePageData.length > 1 ? "1.75rem" : "1.25rem"}
-        borderRadius="0.5rem"
+        borderRadius="0.75rem"
         backgroundColor={
           theme.mode === "light"
             ? ColorPalette["white"]
             : ColorPalette["gray-600"]
         }
+        style={{
+          overflow: "hidden",
+        }}
       >
         <FixedWidthSceneTransition
           ref={sceneRef}
@@ -121,29 +117,83 @@ export const UpdateNoteModal: FunctionComponent<{
         />
 
         {updateNotePageData.length > 1 ? (
-          <Box alignX="center">
+          <Box alignX="center" marginTop="0.5rem">
             <Body2 color={ColorPalette["gray-300"]}>
               {currentPage + 1} / {updateNotePageData.length}
             </Body2>
           </Box>
         ) : null}
 
-        <Gutter size="1.125rem" />
+        <Gutter size="1.5rem" />
 
-        <Button
-          text={intl.formatMessage({
-            id: "button.close",
-          })}
-          size="medium"
-          color="secondary"
-          onClick={close}
-        />
+        <Box marginX="1.25rem" marginBottom="1.25rem">
+          <Button
+            text={(() => {
+              const current = updateNotePageData[currentPage];
+
+              if (current && current.closeText) {
+                return current.closeText;
+              }
+
+              return intl.formatMessage({
+                id: "button.close",
+              });
+            })()}
+            size="medium"
+            color="secondary"
+            onClick={() => {
+              const current = updateNotePageData[currentPage];
+
+              if (current && current.closeLink) {
+                browser.tabs.create({
+                  url: current.closeLink,
+                });
+              }
+              close();
+            }}
+          />
+        </Box>
+
+        <Box position="absolute" alignY="center" style={{ top: 0, right: 0 }}>
+          <Box
+            width="2rem"
+            height="2rem"
+            marginTop="0.75rem"
+            marginRight="0.75rem"
+            alignX="center"
+            alignY="center"
+            cursor="pointer"
+            opacity={0.5}
+            onClick={(e) => {
+              e.preventDefault();
+
+              close();
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              stroke="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill={
+                  theme.mode === "light"
+                    ? ColorPalette["black"]
+                    : ColorPalette["white"]
+                }
+                d="M7.536 6.264a.9.9 0 0 0-1.272 1.272L10.727 12l-4.463 4.464a.9.9 0 0 0 1.272 1.272L12 13.273l4.464 4.463a.9.9 0 1 0 1.272-1.272L13.273 12l4.463-4.464a.9.9 0 1 0-1.272-1.272L12 10.727z"
+              />
+            </svg>
+          </Box>
+        </Box>
 
         {currentPage > 0 ? (
           <Box
             position="absolute"
             alignY="center"
-            paddingLeft="0.25rem"
             style={{ top: 0, bottom: 0, left: 0 }}
           >
             <Box
@@ -174,7 +224,6 @@ export const UpdateNoteModal: FunctionComponent<{
           <Box
             position="absolute"
             alignY="center"
-            paddingRight="0.25rem"
             style={{ top: 0, bottom: 0, right: 0 }}
           >
             <Box
@@ -208,8 +257,6 @@ export const UpdateNoteModal: FunctionComponent<{
 const CarouselPage: FunctionComponent<{
   notePageData: UpdateNotePageData;
 }> = observer(({ notePageData }) => {
-  const { uiConfigStore } = useStore();
-
   const theme = useTheme();
 
   return (
@@ -218,30 +265,9 @@ const CarouselPage: FunctionComponent<{
         display: "flex",
         flexDirection: "column",
         overflowY: "auto",
-        maxHeight: "24rem",
+        maxHeight: "26rem",
       }}
     >
-      <Box alignX="center">
-        <H5
-          color={
-            theme.mode === "light"
-              ? ColorPalette["black"]
-              : ColorPalette["white"]
-          }
-        >
-          <FormattedMessage
-            id="update-node/paragraph/noop"
-            defaultMessage={notePageData.title}
-            values={{
-              br: <br />,
-              b: (...chunks: any) => <b>{chunks}</b>,
-            }}
-          />
-        </H5>
-      </Box>
-
-      <Gutter size="1.25rem" />
-
       {notePageData.image ? (
         <CompImage
           alt={notePageData.title}
@@ -262,133 +288,92 @@ const CarouselPage: FunctionComponent<{
           style={{
             aspectRatio: notePageData.image.aspectRatio,
             width: "100%",
-            padding: "0.25rem",
-            marginBottom: "1.5rem",
           }}
         />
       ) : null}
-      <Box>
-        <Body2
+
+      <Box
+        alignX="center"
+        marginX="1.25rem"
+        marginTop={notePageData.image ? "" : "1.25rem"}
+      >
+        <BaseTypography
           color={
             theme.mode === "light"
-              ? ColorPalette["gray-400"]
-              : ColorPalette["gray-100"]
+              ? ColorPalette["black"]
+              : ColorPalette["white"]
           }
+          style={{
+            fontWeight: 600,
+            fontSize: "1rem",
+          }}
+        >
+          <FormattedMessage
+            id="update-node/paragraph/noop"
+            defaultMessage={notePageData.title}
+            values={{
+              br: <br />,
+              b: (...chunks: any) => <b>{chunks}</b>,
+              gutter: <Gutter size="0.625rem" />,
+            }}
+          />
+        </BaseTypography>
+      </Box>
+
+      {notePageData.subtitle ? (
+        <React.Fragment>
+          <Gutter size="0.75rem" />
+          <Box alignX="center" marginX="1.25rem">
+            <BaseTypography
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["black"]
+                  : ColorPalette["white"]
+              }
+              style={{
+                fontWeight: 400,
+                fontSize: "0.75rem",
+                lineHeight: "155%",
+              }}
+            >
+              <FormattedMessage
+                id="update-node/paragraph/noop"
+                defaultMessage={notePageData.subtitle}
+                values={{
+                  br: <br />,
+                  b: (...chunks: any) => (
+                    <b style={{ fontWeight: 700 }}>{chunks}</b>
+                  ),
+                  gutter: <Gutter size="0.625rem" />,
+                }}
+              />
+            </BaseTypography>
+          </Box>
+          <Gutter size="1.5rem" />
+        </React.Fragment>
+      ) : (
+        <Gutter size="1.5rem" />
+      )}
+
+      <Box marginX="1.25rem">
+        <BaseTypography
+          color={
+            theme.mode === "light"
+              ? ColorPalette["black"]
+              : ColorPalette["white"]
+          }
+          style={{
+            fontWeight: 400,
+            fontSize: "0.75rem",
+            lineHeight: "155%",
+          }}
         >
           <ParagraphWithLinks
             paragraph={notePageData.paragraph}
             links={notePageData.links}
           />
-        </Body2>
+        </BaseTypography>
       </Box>
-
-      {notePageData.isSidePanelBeta ? (
-        <Box
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette["gray-50"]
-              : ColorPalette["gray-550"]
-          }
-          borderRadius="0.375rem"
-          padding="1rem"
-          marginTop="1.125rem"
-        >
-          <XAxis alignY="center">
-            <YAxis>
-              <XAxis alignY="center">
-                <Subtitle4
-                  color={
-                    theme.mode === "light"
-                      ? ColorPalette["gray-700"]
-                      : ColorPalette["gray-10"]
-                  }
-                >
-                  Switch to Side Panel
-                </Subtitle4>
-                <Gutter size="0.375rem" />
-                <Tag text="Beta" paddingX="0.25rem" />
-              </XAxis>
-              <Gutter size="0.375rem" />
-              <Body3
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-300"]
-                    : ColorPalette["gray-300"]
-                }
-              >
-                Open Keplr in a sidebar on your screen
-              </Body3>
-            </YAxis>
-
-            <Toggle
-              isOpen={false}
-              setIsOpen={(v) => {
-                if (v) {
-                  const msg = new SetSidePanelEnabledMsg(true);
-                  new InExtensionMessageRequester()
-                    .sendMessage(BACKGROUND_PORT, msg)
-                    .then((res) => {
-                      if (res.enabled) {
-                        if (
-                          typeof chrome !== "undefined" &&
-                          typeof chrome.sidePanel !== "undefined"
-                        ) {
-                          (async () => {
-                            const selfCloseId = Math.random() * 100000;
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            window.__self_id_for_closing_view_side_panel =
-                              selfCloseId;
-                            // side panel을 열고 나서 기존의 popup view를 모두 지워야한다
-                            const viewsBefore = browser.extension.getViews();
-
-                            try {
-                              const activeTabs = await browser.tabs.query({
-                                active: true,
-                                currentWindow: true,
-                              });
-                              if (activeTabs.length > 0) {
-                                const id = activeTabs[0].id;
-                                if (id != null) {
-                                  await chrome.sidePanel.open({
-                                    tabId: id,
-                                  });
-                                }
-                              }
-                            } catch (e) {
-                              console.log(e);
-                            } finally {
-                              for (const view of viewsBefore) {
-                                if (
-                                  // 자기 자신은 제외해야한다.
-                                  // 다른거 끄기 전에 자기가 먼저 꺼지면 안되기 때문에...
-                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                  // @ts-ignore
-                                  window.__self_id_for_closing_view_side_panel !==
-                                  selfCloseId
-                                ) {
-                                  view.window.close();
-                                }
-                              }
-
-                              uiConfigStore.changelogConfig.clearLastInfo();
-                              await new Promise((resolve) =>
-                                setTimeout(resolve, 300)
-                              );
-                              window.close();
-                            }
-                          })();
-                        } else {
-                          window.close();
-                        }
-                      }
-                    });
-                }
-              }}
-            />
-          </XAxis>
-        </Box>
-      ) : null}
     </SimpleBar>
   );
 });
