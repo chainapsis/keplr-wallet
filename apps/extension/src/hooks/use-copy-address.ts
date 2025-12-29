@@ -10,16 +10,32 @@ export const useCopyAddress = (viewToken: ViewToken): string | undefined => {
   );
   const account = accountStore.getAccount(viewToken.chainInfo.chainId);
 
-  if (denomHelper.type === "erc20" && "starknet" in viewToken.chainInfo) {
-    const isETH =
-      denomHelper.contractAddress ===
-      viewToken.chainInfo.starknet.ethContractAddress;
-    const isSTRK =
-      denomHelper.contractAddress ===
-      viewToken.chainInfo.starknet.strkContractAddress;
-    if (isETH || isSTRK) {
-      return account.starknetHexAddress;
+  if ("bitcoin" in viewToken.chainInfo) {
+    return account.bitcoinAddress?.bech32Address;
+  }
+
+  // only ETH and STRK are supported on Starknet
+  if ("starknet" in viewToken.chainInfo) {
+    if (denomHelper.type !== "erc20") {
+      return undefined;
     }
+
+    const { ethContractAddress, strkContractAddress } =
+      viewToken.chainInfo.starknet;
+    const isSupportedToken =
+      denomHelper.contractAddress === ethContractAddress ||
+      denomHelper.contractAddress === strkContractAddress;
+
+    if (!isSupportedToken) {
+      return undefined;
+    }
+
+    return account.starknetHexAddress;
+  }
+
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(viewToken.chainInfo.chainId);
+  if (isEVMOnlyChain) {
+    return account.ethereumHexAddress;
   }
 
   if (
@@ -29,10 +45,5 @@ export const useCopyAddress = (viewToken: ViewToken): string | undefined => {
     return undefined;
   }
 
-  if ("bitcoin" in viewToken.chainInfo) {
-    return account.bitcoinAddress?.bech32Address;
-  }
-
-  const isEVMOnlyChain = chainStore.isEvmOnlyChain(viewToken.chainInfo.chainId);
-  return isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address;
+  return account.bech32Address;
 };
