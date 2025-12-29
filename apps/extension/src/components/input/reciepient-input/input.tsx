@@ -60,6 +60,31 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
       return false;
     })();
 
+    const displaySuffix: string | undefined = (() => {
+      if ("nameServiceResult" in recipientConfig) {
+        const r = recipientConfig.nameServiceResult;
+        if (r.length > 0) {
+          const currentValue = recipientConfig.value;
+          const suffix = r[0].suffix;
+
+          const i = currentValue.lastIndexOf(".");
+          if (i >= 0) {
+            const tld = currentValue.slice(i + 1);
+            if (currentValue.endsWith("." + suffix)) {
+              return undefined;
+            }
+            if (suffix.startsWith(tld) && suffix !== tld) {
+              return suffix.replace(tld, "");
+            }
+            return undefined;
+          }
+
+          return "." + suffix;
+        }
+      }
+      return undefined;
+    })();
+
     return (
       <Box>
         <TextInput
@@ -89,29 +114,57 @@ export const RecipientInput = observer<RecipientInputProps, HTMLInputElement>(
             })(),
           })}
           value={recipientConfig.value}
-          suffix={(() => {
+          suffix={displaySuffix}
+          autoComplete="off"
+          onChange={(e) => {
+            const newValue = e.target.value;
+            const previousValue = recipientConfig.value;
+
+            const isDeleting = newValue.length < previousValue.length;
+
             if ("nameServiceResult" in recipientConfig) {
               const r = recipientConfig.nameServiceResult;
-              if (r.length > 0) {
-                const i = recipientConfig.value.lastIndexOf(".");
-                if (i >= 0) {
-                  const tld = recipientConfig.value.slice(i + 1);
-                  if (r[0].suffix.startsWith(tld) && r[0].suffix !== tld) {
-                    return r[0].suffix.replace(tld, "");
+
+              if (isDeleting) {
+                if (r.length > 0) {
+                  const currentValue = recipientConfig.value;
+                  const suffix = r[0].suffix;
+                  const fullSuffix = "." + suffix;
+
+                  if (currentValue.endsWith(fullSuffix)) {
+                    // Only remove suffix if newValue doesn't end with "." + suffix
+                    // This means user explicitly deleted the suffix
+                    if (!newValue.endsWith(fullSuffix)) {
+                      const baseValue = currentValue.slice(
+                        0,
+                        -fullSuffix.length
+                      );
+                      recipientConfig.setValue(baseValue);
+                      return;
+                    }
+                    // If newValue still ends with "." + suffix, user deleted text before it
+                    // Let the normal flow handle it (suffix will be preserved)
                   }
-                } else {
-                  if (!recipientConfig.value.endsWith("." + r[0].suffix)) {
-                    return "." + r[0].suffix;
+                }
+              } else if (displaySuffix && !isDeleting) {
+                if (r.length > 0) {
+                  const suffix = r[0].suffix;
+
+                  if (
+                    !previousValue.includes(".") &&
+                    newValue.endsWith(".") &&
+                    newValue.length === previousValue.length + 1
+                  ) {
+                    // User just typed ".", complete with suffix (e.g., "alice." -> "alice.icns")
+                    const completedValue = newValue + suffix;
+                    recipientConfig.setValue(completedValue);
+                    return;
                   }
                 }
               }
             }
-          })()}
-          autoComplete="off"
-          onChange={(e) => {
-            recipientConfig.setValue(e.target.value);
 
-            e.preventDefault();
+            recipientConfig.setValue(newValue);
           }}
           right={
             memoConfig ? (
