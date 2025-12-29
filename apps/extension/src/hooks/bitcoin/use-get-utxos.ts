@@ -56,8 +56,12 @@ export const useGetUTXOs = (
 
   const isUnfiltered = hasApiError && indexerIsHealthy;
 
+  // NOTE: inscriptions/runes 조회 결과에 오류가 있고 사용자가 허용한 경우 빈 배열을 반환한다.
+  // inscriptions/runes 조회는 명시적으로 파이지네이션으로 구현이 되어있지만, 이 훅에서는 파이지네이션을 사용하지 않는다.
+  // 따라서, 조회 오류가 있는 경우는 항상 빈 배열을 반환하게 된다.
+
   const inscribedUTXOs =
-    hasInscriptionsApiError && !shouldSkipFiltering
+    hasInscriptionsApiError && allowUnfilteredOnApiError
       ? []
       : inscriptionsPages
           ?.filter((page) => !page.error)
@@ -72,7 +76,7 @@ export const useGetUTXOs = (
           });
 
   const runesUTXOs =
-    hasRunesApiError && !shouldSkipFiltering
+    hasRunesApiError && allowUnfilteredOnApiError
       ? []
       : runesPages
           ?.filter((page) => !page.error)

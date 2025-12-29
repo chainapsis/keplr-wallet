@@ -166,6 +166,7 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
     isUnfiltered: isAvailableBalanceUnfiltered,
     allowUnfilteredOnApiError,
     setAllowUnfilteredOnApiError,
+    shouldSkipFiltering,
   } = useGetUTXOs(chainId, sender, paymentType === "taproot", true);
 
   const sendConfigs = useSendTxConfig(
@@ -177,15 +178,8 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
   );
   sendConfigs.amountConfig.setCurrency(currency);
 
-  const [isAvailableBalanceInitialized, setIsAvailableBalanceInitialized] =
-    useState<boolean>(false);
-
   useEffect(() => {
-    if (
-      isFetchingAvailableUTXOs ||
-      availableUTXOsIndexerError ||
-      isAvailableBalanceInitialized
-    ) {
+    if (isFetchingAvailableUTXOs || availableUTXOsIndexerError) {
       return;
     }
 
@@ -193,14 +187,13 @@ export const BitcoinSendPage: FunctionComponent = observer(() => {
       sender,
       availableBalance
     );
-    setIsAvailableBalanceInitialized(true);
   }, [
     sender,
     availableBalance,
     sendConfigs.availableBalanceConfig,
     isFetchingAvailableUTXOs,
     availableUTXOsIndexerError,
-    isAvailableBalanceInitialized,
+    shouldSkipFiltering,
   ]);
 
   // bitcoin tx size는 amount, fee rate, recipient address type에 따라 달라진다.
