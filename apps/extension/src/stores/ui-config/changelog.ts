@@ -70,6 +70,7 @@ export class ChangelogConfig {
         lastVersion: string;
         currentVersion: string;
         cleared: boolean;
+        forceClearNext?: boolean;
         histories: VersionHistory[];
       }
     | undefined = undefined;
@@ -86,9 +87,18 @@ export class ChangelogConfig {
         "lastInfo"
       );
       if (saved) {
-        runInAction(() => {
-          this._lastInfo = saved;
-        });
+        if (saved.forceClearNext) {
+          runInAction(() => {
+            this._lastInfo = {
+              ...saved,
+              cleared: true,
+            };
+          });
+        } else {
+          runInAction(() => {
+            this._lastInfo = saved;
+          });
+        }
       }
     }
 
@@ -139,6 +149,16 @@ export class ChangelogConfig {
       this._lastInfo = {
         ...this._lastInfo,
         cleared: true,
+      };
+    }
+  }
+
+  @action
+  forceClearNext() {
+    if (this._lastInfo) {
+      this._lastInfo = {
+        ...this._lastInfo,
+        forceClearNext: true,
       };
     }
   }
