@@ -18,6 +18,7 @@ import { TextButton } from "../../components/button-text";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 import { useIntl } from "react-intl";
 import { Dec, PricePretty } from "@keplr-wallet/unit";
+import { useStakableTokens } from "./hooks/use-stakable-tokens";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Stack } from "../../components/stack";
 import { TokenItem, TokenTitleView } from "../main/components";
@@ -32,16 +33,13 @@ import styled from "styled-components";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import debounce from "lodash.debounce";
 
-const zeroDec = new Dec(0);
-
 export const StakePage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialExpand = params.get("intitialExpand") === "true";
 
-  const { uiConfigStore, hugeQueriesStore, analyticsAmplitudeStore } =
-    useStore();
+  const { uiConfigStore, analyticsAmplitudeStore } = useStore();
   const isNotReady = useIsNotReady();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -78,11 +76,7 @@ export const StakePage: FunctionComponent = observer(() => {
     };
   }, [delegations.length, isNotReady, debouncedLogEvent, unbondings.length]);
 
-  const hasAnyStakableAsset = useMemo(() => {
-    return hugeQueriesStore.stakables.some((token) =>
-      token.token.toDec().gt(zeroDec)
-    );
-  }, [hugeQueriesStore.stakables]);
+  const { stakableTokens } = useStakableTokens();
 
   const TokenViewData: {
     title: string;
@@ -121,11 +115,11 @@ export const StakePage: FunctionComponent = observer(() => {
     },
   ];
 
-  if (!hasAnyStakableAsset) {
-    return <StakeExplorePage />;
-  }
-
   if (delegations.length === 0 && unbondings.length === 0) {
+    if (stakableTokens.length === 0) {
+      return <StakeExplorePage />;
+    }
+
     return <StakeEmptyPage />;
   }
 
