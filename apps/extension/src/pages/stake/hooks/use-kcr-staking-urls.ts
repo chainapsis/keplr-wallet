@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useStore } from "../stores";
+import { useStore } from "../../../stores";
 import { ChainInfo } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
