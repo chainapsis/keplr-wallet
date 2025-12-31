@@ -27,9 +27,14 @@ export function sortByPrice(
   return aPrice.gt(bPrice) ? -1 : 1;
 }
 
+type ViewTokenWithOptionalPrice = {
+  token: CoinPretty;
+  price?: PricePretty | undefined;
+};
+
 export function sortTokenGroups(
-  tokensA: ViewTokenWithPrice[],
-  tokensB: ViewTokenWithPrice[]
+  tokensA: ViewTokenWithOptionalPrice[],
+  tokensB: ViewTokenWithOptionalPrice[]
 ): number {
   let valueA = new Dec(0);
   let valueB = new Dec(0);

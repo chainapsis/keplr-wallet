@@ -70,11 +70,17 @@ export function useGroupedTokensMap(search: string) {
       groupedTokensSearchFields
     );
 
-    const entriesWithScores = [];
+    const entriesWithScores: {
+      groupKey: string;
+      tokens: ViewToken[];
+      score: number;
+      fieldMatchScores: number[];
+    }[] = [];
 
     for (const {
       item: [groupKey, tokens],
       score,
+      fieldMatchScores,
     } of searchedWithScores) {
       const searchResults = performSearch(
         tokens,
@@ -83,13 +89,25 @@ export function useGroupedTokensMap(search: string) {
         sortByPrice
       );
       if (searchResults.length > 0) {
-        entriesWithScores.push({ groupKey, tokens: searchResults, score });
+        entriesWithScores.push({
+          groupKey,
+          tokens: searchResults,
+          score,
+          fieldMatchScores,
+        });
       }
     }
 
     entriesWithScores.sort((a, b) => {
       if (a.score !== b.score) {
         return b.score - a.score;
+      }
+      for (let i = 0; i < groupedTokensSearchFields.length; i++) {
+        const scoreA = a.fieldMatchScores[i] ?? -Infinity;
+        const scoreB = b.fieldMatchScores[i] ?? -Infinity;
+        if (scoreA !== scoreB) {
+          return scoreB - scoreA;
+        }
       }
       return sortTokenGroups(a.tokens, b.tokens);
     });
