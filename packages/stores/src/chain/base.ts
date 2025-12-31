@@ -1752,7 +1752,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
   @action
   protected setEmbeddedChainInfosV2(infos: {
     chainInfos: C[];
-    modulrChainInfos: ModularChainInfo[];
+    modularChainInfos: ModularChainInfo[];
   }) {
     this._chainInfos = infos.chainInfos.map((chainInfo) => {
       const prev = this.chainInfoMap.get(
@@ -1765,7 +1765,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
       return new ChainInfoImpl(chainInfo, this);
     });
-    this._modularChainInfos = infos.modulrChainInfos.map((chainInfo) => {
+    this._modularChainInfos = infos.modularChainInfos.map((chainInfo) => {
       if ("currencies" in chainInfo) {
         const cosmos = infos.chainInfos.find(
           (c) => c.chainId === chainInfo.chainId
@@ -1793,7 +1793,7 @@ export class ChainStore<C extends ChainInfo = ChainInfo>
 
       return chainInfo;
     });
-    this._modularChainInfoImpls = infos.modulrChainInfos.map((chainInfo) => {
+    this._modularChainInfoImpls = infos.modularChainInfos.map((chainInfo) => {
       const modularChainInfo = this._modularChainInfos.find(
         (c) => c.chainId === chainInfo.chainId
       );

@@ -498,7 +498,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
     this.setEmbeddedChainInfosV2({
       chainInfos: result.chainInfos,
-      modulrChainInfos: result.modulrChainInfos,
+      modularChainInfos: result.modularChainInfos,
     });
   }
 
@@ -625,7 +625,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.setEmbeddedChainInfosV2({
       chainInfos: res.chainInfos,
-      modulrChainInfos: res.modularChainInfos,
+      modularChainInfos: res.modularChainInfos,
     });
   }
 
@@ -643,7 +643,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.setEmbeddedChainInfosV2({
       chainInfos: res.chainInfos,
-      modulrChainInfos: res.modularChainInfos,
+      modularChainInfos: res.modularChainInfos,
     });
   }
 
@@ -656,7 +656,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.setEmbeddedChainInfosV2({
       chainInfos: res.chainInfos,
-      modulrChainInfos: res.modularChainInfos,
+      modularChainInfos: res.modularChainInfos,
     });
   }
 

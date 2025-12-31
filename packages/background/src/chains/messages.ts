@@ -31,7 +31,7 @@ export class PingMsg extends Message<void> {
 
 export class GetChainInfosWithCoreTypesMsg extends Message<{
   chainInfos: ChainInfoWithCoreTypes[];
-  modulrChainInfos: ModularChainInfo[];
+  modularChainInfos: ModularChainInfo[];
 }> {
   public static type() {
     return "get-chain-infos-with-core-types";
