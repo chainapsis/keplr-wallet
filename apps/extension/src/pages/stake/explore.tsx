@@ -32,6 +32,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { IconProps } from "../../components/icon/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
+import { useKcrStakingUrls } from "../../hooks/use-kcr-staking-urls";
 
 const priority = (chainId: string) => {
   const id = ChainIdHelper.parse(chainId).identifier;
@@ -55,6 +56,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
   const [searchParams] = useSearchParams();
 
   const { chainStore } = useStore();
+  const { hasKcrStakingUrl } = useKcrStakingUrls();
 
   const [isOpenDepositModal, setIsOpenDepositModal] = React.useState(false);
   const [isOpenBuy, setIsOpenBuy] = React.useState(false);
@@ -68,6 +70,23 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
 
   const stakeCurrencyItems = useMemo<StakeCurrencyItem[]>(() => {
     const items: StakeCurrencyItem[] = [];
+    for (const chainInfo of chainStore.chainInfos) {
+      if (chainInfo.isTestnet || !chainInfo.stakeCurrency) {
+        continue;
+      }
+      const hasNativeUrl =
+        !!chainInfo.embedded.embedded &&
+        !!chainInfo.embedded.walletUrlForStaking;
+      if (!hasNativeUrl && !hasKcrStakingUrl(chainInfo.chainId)) {
+        continue;
+      }
+      const key = `${chainInfo.chainIdentifier}/${chainInfo.stakeCurrency.coinMinimalDenom}`;
+      items.push({
+        key,
+        chainInfo: chainStore.getModularChain(chainInfo.chainId),
+        currency: chainInfo.stakeCurrency,
+      });
+    }
 
     for (const modularChainInfo of chainStore.modularChainInfos) {
       if ("cosmos" in modularChainInfo) {
@@ -131,7 +150,7 @@ export const StakeExplorePage: FunctionComponent = observer(() => {
       }
       return a.currency.coinDenom.localeCompare(b.currency.coinDenom);
     });
-  }, [chainStore]);
+  }, [chainStore, hasKcrStakingUrl]);
 
   return (
     <MainHeaderLayout>

@@ -2,11 +2,7 @@ import { Message } from "@keplr-wallet/router";
 import { TokenScan } from "./service";
 import { ROUTE } from "./constants";
 
-export class GetTokenScansMsg extends Message<{
-  vaultId: string;
-  tokenScans: TokenScan[];
-  tokenScansWithoutDismissed: TokenScan[];
-}> {
+export class GetTokenScansMsg extends Message<TokenScan[]> {
   public static type() {
     return "get-token-scans";
   }
@@ -33,7 +29,6 @@ export class GetTokenScansMsg extends Message<{
 export class RevalidateTokenScansMsg extends Message<{
   vaultId: string;
   tokenScans: TokenScan[];
-  tokenScansWithoutDismissed: TokenScan[];
 }> {
   public static type() {
     return "revalidate-token-scans";
@@ -55,33 +50,5 @@ export class RevalidateTokenScansMsg extends Message<{
 
   type(): string {
     return RevalidateTokenScansMsg.type();
-  }
-}
-
-export class DismissNewTokenFoundInMainMsg extends Message<{
-  vaultId: string;
-  tokenScans: TokenScan[];
-  tokenScansWithoutDismissed: TokenScan[];
-}> {
-  public static type() {
-    return "dismiss-new-token-found-in-main";
-  }
-
-  constructor(public readonly vaultId: string) {
-    super();
-  }
-
-  validateBasic(): void {
-    if (!this.vaultId) {
-      throw new Error("Empty vault id");
-    }
-  }
-
-  route(): string {
-    return ROUTE;
-  }
-
-  type(): string {
-    return DismissNewTokenFoundInMainMsg.type();
   }
 }

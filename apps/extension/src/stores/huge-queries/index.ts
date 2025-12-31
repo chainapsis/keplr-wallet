@@ -25,6 +25,7 @@ import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
 import { Asset, SkipQueries } from "@keplr-wallet/stores-internal";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
 import { INITIA_CHAIN_ID } from "../../config.ui";
+import { sortByPrice } from "../../utils/token-sort";
 
 interface ViewToken {
   chainInfo: ModularChainInfo;
@@ -75,7 +76,7 @@ export class HugeQueriesStore {
   ) {
     let balanceDisposal: (() => void) | undefined;
     this.balanceBinarySort = new BinarySortArray<ViewToken>(
-      this.sortByPrice,
+      sortByPrice,
       () => {
         balanceDisposal = autorun(() => {
           this.updateBalances();
@@ -89,7 +90,7 @@ export class HugeQueriesStore {
     );
     let delegationDisposal: (() => void) | undefined;
     this.delegationBinarySort = new BinarySortArray<ViewStakedToken>(
-      this.sortByPrice,
+      sortByPrice,
       () => {
         delegationDisposal = autorun(() => {
           this.updateDelegations();
@@ -104,7 +105,7 @@ export class HugeQueriesStore {
     let unbondingDisposal: (() => void) | undefined;
     this.unbondingBinarySort = new BinarySortArray<ViewUnbondingToken>(
       (a, b) => {
-        return this.sortByPrice(a, b);
+        return sortByPrice(a, b);
       },
       () => {
         unbondingDisposal = autorun(() => {
@@ -119,7 +120,7 @@ export class HugeQueriesStore {
     );
     let claimableRewardsDisposal: (() => void) | undefined;
     this.claimableRewardsBinarySort = new BinarySortArray<ViewStakedToken>(
-      this.sortByPrice,
+      sortByPrice,
       () => {
         claimableRewardsDisposal = autorun(() => {
           this.updateClaimableRewards();
@@ -700,7 +701,7 @@ export class HugeQueriesStore {
     for (const [chainId, tokens] of tokensByChainId.entries()) {
       tokensByChainId.set(
         chainId,
-        tokens.sort((a, b) => this.sortByPrice(a, b))
+        tokens.sort((a, b) => sortByPrice(a, b))
       );
     }
 
@@ -1160,31 +1161,6 @@ export class HugeQueriesStore {
     return this.claimableRewardsBinarySort.arr;
   }
 
-  protected sortByPrice(a: ViewToken, b: ViewToken): number {
-    const aPrice = a.price?.toDec() ?? HugeQueriesStore.zeroDec;
-    const bPrice = b.price?.toDec() ?? HugeQueriesStore.zeroDec;
-
-    if (aPrice.equals(bPrice)) {
-      if (aPrice.equals(HugeQueriesStore.zeroDec)) {
-        const aHasBalance = a.token.toDec().gt(HugeQueriesStore.zeroDec);
-        const bHasBalance = b.token.toDec().gt(HugeQueriesStore.zeroDec);
-
-        if (aHasBalance && !bHasBalance) {
-          return -1;
-        } else if (!aHasBalance && bHasBalance) {
-          return 1;
-        } else {
-          return 0;
-        }
-      }
-      return 0;
-    } else if (aPrice.gt(bPrice)) {
-      return -1;
-    } else {
-      return 1;
-    }
-  }
-
   // 그룹화 로직
   // 1. 먼저 IBC 토큰들을 originChainId와 originCurrency.coinMinimalDenom으로 그룹화
   // 2. ERC20 토큰 처리:
@@ -1325,7 +1301,7 @@ export class HugeQueriesStore {
     }
 
     for (const tokens of tokensMap.values()) {
-      tokens.sort(this.sortByPrice);
+      tokens.sort(sortByPrice);
     }
 
     const sortedEntries = Array.from(tokensMap.entries()).sort(

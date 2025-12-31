@@ -89,14 +89,15 @@ const getScore = (
 
 const THROTTLE_DELAY = 500;
 
-export function performSearch<T>(
+function performSearchSorted<T>(
   data: T[],
   query: string,
-  fields: SearchField<T>[]
-): T[] {
+  fields: SearchField<T>[],
+  tiebreaker?: (a: T, b: T) => number
+): { item: T; maxScore: number }[] {
   const queryLower = query.toLowerCase().trim();
   if (!queryLower) {
-    return data;
+    return data.map((item) => ({ item, maxScore: 0 }));
   }
 
   const matchedItems = data
@@ -142,37 +143,52 @@ export function performSearch<T>(
       });
 
       const hasAnyMatch = fieldMatchScores.some((score) => score > SCORE_NONE);
+      const maxScore = hasAnyMatch ? Math.max(...fieldMatchScores) : SCORE_NONE;
 
-      return {
-        item,
-        fieldMatchScores,
-        hasAnyMatch,
-      };
+      return { item, fieldMatchScores, maxScore, hasAnyMatch };
     })
     .filter(({ hasAnyMatch }) => hasAnyMatch);
 
-  const sortedItems = matchedItems
-    .sort((a, b) => {
-      const maxScoreA = Math.max(...a.fieldMatchScores);
-      const maxScoreB = Math.max(...b.fieldMatchScores);
+  return matchedItems.sort((a, b) => {
+    if (a.maxScore !== b.maxScore) {
+      return b.maxScore - a.maxScore;
+    }
 
-      if (maxScoreA !== maxScoreB) {
-        return maxScoreB - maxScoreA;
+    for (let i = 0; i < fields.length; i++) {
+      const scoreA = a.fieldMatchScores[i] ?? SCORE_NONE;
+      const scoreB = b.fieldMatchScores[i] ?? SCORE_NONE;
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA;
       }
+    }
 
-      for (let i = 0; i < fields.length; i++) {
-        const scoreA = a.fieldMatchScores[i] ?? SCORE_NONE;
-        const scoreB = b.fieldMatchScores[i] ?? SCORE_NONE;
+    if (tiebreaker) {
+      return tiebreaker(a.item, b.item);
+    }
+    return 0;
+  });
+}
 
-        if (scoreA !== scoreB) {
-          return scoreB - scoreA;
-        }
-      }
-      return 0;
-    })
-    .map(({ item }) => item);
+export function performSearch<T>(
+  data: T[],
+  query: string,
+  fields: SearchField<T>[],
+  tiebreaker?: (a: T, b: T) => number
+): T[] {
+  return performSearchSorted(data, query, fields, tiebreaker).map(
+    ({ item }) => item
+  );
+}
 
-  return sortedItems;
+export function performSearchWithScore<T>(
+  data: T[],
+  query: string,
+  fields: SearchField<T>[]
+): { item: T; score: number }[] {
+  return performSearchSorted(data, query, fields).map(({ item, maxScore }) => ({
+    item,
+    score: maxScore,
+  }));
 }
 
 export function useSearch<T>(

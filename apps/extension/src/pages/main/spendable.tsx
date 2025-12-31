@@ -513,13 +513,13 @@ export const SpendableAssetView: FunctionComponent<{
     });
 
     const numFoundToken = useMemo(() => {
-      if (chainStore.tokenScansWithoutDismissed.length === 0) {
+      if (chainStore.tokenScans.length === 0) {
         return 0;
       }
 
       const set = new Set<string>();
 
-      for (const tokenScan of chainStore.tokenScansWithoutDismissed) {
+      for (const tokenScan of chainStore.tokenScans) {
         for (const info of tokenScan.infos) {
           for (const asset of info.assets) {
             const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
@@ -531,7 +531,7 @@ export const SpendableAssetView: FunctionComponent<{
       }
 
       return Array.from(set).length;
-    }, [chainStore.tokenScansWithoutDismissed]);
+    }, [chainStore.tokenScans]);
 
     const { allBalancesSearchFiltered, lowBalanceTokens, isFirstTime } =
       useAllBalances(trimSearch);
@@ -732,9 +732,7 @@ export const SpendableAssetView: FunctionComponent<{
 
               {numFoundToken > 0 && (
                 <NewTokenFoundButtonContainer
-                  onClick={() => {
-                    setIsFoundTokenModalOpen(true);
-                  }}
+                  onClick={() => setIsFoundTokenModalOpen(true)}
                 >
                   <XAxis alignY="center">
                     <Subtitle3>
@@ -932,18 +930,8 @@ export const SpendableAssetView: FunctionComponent<{
           isOpen={isFoundTokenModalOpen && numFoundToken > 0}
           align="bottom"
           close={() => setIsFoundTokenModalOpen(false)}
-          onCloseTransitionEnd={() => {
-            chainStore.dismissNewTokenFoundInMain();
-          }}
         >
-          {/*
-            여기서 tokenScansWithoutDismissed가 아니라 tokenScans를 사용하는 건 의도된 행동임
-            new tokens 정보가 변했을때 변경된 토큰들만이 아니라 전체 new tokens를 다 보여주도록 함
-          */}
-          <TokenFoundModal
-            tokenScans={chainStore.tokenScans}
-            close={() => setIsFoundTokenModalOpen(false)}
-          />
+          <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
         </Modal>
       </React.Fragment>
     );

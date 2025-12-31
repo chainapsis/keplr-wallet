@@ -32,7 +32,7 @@
 
   "pages.register.components.header.intro-title": "Your Interchain Gateway",
   "pages.register.components.header.header-step.title": "Step",
-  "pages.register.components.help-desk-button.title": "Help Desk",
+  "pages.register.components.help-desk-button.title": "Get Support",
   "pages.register.components.help-desk-button.question": "?",
   "pages.register.components.copy-to-clipboard.button-before": "Copy to clipboard",
   "pages.register.components.copy-to-clipboard.button-after": "Copied",
@@ -233,7 +233,7 @@
   "page.setting.list.security-privacy": "Security & Privacy",
   "page.setting.list.more": "More",
 
-  "page.setting.helpdesk.title": "HelpDesk",
+  "page.setting.helpdesk.title": "Support",
 
   "page.setting.title": "Settings",
   "page.setting.general-title": "General",
@@ -443,7 +443,7 @@
   "page.ibc-swap.button.swap": "Swap",
   "page.ibc-swap.error.no-route-found": "No routes found for this swap",
   "page.ibc-swap.warning.unable-to-populate-price": "Unable to retrieve {assets} price from Coingecko. Check the fiat values of input and output from other sources before clicking \"Swap\".",
-  "page.ibc-swap.warning.high-price-impact-title": "{inPrice} on {srcChain} → {outPrice} on {dstChain}",
+  "page.ibc-swap.warning.high-price-impact-title": "You may lose {lossAmount} in this swap.",
   "page.ibc-swap.warning.high-price-impact": "Big drop in USD value detected due to low liquidity. Review your trade, or click \"Swap\" to continue.",
   "page.ibc-swap.components.swap-asset-info.from": "From",
   "page.ibc-swap.components.swap-asset-info.to": "To",

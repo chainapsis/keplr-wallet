@@ -191,6 +191,11 @@ export const MainPage: FunctionComponent<{
   useEffect(() => {
     if (uiConfigStore.changelogConfig.showingInfo.length > 0) {
       setIsChangelogModalOpen(true);
+
+      // 한번 모달이 나타난 다음에는 껏다켜도 모달이 나타나지 않도록한다.
+      // popup, side panel에서 window의 close 이벤트의 동작 방식이 달라서
+      // 각각 처리하기 귀찮고 다른 변수도 있을 수 있기 때문에 로직에서 확실히 처리.
+      uiConfigStore.changelogConfig.forceClearNext();
     }
   }, [uiConfigStore.changelogConfig.showingInfo.length]);
 
@@ -479,6 +484,7 @@ export const MainPage: FunctionComponent<{
               for (const scene of info.scenes) {
                 res.push({
                   title: scene.title,
+                  subtitle: scene.subtitle,
                   image:
                     scene.image && scene.aspectRatio
                       ? {
@@ -489,7 +495,8 @@ export const MainPage: FunctionComponent<{
                       : undefined,
                   paragraph: scene.paragraph,
                   links: scene.links,
-                  isSidePanelBeta: info.isSidePanelBeta,
+                  closeText: scene.closeText,
+                  closeLink: scene.closeLink,
                 });
               }
             }

@@ -37,12 +37,10 @@ import { EmbedChainInfos } from "../../../../config";
 import { DenomHelper } from "@keplr-wallet/common";
 import { TokenTag } from "../../../register/enable-chains/components/chain-item";
 import { SupportedPaymentType } from "@keplr-wallet/types";
-import { useTokenTag } from "../../../../hooks/use-token-tag";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
-  tokenScans: TokenScan[];
-}> = observer(({ close, tokenScans }) => {
+}> = observer(({ close }) => {
   const { chainStore, keyRingStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
@@ -52,13 +50,13 @@ export const TokenFoundModal: FunctionComponent<{
   >([]);
 
   const numFoundToken = useMemo(() => {
-    if (tokenScans.length === 0) {
+    if (chainStore.tokenScans.length === 0) {
       return 0;
     }
 
     const set = new Set<string>();
 
-    for (const tokenScan of tokenScans) {
+    for (const tokenScan of chainStore.tokenScans) {
       for (const info of tokenScan.infos) {
         for (const asset of info.assets) {
           const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
@@ -70,7 +68,7 @@ export const TokenFoundModal: FunctionComponent<{
     }
 
     return Array.from(set).length;
-  }, [tokenScans]);
+  }, [chainStore.tokenScans]);
 
   const buttonClicked = async () => {
     if (!keyRingStore.selectedKeyInfo) {
@@ -81,7 +79,7 @@ export const TokenFoundModal: FunctionComponent<{
       .filter((identifier) => !chainStore.isEnabledChain(identifier))
       .filter((identifier) => {
         return (
-          tokenScans.find((tokenScan) => {
+          chainStore.tokenScans.find((tokenScan) => {
             return (
               ChainIdHelper.parse(tokenScan.chainId).identifier === identifier
             );
@@ -90,6 +88,11 @@ export const TokenFoundModal: FunctionComponent<{
       });
 
     const needBIP44Selects: string[] = [];
+
+    // chainStore.tokenScans는 체인이 enable되고 나면 그 체인은 사라진다.
+    // 근데 로직상 enable 이후에 추가 로직이 있다.
+    // 그래서 일단 얇은 복사를 하고 이 값을 사용한다.
+    const tokenScans = chainStore.tokenScans.slice();
 
     const linkedEnables = new Set<string>();
 
@@ -233,7 +236,7 @@ export const TokenFoundModal: FunctionComponent<{
         }}
       >
         <Stack gutter="0.75rem">
-          {tokenScans.map((tokenScan) => {
+          {chainStore.tokenScans.map((tokenScan) => {
             return (
               <FoundChainView
                 key={tokenScan.chainId}
@@ -275,11 +278,13 @@ export const TokenFoundModal: FunctionComponent<{
           onClick={(e) => {
             e.preventDefault();
 
-            if (tokenScans.length === checkedChainIdentifiers.length) {
+            if (
+              chainStore.tokenScans.length === checkedChainIdentifiers.length
+            ) {
               setCheckedChainIdentifiers([]);
             } else {
               setCheckedChainIdentifiers(
-                tokenScans.map((tokenScan) => {
+                chainStore.tokenScans.map((tokenScan) => {
                   return ChainIdHelper.parse(tokenScan.chainId).identifier;
                 })
               );
@@ -295,7 +300,9 @@ export const TokenFoundModal: FunctionComponent<{
 
             <Checkbox
               size="small"
-              checked={tokenScans.length === checkedChainIdentifiers.length}
+              checked={
+                chainStore.tokenScans.length === checkedChainIdentifiers.length
+              }
               onChange={() => {}}
             />
           </XAxis>
@@ -498,13 +505,6 @@ const FoundTokenView: FunctionComponent<{
     }
   }, [asset.currency, chainId, asset.paymentType]);
 
-  const tokenTag = useTokenTag({
-    token: new CoinPretty(asset.currency, asset.amount),
-    chainInfo: chainStore.getModularChain(chainId),
-    isFetching: false,
-    error: undefined,
-  });
-
   return (
     <Columns sum={1} gutter="0.5rem" alignY="center">
       <Box width="1.5rem" height="1.5rem">
@@ -547,13 +547,9 @@ const FoundTokenView: FunctionComponent<{
               const cut = coinDenom.indexOf(" (");
               return cut > 0 ? coinDenom.slice(0, cut) : coinDenom;
             }
-            return coinDenom;
           })()}
         </Subtitle3>
         {addressTag ? <TokenTag text={addressTag.text} /> : null}
-        {tokenTag && tokenTag.text === "IBC" ? (
-          <TokenTag text={tokenTag.text} tooltip={tokenTag.tooltip} />
-        ) : null}
       </Box>
 
       <Column weight={1} />
@@ -574,7 +570,6 @@ const FoundTokenView: FunctionComponent<{
           return uiConfigStore.hideStringIfPrivacyMode(
             new CoinPretty(currency, asset.amount)
               .shrink(true)
-              .hideIBCMetadata(true)
               .trim(true)
               .maxDecimals(6)
               .inequalitySymbol(true)

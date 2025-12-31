@@ -17,7 +17,11 @@ import { QRCodeSVG } from "qrcode.react";
 import { IconProps } from "../../../../components/icon/types";
 import { YAxis } from "../../../../components/axis";
 import { Button } from "../../../../components/button";
-import { GENESIS_HASH_TO_NETWORK, GenesisHash } from "@keplr-wallet/types";
+import {
+  GENESIS_HASH_TO_NETWORK,
+  GenesisHash,
+  Network,
+} from "@keplr-wallet/types";
 import { EthereumAccountBase } from "@keplr-wallet/stores-eth";
 import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
 import { StarknetAccountBase } from "@keplr-wallet/stores-starknet";
@@ -109,6 +113,9 @@ export const QRCodeScene: FunctionComponent<{
         .split(":")[0];
       const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
       if (network) {
+        if (network === Network.MAINNET) {
+          return account.bitcoinAddress?.bech32Address ?? "";
+        }
         return `bitcoin:${account.bitcoinAddress?.bech32Address}?message=${network}`;
       }
     }

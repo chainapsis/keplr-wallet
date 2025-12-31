@@ -41,8 +41,7 @@ import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { MintPhotonButton } from "./mint-photon-button";
-import { ModularChainInfo } from "@keplr-wallet/types";
-import Joi from "joi";
+import { useKcrStakingUrls } from "../../../hooks/use-kcr-staking-urls";
 
 const Styles = {
   Container: styled.div`
@@ -92,13 +91,12 @@ export const TokenDetailModal: FunctionComponent<{
   } = useStore();
 
   const theme = useTheme();
+  const { hasKcrStakingUrl } = useKcrStakingUrls();
 
   const account = accountStore.getAccount(chainId);
-  const modularChainInfo: ModularChainInfo =
-    chainStore.getModularChain(chainId);
-  const currency = chainStore
-    .getModularChainInfoImpl(chainId)
-    .forceFindCurrency(coinMinimalDenom);
+  const modularChainInfo = chainStore.getModularChain(chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
+  const currency = modularChainInfoImpl.forceFindCurrency(coinMinimalDenom);
 
   const isIBCCurrency = "paths" in currency;
 
@@ -591,14 +589,17 @@ export const TokenDetailModal: FunctionComponent<{
                 return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
               }
 
+              const isStakeCurrency =
+                modularChainInfo.cosmos.stakeCurrency?.coinMinimalDenom ===
+                currency.coinMinimalDenom;
+              const hasNativeStaking =
+                modularChainInfoImpl.embedded &&
+                "cosmos" in modularChainInfoImpl.embedded &&
+                !!modularChainInfoImpl.embedded.cosmos.walletUrlForStaking;
+
               if (
-                modularChainInfo.cosmos.stakeCurrency &&
-                modularChainInfo.cosmos.stakeCurrency.coinMinimalDenom ===
-                  currency.coinMinimalDenom &&
-                modularChainInfo.cosmos.walletUrlForStaking &&
-                !Joi.string()
-                  .uri()
-                  .validate(modularChainInfo.cosmos.walletUrlForStaking).error
+                isStakeCurrency &&
+                (hasNativeStaking || hasKcrStakingUrl(chainId))
               ) {
                 return (
                   <React.Fragment>

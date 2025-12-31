@@ -2047,24 +2047,22 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 ? (() => {
                     const inPrice = priceStore.calculatePrice(
                       ibcSwapConfigs.amountConfig.amount[0],
-                      "usd"
+                      priceStore.defaultVsCurrency
                     );
                     const outPrice = priceStore.calculatePrice(
                       ibcSwapConfigs.amountConfig.outAmount,
-                      "usd"
+                      priceStore.defaultVsCurrency
                     );
+                    if (!inPrice || !outPrice) {
+                      return undefined;
+                    }
+                    const lossAmount = inPrice.sub(outPrice);
                     return intl.formatMessage(
                       {
                         id: "page.ibc-swap.warning.high-price-impact-title",
                       },
                       {
-                        inPrice: inPrice?.toString(),
-                        srcChain:
-                          ibcSwapConfigs.amountConfig.chainInfo.chainName,
-                        outPrice: outPrice?.toString(),
-                        dstChain: chainStore.getModularChain(
-                          ibcSwapConfigs.amountConfig.outChainId
-                        ).chainName,
+                        lossAmount: lossAmount?.toString(),
                       }
                     );
                   })()

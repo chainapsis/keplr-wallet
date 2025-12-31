@@ -13,7 +13,6 @@ import { Gutter } from "../../components/gutter";
 import { XAxis, YAxis } from "../../components/axis";
 import { SearchTextInput } from "../../components/input";
 import { NewTokenFoundButtonContainer } from "../../components/new-token-found-button";
-import { Dec } from "@keplr-wallet/unit";
 import styled, {
   css,
   FlattenSimpleInterpolation,
@@ -29,6 +28,7 @@ import { Subtitle3 } from "../../components/typography";
 import { useSearch } from "../../hooks/use-search";
 import { ViewToken } from "../main";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { sortByPrice } from "../../utils/token-sort";
 
 const searchFields = [
   {
@@ -86,57 +86,10 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
   const searchedBalances = useSearch([...allBalances], search, searchFields);
   const sortedBalances = useMemo(() => {
     const searchedBalancesSliced = [...searchedBalances];
-    // TODO: hugeQueriesStore.sortByPrice 로직을 공통화해서 사용하는 방식 고려
     if (sortMode === "asc") {
-      return searchedBalancesSliced.sort((a, b) => {
-        const aPrice = a.price?.toDec() ?? new Dec(0);
-        const bPrice = b.price?.toDec() ?? new Dec(0);
-
-        if (aPrice.equals(bPrice)) {
-          if (aPrice.equals(Dec.zero)) {
-            const aHasBalance = a.token.toDec().gt(Dec.zero);
-            const bHasBalance = b.token.toDec().gt(Dec.zero);
-
-            if (aHasBalance && !bHasBalance) {
-              return 1;
-            } else if (!aHasBalance && bHasBalance) {
-              return -1;
-            } else {
-              return 0;
-            }
-          }
-          return 0;
-        } else if (aPrice.gt(bPrice)) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });
+      return searchedBalancesSliced.sort((a, b) => -sortByPrice(a, b));
     } else if (sortMode === "desc") {
-      return searchedBalancesSliced.sort((a, b) => {
-        const aPrice = a.price?.toDec() ?? new Dec(0);
-        const bPrice = b.price?.toDec() ?? new Dec(0);
-
-        if (aPrice.equals(bPrice)) {
-          if (aPrice.equals(Dec.zero)) {
-            const aHasBalance = a.token.toDec().gt(Dec.zero);
-            const bHasBalance = b.token.toDec().gt(Dec.zero);
-
-            if (aHasBalance && !bHasBalance) {
-              return -1;
-            } else if (!aHasBalance && bHasBalance) {
-              return 1;
-            } else {
-              return 0;
-            }
-          }
-          return 0;
-        } else if (aPrice.gt(bPrice)) {
-          return -1;
-        } else {
-          return 1;
-        }
-      });
+      return searchedBalancesSliced.sort(sortByPrice);
     } else {
       return searchedBalancesSliced;
     }
@@ -298,10 +251,7 @@ export const ManageViewAssetTokenListPage: FunctionComponent = observer(() => {
         align="bottom"
         close={() => setIsFoundTokenModalOpen(false)}
       >
-        <TokenFoundModal
-          tokenScans={chainStore.tokenScans}
-          close={() => setIsFoundTokenModalOpen(false)}
-        />
+        <TokenFoundModal close={() => setIsFoundTokenModalOpen(false)} />
       </Modal>
     </HeaderLayout>
   );
