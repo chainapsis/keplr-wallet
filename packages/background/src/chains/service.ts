@@ -9,6 +9,7 @@ import {
   BitcoinChainInfo,
   ChainInfo,
   ChainInfoWithoutEndpoints,
+  EVMChainInfo,
   EVMInfo,
   ModularChainInfo,
   StarknetChainInfo,
@@ -51,6 +52,15 @@ export class ChainsService {
    * @dev EVMInfo is a subtype of EVMChainInfo, containing only the minimal information (chainId, rpc, websocket).
    */
   static getEVMInfo(chainInfo: ModularChainInfo): EVMInfo | undefined {
+    if ("evm" in chainInfo) {
+      return chainInfo.evm;
+    }
+    return undefined;
+  }
+
+  static getEVMChainInfo(
+    chainInfo: ModularChainInfo
+  ): EVMChainInfo | undefined {
     if ("evm" in chainInfo) {
       return chainInfo.evm;
     }

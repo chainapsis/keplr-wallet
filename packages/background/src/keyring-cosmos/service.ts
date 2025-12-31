@@ -109,8 +109,8 @@ export class KeyRingCosmosService {
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const evmInfo = ChainsService.getEVMInfo(chainInfo);
-    const forceEVMLedger = evmInfo?.features?.includes(
+    const evmChainInfo = ChainsService.getEVMChainInfo(chainInfo);
+    const forceEVMLedger = evmChainInfo?.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -126,7 +126,7 @@ export class KeyRingCosmosService {
     }
 
     const address = (() => {
-      if (isEthermintLike || evmInfo !== undefined) {
+      if (isEthermintLike || evmChainInfo !== undefined) {
         return pubKey.getEthAddress();
       }
 
