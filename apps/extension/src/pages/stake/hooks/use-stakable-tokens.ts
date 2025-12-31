@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useStore } from "../../../stores";
-import { useKcrStakingUrls } from "./use-kcr-staking-urls";
+import { useKcrStakingUrls } from "../../../hooks/use-kcr-staking-urls";
 import { Dec } from "@keplr-wallet/unit";
 import { ViewToken } from "../../main";
 
@@ -17,6 +17,9 @@ export const useStakableTokens = () => {
           return false;
         }
         if ("starknet" in token.chainInfo) {
+          if (token.chainInfo.chainId === "starknet:SN_SEPOLIA") {
+            return false;
+          }
           return true;
         }
         if ("bitcoin" in token.chainInfo) {

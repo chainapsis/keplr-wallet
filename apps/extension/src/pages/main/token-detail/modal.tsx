@@ -42,7 +42,7 @@ import { Button } from "../../../components/button";
 import { FormattedMessage } from "react-intl";
 import { NOBLE_CHAIN_ID } from "../../../config.ui";
 import { MintPhotonButton } from "./mint-photon-button";
-import Joi from "joi";
+import { useKcrStakingUrls } from "../../../hooks/use-kcr-staking-urls";
 
 const Styles = {
   Container: styled.div`
@@ -92,6 +92,7 @@ export const TokenDetailModal: FunctionComponent<{
   } = useStore();
 
   const theme = useTheme();
+  const { hasKcrStakingUrl } = useKcrStakingUrls();
 
   const account = accountStore.getAccount(chainId);
   const modularChainInfo = chainStore.getModularChain(chainId);
@@ -625,13 +626,16 @@ export const TokenDetailModal: FunctionComponent<{
                 return <EarnApyBanner chainId={NOBLE_CHAIN_ID} />;
               }
 
+              const isStakeCurrency =
+                chainInfo.stakeCurrency?.coinMinimalDenom ===
+                currency.coinMinimalDenom;
+              const hasNativeStaking =
+                chainInfo.embedded.embedded &&
+                chainInfo.embedded.walletUrlForStaking;
+
               if (
-                chainInfo.stakeCurrency &&
-                chainInfo.stakeCurrency.coinMinimalDenom ===
-                  currency.coinMinimalDenom &&
-                chainInfo.walletUrlForStaking &&
-                !Joi.string().uri().validate(chainInfo.walletUrlForStaking)
-                  .error
+                isStakeCurrency &&
+                (hasNativeStaking || hasKcrStakingUrl(chainId))
               ) {
                 return (
                   <React.Fragment>
