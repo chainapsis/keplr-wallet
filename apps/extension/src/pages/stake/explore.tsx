@@ -32,7 +32,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { IconProps } from "../../components/icon/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
-import { useKcrStakingUrls } from "./hooks/use-kcr-staking-urls";
+import { useKcrStakingUrls } from "../../hooks/use-kcr-staking-urls";
 
 const priority = (chainId: string) => {
   const id = ChainIdHelper.parse(chainId).identifier;
