@@ -10,7 +10,6 @@ import {
   ChainInfo,
   ChainInfoWithoutEndpoints,
   EVMInfo,
-  EVMNativeChainInfo,
   ModularChainInfo,
   StarknetChainInfo,
 } from "@keplr-wallet/types";
@@ -45,9 +44,13 @@ type ChainSuggestedHandler = (
 type UpdatedChainInfo = Pick<ChainInfo, "chainId" | "features">;
 
 export class ChainsService {
-  static getEVMInfo(
-    chainInfo: ModularChainInfo
-  ): EVMNativeChainInfo | undefined {
+  /**
+   * Get the EVM info from the modular chain info.
+   * @param chainId - The chain id.
+   * @returns The EVM info.
+   * @dev EVMInfo is a subtype of EVMChainInfo, containing only the minimal information (chainId, rpc, websocket).
+   */
+  static getEVMInfo(chainInfo: ModularChainInfo): EVMInfo | undefined {
     if ("evm" in chainInfo) {
       return chainInfo.evm;
     }

@@ -81,7 +81,7 @@ export interface BitcoinChainInfo {
   readonly currencies: AppCurrency[];
 }
 
-export interface EVMNativeChainInfo {
+export interface EVMChainInfo {
   readonly rpc: string;
   readonly chainId: number;
   readonly websocket?: string;
@@ -114,10 +114,10 @@ export type ModularChainInfo = ModularChainInfoBase &
         readonly linkedChainKey: string;
       }
     | {
-        readonly evm: EVMNativeChainInfo;
+        readonly evm: EVMChainInfo;
       }
     | {
         readonly cosmos: Omit<ChainInfo, "evm">;
-        readonly evm: EVMNativeChainInfo;
+        readonly evm: EVMChainInfo;
       }
   );
