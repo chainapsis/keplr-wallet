@@ -79,7 +79,13 @@ export const AccountSwitchFloatModal = observer(
           setAddressMap(addressMap);
         }
       })();
-    }, [chainStore, uiConfigStore.addressBookConfig, uiConfigStore.icnsInfo]);
+    }, [
+      chainStore,
+      uiConfigStore.addressBookConfig,
+      uiConfigStore.icnsInfo,
+      // 새로 추가된 계정의 bech32Address를 포함하도록
+      keyRingStore.keyInfos.length,
+    ]);
 
     const handleAccountSelect = async (keyInfo: KeyInfo) => {
       if (keyInfo.id === keyRingStore.selectedKeyInfo?.id) {
