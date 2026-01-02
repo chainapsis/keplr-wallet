@@ -144,7 +144,7 @@ export const SignStarknetTxView: FunctionComponent<{
       const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
-        .getCurrencies("starknet")
+        .getCurrenciesByModule("starknet")
         .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
       if (!feeCurrency) {
         throw new Error("Can't find fee currency");
@@ -272,7 +272,7 @@ export const SignStarknetTxView: FunctionComponent<{
       const feeContractAddress = starknet.strkContractAddress;
       const feeCurrency = chainStore
         .getModularChainInfoImpl(chainId)
-        .getCurrencies("starknet")
+        .getCurrenciesByModule("starknet")
         .find((cur) => cur.coinMinimalDenom === `erc20:${feeContractAddress}`);
       if (!feeCurrency) {
         throw new Error("Can't find fee currency");

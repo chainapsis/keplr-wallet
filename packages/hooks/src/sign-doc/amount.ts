@@ -48,7 +48,8 @@ export class SignDocAmountConfig
     if (
       this.disableBalanceCheck ||
       !this.signDocHelper?.signDocWrapper ||
-      this.chainInfo.feeCurrencies.length === 0
+      this.chainGetter.getModularChainInfoImpl(this.chainId).feeCurrencies
+        ?.length === 0
     ) {
       return [];
     }
@@ -68,6 +69,10 @@ export class SignDocAmountConfig
     const amount: CoinPretty[] = [];
 
     for (const msg of msgs) {
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+
       try {
         // TODO: msg.type이 다른 체인들이 몇개 있다. 이런 얘들에 대해서 좀 더 편리하게 처리해줄 방법을 찾아본다.
         //       이 기능이 사용자의 자산을 잃게 만들리는 없기 때문에 나중에 처리해준다.
@@ -81,7 +86,7 @@ export class SignDocAmountConfig
                 for (const amountInMsg of msg.value.amount) {
                   amount.push(
                     new CoinPretty(
-                      this.chainInfo.forceFindCurrency(amountInMsg.denom),
+                      modularChainInfoImpl.forceFindCurrency(amountInMsg.denom),
                       amountInMsg.amount
                     )
                   );
@@ -101,7 +106,9 @@ export class SignDocAmountConfig
               ) {
                 amount.push(
                   new CoinPretty(
-                    this.chainInfo.forceFindCurrency(msg.value.amount.denom),
+                    modularChainInfoImpl.forceFindCurrency(
+                      msg.value.amount.denom
+                    ),
                     msg.value.amount.amount
                   )
                 );
@@ -120,7 +127,9 @@ export class SignDocAmountConfig
               ) {
                 amount.push(
                   new CoinPretty(
-                    this.chainInfo.forceFindCurrency(msg.value.token.denom),
+                    modularChainInfoImpl.forceFindCurrency(
+                      msg.value.token.denom
+                    ),
                     msg.value.token.amount
                   )
                 );
@@ -143,6 +152,10 @@ export class SignDocAmountConfig
     const amount: CoinPretty[] = [];
 
     for (const msg of msgs) {
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+
       try {
         if (!(msg instanceof UnknownMessage) && "unpacked" in msg) {
           switch (msg.typeUrl) {
@@ -155,7 +168,7 @@ export class SignDocAmountConfig
                 for (const amountInMsg of sendMsg.amount) {
                   amount.push(
                     new CoinPretty(
-                      this.chainInfo.forceFindCurrency(amountInMsg.denom),
+                      modularChainInfoImpl.forceFindCurrency(amountInMsg.denom),
                       amountInMsg.amount
                     )
                   );
@@ -172,7 +185,7 @@ export class SignDocAmountConfig
                 if (delegateMsg.amount) {
                   amount.push(
                     new CoinPretty(
-                      this.chainInfo.forceFindCurrency(
+                      modularChainInfoImpl.forceFindCurrency(
                         delegateMsg.amount.denom
                       ),
                       delegateMsg.amount.amount
@@ -191,7 +204,7 @@ export class SignDocAmountConfig
                 if (ibcTransferMsg.token) {
                   amount.push(
                     new CoinPretty(
-                      this.chainInfo.forceFindCurrency(
+                      modularChainInfoImpl.forceFindCurrency(
                         ibcTransferMsg.token.denom
                       ),
                       ibcTransferMsg.token.amount

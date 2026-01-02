@@ -1,6 +1,6 @@
 import { action, makeObservable, observable, computed } from "mobx";
-import { ChainStore } from "../chain";
 import { KeyRingStore } from "@keplr-wallet/stores-core";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export class ClaimAllEachState {
   @observable
@@ -61,7 +61,6 @@ export class ClaimRewardsStateStore {
   private readonly map = new Map<string, ClaimAllEachState>();
 
   constructor(
-    private readonly chainStore: ChainStore,
     private readonly keyRingStore: KeyRingStore,
     private readonly eventListener: {
       addEventListener: (type: string, fn: () => unknown) => void;
@@ -73,9 +72,7 @@ export class ClaimRewardsStateStore {
   }
 
   private key(chainId: string) {
-    const chainIdentifier = this.chainStore.hasChain(chainId)
-      ? this.chainStore.getChain(chainId).chainIdentifier
-      : chainId;
+    const chainIdentifier = ChainIdHelper.parse(chainId).identifier;
     const keyId = this.keyRingStore.selectedKeyInfo?.id ?? "unknown";
     return `${keyId}:${chainIdentifier}`;
   }

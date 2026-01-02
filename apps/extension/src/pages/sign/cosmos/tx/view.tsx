@@ -148,7 +148,7 @@ export const CosmosTxView: FunctionComponent<{
       feeConfig.setFee(
         data.data.signDocWrapper.fees.map((fee) => {
           const currency = chainStore
-            .getChain(data.data.chainId)
+            .getModularChainInfoImpl(data.data.chainId)
             .forceFindCurrency(fee.denom);
           return new CoinPretty(currency, new Int(fee.amount));
         })
@@ -380,7 +380,7 @@ export const CosmosTxView: FunctionComponent<{
       let sumPrice = new Dec(0);
       for (const fee of feeConfig.fees) {
         const currency = chainStore
-          .getChain(chainId)
+          .getModularChainInfoImpl(chainId)
           .findCurrency(fee.currency.coinMinimalDenom);
         if (currency && currency.coinGeckoId) {
           const price = priceStore.calculatePrice(
@@ -435,7 +435,7 @@ export const CosmosTxView: FunctionComponent<{
           presignOptions = {
             useWebHID: uiConfigStore.useWebHIDLedger,
             signEthPlainJSON: chainStore
-              .getChain(
+              .getModularChainInfoImpl(
                 signInteractionStore.waitingData?.data.chainId ?? chainId
               )
               .hasFeature("evm-ledger-sign-plain-json"),
@@ -444,7 +444,7 @@ export const CosmosTxView: FunctionComponent<{
           setIsKeystoneInteracting(true);
           setKeystoneInteractingError(undefined);
           const isEthSigning = KeyRingService.isEthermintLike(
-            chainStore.getChain(chainId)
+            chainStore.getModularChain(chainId)
           );
           presignOptions = {
             isEthSigning,
@@ -528,10 +528,14 @@ export const CosmosTxView: FunctionComponent<{
   };
 
   const isLavaEndpoint = (() => {
+    const modularChainInfo = chainStore.getModularChain(chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      return false;
+    }
     try {
       const lavaBaseHostName = "lava.build";
-      const rpcUrl = new URL(chainStore.getChain(chainId).rpc);
-      const lcdUrl = new URL(chainStore.getChain(chainId).rest);
+      const rpcUrl = new URL(modularChainInfo.cosmos.rpc);
+      const lcdUrl = new URL(modularChainInfo.cosmos.rest);
 
       return (
         rpcUrl.hostname.endsWith(lavaBaseHostName) ||

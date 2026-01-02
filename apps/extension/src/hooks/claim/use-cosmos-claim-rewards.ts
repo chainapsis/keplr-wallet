@@ -26,6 +26,7 @@ import {
 } from "../../config.ui";
 import { MakeTxResponse } from "@keplr-wallet/stores";
 import { logNobleClaimAnalytics } from "../../analytics-amplitude";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 const zeroDec = new Dec(0);
 // TODO: Add below property to config.ui.ts
@@ -49,7 +50,7 @@ export const useCosmosClaimRewards = () => {
     rewardToken: CoinPretty,
     state: ClaimAllEachState
   ) => {
-    const chainInfo = chainStore.getChain(chainId);
+    const chainInfo = chainStore.getModularChain(chainId);
     const account = accountStore.getAccount(chainId);
     if (!account.bech32Address) {
       return;
@@ -117,15 +118,22 @@ export const useCosmosClaimRewards = () => {
     state.setIsLoading(true);
 
     (async () => {
+      if (!("cosmos" in chainInfo)) {
+        return;
+      }
       // feemarket feature가 있는 경우 이후의 로직에서 사용할 수 있는 fee currency를 찾아야하기 때문에 undefined로 시작시킨다.
-      let feeCurrency = chainInfo.hasFeature("feemarket")
+      let feeCurrency = chainInfo.cosmos.features?.includes("feemarket")
         ? undefined
-        : chainInfo.feeCurrencies.find(
+        : chainInfo.cosmos.feeCurrencies.find(
             (cur) =>
-              cur.coinMinimalDenom === chainInfo.stakeCurrency?.coinMinimalDenom
+              cur.coinMinimalDenom ===
+              chainInfo.cosmos.stakeCurrency?.coinMinimalDenom
           );
 
-      if (chainInfo.hasFeature("osmosis-base-fee-beta") && feeCurrency) {
+      if (
+        chainInfo.cosmos.features?.includes("osmosis-base-fee-beta") &&
+        feeCurrency
+      ) {
         const queryBaseFee = queriesStore.get(chainInfo.chainId).osmosis
           .queryBaseFee;
         const queryRemoteBaseFeeStep = queriesStore.simpleQuery.queryGet<{
@@ -186,7 +194,7 @@ export const useCosmosClaimRewards = () => {
           | undefined;
 
         const feeCurrencies = await (async () => {
-          if (chainInfo.hasFeature("feemarket")) {
+          if (chainInfo.cosmos.features?.includes("feemarket")) {
             const queryFeeMarketGasPrices =
               queriesStore.get(chainId).cosmos.queryFeeMarketGasPrices;
             await queryFeeMarketGasPrices.waitFreshResponse();
@@ -200,9 +208,9 @@ export const useCosmosClaimRewards = () => {
                 continue;
               }
 
-              const currency = await chainInfo.findCurrencyAsync(
-                gasPrice.denom
-              );
+              const currency = await chainStore
+                .getModularChainInfoImpl(chainId)
+                .findCurrencyAsync(gasPrice.denom);
               if (currency) {
                 let multiplication = {
                   low: 1.1,
@@ -244,7 +252,7 @@ export const useCosmosClaimRewards = () => {
                   }
                   const specific =
                     multificationConfig.response.data[
-                      chainInfo.chainIdentifier
+                      ChainIdHelper.parse(chainId).identifier
                     ];
                   if (
                     specific &&
@@ -288,13 +296,13 @@ export const useCosmosClaimRewards = () => {
 
             return result;
           } else {
-            return chainInfo.feeCurrencies;
+            return chainInfo.cosmos.feeCurrencies;
           }
         })();
         for (const chainFeeCurrency of feeCurrencies) {
-          const currency = await chainInfo.findCurrencyAsync(
-            chainFeeCurrency.coinMinimalDenom
-          );
+          const currency = await chainStore
+            .getModularChainInfoImpl(chainId)
+            .findCurrencyAsync(chainFeeCurrency.coinMinimalDenom);
           if (currency) {
             const balance = queries.queryBalances
               .getQueryBech32Address(account.bech32Address)
@@ -382,9 +390,10 @@ export const useCosmosClaimRewards = () => {
           }
 
           // Ensure fee currency fetched before querying balance
-          const feeCurrencyFetched = await chainInfo.findCurrencyAsync(
-            feeCurrency.coinMinimalDenom
-          );
+          const feeCurrencyFetched = await chainStore
+            .getModularChainInfoImpl(chainId)
+            .findCurrencyAsync(feeCurrency.coinMinimalDenom);
+
           if (!feeCurrencyFetched) {
             throw new Error(
               intl.formatMessage({
@@ -592,7 +601,7 @@ export const useCosmosClaimRewards = () => {
     chainId: string,
     state: ClaimAllEachState
   ) => {
-    const cosmosChainInfo = chainStore.getChain(chainId);
+    const cosmosChainInfo = chainStore.getModularChain(chainId);
     const account = accountStore.getAccount(chainId);
     if (!account.bech32Address) {
       return;

@@ -82,10 +82,10 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     const bridgeOrIBCList = bridgeInfos.concat(channels).sort((a, b) => {
       // Sort by chain name.
       return chainStore
-        .getChain(a.destinationChainId)
+        .getModularChain(a.destinationChainId)
         .chainName.trim()
         .localeCompare(
-          chainStore.getChain(b.destinationChainId).chainName.trim()
+          chainStore.getModularChain(b.destinationChainId).chainName.trim()
         );
     });
 
@@ -94,7 +94,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
     const searchRef = useFocusOnMount<HTMLInputElement>();
 
     const filteredChannels = bridgeOrIBCList.filter((c) => {
-      const chainInfo = chainStore.getChain(c.destinationChainId);
+      const chainInfo = chainStore.getModularChain(c.destinationChainId);
       return chainInfo.chainName
         .trim()
         .toLowerCase()
@@ -177,7 +177,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                   bridgeOrChannel.originChainId
                 : false;
 
-              const chainInfo = chainStore.getChain(
+              const chainInfo = chainStore.getModularChainInfoImpl(
                 bridgeOrChannel.destinationChainId
               );
 
@@ -273,7 +273,10 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                   }}
                 >
                   <XAxis alignY="center">
-                    <ChainImageFallback chainInfo={chainInfo} size="2rem" />
+                    <ChainImageFallback
+                      chainInfo={chainInfo.embedded}
+                      size="2rem"
+                    />
                     <Gutter size="0.75rem" />
                     <YAxis>
                       <Subtitle2
@@ -283,7 +286,7 @@ export const IBCTransferSelectDestinationModal: FunctionComponent<{
                             : ColorPalette["gray-10"]
                         }
                       >
-                        {chainInfo.chainName}
+                        {chainInfo.embedded.chainName}
                       </Subtitle2>
                       {isToOrigin ? (
                         <React.Fragment>

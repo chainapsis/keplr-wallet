@@ -20,12 +20,7 @@ export const AddressChip: FunctionComponent<{
   const { accountStore, chainStore } = useStore();
 
   const modularChainInfo = chainStore.getModularChain(chainId);
-  const isEVMOnlyChain = (() => {
-    if ("cosmos" in modularChainInfo) {
-      return chainStore.isEvmOnlyChain(chainId);
-    }
-    return false;
-  })();
+  const isEVMOnlyChain = chainStore.isEvmOnlyChain(chainId);
 
   const theme = useTheme();
 
@@ -79,16 +74,14 @@ export const AddressChip: FunctionComponent<{
       onClick={(e) => {
         e.preventDefault();
 
-        if ("cosmos" in modularChainInfo) {
-          // copy address
-          navigator.clipboard.writeText(
-            isEVMOnlyChain ? account.ethereumHexAddress : account.bech32Address
-          );
+        // copy address
+        if (isEVMOnlyChain) {
+          navigator.clipboard.writeText(account.ethereumHexAddress);
+        } else if ("cosmos" in modularChainInfo) {
+          navigator.clipboard.writeText(account.bech32Address);
         } else if ("starknet" in modularChainInfo) {
-          // copy address
           navigator.clipboard.writeText(account.starknetHexAddress);
         } else if ("bitcoin" in modularChainInfo) {
-          // copy address
           navigator.clipboard.writeText(
             account.bitcoinAddress?.bech32Address ?? ""
           );
@@ -106,13 +99,13 @@ export const AddressChip: FunctionComponent<{
           }
         >
           {(() => {
-            if ("cosmos" in modularChainInfo) {
-              return isEVMOnlyChain
-                ? `${account.ethereumHexAddress.slice(
-                    0,
-                    10
-                  )}...${account.ethereumHexAddress.slice(32)}`
-                : Bech32Address.shortenAddress(account.bech32Address, 16);
+            if (isEVMOnlyChain) {
+              return `${account.ethereumHexAddress.slice(
+                0,
+                10
+              )}...${account.ethereumHexAddress.slice(32)}`;
+            } else if ("cosmos" in modularChainInfo) {
+              return Bech32Address.shortenAddress(account.bech32Address, 16);
             } else if ("starknet" in modularChainInfo) {
               return `${account.starknetHexAddress.slice(
                 0,

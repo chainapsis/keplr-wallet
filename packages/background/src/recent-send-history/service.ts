@@ -209,14 +209,23 @@ export class RecentSendHistoryService {
     shouldLegacyTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
-      this.chainsService.getChainInfoOrThrow(sourceChainId);
+      this.chainsService.getModularChainInfoOrThrow(sourceChainId);
+    if (!("cosmos" in sourceChainInfo)) {
+      throw new Error("Source chain is not a cosmos chain");
+    }
+
     Bech32Address.validate(
       sender,
-      sourceChainInfo.bech32Config?.bech32PrefixAccAddr
+      sourceChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
     const destinationChainInfo =
-      this.chainsService.getChainInfoOrThrow(destinationChainId);
+      this.chainsService.getModularChainInfoOrThrow(destinationChainId);
+
+    if (!("cosmos" in destinationChainInfo)) {
+      throw new Error("Destination chain is not a cosmos chain");
+    }
+
     if (recipient.startsWith("0x")) {
       if (!recipient.match(/^0x[0-9A-Fa-f]*$/) || recipient.length !== 42) {
         throw new Error("Recipient address is not valid hex address");
@@ -224,7 +233,7 @@ export class RecentSendHistoryService {
     } else {
       Bech32Address.validate(
         recipient,
-        destinationChainInfo.bech32Config?.bech32PrefixAccAddr
+        destinationChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
       );
     }
 
@@ -327,13 +336,18 @@ export class RecentSendHistoryService {
     shouldLegacyTrack: boolean = false
   ): Promise<Uint8Array> {
     const sourceChainInfo =
-      this.chainsService.getChainInfoOrThrow(sourceChainId);
+      this.chainsService.getModularChainInfoOrThrow(sourceChainId);
+
+    if (!("cosmos" in sourceChainInfo)) {
+      throw new Error("Source chain is not a cosmos chain");
+    }
+
     Bech32Address.validate(
       sender,
-      sourceChainInfo.bech32Config?.bech32PrefixAccAddr
+      sourceChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
-    this.chainsService.getChainInfoOrThrow(destinationChainId);
+    this.chainsService.getModularChainInfoOrThrow(destinationChainId);
 
     const txHash = await this.txService.sendTx(sourceChainId, tx, mode, {
       silent,

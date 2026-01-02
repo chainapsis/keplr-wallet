@@ -14,6 +14,7 @@
     "lint-fix": "npx eslint --fix \"src/**/*\" && npx prettier --write \"src/**/*\""
   },
   "dependencies": {
+    "@keplr-wallet/cosmos": "0.12.308",
     "@keplr-wallet/hooks": "0.12.308",
     "@keplr-wallet/stores": "0.12.308",
     "@keplr-wallet/stores-eth": "0.12.308",

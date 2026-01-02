@@ -299,7 +299,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
     if (keyRingStore.status === "unlocked") {
       // mobx의 특성상 밑의 로직은 useMemo 안에서 처리할 수가 없어서 분리되었음.
       const firstAccount = accountStore.getAccount(
-        chainStore.chainInfos[0].chainId
+        chainStore.modularChainInfos[0].chainId
       );
       if (
         firstAccount.walletStatus === WalletStatus.NotInit ||
@@ -335,7 +335,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
       for (const keyInfo of keyRingStore.keyInfos) {
         chainStore.enableChainInfoInUIWithVaultId(
           keyInfo.id,
-          ...chainStore.chainInfos
+          ...chainStore.modularChainInfos
             .filter((chainInfo) => chainInfo.chainId.startsWith("eip155:"))
             .map((chainInfo) => chainInfo.chainId)
         );
@@ -379,7 +379,7 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
             }),
             ...(() => {
               for (const modularChainInfo of chainStore.modularChainInfosInUI) {
-                if ("cosmos" in modularChainInfo) {
+                if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
                   return {
                     disabled: false,
                   };

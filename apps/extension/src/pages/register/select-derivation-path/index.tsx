@@ -76,7 +76,8 @@ export const SelectDerivationPathScene: FunctionComponent<{
   const sceneTransition = useSceneTransition();
 
   const chainId = chainIds[0];
-  const chainInfo = chainStore.getChain(chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
+  const chainInfo = chainStore.getModularChain(chainId);
 
   const _goToNext = () => {
     if (chainIds.length > 1) {
@@ -119,8 +120,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
 
         if (res.length === 1) {
           (async () => {
-            const chainInfo = chainStore.getChain(chainId);
-            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo)) {
+            if (keyRingStore.needKeyCoinTypeFinalize(vaultId, chainId)) {
               await keyRingStore.finalizeKeyCoinType(
                 vaultId,
                 chainId,
@@ -144,7 +144,10 @@ export const SelectDerivationPathScene: FunctionComponent<{
       });
   }, [chainId, chainStore, keyRingStore, vaultId]);
 
-  const currency = chainInfo.stakeCurrency || chainInfo.currencies[0];
+  const currency =
+    ("cosmos" in modularChainInfoImpl.embedded &&
+      modularChainInfoImpl.embedded.cosmos.stakeCurrency) ||
+    modularChainInfoImpl.getCurrencies()[0];
 
   return (
     <RegisterSceneBox>
@@ -235,7 +238,7 @@ export const SelectDerivationPathScene: FunctionComponent<{
             })}
             size="large"
             disabled={
-              !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainInfo) ||
+              !keyRingStore.needKeyCoinTypeFinalize(vaultId, chainId) ||
               selectedCoinType < 0
             }
             onClick={async () => {

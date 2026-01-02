@@ -59,8 +59,8 @@ export const useInsufficientFeeAnalytics = (
         analyticsAmplitudeStore.logEvent("view_insufficient_fee_error", {
           pathname,
           chainIdentifier: ChainIdHelper.parse(chainId).identifier,
-          chainName: chainStore.hasChain(chainId)
-            ? chainStore.getChain(chainId).chainName
+          chainName: chainStore.hasModularChain(chainId)
+            ? chainStore.getModularChain(chainId).chainName
             : undefined,
           feeCurrencyDenom: feeConfig.fees[0].currency.coinMinimalDenom,
         });

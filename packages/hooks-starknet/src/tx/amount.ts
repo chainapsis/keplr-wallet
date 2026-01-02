@@ -132,7 +132,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       throw new Error("Chain doesn't support the starknet");
     }
 
-    const currencies = modularChainInfoImpl.getCurrencies("starknet");
+    const currencies = modularChainInfoImpl.getCurrenciesByModule("starknet");
 
     if (this._currency) {
       const find = currencies.find(
@@ -171,7 +171,7 @@ export class AmountConfig extends TxChainSetter implements IAmountConfig {
       throw new Error("Chain doesn't support the starknet");
     }
 
-    const currencies = modularChainInfoImpl.getCurrencies("starknet");
+    const currencies = modularChainInfoImpl.getCurrenciesByModule("starknet");
 
     return (
       currencies.find(

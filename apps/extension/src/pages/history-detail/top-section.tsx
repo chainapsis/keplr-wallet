@@ -40,6 +40,7 @@ import {
 } from "./msgs/evm-contract-call";
 import { IconBase } from "./icon-base";
 import { ColorPalette } from "../../styles";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
 export const HistoryDetailTopSection: FunctionComponent<{
   msg: MsgHistory;
@@ -52,8 +53,8 @@ export const HistoryDetailTopSection: FunctionComponent<{
       if (!msg.denoms || msg.denoms.length === 0) {
         throw new Error(`Invalid denoms: ${msg.denoms})`);
       }
-      const chainInfo = chainStore.getChain(msg.chainId);
-      if (chainInfo.chainIdentifier === "dydx-mainnet") {
+      const chainInfo = chainStore.getModularChain(msg.chainId);
+      if (ChainIdHelper.parse(msg.chainId).identifier === "dydx-mainnet") {
         // dydx는 USDC에 우선권을 줌
         if (
           msg.denoms.includes(
@@ -63,9 +64,11 @@ export const HistoryDetailTopSection: FunctionComponent<{
           return "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5";
         }
       }
-      if (chainInfo.stakeCurrency) {
-        if (msg.denoms.includes(chainInfo.stakeCurrency.coinMinimalDenom)) {
-          return chainInfo.stakeCurrency.coinMinimalDenom;
+      if ("cosmos" in chainInfo && chainInfo.cosmos.stakeCurrency) {
+        if (
+          msg.denoms.includes(chainInfo.cosmos.stakeCurrency.coinMinimalDenom)
+        ) {
+          return chainInfo.cosmos.stakeCurrency.coinMinimalDenom;
         }
       }
       return msg.denoms[0];
@@ -194,7 +197,7 @@ export const HistoryDetailTopSection: FunctionComponent<{
     case "evm/erc20-approve": {
       icon = <HistoryDetailEvmApproveIcon />;
       const currency = chainStore
-        .getChain(msg.chainId)
+        .getModularChainInfoImpl(msg.chainId)
         .findCurrency(
           msg.meta["contract"] ? `erc20:${msg.meta["contract"]}` : targetDenom
         );

@@ -30,8 +30,10 @@ export class ObservableCosmwasmContractChainQuery<
     super.onStart();
 
     this.disposer = autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("wasmd_0.24+")) {
+      const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      );
+      if (modularChainInfoImpl.hasFeature("wasmd_0.24+")) {
         if (this.url.startsWith("/wasm/v1/")) {
           this.setUrl(`/cosmwasm${this.url}`);
         }

@@ -6350,6 +6350,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-wallet/hooks-internal@workspace:apps/hooks-internal"
   dependencies:
+    "@keplr-wallet/cosmos": 0.12.308
     "@keplr-wallet/hooks": 0.12.308
     "@keplr-wallet/stores": 0.12.308
     "@keplr-wallet/stores-eth": 0.12.308
@@ -6662,7 +6663,7 @@ __metadata:
   peerDependencies:
     mobx: ^6
     mobx-utils: ^6
-    starknet: ^7
+    starknet: ^8
   languageName: unknown
   linkType: soft
 

@@ -96,7 +96,7 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
   }
 
   protected override canFetch(): boolean {
-    if (!this.chainGetter.getChain(this.chainId).stakeCurrency) {
+    if (!this.chainGetter.getModularChainInfoImpl(this.chainId).stakeCurrency) {
       return false;
     }
     return super.canFetch();
@@ -185,8 +185,9 @@ export class ObservableQueryValidatorsInner extends ObservableChainQuery<Validat
         return;
       }
 
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      const stakeCurrency = chainInfo.stakeCurrency;
+      const stakeCurrency = this.chainGetter.getModularChainInfoImpl(
+        this.chainId
+      ).stakeCurrency;
 
       if (!stakeCurrency) {
         return;

@@ -107,7 +107,7 @@ const handleGetInfosWithCoreTypesMsg: (
   return () => {
     return {
       chainInfos: service.getChainInfosWithCoreTypes(),
-      modulrChainInfos: service.getModularChainInfos(),
+      modularChainInfos: service.getModularChainInfos(),
     };
   };
 };

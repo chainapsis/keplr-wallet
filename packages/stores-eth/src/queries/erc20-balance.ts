@@ -42,10 +42,10 @@ export class ObservableQueryEthereumERC20BalanceImpl
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
-    );
+    const chainInfo = this.chainGetter.getModularChainInfoImpl(this.chainId);
+    const currency = chainInfo
+      .getCurrencies()
+      .find((cur) => cur.coinMinimalDenom === denom);
 
     if (!currency) {
       throw new Error(`Unknown currency: ${this.contractAddress}`);
@@ -65,8 +65,9 @@ export class ObservableQueryEthereumERC20BalanceImpl
   get currency(): AppCurrency {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return chainInfo.forceFindCurrency(denom);
+    return this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .forceFindCurrency(denom);
   }
 }
 
@@ -82,13 +83,13 @@ export class ObservableQueryEthereumERC20BalanceRegistry
     minimalDenom: string
   ): IObservableQueryBalanceImpl | undefined {
     const denomHelper = new DenomHelper(minimalDenom);
-    const chainInfo = chainGetter.getChain(chainId);
+    const chainInfo = chainGetter.getModularChain(chainId);
     const isHexAddress =
       EthereumAccountBase.isEthereumHexAddressWithChecksum(address);
     if (
       denomHelper.type !== "erc20" ||
       !isHexAddress ||
-      chainInfo.evm == null
+      !("evm" in chainInfo && chainInfo.evm != null)
     ) {
       return;
     }

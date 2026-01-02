@@ -40,12 +40,11 @@ const CosmosStakedBalance: FunctionComponent<{
 }> = observer(({ chainInfo }) => {
   const theme = useTheme();
 
-  const { queriesStore, accountStore, chainStore, uiConfigStore } = useStore();
+  const { queriesStore, accountStore, uiConfigStore } = useStore();
 
   const [isHover, setIsHover] = useState(false);
 
   const chainId = chainInfo.chainId;
-  const chain = chainStore.getChain(chainId);
 
   const cosmosAPRDec = useGetStakingApr(chainId);
   const cosmosAPR = cosmosAPRDec
@@ -66,7 +65,7 @@ const CosmosStakedBalance: FunctionComponent<{
 
   return (
     <StakedBalanceLayout
-      stakingUrl={chain.walletUrlForStaking}
+      stakingUrl={chainInfo.walletUrlForStaking}
       isHover={isHover}
       onHoverStateChange={setIsHover}
     >
@@ -79,7 +78,7 @@ const CosmosStakedBalance: FunctionComponent<{
         <Gutter size="0.75rem" />
         <YAxis>
           {(() => {
-            if (stakeBalanceIsZero && chain.walletUrlForStaking) {
+            if (stakeBalanceIsZero && chainInfo.walletUrlForStaking) {
               return (
                 <React.Fragment>
                   <Subtitle1
@@ -160,7 +159,7 @@ const CosmosStakedBalance: FunctionComponent<{
             </Subtitle3>
           ) : null}
 
-          {chain.walletUrlForStaking ? (
+          {chainInfo.walletUrlForStaking ? (
             stakeBalanceIsZero ? (
               <React.Fragment>
                 <Gutter size="0.25rem" />

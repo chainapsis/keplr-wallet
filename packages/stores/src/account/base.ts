@@ -348,12 +348,14 @@ export class AccountSetBase {
   }
 
   get hasEthereumHexAddress(): boolean {
-    const chainInfo = this.chainGetter.getChain(this.chainId);
+    const chainInfo = this.chainGetter.getModularChain(this.chainId);
     return (
-      chainInfo.evm != null ||
-      chainInfo.bip44.coinType === 60 ||
-      !!chainInfo.features?.includes("eth-address-gen") ||
-      !!chainInfo.features?.includes("eth-key-sign")
+      ("evm" in chainInfo && chainInfo.evm != null) ||
+      // The condition below is needed, since some chain infos possibily do not have the `evm` field, but have a coin type of 60 and use Ethereum addresses. (e.g. Initia)
+      ("cosmos" in chainInfo &&
+        (chainInfo.cosmos.bip44.coinType === 60 ||
+          !!chainInfo.cosmos.features?.includes("eth-address-gen") ||
+          !!chainInfo.cosmos.features?.includes("eth-key-sign")))
     );
   }
 

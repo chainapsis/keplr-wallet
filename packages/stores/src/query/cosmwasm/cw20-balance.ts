@@ -35,10 +35,12 @@ export class ObservableQueryCw20BalanceImpl
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.currencies.find(
-      (cur) => cur.coinMinimalDenom === denom
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
     );
+    const currency = modularChainInfoImpl
+      .getCurrencies()
+      .find((cur) => cur.coinMinimalDenom === denom);
 
     // TODO: Infer the currency according to its denom (such if denom is `uatom` -> `Atom` with decimal 6)?
     if (!currency) {
@@ -56,8 +58,9 @@ export class ObservableQueryCw20BalanceImpl
   get currency(): AppCurrency {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return chainInfo.forceFindCurrency(denom);
+    return this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .forceFindCurrency(denom);
   }
 }
 

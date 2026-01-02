@@ -14,11 +14,11 @@ export const HistoryDetailReceive: FunctionComponent<{
 }> = observer(({ msg, targetDenom }) => {
   const { chainStore, accountStore } = useStore();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
   const account = accountStore.getAccount(msg.chainId);
 
   const sendAmountPretty = useMemo(() => {
-    const currency = chainInfo.forceFindCurrency(targetDenom);
+    const currency = modularChainInfoImpl.forceFindCurrency(targetDenom);
 
     const amounts = (msg.msg as any)["amount"] as {
       denom: string;
@@ -30,7 +30,7 @@ export const HistoryDetailReceive: FunctionComponent<{
       return new CoinPretty(currency, "0");
     }
     return new CoinPretty(currency, amt.amount);
-  }, [chainInfo, msg.msg, targetDenom]);
+  }, [modularChainInfoImpl, msg.msg, targetDenom]);
 
   const fromAddress = (() => {
     return (msg.msg as any)["from_address"];

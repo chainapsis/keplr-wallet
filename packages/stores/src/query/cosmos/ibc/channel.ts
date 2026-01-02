@@ -29,8 +29,11 @@ export class ObservableChainQueryIBCChannel extends ObservableChainQuery<Channel
     super.onStart();
 
     this.disposer = autorun(() => {
-      const chainInfo = this.chainGetter.getChain(this.chainId);
-      if (chainInfo.features && chainInfo.features.includes("ibc-go")) {
+      if (
+        this.chainGetter
+          .getModularChainInfoImpl(this.chainId)
+          .hasFeature("ibc-go")
+      ) {
         this.setUrl(
           `/ibc/core/channel/v1/channels/${this.channelId}/ports/${this.portId}`
         );

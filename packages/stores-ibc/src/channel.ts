@@ -41,7 +41,7 @@ export class IBCChannelStore {
     if (!migrate) {
       const migrationData = new Map<string, Map<string, Channel>>();
 
-      for (const chainInfo of this.chainStore.chainInfos) {
+      for (const chainInfo of this.chainStore.modularChainInfos) {
         const chainIdentifier = ChainIdHelper.parse(chainInfo.chainId);
         const legacyKey = `${chainIdentifier.identifier}-channels`;
         const legacyObj = await this.legacyKVStore.get<
@@ -116,7 +116,12 @@ export class IBCChannelStore {
       const savedChainIdentifiers = new Set<string>(Object.keys(saved ?? {}));
       const removingChainIdentifiers: string[] = [];
       for (const savedChainIdentifier of savedChainIdentifiers) {
-        if (!this.chainStore.hasChain(savedChainIdentifier)) {
+        if (
+          !this.chainStore.hasModularChain(savedChainIdentifier) ||
+          !this.chainStore
+            .getModularChainInfoImpl(savedChainIdentifier)
+            .matchModule("cosmos")
+        ) {
           removingChainIdentifiers.push(savedChainIdentifier);
         }
       }

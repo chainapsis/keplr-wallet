@@ -33,7 +33,7 @@ export class ObservableQuerySecret20BalanceImpl
       throw new Error(`Denom helper must be secret20: ${denomHelper.denom}`);
     }
     const currency = chainGetter
-      .getChain(chainId)
+      .getModularChainInfoImpl(chainId)
       .forceFindCurrency(denomHelper.denom);
     let viewingKey = "";
     if ("type" in currency && currency.type === "secret20") {
@@ -92,8 +92,9 @@ export class ObservableQuerySecret20BalanceImpl
   get balance(): CoinPretty {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    const currency = chainInfo.findCurrency(denom);
+    const currency = this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .findCurrency(denom);
 
     // TODO: Infer the currency according to its denom (such if denom is `uatom` -> `Atom` with decimal 6)?
     if (!currency) {
@@ -111,8 +112,9 @@ export class ObservableQuerySecret20BalanceImpl
   get currency(): AppCurrency {
     const denom = this.denomHelper.denom;
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
-    return chainInfo.forceFindCurrency(denom);
+    return this.chainGetter
+      .getModularChainInfoImpl(this.chainId)
+      .forceFindCurrency(denom);
   }
 }
 

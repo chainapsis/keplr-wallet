@@ -137,12 +137,12 @@ export const EthSendTokenTxPretty: React.FunctionComponent<{
   erc20ContractAddress?: string;
 }> = observer(({ chainId, recipient, amount, erc20ContractAddress }) => {
   const { chainStore, accountStore } = useStore();
-  const chainInfo = chainStore.getChain(chainId);
+  const chainInfo = chainStore.getModularChainInfoImpl(chainId);
   const sender = accountStore.getAccount(chainId).ethereumHexAddress;
 
   const currency = erc20ContractAddress
     ? chainInfo.forceFindCurrency(`erc20:${erc20ContractAddress}`)
-    : chainInfo.currencies[0];
+    : chainInfo.getCurrencies()[0];
   const amountCoinPretty = new CoinPretty(currency, new Dec(Number(amount)));
 
   const theme = useTheme();

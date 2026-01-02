@@ -45,14 +45,17 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
 
   const supportedChainInfos = useMemo(() => {
-    return chainStore.chainInfosInListUI.filter((chainInfo) => {
+    return chainStore.modularChainInfosInListUI.filter((chainInfo) => {
+      const modularChainInfoImpl = chainStore.getModularChainInfoImpl(
+        chainInfo.chainId
+      );
       return (
-        chainInfo.features?.includes("cosmwasm") ||
-        chainInfo.features?.includes("secretwasm") ||
+        modularChainInfoImpl.hasFeature("cosmwasm") ||
+        modularChainInfoImpl.hasFeature("secretwasm") ||
         chainStore.isEvmChain(chainInfo.chainId)
       );
     });
-  }, [chainStore.chainInfosInListUI]);
+  }, [chainStore.modularChainInfosInListUI]);
 
   const supportedModuleChainInfos = useMemo(() => {
     return chainStore.modularChainInfos.filter((modularChainInfo) => {
@@ -66,7 +69,7 @@ export const SettingTokenListPage: FunctionComponent = observer(() => {
     if (supportedChainInfos.length > 0) {
       return supportedChainInfos[0].chainId;
     } else {
-      return chainStore.chainInfos[0].chainId;
+      return chainStore.modularChainInfos[0].chainId;
     }
   });
 

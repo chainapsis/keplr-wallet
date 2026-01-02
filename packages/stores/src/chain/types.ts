@@ -86,11 +86,37 @@ export interface IModularChainInfoImpl<
 > {
   readonly embedded: M;
   readonly chainId: string;
+  readonly stakeCurrency: Currency | undefined;
+  readonly feeCurrencies: FeeCurrency[] | undefined;
 
-  getCurrencies(module: ChainInfoModule): AppCurrency[];
+  getCurrencies(): AppCurrency[];
+  getCurrenciesByModule(module: ChainInfoModule): AppCurrency[];
   addCurrencies(module: ChainInfoModule, ...currencies: AppCurrency[]): void;
   removeCurrencies(
     module: ChainInfoModule,
     ...coinMinimalDenoms: string[]
   ): void;
+  findCurrency(coinMinimalDenom: string): AppCurrency | undefined;
+  forceFindCurrency(coinMinimalDenom: string): AppCurrency;
+  findCurrencyWithoutReaction(
+    coinMinimalDenom: string
+  ): AppCurrency | undefined;
+  forceFindCurrencyWithoutReaction(coinMinimalDenom: string): AppCurrency;
+  findCurrencyAsync(coinMinimalDenom: string): Promise<AppCurrency | undefined>;
+  hasFeature(feature: string): boolean;
+  addUnknownDenoms(args: {
+    module: ChainInfoModule;
+    coinMinimalDenoms: string[];
+  }): void;
+  addUnknownDenomsWithoutReaction(args: {
+    module: ChainInfoModule;
+    coinMinimalDenoms: string[];
+  }): void;
+  isCurrencyRegistrationInProgress(coinMinimalDenom: string): boolean;
+  matchModules(
+    conditions:
+      | { or: ChainInfoModule[]; and?: undefined }
+      | { and: ChainInfoModule[]; or?: undefined }
+  ): boolean;
+  matchModule(module: ChainInfoModule): boolean;
 }

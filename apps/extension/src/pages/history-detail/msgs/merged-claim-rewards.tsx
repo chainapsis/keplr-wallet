@@ -9,7 +9,7 @@ import { Button2, Subtitle3, Subtitle4 } from "../../../components/typography";
 import { Gutter } from "../../../components/gutter";
 import { MsgHistory } from "../../main/token-detail/types";
 import { isValidCoinStr, parseCoinStr } from "@keplr-wallet/common";
-import { AppCurrency, ChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ModularChainInfo } from "@keplr-wallet/types";
 import styled, { useTheme } from "styled-components";
 import { CurrencyImageFallback } from "../../../components/image";
 import { VerticalCollapseTransition } from "../../../components/transition/vertical-collapse";
@@ -24,7 +24,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
 
   const theme = useTheme();
 
-  const chainInfo = chainStore.getChain(msg.chainId);
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(msg.chainId);
 
   const isNobleClaimMessage = msg.relation === "noble-claim-yield";
 
@@ -48,7 +48,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
           const coin = parseCoinStr(coinStr as string);
 
           if (!processedDenoms.has(coin.denom)) {
-            const currency = chainInfo.findCurrency(coin.denom);
+            const currency = modularChainInfoImpl.findCurrency(coin.denom);
             if (currency) {
               if (
                 currency.coinMinimalDenom.startsWith("ibc/") &&
@@ -72,7 +72,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
       if (b.currency.coinMinimalDenom === targetDenom) return 1;
       return 0;
     });
-  }, [isNobleClaimMessage, chainInfo, msg.meta, targetDenom]);
+  }, [isNobleClaimMessage, modularChainInfoImpl, msg.meta, targetDenom]);
 
   const needCollapse = rewardsData.length > 1;
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -103,7 +103,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
               length={rewardsData.length}
               currency={rewardsData[0].currency}
               amount={rewardsData[0].amount}
-              chainInfo={chainInfo}
+              chainInfo={modularChainInfoImpl.embedded}
             />
           ) : null}
           {needCollapse
@@ -119,7 +119,7 @@ export const HistoryDetailMergedClaimRewards: FunctionComponent<{
                           length={rewardsData.length}
                           currency={reward.currency}
                           amount={reward.amount}
-                          chainInfo={chainInfo}
+                          chainInfo={modularChainInfoImpl.embedded}
                         />
                       );
                     })}
@@ -187,7 +187,7 @@ const RewardItem: FunctionComponent<{
   length: number;
   currency: AppCurrency;
   amount: CoinPretty;
-  chainInfo: ChainInfo;
+  chainInfo: ModularChainInfo;
 }> = observer(({ index, length, currency, amount, chainInfo }) => {
   const { priceStore } = useStore();
 

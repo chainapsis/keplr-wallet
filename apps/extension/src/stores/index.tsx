@@ -49,12 +49,9 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
         await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
 
         for (const modularChainInfo of stores.chainStore.modularChainInfos) {
-          if ("cosmos" in modularChainInfo) {
-            const chainInfo = stores.chainStore.getChain(
-              modularChainInfo.chainId
-            );
-            if (stores.accountStore.hasAccount(chainInfo.chainId)) {
-              stores.accountStore.getAccount(chainInfo.chainId).init();
+          if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
+            if (stores.accountStore.hasAccount(modularChainInfo.chainId)) {
+              stores.accountStore.getAccount(modularChainInfo.chainId).init();
             }
           } else if ("starknet" in modularChainInfo) {
             if (
@@ -81,12 +78,9 @@ export const StoreProvider: FunctionComponent<PropsWithChildren> = ({
           await stores.chainStore.updateEnabledChainIdentifiersFromBackground();
 
           for (const modularChainInfo of stores.chainStore.modularChainInfos) {
-            if ("cosmos" in modularChainInfo) {
-              const chainInfo = stores.chainStore.getChain(
-                modularChainInfo.chainId
-              );
-              if (stores.accountStore.hasAccount(chainInfo.chainId)) {
-                stores.accountStore.getAccount(chainInfo.chainId).init();
+            if ("cosmos" in modularChainInfo || "evm" in modularChainInfo) {
+              if (stores.accountStore.hasAccount(modularChainInfo.chainId)) {
+                stores.accountStore.getAccount(modularChainInfo.chainId).init();
               }
             } else if ("starknet" in modularChainInfo) {
               if (

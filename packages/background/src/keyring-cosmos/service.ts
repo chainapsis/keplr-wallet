@@ -104,13 +104,13 @@ export class KeyRingCosmosService {
   }
 
   async getKey(vaultId: string, chainId: string): Promise<Key> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
 
     const pubKey = await this.keyRingService.getPubKey(chainId, vaultId);
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const evmInfo = ChainsService.getEVMInfo(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const evmChainInfo = ChainsService.getEVMChainInfo(chainInfo);
+    const forceEVMLedger = evmChainInfo?.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -126,7 +126,7 @@ export class KeyRingCosmosService {
     }
 
     const address = (() => {
-      if (isEthermintLike || evmInfo !== undefined) {
+      if (isEthermintLike || evmChainInfo !== undefined) {
         return pubKey.getEthAddress();
       }
 
@@ -141,7 +141,9 @@ export class KeyRingCosmosService {
       pubKey: pubKey.toBytes(),
       address,
       bech32Address: bech32Address.toBech32(
-        chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
+        "cosmos" in chainInfo
+          ? chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
+          : ""
       ),
       ethereumHexAddress: bech32Address.toHex(true),
       isNanoLedger: keyInfo.type === "ledger",
@@ -158,11 +160,17 @@ export class KeyRingCosmosService {
       bech32Address: string;
     }[]
   > {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    const coinTypes = [chainInfo.bip44.coinType];
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
 
-    if (chainInfo.alternativeBIP44s) {
-      coinTypes.push(...chainInfo.alternativeBIP44s.map((alt) => alt.coinType));
+    const coinTypes = [chainInfo.cosmos.bip44.coinType];
+
+    if (chainInfo.cosmos.alternativeBIP44s) {
+      coinTypes.push(
+        ...chainInfo.cosmos.alternativeBIP44s.map((alt) => alt.coinType)
+      );
     }
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
@@ -199,7 +207,7 @@ export class KeyRingCosmosService {
       res.push({
         coinType,
         bech32Address: bech32Address.toBech32(
-          chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
+          chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
         ),
       });
     }
@@ -235,12 +243,16 @@ export class KeyRingCosmosService {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -265,8 +277,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -347,7 +358,7 @@ export class KeyRingCosmosService {
         });
 
         try {
-          this.trackError(chainInfo, signer, newSignDoc.sequence, {
+          this.trackError(chainInfo.cosmos, signer, newSignDoc.sequence, {
             isInternal: env.isInternalMsg,
             origin,
             signMode: "amino",
@@ -378,15 +389,19 @@ export class KeyRingCosmosService {
       throw new Error("Permission Rejected");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
 
     const vaultId = this.keyRingService.selectedVaultId;
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -411,8 +426,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -481,15 +495,18 @@ export class KeyRingCosmosService {
       throw new Error("Permission Rejected");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
 
     const vaultId = this.keyRingService.selectedVaultId;
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -514,8 +531,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -618,15 +634,18 @@ export class KeyRingCosmosService {
       throw new Error("Permission Rejected");
     }
 
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
 
     const vaultId = this.keyRingService.selectedVaultId;
 
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -651,8 +670,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -743,12 +761,16 @@ export class KeyRingCosmosService {
       isADR36WithString?: boolean;
     }
   ): Promise<AminoSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
+
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -765,8 +787,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -842,12 +863,15 @@ export class KeyRingCosmosService {
     signDoc: SignDoc,
     signOptions: KeplrSignOptions
   ): Promise<DirectSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -864,8 +888,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -924,7 +947,7 @@ export class KeyRingCosmosService {
           const authInfo = AuthInfo.decode(newSignDoc.authInfoBytes);
           if (authInfo.signerInfos.length === 1) {
             this.trackError(
-              chainInfo,
+              chainInfo.cosmos,
               signer,
               authInfo.signerInfos[0].sequence,
               {
@@ -982,12 +1005,15 @@ export class KeyRingCosmosService {
       "preferNoSetFee" | "disableBalanceCheck"
     >
   ): Promise<DirectAuxSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -1004,8 +1030,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -1123,11 +1148,15 @@ export class KeyRingCosmosService {
     data: Uint8Array,
     signature: StdSignature
   ): Promise<boolean> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
 
     const key = await this.getKey(vaultId, chainId);
-    const bech32Prefix = chainInfo.bech32Config?.bech32PrefixAccAddr ?? "";
+    const bech32Prefix =
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -1191,12 +1220,15 @@ export class KeyRingCosmosService {
     signDoc: StdSignDoc,
     signOptions: KeplrSignOptions
   ): Promise<AminoSignResponse> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-    if (chainInfo.hideInUI) {
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error("Chain is not a cosmos chain");
+    }
+    if (chainInfo.cosmos.hideInUI) {
       throw new Error("Can't sign for hidden chain");
     }
     const isEthermintLike = KeyRingService.isEthermintLike(chainInfo);
-    const forceEVMLedger = chainInfo.features?.includes(
+    const forceEVMLedger = chainInfo.cosmos.features?.includes(
       "force-enable-evm-ledger"
     );
 
@@ -1220,7 +1252,7 @@ export class KeyRingCosmosService {
     }
 
     let ethChainId: number;
-    if (chainInfo.features?.includes("evm-ledger-sign-plain-json")) {
+    if (chainInfo.cosmos.features?.includes("evm-ledger-sign-plain-json")) {
       ethChainId = 9999;
     } else {
       ethChainId = EthermintChainIdHelper.parse(chainId).ethChainId;
@@ -1249,8 +1281,7 @@ export class KeyRingCosmosService {
 
     const key = await this.getKey(vaultId, chainId);
     const bech32Prefix =
-      this.chainsService.getChainInfoOrThrow(chainId).bech32Config
-        ?.bech32PrefixAccAddr ?? "";
+      chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "";
     const bech32Address = new Bech32Address(key.address).toBech32(bech32Prefix);
     if (signer !== bech32Address) {
       throw new Error("Signer mismatched");
@@ -1374,19 +1405,22 @@ export class KeyRingCosmosService {
 
     {
       // Do this on other code block to avoid variable conflict.
-      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-      if (chainInfo.hideInUI) {
+      const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+      if (!("cosmos" in chainInfo)) {
+        throw new Error("Chain is not a cosmos chain");
+      }
+      if (chainInfo.cosmos.hideInUI) {
         throw new Error("Can't sign for hidden chain");
       }
 
       Bech32Address.validate(
         contractAddress,
-        chainInfo.bech32Config?.bech32PrefixAccAddr
+        chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
       );
 
       const key = await this.getKey(vaultId, chainId);
       const bech32Address = new Bech32Address(key.address).toBech32(
-        chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
+        chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
       );
 
       if (bech32Address !== owner) {
@@ -1398,17 +1432,20 @@ export class KeyRingCosmosService {
     const salt = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
     for (const chainId of addressChainIds) {
-      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+      const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
+      if (!("cosmos" in chainInfo)) {
+        throw new Error("Chain is not a cosmos chain");
+      }
 
       const key = await this.getKey(vaultId, chainId);
 
       const bech32Address = new Bech32Address(key.address).toBech32(
-        chainInfo.bech32Config?.bech32PrefixAccAddr ?? ""
+        chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? ""
       );
 
       interactionInfo.accountInfos.push({
         chainId: chainInfo.chainId,
-        bech32Prefix: chainInfo.bech32Config?.bech32PrefixAccAddr ?? "",
+        bech32Prefix: chainInfo.cosmos.bech32Config?.bech32PrefixAccAddr ?? "",
         bech32Address: bech32Address,
         pubKey: key.pubKey,
       });
@@ -1437,7 +1474,7 @@ export class KeyRingCosmosService {
         const ownerBech32 = Bech32Address.fromBech32(owner);
         for (const accountInfo of interactionInfo.accountInfos) {
           const isEthermintLike = KeyRingService.isEthermintLike(
-            this.chainsService.getChainInfoOrThrow(accountInfo.chainId)
+            this.chainsService.getModularChainInfoOrThrow(accountInfo.chainId)
           );
 
           if (

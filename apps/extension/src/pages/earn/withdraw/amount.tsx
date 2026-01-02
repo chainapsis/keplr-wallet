@@ -66,15 +66,17 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
   const initialChainId = searchParams.get("chainId");
   const initialCoinMinimalDenom = searchParams.get("coinMinimalDenom");
 
-  const chainId = initialChainId || chainStore.chainInfosInUI[0].chainId;
-  const chainInfo = chainStore.getChain(chainId);
+  const chainId = initialChainId || chainStore.modularChainInfosInUI[0].chainId;
+
+  const modularChainInfoImpl = chainStore.getModularChainInfoImpl(chainId);
   const account = accountStore.getAccount(chainId);
 
   const coinMinimalDenom =
-    initialCoinMinimalDenom || chainInfo.currencies[0].coinMinimalDenom;
-  const currency = chainInfo.forceFindCurrency(coinMinimalDenom);
+    initialCoinMinimalDenom ||
+    modularChainInfoImpl.getCurrenciesByModule("cosmos")[0].coinMinimalDenom;
+  const currency = modularChainInfoImpl.forceFindCurrency(coinMinimalDenom);
 
-  const outCurrency = chainInfo.forceFindCurrency(
+  const outCurrency = modularChainInfoImpl.forceFindCurrency(
     NOBLE_EARN_WITHDRAW_OUT_COIN_MINIMAL_DENOM
   );
 
@@ -400,7 +402,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                 <Subtitle3 color={ColorPalette["gray-300"]}>
                   {intl.formatMessage(
                     { id: "page.earn.amount.balance.current-chain" },
-                    { chain: chainInfo.chainName }
+                    { chain: modularChainInfoImpl.embedded.chainName }
                   )}
                 </Subtitle3>
               </XAxis>
@@ -439,7 +441,7 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
                   </Box>
                   <Gutter size="0.5rem" />
                   <Subtitle3 color={ColorPalette["gray-300"]}>
-                    {`on ${chainInfo.chainName}`}
+                    {`on ${modularChainInfoImpl.embedded.chainName}`}
                   </Subtitle3>
                 </Fragment>
               )}

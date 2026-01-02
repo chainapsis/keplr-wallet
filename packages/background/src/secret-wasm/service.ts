@@ -55,11 +55,15 @@ export class SecretWasmService {
   };
 
   async getPubkey(chainId: string): Promise<Uint8Array> {
-    const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = this.chainsService.getModularChainInfoOrThrow(chainId);
 
-    const seed = await this.getSeed(chainInfo);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
 
-    const utils = this.getEnigmaUtils(chainInfo, seed);
+    const seed = await this.getSeed(chainInfo.cosmos);
+
+    const utils = this.getEnigmaUtils(chainInfo.cosmos, seed);
     return utils.pubkey;
   }
 
@@ -67,11 +71,17 @@ export class SecretWasmService {
     chainId: string,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = await this.chainsService.getModularChainInfoOrThrow(
+      chainId
+    );
 
-    const seed = await this.getSeed(chainInfo);
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
 
-    const utils = this.getEnigmaUtils(chainInfo, seed);
+    const seed = await this.getSeed(chainInfo.cosmos);
+
+    const utils = this.getEnigmaUtils(chainInfo.cosmos, seed);
     return utils.getTxEncryptionKey(nonce);
   }
 
@@ -81,15 +91,21 @@ export class SecretWasmService {
     // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = await this.chainsService.getModularChainInfoOrThrow(
+      chainId
+    );
+
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
 
     // XXX: Keplr should generate the seed deterministically according to the account.
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
     // It need to more research.
-    const seed = await this.getSeed(chainInfo);
+    const seed = await this.getSeed(chainInfo.cosmos);
 
-    const utils = this.getEnigmaUtils(chainInfo, seed);
+    const utils = this.getEnigmaUtils(chainInfo.cosmos, seed);
 
     return await utils.encrypt(contractCodeHash, msg);
   }
@@ -99,15 +115,21 @@ export class SecretWasmService {
     ciphertext: Uint8Array,
     nonce: Uint8Array
   ): Promise<Uint8Array> {
-    const chainInfo = await this.chainsService.getChainInfoOrThrow(chainId);
+    const chainInfo = await this.chainsService.getModularChainInfoOrThrow(
+      chainId
+    );
+
+    if (!("cosmos" in chainInfo)) {
+      throw new Error(`${chainId} is not a cosmos chain`);
+    }
 
     // XXX: Keplr should generate the seed deterministically according to the account.
     // Otherwise, it will lost the encryption/decryption key if Keplr is uninstalled or local storage is cleared.
     // For now, use the signature of some string to generate the seed.
     // It need to more research.
-    const seed = await this.getSeed(chainInfo);
+    const seed = await this.getSeed(chainInfo.cosmos);
 
-    const utils = this.getEnigmaUtils(chainInfo, seed);
+    const utils = this.getEnigmaUtils(chainInfo.cosmos, seed);
 
     return await utils.decrypt(ciphertext, nonce);
   }

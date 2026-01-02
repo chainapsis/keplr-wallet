@@ -198,10 +198,14 @@ export class CosmosAccountImpl {
         return dec.truncate().toString();
       })();
 
+      const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+      if (!("cosmos" in modularChainInfo)) {
+        throw new Error("cosmos module is not supported on this chain");
+      }
+
       Bech32Address.validate(
         recipient,
-        this.chainGetter.getChain(this.chainId).bech32Config
-          ?.bech32PrefixAccAddr
+        modularChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
       );
 
       const isThorchain = this.chainId.startsWith("thorchain-");
@@ -342,8 +346,13 @@ export class CosmosAccountImpl {
       onBroadcasted(txHash);
     }
 
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     const txTracer = new TendermintTxTracer(
-      this.chainGetter.getChain(this.chainId).rpc,
+      modularChainInfo.cosmos.rpc,
       "/websocket",
       {
         wsObject: this.txOpts.wsObject,
@@ -419,16 +428,19 @@ export class CosmosAccountImpl {
       }
     }
 
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     const account = await BaseAccount.fetchFromRest(
-      this.chainGetter.getChain(this.chainId).rest,
+      modularChainInfo.cosmos.rest,
       this.base.bech32Address,
       true
     );
 
     const useEthereumSign =
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-key-sign") === true;
+      modularChainInfo.cosmos.features?.includes("eth-key-sign") === true;
 
     const eip712Signing = useEthereumSign && this.base.isNanoLedger;
 
@@ -465,12 +477,12 @@ export class CosmosAccountImpl {
           memo: escapeHTML(memo),
         };
 
-        const chainInfo = this.chainGetter.getChain(this.chainId);
         const chainIsInjective = this.chainId.startsWith("injective");
         const chainIsStratos = this.chainId.startsWith("stratos");
         const ethSignPlainJson: boolean =
-          chainInfo.features &&
-          chainInfo.features.includes("evm-ledger-sign-plain-json");
+          !!modularChainInfo.cosmos.features?.includes(
+            "evm-ledger-sign-plain-json"
+          );
 
         if (eip712Signing) {
           if (chainIsInjective) {
@@ -525,10 +537,7 @@ export class CosmosAccountImpl {
           return await experimentalSignEIP712CosmosTx_v0(
             this.chainId,
             this.base.bech32Address,
-            getEip712TypedDataBasedOnChainInfo(
-              this.chainGetter.getChain(this.chainId),
-              msgs
-            ),
+            getEip712TypedDataBasedOnChainInfo(modularChainInfo.cosmos, msgs),
             signDoc,
             signOptions
           );
@@ -547,7 +556,7 @@ export class CosmosAccountImpl {
                         {
                           typeUrl: (() => {
                             if (
-                              chainInfo.hasFeature(
+                              modularChainInfo.cosmos.features?.includes(
                                 "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx"
                               )
                             ) {
@@ -598,11 +607,19 @@ export class CosmosAccountImpl {
                         return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                       }
 
-                      if (chainInfo.hasFeature("eth-secp256k1-cosmos")) {
+                      if (
+                        modularChainInfo.cosmos.features?.includes(
+                          "eth-secp256k1-cosmos"
+                        )
+                      ) {
                         return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
                       }
 
-                      if (chainInfo.hasFeature("eth-secp256k1-initia")) {
+                      if (
+                        modularChainInfo.cosmos.features?.includes(
+                          "eth-secp256k1-initia"
+                        )
+                      ) {
                         return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                       }
 
@@ -671,10 +688,10 @@ export class CosmosAccountImpl {
     tx: Uint8Array;
     signDoc: SignDoc;
   }> {
-    const useEthereumSign =
-      this.chainGetter
-        .getChain(this.chainId)
-        .features?.includes("eth-key-sign") === true;
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+    const useEthereumSign = modularChainInfoImpl.hasFeature("eth-key-sign");
 
     const chainIsInjective = this.chainId.startsWith("injective");
     const chainIsStratos = this.chainId.startsWith("stratos");
@@ -712,18 +729,10 @@ export class CosmosAccountImpl {
                     return "/stratos.crypto.v1.ethsecp256k1.PubKey";
                   }
 
-                  if (
-                    this.chainGetter
-                      .getChain(this.chainId)
-                      .hasFeature("eth-secp256k1-cosmos")
-                  ) {
+                  if (modularChainInfoImpl.hasFeature("eth-secp256k1-cosmos")) {
                     return "/cosmos.evm.crypto.v1.ethsecp256k1.PubKey";
                   }
-                  if (
-                    this.chainGetter
-                      .getChain(this.chainId)
-                      .hasFeature("eth-secp256k1-initia")
-                  ) {
+                  if (modularChainInfoImpl.hasFeature("eth-secp256k1-initia")) {
                     return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                   }
                   return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
@@ -791,8 +800,13 @@ export class CosmosAccountImpl {
   ): Promise<{
     gasUsed: number;
   }> {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     const account = await BaseAccount.fetchFromRest(
-      this.chainGetter.getChain(this.chainId).rest,
+      modularChainInfo.cosmos.rest,
       this.base.bech32Address,
       true
     );
@@ -832,7 +846,7 @@ export class CosmosAccountImpl {
 
     // TODO: Add response type
     const result = await simpleFetch<any>(
-      this.chainGetter.getChain(this.chainId).rest,
+      modularChainInfo.cosmos.rest,
       "/cosmos/tx/v1beta1/simulate",
       {
         method: "POST",
@@ -1031,16 +1045,28 @@ export class CosmosAccountImpl {
     const destinationChainId =
       channels[channels.length - 1].counterpartyChainId;
 
-    const destinationChainInfo = this.chainGetter.getChain(destinationChainId);
+    const destinationChainInfo =
+      this.chainGetter.getModularChain(destinationChainId);
+
+    if (!("cosmos" in destinationChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
 
     Bech32Address.validate(
       recipient,
-      destinationChainInfo.bech32Config?.bech32PrefixAccAddr
+      destinationChainInfo.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
-    const counterpartyChainBech32Config = this.chainGetter.getChain(
+    const counterpartyChainInfo = this.chainGetter.getModularChain(
       channels[0].counterpartyChainId
-    ).bech32Config;
+    );
+    if (!("cosmos" in counterpartyChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
+    const counterpartyChainBech32Config =
+      counterpartyChainInfo.cosmos.bech32Config;
+
     if (counterpartyChainBech32Config == null) {
       throw new Error("Counterparty chain bech32 config is not set");
     }
@@ -1051,18 +1077,15 @@ export class CosmosAccountImpl {
       currency,
       async () => {
         if (channels.length === 1) {
-          const chainInfo = this.chainGetter.getChain(
-            channels[0].counterpartyChainId
-          );
-          if (!chainInfo.bech32Config) {
+          if (!counterpartyChainBech32Config) {
             throw new Error("Bech32 config is not set");
           }
           return Bech32Address.fromBech32(recipient).toBech32(
-            chainInfo.bech32Config.bech32PrefixAccAddr
+            counterpartyChainInfo.cosmos.bech32Config.bech32PrefixAccAddr
           );
         }
         const channel = channels[0];
-        const destChainInfo = this.chainGetter.getChain(
+        const destChainInfo = this.chainGetter.getModularChain(
           channel.counterpartyChainId
         );
 
@@ -1100,15 +1123,20 @@ export class CosmosAccountImpl {
           for (let i = 0; i < loopChannels.length; i++) {
             const channel = loopChannels[i];
             if (i === loopChannels.length - 1) {
-              const chainInfo = this.chainGetter.getChain(
+              const chainInfo = this.chainGetter.getModularChain(
                 channel.counterpartyChainId
               );
-              if (!chainInfo.bech32Config) {
+
+              if (!("cosmos" in chainInfo)) {
+                throw new Error("cosmos module is not supported on this chain");
+              }
+
+              if (!chainInfo.cosmos.bech32Config) {
                 throw new Error("Bech32 config is not set");
               }
               Bech32Address.validate(
                 recipient,
-                chainInfo.bech32Config.bech32PrefixAccAddr
+                chainInfo.cosmos.bech32Config.bech32PrefixAccAddr
               );
               const forward = {
                 receiver: recipient,
@@ -1127,7 +1155,7 @@ export class CosmosAccountImpl {
 
               lastForward = forward;
             } else {
-              const destChainInfo = this.chainGetter.getChain(
+              const destChainInfo = this.chainGetter.getModularChain(
                 channel.counterpartyChainId
               );
 
@@ -1255,10 +1283,9 @@ export class CosmosAccountImpl {
           );
         }
 
-        const useEthereumSign =
-          this.chainGetter
-            .getChain(this.chainId)
-            .features?.includes("eth-key-sign") === true;
+        const useEthereumSign = this.chainGetter
+          .getModularChainInfoImpl(this.chainId)
+          .hasFeature("eth-key-sign");
 
         const eip712Signing = useEthereumSign && this.base.isNanoLedger;
         const chainIsInjective = this.chainId.startsWith("injective");
@@ -1322,7 +1349,7 @@ export class CosmosAccountImpl {
               this.chainId.startsWith("injective") ||
               this.chainId.startsWith("stride") ||
               this.chainGetter
-                .getChain(this.chainId)
+                .getModularChainInfoImpl(this.chainId)
                 .hasFeature("ibc-go-v7-hot-fix")
             ) {
               return true;
@@ -1546,15 +1573,21 @@ export class CosmosAccountImpl {
   }
 
   makeRevokeMsg(grantee: string, messageType: string) {
+    const modularChainInfoImpl = this.chainGetter.getModularChainInfoImpl(
+      this.chainId
+    );
+    if (!("cosmos" in modularChainInfoImpl.embedded)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       grantee,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixAccAddr
+      modularChainInfoImpl.embedded.cosmos.bech32Config?.bech32PrefixAccAddr
     );
 
-    const chainInfo = this.chainGetter.getChain(this.chainId);
     const msg =
-      chainInfo.chainIdentifier === "osmosis" ||
-      chainInfo.hasFeature("authz-msg-revoke-fixed")
+      ChainIdHelper.parse(this.chainId).identifier === "osmosis" ||
+      modularChainInfoImpl.hasFeature("authz-msg-revoke-fixed")
         ? {
             type: "cosmos-sdk/MsgRevoke",
             value: {
@@ -1595,12 +1628,17 @@ export class CosmosAccountImpl {
   }
 
   makeDelegateTx(amount: string, validatorAddress: string) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       validatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
 
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");
@@ -1707,7 +1745,11 @@ export class CosmosAccountImpl {
           onFulfill?: (tx: any) => void;
         }
   ) {
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");
@@ -1767,12 +1809,17 @@ export class CosmosAccountImpl {
   }
 
   makeUndelegateTx(amount: string, validatorAddress: string) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     Bech32Address.validate(
       validatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
 
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");
@@ -1914,16 +1961,20 @@ export class CosmosAccountImpl {
     srcValidatorAddress: string,
     dstValidatorAddress: string
   ) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
     Bech32Address.validate(
       srcValidatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
     Bech32Address.validate(
       dstValidatorAddress,
-      this.chainGetter.getChain(this.chainId).bech32Config?.bech32PrefixValAddr
+      modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
     );
 
-    const currency = this.chainGetter.getChain(this.chainId).stakeCurrency;
+    const currency = modularChainInfo.cosmos.stakeCurrency;
 
     if (!currency) {
       throw new Error("Stake currency is null");
@@ -2058,11 +2109,15 @@ export class CosmosAccountImpl {
   }
 
   makeWithdrawDelegationRewardTx(validatorAddresses: string[]) {
+    const modularChainInfo = this.chainGetter.getModularChain(this.chainId);
+    if (!("cosmos" in modularChainInfo)) {
+      throw new Error("cosmos module is not supported on this chain");
+    }
+
     for (const validatorAddress of validatorAddresses) {
       Bech32Address.validate(
         validatorAddress,
-        this.chainGetter.getChain(this.chainId).bech32Config
-          ?.bech32PrefixValAddr
+        modularChainInfo.cosmos.bech32Config?.bech32PrefixValAddr
       );
     }
 

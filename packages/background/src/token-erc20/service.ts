@@ -1,5 +1,10 @@
 import { Env, KeplrError } from "@keplr-wallet/router";
-import { AppCurrency, ChainInfo, ERC20Currency } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  ChainInfo,
+  ERC20Currency,
+  ModularChainInfo,
+} from "@keplr-wallet/types";
 import { ERC20CurrencySchema } from "@keplr-wallet/chain-validator";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { ChainsService } from "../chains";
@@ -64,8 +69,8 @@ export class TokenERC20Service {
     }
   );
 
-  protected validateChainInfo(chainInfo: ChainInfo) {
-    if (chainInfo.evm === undefined) {
+  protected validateChainInfo(chainInfo: ModularChainInfo) {
+    if ("evm" in chainInfo && chainInfo.evm === undefined) {
       throw new Error("The chain doesn't support evm");
     }
   }
@@ -74,9 +79,11 @@ export class TokenERC20Service {
     const modularChainInfo =
       this.chainsService.getModularChainInfoOrThrow(chainId);
     if ("cosmos" in modularChainInfo) {
-      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-
-      this.validateChainInfo(chainInfo);
+      this.validateChainInfo(modularChainInfo);
+    } else if ("evm" in modularChainInfo) {
+      if (modularChainInfo.evm == null) {
+        throw new Error("EVM chain info is not defined");
+      }
     } else if ("starknet" in modularChainInfo) {
       if (modularChainInfo.starknet == null) {
         throw new Error("Starknet chain info is not defined");
@@ -138,8 +145,11 @@ export class TokenERC20Service {
     const modularChainInfo =
       this.chainsService.getModularChainInfoOrThrow(chainId);
     if ("cosmos" in modularChainInfo) {
-      const chainInfo = this.chainsService.getChainInfoOrThrow(chainId);
-      this.validateChainInfo(chainInfo);
+      this.validateChainInfo(modularChainInfo);
+    } else if ("evm" in modularChainInfo) {
+      if (modularChainInfo.evm == null) {
+        throw new Error("EVM chain info is not defined");
+      }
     } else if ("starknet" in modularChainInfo) {
       if (modularChainInfo.starknet == null) {
         throw new Error("Starknet chain info is not defined");

@@ -621,7 +621,6 @@ export class RootStore {
     );
 
     this.claimRewardsStateStore = new ClaimRewardsStateStore(
-      this.chainStore,
       this.keyRingStore,
       window
     );

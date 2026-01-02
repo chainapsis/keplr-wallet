@@ -125,7 +125,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get tokenScans(): TokenScan[] {
     return this._tokenScans.filter((scan) => {
-      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
+      if (!this.hasModularChain(scan.chainId)) {
         return false;
       }
 
@@ -232,6 +232,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     return this._enabledChainIdentifiers;
   }
 
+  /**
+   * @deprecated Use `modularChainInfosInUI` instead
+   */
   @computed
   get chainInfosInUI() {
     return this.chainInfos.filter((chainInfo) => {
@@ -274,6 +277,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   // chain info들을 list로 보여줄때 hideInUI인 얘들은 빼고 보여줘야한다
   // property 이름이 얘매해서 일단 이렇게 지었다.
+  /**
+   * @deprecated Use `modularChainInfosInListUI` instead
+   */
   @computed
   get chainInfosInListUI() {
     return this.chainInfos.filter((chainInfo) => {
@@ -320,6 +326,23 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   isInChainInfosInListUI(chainId: string): boolean {
     return (
       this.chainInfosInListUIMap.get(
+        ChainIdHelper.parse(chainId).identifier
+      ) === true
+    );
+  }
+
+  @computed
+  protected get modularChainInfosInListUIMap(): Map<string, true> {
+    const map = new Map<string, true>();
+    for (const chainInfo of this.modularChainInfosInListUI) {
+      map.set(ChainIdHelper.parse(chainInfo.chainId).identifier, true);
+    }
+    return map;
+  }
+
+  isInModularChainInfosInListUI(chainId: string): boolean {
+    return (
+      this.modularChainInfosInListUIMap.get(
         ChainIdHelper.parse(chainId).identifier
       ) === true
     );
@@ -475,7 +498,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     );
     this.setEmbeddedChainInfosV2({
       chainInfos: result.chainInfos,
-      modulrChainInfos: result.modulrChainInfos,
+      modularChainInfos: result.modularChainInfos,
     });
   }
 
@@ -602,7 +625,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.setEmbeddedChainInfosV2({
       chainInfos: res.chainInfos,
-      modulrChainInfos: res.modularChainInfos,
+      modularChainInfos: res.modularChainInfos,
     });
   }
 
@@ -620,7 +643,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.setEmbeddedChainInfosV2({
       chainInfos: res.chainInfos,
-      modulrChainInfos: res.modularChainInfos,
+      modularChainInfos: res.modularChainInfos,
     });
   }
 
@@ -633,7 +656,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     this.setEmbeddedChainInfosV2({
       chainInfos: res.chainInfos,
-      modulrChainInfos: res.modularChainInfos,
+      modularChainInfos: res.modularChainInfos,
     });
   }
 

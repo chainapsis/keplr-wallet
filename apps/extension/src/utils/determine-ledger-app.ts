@@ -6,7 +6,7 @@ export const determineLedgerApp = (
   info: ModularChainInfo,
   cid: string
 ): string => {
-  if ("cosmos" in info && chainStore.isEvmOrEthermintLikeChain(cid)) {
+  if (chainStore.isEvmOrEthermintLikeChain(cid)) {
     return "Ethereum";
   }
 

@@ -68,7 +68,7 @@ export const AccountSwitchFloatModal = observer(
         if (uiConfigStore.icnsInfo) {
           const keysSettled =
             await uiConfigStore.addressBookConfig.getVaultCosmosKeysSettled(
-              chainStore.getChain(uiConfigStore.icnsInfo.chainId).chainId
+              chainStore.getModularChain(uiConfigStore.icnsInfo.chainId).chainId
             );
           const addressMap = new Map<string, string>();
           keysSettled.forEach((res) => {
