@@ -94,10 +94,10 @@ function performSearchSorted<T>(
   query: string,
   fields: SearchField<T>[],
   tiebreaker?: (a: T, b: T) => number
-): { item: T; maxScore: number }[] {
+): { item: T; maxScore: number; fieldMatchScores: number[] }[] {
   const queryLower = query.toLowerCase().trim();
   if (!queryLower) {
-    return data.map((item) => ({ item, maxScore: 0 }));
+    return data.map((item) => ({ item, maxScore: 0, fieldMatchScores: [] }));
   }
 
   const matchedItems = data
@@ -184,11 +184,14 @@ export function performSearchWithScore<T>(
   data: T[],
   query: string,
   fields: SearchField<T>[]
-): { item: T; score: number }[] {
-  return performSearchSorted(data, query, fields).map(({ item, maxScore }) => ({
-    item,
-    score: maxScore,
-  }));
+): { item: T; score: number; fieldMatchScores: number[] }[] {
+  return performSearchSorted(data, query, fields).map(
+    ({ item, maxScore, fieldMatchScores }) => ({
+      item,
+      score: maxScore,
+      fieldMatchScores,
+    })
+  );
 }
 
 export function useSearch<T>(
