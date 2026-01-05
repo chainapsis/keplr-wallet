@@ -24,7 +24,10 @@ import {
 } from "../../components/special-button";
 import { useSpringValue, animated } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
+import {
+  GlobalSimpleBarProvider,
+  useGlobalSimpleBar,
+} from "../../hooks/global-simplebar";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(
@@ -355,7 +358,9 @@ export const HeaderLayout: FunctionComponent<
         fixedTopHeight={fixedTop?.height}
         style={contentContainerStyle}
       >
-        {children}
+        <GlobalSimpleBarProvider style={{ height: "100%" }}>
+          {children}
+        </GlobalSimpleBarProvider>
       </Styles.ContentContainer>
 
       {hasBottomButton || animatedBottomButtons ? (

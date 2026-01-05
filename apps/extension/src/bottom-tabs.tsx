@@ -1,5 +1,4 @@
 import React, { FunctionComponent, PropsWithChildren } from "react";
-import { GlobalSimpleBarProvider } from "./hooks/global-simplebar";
 import { Link, useLocation } from "react-router-dom";
 import { ColorPalette } from "./styles";
 import styled, { useTheme } from "styled-components";
@@ -80,9 +79,7 @@ export const BottomTabsRouteProvider: FunctionComponent<
           overflow: "hidden",
         }}
       >
-        <GlobalSimpleBarProvider style={{ height: "100%" }}>
-          {children}
-        </GlobalSimpleBarProvider>
+        {children}
       </div>
       {shouldBottomTabsShown ? (
         <div
