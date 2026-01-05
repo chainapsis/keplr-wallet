@@ -16,8 +16,8 @@ import { EyeIcon, EyeSlashIcon } from "../../components/icon";
 import { Gutter } from "../../components/gutter";
 import { TextButton } from "../../components/button-text";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
+import { useViewStakingTokens } from "../../hooks/use-view-staking-tokens";
 import { useIntl } from "react-intl";
-import { Dec, PricePretty } from "@keplr-wallet/unit";
 import { useStakableTokens } from "./hooks/use-stakable-tokens";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Stack } from "../../components/stack";
@@ -37,7 +37,7 @@ export const StakePage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const initialExpand = params.get("intitialExpand") === "true";
+  const initialExpand = params.get("initialExpand") === "true";
 
   const { uiConfigStore, analyticsAmplitudeStore } = useStore();
   const isNotReady = useIsNotReady();
@@ -49,7 +49,7 @@ export const StakePage: FunctionComponent = observer(() => {
   const { stakedTotalPrice } = useStakedTotalPrice();
 
   const { delegations, unbondings, unbondingsTotalPrice } =
-    useViewStakingTokens();
+    useViewStakingTokens(true);
 
   const hasLoggedAnalytics = useRef(false);
 
@@ -308,129 +308,6 @@ export const StakePage: FunctionComponent = observer(() => {
     </MainHeaderLayout>
   );
 });
-
-const useViewStakingTokens = () => {
-  const { hugeQueriesStore, priceStore } = useStore();
-  const intl = useIntl();
-
-  const delegations: ViewStakedToken[] = useMemo(
-    () =>
-      hugeQueriesStore.delegations.filter((token) => {
-        return token.token.toDec().gt(new Dec(0));
-      }),
-    [hugeQueriesStore.delegations]
-  );
-
-  const unbondings: {
-    unbonding: ViewUnbondingToken;
-    altSentence: string;
-  }[] = useMemo(
-    () =>
-      hugeQueriesStore.unbondings
-        .filter((unbonding) => {
-          return unbonding.token.toDec().gt(new Dec(0));
-        })
-        .map((unbonding) => {
-          const relativeTime = formatRelativeTime(
-            unbonding.completeTime,
-            unbonding.omitCompleteTimeFraction
-          );
-
-          return {
-            unbonding,
-            altSentence: unbonding.completeTime
-              ? intl.formatRelativeTime(relativeTime.value, relativeTime.unit)
-              : "Caculating",
-          };
-        }),
-    [hugeQueriesStore.unbondings, intl]
-  );
-
-  const unbondingsTotalPrice = useMemo(() => {
-    const fiat = priceStore.getFiatCurrency(priceStore.defaultVsCurrency);
-    if (!fiat) {
-      return undefined;
-    }
-
-    let total = new PricePretty(fiat, 0);
-    for (const { unbonding } of unbondings) {
-      const price = priceStore.calculatePrice(unbonding.token);
-      if (price) {
-        total = total.add(price);
-      }
-    }
-
-    return total;
-  }, [unbondings, priceStore]);
-
-  return {
-    delegations,
-    unbondings,
-    unbondingsTotalPrice,
-  };
-};
-
-function formatRelativeTime(
-  time: string | number,
-  discardDecimal?: boolean
-): {
-  unit: "minute" | "hour" | "day";
-  value: number;
-} {
-  let timeMs: number;
-  if (typeof time === "number") {
-    timeMs = time;
-  } else {
-    const parsed = Number(time);
-    if (!isNaN(parsed)) {
-      timeMs = parsed;
-    } else {
-      timeMs = new Date(time).getTime();
-    }
-  }
-
-  const remaining = timeMs - Date.now();
-
-  if (remaining <= 0) {
-    return {
-      unit: "minute",
-      value: 1,
-    };
-  }
-
-  const round = discardDecimal ? Math.floor : Math.ceil;
-
-  const remainingSeconds = remaining / 1000;
-  const remainingMinutes = remainingSeconds / 60;
-  if (remainingMinutes < 1) {
-    return {
-      unit: "minute",
-      value: 1,
-    };
-  }
-
-  const remainingHours = remainingMinutes / 60;
-  const remainingDays = remainingHours / 24;
-
-  if (remainingDays >= 1) {
-    return {
-      unit: "day",
-      value: round(remainingDays),
-    };
-  }
-
-  if (remainingHours >= 1) {
-    return {
-      unit: "hour",
-      value: round(remainingHours),
-    };
-  }
-
-  return {
-    unit: "minute",
-    value: round(remainingMinutes),
-  };
-}
 
 const BalanceRow = styled(Box)`
   display: flex;

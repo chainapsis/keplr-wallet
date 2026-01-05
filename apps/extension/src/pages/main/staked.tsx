@@ -1,55 +1,12 @@
-import React, { FunctionComponent, useMemo } from "react";
+import React, { FunctionComponent } from "react";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { TokenItem, TokenTitleView } from "./components";
-import { Dec } from "@keplr-wallet/unit";
 import { observer } from "mobx-react-lite";
 import { Stack } from "../../components/stack";
 import { useStore } from "../../stores";
 import { useIntl } from "react-intl";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
-
-const useViewStakingTokens = () => {
-  const { hugeQueriesStore } = useStore();
-  const intl = useIntl();
-
-  const delegations: ViewStakedToken[] = useMemo(
-    () =>
-      hugeQueriesStore.delegations.filter((token) => {
-        return token.token.toDec().gt(new Dec(0));
-      }),
-    [hugeQueriesStore.delegations]
-  );
-
-  const unbondings: {
-    unbonding: ViewUnbondingToken;
-    altSentence: string;
-  }[] = useMemo(
-    () =>
-      hugeQueriesStore.unbondings
-        .filter((unbonding) => {
-          return unbonding.token.toDec().gt(new Dec(0));
-        })
-        .map((unbonding) => {
-          const relativeTime = formatRelativeTime(
-            unbonding.completeTime,
-            unbonding.omitCompleteTimeFraction
-          );
-
-          return {
-            unbonding,
-            altSentence: unbonding.completeTime
-              ? intl.formatRelativeTime(relativeTime.value, relativeTime.unit)
-              : "Caculating",
-          };
-        }),
-    [hugeQueriesStore.unbondings, intl]
-  );
-
-  return {
-    delegations,
-    unbondings,
-  };
-};
+import { useViewStakingTokens } from "../../hooks/use-view-staking-tokens";
 
 export const StakedTabView: FunctionComponent<{
   onMoreTokensClosed: () => void;
@@ -198,65 +155,3 @@ export const StakedTabView: FunctionComponent<{
     </React.Fragment>
   );
 });
-
-function formatRelativeTime(
-  time: string | number,
-  discardDecimal?: boolean
-): {
-  unit: "minute" | "hour" | "day";
-  value: number;
-} {
-  let timeMs: number;
-  if (typeof time === "number") {
-    timeMs = time;
-  } else {
-    const parsed = Number(time);
-    if (!isNaN(parsed)) {
-      timeMs = parsed;
-    } else {
-      timeMs = new Date(time).getTime();
-    }
-  }
-
-  const remaining = timeMs - Date.now();
-
-  if (remaining <= 0) {
-    return {
-      unit: "minute",
-      value: 1,
-    };
-  }
-
-  const round = discardDecimal ? Math.floor : Math.ceil;
-
-  const remainingSeconds = remaining / 1000;
-  const remainingMinutes = remainingSeconds / 60;
-  if (remainingMinutes < 1) {
-    return {
-      unit: "minute",
-      value: 1,
-    };
-  }
-
-  const remainingHours = remainingMinutes / 60;
-  const remainingDays = remainingHours / 24;
-
-  if (remainingDays >= 1) {
-    return {
-      unit: "day",
-      value: round(remainingDays),
-    };
-  }
-
-  if (remainingHours >= 1) {
-    return {
-      unit: "hour",
-      value: round(remainingHours),
-    };
-  }
-
-  return {
-    unit: "minute",
-    value: round(remainingMinutes),
-  };
-}
