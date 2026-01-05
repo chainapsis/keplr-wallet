@@ -15,7 +15,7 @@ import { Gutter } from "../../components/gutter";
 import { Dropdown } from "../../components/dropdown";
 import { EmptyView } from "../../components/empty-view";
 import { H4, Subtitle3 } from "../../components/typography";
-import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../hooks/page-simplebar";
 import {
   IAccountStore,
   IChainInfoImpl,
@@ -170,15 +170,15 @@ const HistoryPageInner: FunctionComponent = observer(() => {
 
   const theme = useTheme();
 
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
   useEffect(() => {
-    if (globalSimpleBar.ref.current) {
-      const scrollElement = globalSimpleBar.ref.current.getScrollElement();
+    if (pageSimpleBar.ref.current) {
+      const scrollElement = pageSimpleBar.ref.current.getScrollElement();
       if (scrollElement) {
         // scroll to refresh
         const onScroll = () => {
-          const el = globalSimpleBar.ref.current?.getContentElement();
-          const scrollEl = globalSimpleBar.ref.current?.getScrollElement();
+          const el = pageSimpleBar.ref.current?.getContentElement();
+          const scrollEl = pageSimpleBar.ref.current?.getScrollElement();
           if (el && scrollEl) {
             const rect = el.getBoundingClientRect();
             const scrollRect = scrollEl.getBoundingClientRect();
@@ -199,7 +199,7 @@ const HistoryPageInner: FunctionComponent = observer(() => {
         };
       }
     }
-  }, [globalSimpleBar.ref, msgHistory]);
+  }, [pageSimpleBar.ref, msgHistory]);
 
   return (
     <Box>

@@ -10,7 +10,7 @@ import { Gutter } from "../../../../components/gutter";
 import { BottomTabsHeightRem } from "../../../../bottom-tabs";
 import { DenomHelper } from "@keplr-wallet/common";
 import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../../../config.ui";
-import { useGlobalSimpleBar } from "../../../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../../../hooks/page-simplebar";
 import { isRunningInSidePanel } from "../../../../utils";
 import { useIsNotReady } from "../../index";
 
@@ -32,7 +32,7 @@ export const RefreshButton: FunctionComponent<{
   const isNotReady = useIsNotReady();
 
   const theme = useTheme();
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
 
   const [isRefreshButtonVisible, setIsRefreshButtonVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +43,7 @@ export const RefreshButton: FunctionComponent<{
       return;
     }
 
-    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+    const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
     if (scrollElement) {
       // 최상단에선 안 보임
       // 그러나 최상단에서 움직임 없이 5초 지나면 보임

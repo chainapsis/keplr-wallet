@@ -1,11 +1,11 @@
 import { FunctionComponent, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useGlobalSimpleBar } from "./hooks/global-simplebar";
+import { usePageSimpleBar } from "./hooks/page-simplebar";
 
 export const PageChangeScrollTop: FunctionComponent = () => {
   const { pathname } = useLocation();
 
-  const simplebar = useGlobalSimpleBar();
+  const simplebar = usePageSimpleBar();
 
   useEffect(() => {
     if (simplebar.ref.current) {

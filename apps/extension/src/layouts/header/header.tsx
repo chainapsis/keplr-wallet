@@ -23,7 +23,7 @@ import {
 } from "../../components/special-button";
 import { useSpringValue, animated } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import { GlobalSimpleBarProvider } from "../../hooks/global-simplebar";
+import { PageSimpleBarProvider } from "../../hooks/page-simplebar";
 import { HeaderBorderScrollHandler } from "./components";
 
 const bottomButtonPaddingRem = 0.75;
@@ -259,12 +259,12 @@ export const HeaderLayout: FunctionComponent<
         bottomPadding={bottomPadding}
         style={contentContainerStyle}
       >
-        <GlobalSimpleBarProvider style={{ height: "100%" }}>
+        <PageSimpleBarProvider style={{ height: "100%" }}>
           <HeaderBorderScrollHandler
             onShowBorderBottomChange={handleShowBorderBottomChange}
           />
           {children}
-        </GlobalSimpleBarProvider>
+        </PageSimpleBarProvider>
       </Styles.ContentContainer>
 
       {hasBottomButton || animatedBottomButtons ? (

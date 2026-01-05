@@ -30,7 +30,7 @@ import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { useIntl } from "react-intl";
-import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../hooks/page-simplebar";
 import styled from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { XAxis } from "../../components/axis";
@@ -74,11 +74,10 @@ const TotalPriceVisibilityHandler: FunctionComponent<{
   totalPriceSectionRef: React.RefObject<HTMLDivElement | null>;
   setIsTotalPriceVisible: (visible: boolean) => void;
 }> = ({ totalPriceSectionRef, setIsTotalPriceVisible }) => {
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
 
   useEffect(() => {
-    const scrollElement =
-      globalSimpleBar.ref.current?.getScrollElement() ?? null;
+    const scrollElement = pageSimpleBar.ref.current?.getScrollElement() ?? null;
     const target = totalPriceSectionRef.current;
 
     if (!target) {
@@ -92,7 +91,7 @@ const TotalPriceVisibilityHandler: FunctionComponent<{
         }
       },
       {
-        //globalSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
+        //pageSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
         root: scrollElement,
         threshold: 0.01,
         rootMargin: "-60px 0px 0px 0px",
@@ -102,7 +101,7 @@ const TotalPriceVisibilityHandler: FunctionComponent<{
     return () => {
       observer.disconnect();
     };
-  }, [globalSimpleBar, setIsTotalPriceVisible, totalPriceSectionRef]);
+  }, [pageSimpleBar, setIsTotalPriceVisible, totalPriceSectionRef]);
 
   return null;
 };

@@ -1,14 +1,14 @@
 import { FunctionComponent, useEffect } from "react";
-import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../../hooks/page-simplebar";
 
-// 이 컴포넌트는 GlobalSimpleBarProvider 내부에서 렌더링되어야 합니다.
+// 이 컴포넌트는 PageSimpleBarProvider 내부에서 렌더링되어야 합니다.
 export const HeaderBorderScrollHandler: FunctionComponent<{
   onShowBorderBottomChange: (show: boolean) => void;
 }> = ({ onShowBorderBottomChange }) => {
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
 
   useEffect(() => {
-    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+    const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
     if (!scrollElement) return;
 
     const handleScroll = () => {
