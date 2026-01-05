@@ -13,6 +13,7 @@ import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../../../config.ui";
 import { usePageSimpleBar } from "../../../../hooks/page-simplebar";
 import { isRunningInSidePanel } from "../../../../utils";
 import { useIsNotReady } from "../../index";
+import SimpleBarCore from "simplebar-core";
 
 const visibleTranslateY = -40;
 const invisibleTranslateY = 100;
@@ -37,13 +38,22 @@ export const RefreshButton: FunctionComponent<{
   const [isRefreshButtonVisible, setIsRefreshButtonVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [simpleBarRefState, setSimpleBarRefState] =
+    useState<SimpleBarCore | null>(null);
+  useEffect(() => {
+    return pageSimpleBar.refChangeHandler(setSimpleBarRefState);
+  }, []);
+
   // 스크롤 핸들러
   useEffect(() => {
     if (!isRunningInSidePanel()) {
       return;
     }
+    if (!simpleBarRefState) {
+      return;
+    }
 
-    const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
+    const scrollElement = simpleBarRefState.getScrollElement();
     if (scrollElement) {
       // 최상단에선 안 보임
       // 그러나 최상단에서 움직임 없이 5초 지나면 보임
@@ -87,8 +97,7 @@ export const RefreshButton: FunctionComponent<{
         clearInterval(interval);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [simpleBarRefState]);
 
   const visible =
     !isNotReady &&

@@ -172,6 +172,8 @@ const HistoryPageInner: FunctionComponent = observer(() => {
 
   const pageSimpleBar = usePageSimpleBar();
   useEffect(() => {
+    // XXX: usePageSimpleBar의 주석을 읽어보면 useEffect에서 ref을 사용하려면 refChangeHandler를 사용해야 한다고 하지만
+    //      얘의 경우는 deps에 msgHistory가 있어서 어차피 effect가 재실행 되기 때문에 상관없다...
     if (pageSimpleBar.ref.current) {
       const scrollElement = pageSimpleBar.ref.current.getScrollElement();
       if (scrollElement) {

@@ -53,6 +53,7 @@ import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import { EmptyStateButtonRow } from "./components/empty-state-button-row";
 import { useNavigate } from "react-router";
 import { useTotalPrices } from "../../hooks/use-total-prices";
+import SimpleBarCore from "simplebar-core";
 
 export interface ViewToken {
   token: CoinPretty;
@@ -76,8 +77,14 @@ const TotalPriceVisibilityHandler: FunctionComponent<{
 }> = ({ totalPriceSectionRef, setIsTotalPriceVisible }) => {
   const pageSimpleBar = usePageSimpleBar();
 
+  const [simpleBarRefState, setSimpleBarRefState] =
+    useState<SimpleBarCore | null>(null);
   useEffect(() => {
-    const scrollElement = pageSimpleBar.ref.current?.getScrollElement() ?? null;
+    return pageSimpleBar.refChangeHandler(setSimpleBarRefState);
+  }, [pageSimpleBar]);
+
+  useEffect(() => {
+    const scrollElement = simpleBarRefState?.getScrollElement() ?? null;
     const target = totalPriceSectionRef.current;
 
     if (!target) {
@@ -91,17 +98,16 @@ const TotalPriceVisibilityHandler: FunctionComponent<{
         }
       },
       {
-        //pageSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
         root: scrollElement,
         threshold: 0.01,
-        rootMargin: "-60px 0px 0px 0px",
+        rootMargin: "0px 0px 0px 0px",
       }
     );
     observer.observe(target);
     return () => {
       observer.disconnect();
     };
-  }, [pageSimpleBar, setIsTotalPriceVisible, totalPriceSectionRef]);
+  }, [simpleBarRefState, setIsTotalPriceVisible, totalPriceSectionRef]);
 
   return null;
 };

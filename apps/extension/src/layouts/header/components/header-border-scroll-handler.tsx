@@ -1,5 +1,6 @@
-import { FunctionComponent, useEffect } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { usePageSimpleBar } from "../../../hooks/page-simplebar";
+import SimpleBarCore from "simplebar-core";
 
 // 이 컴포넌트는 PageSimpleBarProvider 내부에서 렌더링되어야 합니다.
 export const HeaderBorderScrollHandler: FunctionComponent<{
@@ -7,8 +8,18 @@ export const HeaderBorderScrollHandler: FunctionComponent<{
 }> = ({ onShowBorderBottomChange }) => {
   const pageSimpleBar = usePageSimpleBar();
 
+  const [simpleBarRefState, setSimpleBarRefState] =
+    useState<SimpleBarCore | null>(null);
   useEffect(() => {
-    const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
+    return pageSimpleBar.refChangeHandler(setSimpleBarRefState);
+  }, []);
+
+  useEffect(() => {
+    if (!simpleBarRefState) {
+      return;
+    }
+
+    const scrollElement = simpleBarRefState.getScrollElement();
     if (!scrollElement) return;
 
     const handleScroll = () => {
@@ -25,8 +36,7 @@ export const HeaderBorderScrollHandler: FunctionComponent<{
     return () => {
       scrollElement.removeEventListener("scroll", handleScroll);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [simpleBarRefState]);
 
   return null;
 };
