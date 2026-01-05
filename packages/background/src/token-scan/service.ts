@@ -2,7 +2,14 @@ import { ChainsService } from "../chains";
 import { KeyRingCosmosService } from "../keyring-cosmos";
 import { KeyRingService } from "../keyring";
 import { ChainsUIForegroundService, ChainsUIService } from "../chains-ui";
-import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
+import {
+  action,
+  autorun,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
 import { AppCurrency, SupportedPaymentType } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
@@ -14,8 +21,17 @@ import { CairoUint256 } from "starknet";
 import { KeyRingBitcoinService } from "../keyring-bitcoin";
 import { MessageRequester } from "@keplr-wallet/router";
 
+const thirdpartySupportedChainIdMap: Record<string, string> = {
+  "eip155:1": "eth",
+  "eip155:10": "opt",
+  "eip155:137": "polygon",
+  "eip155:8453": "base",
+  "eip155:42161": "arb",
+};
+
 type Asset = {
-  currency: AppCurrency;
+  currency?: AppCurrency;
+  coinMinimalDenom?: string;
   amount: string;
 };
 
@@ -405,6 +421,65 @@ export class TokenScanService {
             ],
           });
         }
+
+        if (thirdpartySupportedChainIdMap[chainId]) {
+          const tokenAPIURL = `https://evm-${chainId.replace(
+            "eip155:",
+            ""
+          )}.keplr.app/api`;
+
+          const res = await simpleFetch<{
+            address: string;
+            tokenBalances: {
+              contractAddress: string;
+              tokenBalance: string | null;
+              error: {
+                code: number;
+                message: string;
+              } | null;
+            }[];
+            // TODO: Support pagination.
+            pageKey: string;
+          }>(tokenAPIURL, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              ...(() => {
+                if (typeof browser !== "undefined") {
+                  return {
+                    "request-source": new URL(browser.runtime.getURL("/"))
+                      .origin,
+                  };
+                }
+                return undefined;
+              })(),
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method: "alchemy_getTokenBalances",
+              params: [ethereumHexAddress, "erc20"],
+              id: 1,
+            }),
+          });
+
+          if (res.status === 200) {
+            for (const tokenBalance of res.data.tokenBalances) {
+              if (tokenBalance.tokenBalance && tokenBalance.error == null) {
+                tokenScan.infos.push({
+                  bech32Address: "",
+                  ethereumHexAddress,
+                  coinType: 60,
+                  assets: [
+                    {
+                      coinMinimalDenom: `erc20:${tokenBalance.contractAddress}`,
+                      amount: BigInt(tokenBalance.tokenBalance).toString(10),
+                    },
+                  ],
+                });
+              }
+            }
+          }
+        }
       } else {
         const bech32Addresses: {
           value: string;
@@ -661,6 +736,7 @@ export class TokenScanService {
     return undefined;
   }
 
+  @action
   dismissNewTokenFoundInHome(vaultId: string) {
     const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
     for (const prevTokenScan of prevTokenScans) {
@@ -669,6 +745,7 @@ export class TokenScanService {
     this.vaultToMap.set(vaultId, prevTokenScans);
   }
 
+  @action
   resetDismiss(vaultId: string) {
     const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
     for (const prevTokenScan of prevTokenScans) {
@@ -727,13 +804,21 @@ export class TokenScanService {
 
       const dismissedAssetMap = new Map<string, Asset>();
       for (const asset of dismissedTokenInfo.assets) {
-        dismissedAssetMap.set(asset.currency.coinMinimalDenom, asset);
+        const coinMinimalDenom =
+          asset.currency?.coinMinimalDenom || asset.coinMinimalDenom;
+        if (!coinMinimalDenom) {
+          continue;
+        }
+        dismissedAssetMap.set(coinMinimalDenom, asset);
       }
 
       for (const asset of info.assets) {
-        const prevAsset = dismissedAssetMap.get(
-          asset.currency.coinMinimalDenom
-        );
+        const coinMinimalDenom =
+          asset.currency?.coinMinimalDenom || asset.coinMinimalDenom;
+        if (!coinMinimalDenom) {
+          continue;
+        }
+        const prevAsset = dismissedAssetMap.get(coinMinimalDenom);
 
         // 없던 토큰이 생긴경우
         if (!prevAsset) {

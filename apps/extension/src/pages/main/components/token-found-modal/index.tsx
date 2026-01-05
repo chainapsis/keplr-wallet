@@ -27,7 +27,6 @@ import { VerticalCollapseTransition } from "../../../../components/transition/ve
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../../../stores";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { TokenScan } from "@keplr-wallet/background";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { Gutter } from "../../../../components/gutter";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -38,10 +37,11 @@ import { DenomHelper } from "@keplr-wallet/common";
 import { TokenTag } from "../../../register/enable-chains/components/chain-item";
 import { SupportedPaymentType } from "@keplr-wallet/types";
 import { useTokenTag } from "../../../../hooks/use-token-tag";
+import { RequiredCurrencyTokenScan } from "../../../../stores/chain";
 
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
-  tokenScans: TokenScan[];
+  tokenScans: RequiredCurrencyTokenScan[];
 }> = observer(({ close, tokenScans }) => {
   const { chainStore, keyRingStore } = useStore();
   const intl = useIntl();
@@ -351,7 +351,7 @@ const FoundChainView: FunctionComponent<{
   checked: boolean;
   onCheckbox: (checked: boolean) => void;
   isNativeChain?: boolean;
-  tokenScan: TokenScan;
+  tokenScan: RequiredCurrencyTokenScan;
 }> = observer(({ checked, onCheckbox, isNativeChain, tokenScan }) => {
   const { chainStore } = useStore();
   const theme = useTheme();
@@ -381,7 +381,7 @@ const FoundChainView: FunctionComponent<{
         paymentType: cur.bitcoinAddress?.paymentType,
       })),
     ];
-  }, [] as (TokenScan["infos"][0]["assets"][0] & { paymentType?: SupportedPaymentType })[]);
+  }, [] as (RequiredCurrencyTokenScan["infos"][number]["assets"][number] & { paymentType?: SupportedPaymentType })[]);
 
   return (
     <Box
@@ -482,7 +482,7 @@ const FoundChainView: FunctionComponent<{
 
 const FoundTokenView: FunctionComponent<{
   chainId: string;
-  asset: TokenScan["infos"][0]["assets"][0] & {
+  asset: RequiredCurrencyTokenScan["infos"][0]["assets"][0] & {
     paymentType?: SupportedPaymentType;
   };
 }> = observer(({ chainId, asset }) => {
