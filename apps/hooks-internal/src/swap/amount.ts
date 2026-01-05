@@ -41,6 +41,7 @@ const DEFAULT_PROVIDERS = [SwapProvider.SQUID, SwapProvider.SKIP];
 
 export class SwapAmountConfig extends AmountConfig {
   static readonly QueryMsgsDirectRefreshInterval = 10000;
+  private static readonly ZERO_DEC = new Dec(0);
 
   @observable
   protected _outChainId: string;
@@ -53,7 +54,7 @@ export class SwapAmountConfig extends AmountConfig {
   @observable.ref
   private _lastRequiresMultipleTxBundles?: boolean;
   @observable.ref
-  private _totalIndividualTxCount?: number;
+  private _lastTotalIndividualTxCount?: number;
 
   @observable.ref
   protected _getSlippageTolerancePercent: () => number;
@@ -104,7 +105,7 @@ export class SwapAmountConfig extends AmountConfig {
       const txs = this.getTxsIfReady();
       if (txs) {
         this._lastRequiresMultipleTxBundles = txs.length > 1;
-        this._totalIndividualTxCount = txs.reduce((acc, tx) => {
+        this._lastTotalIndividualTxCount = txs.reduce((acc, tx) => {
           if ("send" in tx) {
             return acc + 1;
           }
@@ -127,7 +128,7 @@ export class SwapAmountConfig extends AmountConfig {
         result = result.sub(fee);
       }
     }
-    if (result.toDec().lte(new Dec(0))) {
+    if (result.toDec().lte(SwapAmountConfig.ZERO_DEC)) {
       return new CoinPretty(this.currency, "0");
     }
 
@@ -150,16 +151,16 @@ export class SwapAmountConfig extends AmountConfig {
             }
             return acc;
           },
-          new CoinPretty(this.currency, new Dec(0))
+          new CoinPretty(this.currency, SwapAmountConfig.ZERO_DEC)
         );
-        if (bridgeFee.toDec().gt(new Dec(0))) {
+        if (bridgeFee.toDec().gt(SwapAmountConfig.ZERO_DEC)) {
           result = result.sub(bridgeFee);
         }
       } else {
         return this._oldValue;
       }
 
-      if (result.toDec().lte(new Dec(0))) {
+      if (result.toDec().lte(SwapAmountConfig.ZERO_DEC)) {
         return "0";
       }
 
@@ -185,7 +186,7 @@ export class SwapAmountConfig extends AmountConfig {
       return false;
     }
 
-    if (!amountIn.toDec().gt(new Dec(0))) {
+    if (!amountIn.toDec().gt(SwapAmountConfig.ZERO_DEC)) {
       return false;
     }
 
@@ -194,7 +195,7 @@ export class SwapAmountConfig extends AmountConfig {
       return false;
     }
 
-    return queryRoute.outAmount.toDec().gt(new Dec(0));
+    return queryRoute.outAmount.toDec().gt(SwapAmountConfig.ZERO_DEC);
   }
 
   get outAmount(): CoinPretty {
@@ -228,8 +229,14 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get requiresMultipleTxBundles(): boolean {
-    const txs = this.getTxsIfReady();
+    if (
+      this.amount.length === 0 ||
+      this.amount[0].toDec().lte(SwapAmountConfig.ZERO_DEC)
+    ) {
+      return false;
+    }
 
+    const txs = this.getTxsIfReady();
     if (!txs) {
       return this._lastRequiresMultipleTxBundles ?? false;
     }
@@ -238,9 +245,16 @@ export class SwapAmountConfig extends AmountConfig {
   }
 
   get totalIndividualTxCount(): number {
+    if (
+      this.amount.length === 0 ||
+      this.amount[0].toDec().lte(SwapAmountConfig.ZERO_DEC)
+    ) {
+      return 0;
+    }
+
     const txs = this.getTxsIfReady();
     if (!txs) {
-      return this._totalIndividualTxCount ?? 0;
+      return this._lastTotalIndividualTxCount ?? 0;
     }
 
     return txs.reduce((acc, tx) => {
@@ -483,7 +497,7 @@ export class SwapAmountConfig extends AmountConfig {
       return;
     }
 
-    if (this.amount[0].toDec().lte(new Dec(0))) {
+    if (this.amount[0].toDec().lte(SwapAmountConfig.ZERO_DEC)) {
       return;
     }
 
@@ -877,7 +891,7 @@ export class SwapAmountConfig extends AmountConfig {
             }
             return acc;
           },
-          new CoinPretty(this.currency, new Dec(0))
+          new CoinPretty(this.currency, SwapAmountConfig.ZERO_DEC)
         );
 
         if (bridgeFee.toDec().gte(this.maxAmount.toDec())) {
@@ -958,7 +972,7 @@ export class SwapAmountConfig extends AmountConfig {
           }
           return acc;
         },
-        new CoinPretty(this.currency, new Dec(0))
+        new CoinPretty(this.currency, SwapAmountConfig.ZERO_DEC)
       );
       if (bridgeFee.toDec().gte(this.maxAmount.toDec())) {
         return {
