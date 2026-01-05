@@ -284,6 +284,7 @@ export class TokenScanService {
     const tokenScans: TokenScan[] = [];
     const processedLinkedChainKeys = new Set<string>();
     const promises: Promise<void>[] = [];
+    const logChains: string[] = [];
 
     for (const modularChainInfo of modularChainInfos) {
       if ("linkedChainKey" in modularChainInfo) {
@@ -305,12 +306,15 @@ export class TokenScanService {
           }
         })()
       );
+      logChains.push(modularChainInfo.chainId);
     }
 
     // ignore error
     const settled = await Promise.allSettled(promises);
-    for (const s of settled) {
+    for (let i = 0; i < settled.length; i++) {
+      const s = settled[i];
       if (s.status === "rejected") {
+        console.error("failed to calculateTokenScan", logChains[i]);
         console.error(s.reason);
       }
     }
@@ -529,33 +533,22 @@ export class TokenScanService {
 
             const balances = res.data?.balances ?? [];
             for (const bal of balances) {
-              let currency = chainInfo.currencies.find(
+              const currency = chainInfo.currencies.find(
                 (cur) => cur.coinMinimalDenom === bal.denom
               );
 
-              // IBC 토큰의 경우 일단 여기서 반환하고
-              // 사용하는 쪽에서 가공한다.
-              if (!currency && bal.denom.startsWith("ibc/")) {
-                currency = {
-                  coinMinimalDenom: bal.denom,
-                  coinDenom: bal.denom,
-                  coinDecimals: chainInfo.stakeCurrency?.coinDecimals ?? 6,
-                };
+              // validate
+              if (typeof bal.amount !== "string") {
+                throw new Error("Invalid amount");
               }
 
-              if (currency) {
-                // validate
-                if (typeof bal.amount !== "string") {
-                  throw new Error("Invalid amount");
-                }
-
-                const dec = new Dec(bal.amount);
-                if (dec.gte(new Dec(0))) {
-                  assets.push({
-                    currency,
-                    amount: bal.amount,
-                  });
-                }
+              const dec = new Dec(bal.amount);
+              if (dec.gte(new Dec(0))) {
+                assets.push({
+                  currency,
+                  coinMinimalDenom: bal.denom,
+                  amount: bal.amount,
+                });
               }
             }
 

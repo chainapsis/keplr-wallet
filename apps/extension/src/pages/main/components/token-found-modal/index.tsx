@@ -600,7 +600,7 @@ const FoundTokenView: FunctionComponent<{
           gap: "0.25rem",
         }}
       >
-        <XAxis>
+        <XAxis alignY="center">
           <Subtitle3
             color={
               theme.mode === "light"
