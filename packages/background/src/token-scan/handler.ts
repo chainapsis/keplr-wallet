@@ -5,7 +5,11 @@ import {
   KeplrError,
   Message,
 } from "@keplr-wallet/router";
-import { GetTokenScansMsg, RevalidateTokenScansMsg } from "./messages";
+import {
+  DismissNewTokenFoundInMainMsg,
+  GetTokenScansMsg,
+  RevalidateTokenScansMsg,
+} from "./messages";
 import { TokenScanService } from "./service";
 
 export const getHandler: (service: TokenScanService) => Handler = (
@@ -20,6 +24,11 @@ export const getHandler: (service: TokenScanService) => Handler = (
           env,
           msg as RevalidateTokenScansMsg
         );
+      case DismissNewTokenFoundInMainMsg:
+        return handleDismissNewTokenFoundInMainMsg(service)(
+          env,
+          msg as DismissNewTokenFoundInMainMsg
+        );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
     }
@@ -30,7 +39,15 @@ const handleGetTokenScansMsg: (
   service: TokenScanService
 ) => InternalHandler<GetTokenScansMsg> = (service) => {
   return (_, msg) => {
-    return service.getTokenScans(msg.vaultId);
+    const tokenScans = service.getTokenScans(msg.vaultId);
+
+    return {
+      vaultId: msg.vaultId,
+      tokenScans: tokenScans,
+      tokenScansWithoutDismissed: tokenScans.filter((scan) =>
+        service.isMeaningfulTokenScanChangeBetweenDismissed(scan)
+      ),
+    };
   };
 };
 
@@ -39,9 +56,33 @@ const handleRevalidateTokenScansMsg: (
 ) => InternalHandler<RevalidateTokenScansMsg> = (service) => {
   return async (_, msg) => {
     await service.scanAll(msg.vaultId);
+
+    const tokenScans = service.getTokenScans(msg.vaultId);
+
     return {
       vaultId: msg.vaultId,
-      tokenScans: service.getTokenScans(msg.vaultId),
+      tokenScans: tokenScans,
+      tokenScansWithoutDismissed: tokenScans.filter((scan) =>
+        service.isMeaningfulTokenScanChangeBetweenDismissed(scan)
+      ),
+    };
+  };
+};
+
+const handleDismissNewTokenFoundInMainMsg: (
+  service: TokenScanService
+) => InternalHandler<DismissNewTokenFoundInMainMsg> = (service) => {
+  return async (_, msg) => {
+    service.dismissNewTokenFoundInHome(msg.vaultId);
+
+    const tokenScans = service.getTokenScans(msg.vaultId);
+
+    return {
+      vaultId: msg.vaultId,
+      tokenScans: tokenScans,
+      tokenScansWithoutDismissed: tokenScans.filter((scan) =>
+        service.isMeaningfulTokenScanChangeBetweenDismissed(scan)
+      ),
     };
   };
 };

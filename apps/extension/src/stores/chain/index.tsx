@@ -33,6 +33,7 @@ import {
   TokenScan,
   TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
+  DismissNewTokenFoundInMainMsg,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
@@ -49,6 +50,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @observable.ref
   protected _tokenScans: TokenScan[] = [];
+  @observable.ref
+  protected _tokenScansWithoutDismissed: TokenScan[] = [];
 
   @observable
   protected _lastTokenScanRevalidateTimestamp: Map<string, number> = new Map();
@@ -125,6 +128,18 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @computed
   get tokenScans(): TokenScan[] {
     return this._tokenScans.filter((scan) => {
+      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
+        return false;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+  }
+
+  @computed
+  get tokenScansWithoutDismissed(): TokenScan[] {
+    return this._tokenScansWithoutDismissed.filter((scan) => {
       if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
         return false;
       }
@@ -393,6 +408,22 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
+  *dismissNewTokenFoundInMain() {
+    const msg = new DismissNewTokenFoundInMainMsg(
+      this.keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
+    const res = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    if (this.keyRingStore.selectedKeyInfo?.id === msg.vaultId) {
+      this._tokenScans = res.tokenScans;
+      this._tokenScansWithoutDismissed = res.tokenScansWithoutDismissed;
+    }
+  }
+
+  @flow
   protected *init() {
     this._isInitializing = true;
 
@@ -507,9 +538,16 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this._tokenScans = yield* toGenerator(
+    const getTokenScansResult = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
     );
+
+    if (this.keyRingStore.selectedKeyInfo?.id === getTokenScansResult.vaultId) {
+      this._tokenScans = getTokenScansResult.tokenScans;
+      this._tokenScansWithoutDismissed =
+        getTokenScansResult.tokenScansWithoutDismissed;
+    }
+
     (async () => {
       await new Promise<void>((resolve) => {
         const disposal = autorun(() => {
@@ -526,7 +564,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       const lastTimestamp = this._lastTokenScanRevalidateTimestamp.get(id);
       if (
         lastTimestamp == null ||
-        Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+        // Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+        // QA 용으로 1분으로 설정
+        Date.now() - lastTimestamp > 1 * 60 * 1000
       ) {
         runInAction(() => {
           this._lastTokenScanRevalidateTimestamp.set(id, Date.now());
@@ -540,6 +580,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
           runInAction(() => {
             this._tokenScans = res.tokenScans;
+            this._tokenScansWithoutDismissed = res.tokenScansWithoutDismissed;
           });
         }
       }
