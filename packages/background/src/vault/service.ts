@@ -400,9 +400,7 @@ export class VaultService {
     }
   }
 
-  async clearAll(userPassword: string): Promise<void> {
-    await this.checkUserPassword(userPassword);
-
+  async clearAllWithoutCheckingPassword(): Promise<void> {
     const prevVaults: {
       type: string;
       id: string;
@@ -442,6 +440,12 @@ export class VaultService {
         handler(prev.type, prev.id);
       }
     }
+  }
+
+  async clearAll(userPassword: string): Promise<void> {
+    await this.checkUserPassword(userPassword);
+
+    await this.clearAllWithoutCheckingPassword();
   }
 
   protected static pbkdf2(

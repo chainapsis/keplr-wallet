@@ -1110,6 +1110,26 @@ export class KeyRingService {
     return wasSelected;
   }
 
+  async clearKeyRings(): Promise<void> {
+    const vaults = this.vaultService.getVaults("keyRing");
+    if (vaults.length === 0) {
+      return;
+    }
+
+    for (const vault of vaults) {
+      this.vaultService.removeVault("keyRing", vault.id);
+    }
+
+    this._selectedVaultId = undefined;
+
+    this.interactionService.dispatchEvent(WEBPAGE_PORT, "keystore-changed", {});
+
+    if (this.getKeyRingVaults().length === 0) {
+      // After deleting all keyring, sign out from the vault.
+      await this.vaultService.clearAllWithoutCheckingPassword();
+    }
+  }
+
   signSelected(
     chainId: string,
     data: Uint8Array,

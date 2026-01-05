@@ -16,6 +16,7 @@ import {
   ChangeUserPasswordMsg,
   CheckLegacyKeyRingPasswordMsg,
   CheckPasswordMsg,
+  ClearAllKeyRingsMsg,
   ComputeNotFinalizedKeyAddressesMsg,
   DeleteKeyRingMsg,
   ExtendedKey,
@@ -381,6 +382,18 @@ export class KeyRingStore {
     if (result.wasSelected && result.status === "unlocked") {
       this.eventDispatcher.dispatchEvent("keplr_keystorechange");
     }
+  }
+
+  @flow
+  *clearAllKeyRings() {
+    const msg = new ClearAllKeyRingsMsg();
+    const result = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+    this._status = result.status;
+    this._keyInfos = [];
+
+    this.eventDispatcher.dispatchEvent("keplr_keystorechange");
   }
 
   async changeUserPassword(

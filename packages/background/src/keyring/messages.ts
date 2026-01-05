@@ -781,3 +781,25 @@ export class SearchKeyRingsMsg extends Message<KeyInfo[]> {
     return SearchKeyRingsMsg.type();
   }
 }
+
+export class ClearAllKeyRingsMsg extends Message<{ status: KeyRingStatus }> {
+  public static type() {
+    return "clear-all-keyrings";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllKeyRingsMsg.type();
+  }
+}

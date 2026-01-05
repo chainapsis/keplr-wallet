@@ -31,6 +31,7 @@ import {
   ShowSensitiveLegacyKeyRingDataMsg,
   ExportKeyRingVaultsMsg,
   SearchKeyRingsMsg,
+  ClearAllKeyRingsMsg,
 } from "./messages";
 import { KeyRingService } from "./service";
 
@@ -134,6 +135,11 @@ export const getHandler: (service: KeyRingService) => Handler = (
         );
       case SearchKeyRingsMsg:
         return handleSearchKeyRingsMsg(service)(env, msg as SearchKeyRingsMsg);
+      case ClearAllKeyRingsMsg:
+        return handleClearAllKeyRingsMsg(service)(
+          env,
+          msg as ClearAllKeyRingsMsg
+        );
       default:
         throw new KeplrError("keyring", 221, "Unknown msg type");
     }
@@ -433,5 +439,16 @@ const handleSearchKeyRingsMsg: (
 ) => InternalHandler<SearchKeyRingsMsg> = (service) => {
   return (_, msg) => {
     return service.searchKeyRings(msg.searchText);
+  };
+};
+
+const handleClearAllKeyRingsMsg: (
+  service: KeyRingService
+) => InternalHandler<ClearAllKeyRingsMsg> = (service) => {
+  return async () => {
+    await service.clearKeyRings();
+    return {
+      status: service.keyRingStatus,
+    };
   };
 };
