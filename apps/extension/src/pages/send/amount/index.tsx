@@ -887,7 +887,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
       displayFlex={true}
-      fixedMinHeight={true}
       left={<BackButton />}
       right={
         // side panel 모드에서는 detach 모드가 필요가 없다...

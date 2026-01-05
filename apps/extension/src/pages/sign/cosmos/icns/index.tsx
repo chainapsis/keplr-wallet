@@ -49,7 +49,6 @@ export const SignCosmosICNSPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title=""
-      fixedHeight={true}
       bottomButtons={[
         {
           textOverrideIcon: (

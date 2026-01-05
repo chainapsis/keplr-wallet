@@ -51,7 +51,6 @@ export const PermissionBasicAccessForEVMPage: FunctionComponent<{
   return (
     <HeaderLayout
       title=""
-      fixedHeight={true}
       bottomButtons={[
         {
           textOverrideIcon: (

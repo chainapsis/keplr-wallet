@@ -49,7 +49,6 @@ export const EarnIntroPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.earn.title" })}
-      fixedHeight={true}
       left={<BackButton />}
     >
       <Box paddingX="1.5rem" paddingTop="1.25rem" paddingBottom="1.5rem">

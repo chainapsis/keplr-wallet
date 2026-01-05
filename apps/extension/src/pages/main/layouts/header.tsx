@@ -168,11 +168,9 @@ export const MainHeaderLayout = observer<
       HeaderProps,
       | "isNotReady"
       | "bottomButtons"
-      | "fixedHeight"
       | "additionalPaddingBottom"
       | "onSubmit"
       | "headerContainerStyle"
-      | "fixedTop"
     >
   > & {
     isShowTotalPrice?: boolean;

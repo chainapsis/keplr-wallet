@@ -88,7 +88,6 @@ export const WalletShowSensitivePage: FunctionComponent = observer(() => {
         });
       })()}
       left={<BackButton />}
-      fixedHeight={true}
       bottomButtons={[
         sensitive === ""
           ? {

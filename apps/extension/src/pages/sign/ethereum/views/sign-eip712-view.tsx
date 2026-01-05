@@ -307,7 +307,6 @@ export const EthereumSignEIP712View: FunctionComponent<{
   return (
     <HeaderLayout
       title={""}
-      fixedHeight={true}
       headerContainerStyle={{
         height: "0",
       }}

@@ -45,7 +45,6 @@ export const PermissionBasicAccessPage: FunctionComponent<{
   return (
     <HeaderLayout
       title=""
-      fixedHeight={true}
       bottomButtons={[
         {
           textOverrideIcon: (

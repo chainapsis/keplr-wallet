@@ -3,8 +3,6 @@ import React, {
   PropsWithChildren,
   useCallback,
   useEffect,
-  useLayoutEffect,
-  useRef,
   useState,
 } from "react";
 import styled, { css } from "styled-components";
@@ -28,12 +26,6 @@ import { defaultSpringConfig } from "../../styles/spring";
 import { GlobalSimpleBarProvider } from "../../hooks/global-simplebar";
 import { HeaderBorderScrollHandler } from "./components";
 
-const pxToRem = (px: number) => {
-  const base = parseFloat(
-    getComputedStyle(document.documentElement).fontSize.replace("px", "")
-  );
-  return px / base;
-};
 const bottomButtonPaddingRem = 0.75;
 
 const AnimatedBox = animated(Box);
@@ -41,10 +33,11 @@ const AnimatedBox = animated(Box);
 export const HeaderHeight = "3.75rem";
 
 const Styles = {
-  Container: styled.div``,
+  Container: styled.div`
+    height: 100%;
+  `,
 
   HeaderContainer: styled.div<{
-    fixedTopHeight?: string;
     showBorderBottom?: boolean;
   }>`
     height: ${HeaderHeight};
@@ -67,7 +60,7 @@ const Styles = {
         : ColorPalette["gray-10"]};
 
     position: fixed;
-    top: ${(props) => props.fixedTopHeight ?? "0"};
+    top: 0;
     left: 0;
     right: 0;
 
@@ -128,14 +121,12 @@ const Styles = {
     align-items: center;
   `,
   ContentContainer: styled.div<{
-    layoutHeight: number;
     additionalPaddingBottom?: string;
     bottomPadding: string;
     displayFlex: boolean;
-    fixedHeight: boolean;
-    fixedMinHeight: boolean;
-    fixedTopHeight?: string;
   }>`
+    height: 100%;
+
     ${({ displayFlex }) => {
       if (displayFlex) {
         return css`
@@ -146,44 +137,8 @@ const Styles = {
       return css``;
     }}
 
-    padding-top: ${(props) => {
-      if (!props.fixedTopHeight) {
-        return HeaderHeight;
-      }
-      return `calc(${HeaderHeight} + ${props.fixedTopHeight})`;
-    }};
+    padding-top: ${HeaderHeight};
     padding-bottom: ${({ bottomPadding }) => bottomPadding};
-
-    ${({
-      layoutHeight,
-      fixedHeight,
-      fixedMinHeight,
-      additionalPaddingBottom,
-    }) => {
-      if (!fixedHeight && !fixedMinHeight) {
-        return css`
-          // min-height: ${layoutHeight}rem;
-        `;
-      } else if (fixedHeight) {
-        return css`
-          height: ${(() => {
-            if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
-              return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
-            }
-            return `${layoutHeight}rem`;
-          })()};
-        `;
-      } else if (fixedMinHeight) {
-        return css`
-          min-height: ${(() => {
-            if (additionalPaddingBottom && additionalPaddingBottom !== "0") {
-              return `calc(${layoutHeight}rem - ${additionalPaddingBottom})`;
-            }
-            return `${layoutHeight}rem`;
-          })()};
-        `;
-      }
-    }};
   `,
   BottomButtonMockBackplate: styled.div`
     background: ${(props) =>
@@ -211,8 +166,6 @@ export const HeaderLayout: FunctionComponent<
   animatedBottomButtons,
   hideBottomButtons,
   displayFlex,
-  fixedHeight,
-  fixedMinHeight,
   onSubmit,
   children,
   isNotReady,
@@ -220,35 +173,12 @@ export const HeaderLayout: FunctionComponent<
   headerContainerStyle,
   contentContainerStyle,
 
-  fixedTop,
   bottomBackground,
 }) => {
-  const [height, setHeight] = React.useState(() => pxToRem(600));
-  const lastSetHeight = useRef(-1);
-
   const hasBottomButton =
     bottomButtons && bottomButtons.length > 0 && !hideBottomButtons;
   const hasMultipleBottomButton =
     bottomButtons && bottomButtons.length > 1 && !hideBottomButtons;
-
-  useLayoutEffect(() => {
-    function handleResize() {
-      if (window.visualViewport) {
-        if (lastSetHeight.current !== window.visualViewport.height) {
-          lastSetHeight.current = window.visualViewport.height;
-          setHeight(pxToRem(window.visualViewport.height));
-        }
-      }
-    }
-
-    if (window.visualViewport) {
-      lastSetHeight.current = window.visualViewport.height;
-      setHeight(pxToRem(window.visualViewport.height));
-    }
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const bottomPadding = (() => {
     if (!hasBottomButton) {
@@ -299,15 +229,9 @@ export const HeaderLayout: FunctionComponent<
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
-      {fixedTop ? (
-        <div style={{ width: "100%", position: "fixed", zIndex: 100 }}>
-          {fixedTop.element}
-        </div>
-      ) : null}
       <Styles.HeaderContainer
         showBorderBottom={showBorderBottom}
         style={headerContainerStyle}
-        fixedTopHeight={fixedTop?.height}
       >
         {left && !isNotReady ? (
           <Styles.HeaderLeft>{left}</Styles.HeaderLeft>
@@ -330,13 +254,9 @@ export const HeaderLayout: FunctionComponent<
       </Styles.HeaderContainer>
 
       <Styles.ContentContainer
-        layoutHeight={height}
         additionalPaddingBottom={additionalPaddingBottom}
         displayFlex={displayFlex || false}
-        fixedHeight={fixedHeight || false}
-        fixedMinHeight={fixedMinHeight || false}
         bottomPadding={bottomPadding}
-        fixedTopHeight={fixedTop?.height}
         style={contentContainerStyle}
       >
         <GlobalSimpleBarProvider style={{ height: "100%" }}>
