@@ -193,11 +193,17 @@ export class ObservableQueryRouteInnerV2 extends ObservableQuery<RouteResponseV2
       from_token: normalizeDenom(
         this.chainStore,
         this.fromChainId,
-        this.fromDenom
+        this.fromDenom,
+        true
       ),
       amount: this.fromAmount,
       to_chain: normalizeChainId(this.toChainId),
-      to_token: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
+      to_token: normalizeDenom(
+        this.chainStore,
+        this.toChainId,
+        this.toDenom,
+        true
+      ),
       from_address: this.fromAddress,
       to_address: this.toAddress,
       slippage: this.slippage,
