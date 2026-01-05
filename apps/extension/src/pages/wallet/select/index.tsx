@@ -44,7 +44,7 @@ const Styles = {
   `,
   AddButton: styled.div`
     position: absolute;
-    top: 8.125rem;
+    top: 4.25rem;
     right: 0.75rem;
   `,
   Content: styled(Stack)`
