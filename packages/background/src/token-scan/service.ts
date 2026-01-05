@@ -308,7 +308,12 @@ export class TokenScanService {
     }
 
     // ignore error
-    await Promise.allSettled(promises);
+    const settled = await Promise.allSettled(promises);
+    for (const s of settled) {
+      if (s.status === "rejected") {
+        console.error(s.reason);
+      }
+    }
 
     if (tokenScans.length > 0) {
       runInAction(() => {
@@ -382,6 +387,8 @@ export class TokenScanService {
           pubkey.getEthAddress()
         ).toString("hex")}`;
 
+        const assets: Asset[] = [];
+
         const res = await simpleFetch<{
           result: string;
         }>(evmInfo.rpc, {
@@ -409,16 +416,9 @@ export class TokenScanService {
           res.status === 200 &&
           BigInt(res.data.result).toString(10) !== "0"
         ) {
-          tokenScan.infos.push({
-            bech32Address: "",
-            ethereumHexAddress,
-            coinType: 60,
-            assets: [
-              {
-                currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
-                amount: BigInt(res.data.result).toString(10),
-              },
-            ],
+          assets.push({
+            currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
+            amount: BigInt(res.data.result).toString(10),
           });
         }
 
@@ -429,17 +429,21 @@ export class TokenScanService {
           )}.keplr.app/api`;
 
           const res = await simpleFetch<{
-            address: string;
-            tokenBalances: {
-              contractAddress: string;
-              tokenBalance: string | null;
-              error: {
-                code: number;
-                message: string;
-              } | null;
-            }[];
-            // TODO: Support pagination.
-            pageKey: string;
+            jsonrpc: string;
+            id: number;
+            result: {
+              address: string;
+              tokenBalances: {
+                contractAddress: string;
+                tokenBalance: string | null;
+                error: {
+                  code: number;
+                  message: string;
+                } | null;
+              }[];
+              // TODO: Support pagination.
+              pageKey: string;
+            };
           }>(tokenAPIURL, {
             method: "POST",
             headers: {
@@ -463,24 +467,26 @@ export class TokenScanService {
           });
 
           if (res.status === 200) {
-            for (const tokenBalance of res.data.tokenBalances) {
+            for (const tokenBalance of res.data.result?.tokenBalances ?? []) {
               if (tokenBalance.tokenBalance && tokenBalance.error == null) {
-                tokenScan.infos.push({
-                  bech32Address: "",
-                  ethereumHexAddress,
-                  coinType: 60,
-                  assets: [
-                    {
-                      coinMinimalDenom: DenomHelper.normalizeDenom(
-                        `erc20:${tokenBalance.contractAddress}`
-                      ),
-                      amount: BigInt(tokenBalance.tokenBalance).toString(10),
-                    },
-                  ],
+                assets.push({
+                  coinMinimalDenom: DenomHelper.normalizeDenom(
+                    `erc20:${tokenBalance.contractAddress}`
+                  ),
+                  amount: BigInt(tokenBalance.tokenBalance).toString(10),
                 });
               }
             }
           }
+        }
+
+        if (assets.length > 0) {
+          tokenScan.infos.push({
+            bech32Address: "",
+            ethereumHexAddress,
+            coinType: 60,
+            assets,
+          });
         }
       } else {
         const bech32Addresses: {
