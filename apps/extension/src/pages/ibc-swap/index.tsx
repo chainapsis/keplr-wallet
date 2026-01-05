@@ -615,6 +615,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         let routeDurationSeconds: number | undefined;
         let isInterChainSwap: boolean = false;
         let isSingleEVMChainOperation: boolean = false;
+        let requiresMultipleTxBundles: boolean = false;
 
         uiConfigStore.ibcSwapConfig.setIsSwapLoading(true, swapLoadingKey);
 
@@ -640,10 +641,86 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isInChainEVMOnly && inChainId === outChainId && !isInterChainSwap;
           provider = queryRoute.response.data.provider;
 
+          const initializedAccounts: Map<
+            string,
+            { isEvm: boolean; address: string }
+          > = new Map();
+
+          for (const chainId of queryRoute.response.data.required_chain_ids) {
+            const evmLikeChainId = Number(chainId);
+            const isEVMChainId =
+              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+            const chainIdInKeplr = isEVMChainId
+              ? `eip155:${evmLikeChainId}`
+              : chainId;
+
+            if (initializedAccounts.has(chainIdInKeplr)) {
+              continue;
+            }
+
+            const receiverAccount = accountStore.getAccount(chainIdInKeplr);
+            if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+              await receiverAccount.init();
+            }
+
+            const address = isEVMChainId
+              ? receiverAccount.ethereumHexAddress
+              : receiverAccount.bech32Address;
+
+            if (!address) {
+              const receiverChainInfo = chainStore.hasChain(chainIdInKeplr)
+                ? chainStore.getChain(chainIdInKeplr)
+                : undefined;
+              if (
+                receiverAccount.isNanoLedger &&
+                receiverChainInfo &&
+                (receiverChainInfo.bip44.coinType === 60 ||
+                  receiverChainInfo.features.includes("eth-address-gen") ||
+                  receiverChainInfo.features.includes("eth-key-sign") ||
+                  receiverChainInfo.evm != null)
+              ) {
+                throw new Error(
+                  "Please connect Ethereum app on Ledger with Keplr to get the address"
+                );
+              }
+
+              throw new Error(
+                isEVMChainId
+                  ? "receiverAccount.ethereumHexAddress is undefined"
+                  : "receiverAccount.bech32Address is undefined"
+              );
+            }
+
+            initializedAccounts.set(chainIdInKeplr, {
+              isEvm: isEVMChainId,
+              address,
+            });
+          }
+
+          // NOTE: txs를 새로 가져오기 때문에 ui에서 보여주는 one click swap 가능 여부라던가
+          // total signature count도 새로 계산되므로, 기대되는 결과와 다르게 로직이 실행될 가능성이 있다.
+          // 그러나 우선 낙관적으로 처리하고, 추후에 변동성이 커질 경우에 이를 처리하도록 한다.
+          const [_txs] = await Promise.all([
+            swapConfigs.amountConfig.getTxs(undefined, priorOutAmount),
+          ]);
+
+          if (_txs.length === 0) {
+            throw new Error("Txs are not ready");
+          }
+
+          txs = _txs;
+          requiresMultipleTxBundles = txs.length > 1;
+
           // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
           // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
           // 단일 evm 체인 위에서의 스왑인 경우에는 history data 구성을 위해 여기서 처리한다.
-          if (isInterChainSwap || isSingleEVMChainOperation) {
+          // requiresMultipleTxBundles인 경우에도 swap v2 history를 사용하므로 simpleRoute를 구성한다.
+          if (
+            isInterChainSwap ||
+            isSingleEVMChainOperation ||
+            requiresMultipleTxBundles
+          ) {
             routeDurationSeconds = queryRoute.response.data.estimated_time;
 
             for (const chainId of queryRoute.response.data.required_chain_ids) {
@@ -655,29 +732,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 ? `eip155:${evmLikeChainId}`
                 : chainId;
 
-              const receiverAccount = accountStore.getAccount(chainIdInKeplr);
-              if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                await receiverAccount.init();
-              }
-
-              if (isEVMChainId && !receiverAccount.ethereumHexAddress) {
-                const receiverChainInfo =
-                  chainStore.hasChain(chainId) && chainStore.getChain(chainId);
-                if (
-                  receiverAccount.isNanoLedger &&
-                  receiverChainInfo &&
-                  (receiverChainInfo.bip44.coinType === 60 ||
-                    receiverChainInfo.features.includes("eth-address-gen") ||
-                    receiverChainInfo.features.includes("eth-key-sign") ||
-                    receiverChainInfo.evm != null)
-                ) {
-                  throw new Error(
-                    "Please connect Ethereum app on Ledger with Keplr to get the address"
-                  );
-                }
-
+              const accountInfo = initializedAccounts.get(chainIdInKeplr);
+              if (!accountInfo) {
                 throw new Error(
-                  "receiverAccount.ethereumHexAddress is undefined"
+                  `Account for ${chainIdInKeplr} is not initialized`
                 );
               }
 
@@ -690,14 +748,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 simpleRoute.push({
                   isOnlyEvm: isEVMChainId,
                   chainId: chainIdInKeplr,
-                  receiver: isEVMChainId
-                    ? receiverAccount.ethereumHexAddress
-                    : receiverAccount.bech32Address,
+                  receiver: accountInfo.address,
                 });
               }
             }
           } else {
-            // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.
+            // 브릿지를 사용하지 않고 single tx인 경우, 자세한 ibc swap channel 정보를 보여준다.
             const skipOperations =
               queryRoute.response.data.provider === "skip"
                 ? queryRoute.response.data.skip_operations
@@ -769,27 +825,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               for (const receiverChainId of receiverChainIds) {
                 const receiverAccount =
                   accountStore.getAccount(receiverChainId);
-                if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                  await receiverAccount.init();
-                }
+                // 계정은 이미 초기화되어 있음
 
                 if (!receiverAccount.bech32Address) {
-                  const receiverChainInfo =
-                    chainStore.hasChain(receiverChainId) &&
-                    chainStore.getChain(receiverChainId);
-                  if (
-                    receiverAccount.isNanoLedger &&
-                    receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
-                  ) {
-                    throw new Error(
-                      "Please connect Ethereum app on Ledger with Keplr to get the address"
-                    );
-                  }
-
                   throw new Error("receiverAccount.bech32Address is undefined");
                 }
                 swapReceiver.push(receiverAccount.bech32Address);
@@ -871,43 +909,15 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const receiverAccount = accountStore.getAccount(
                   receiverChainIdInKeplr
                 );
-                if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                  await receiverAccount.init();
-                }
+                // 계정은 이미 초기화되어 있음
 
                 if (!receiverAccount.bech32Address) {
-                  const receiverChainInfo =
-                    chainStore.hasChain(receiverChainIdInKeplr) &&
-                    chainStore.getChain(receiverChainIdInKeplr);
-                  if (
-                    receiverAccount.isNanoLedger &&
-                    receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
-                  ) {
-                    throw new Error(
-                      "Please connect Ethereum app on Ledger with Keplr to get the address"
-                    );
-                  }
-
                   throw new Error("receiverAccount.bech32Address is undefined");
                 }
                 swapReceiver.push(receiverAccount.bech32Address);
               }
             }
           }
-
-          const [_txs] = await Promise.all([
-            swapConfigs.amountConfig.getTxs(undefined, priorOutAmount),
-          ]);
-
-          if (_txs.length === 0) {
-            throw new Error("Txs are not ready");
-          }
-
-          txs = _txs;
         } catch (e) {
           setCalculatingTxError(e);
           uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
@@ -926,7 +936,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           | IBCSwapHistoryData
           | SwapV2HistoryData
           | undefined;
-        if (isInterChainSwap || isSingleEVMChainOperation) {
+        if (
+          isInterChainSwap ||
+          isSingleEVMChainOperation ||
+          requiresMultipleTxBundles
+        ) {
           executionType = TxExecutionType.SWAP_V2;
           historyData = {
             fromChainId: inChainId,
@@ -1037,7 +1051,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
         })[] = [];
 
-        const requiresMultipleTxBundles = txs.length > 1;
         const totalSignatureCount = txs.reduce((acc, curr) => {
           if ("send" in curr) {
             return acc + 1;
