@@ -14,6 +14,7 @@ import {
   UpdateNoteModal,
   UpdateNotePageData,
   SpendableCard,
+  RefreshButton,
 } from "./components";
 import { Stack } from "../../components/stack";
 import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
@@ -21,20 +22,20 @@ import { EyeIcon, EyeSlashIcon, RightArrowIcon } from "../../components/icon";
 import { Box } from "../../components/box";
 import { Modal } from "../../components/modal";
 import { Gutter } from "../../components/gutter";
-import { Body2, Subtitle4 } from "../../components/typography";
-import { ColorPalette, SidePanelMaxWidth } from "../../styles";
+import { Body2 } from "../../components/typography";
+import { ColorPalette } from "../../styles";
 import { SpendableAssetView } from "./spendable";
-import { animated, useSpringValue, easings } from "@react-spring/web";
+import { animated, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
 import { IChainInfoImpl, QueryError } from "@keplr-wallet/stores";
 import { Skeleton } from "../../components/skeleton";
 import { useIntl } from "react-intl";
 import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
-import styled, { useTheme } from "styled-components";
+import styled from "styled-components";
 import { IbcHistoryView } from "./components/ibc-history-view";
 import { XAxis } from "../../components/axis";
 import { MainHeaderLayout } from "./layouts/header";
-import { amountToAmbiguousAverage, isRunningInSidePanel } from "../../utils";
+import { amountToAmbiguousAverage } from "../../utils";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import {
   ChainInfoWithCoreTypes,
@@ -42,10 +43,7 @@ import {
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 import { useBuySupportServiceInfos } from "../../hooks/use-buy-support-service-infos";
-import { BottomTabsHeightRem } from "../../bottom-tabs";
-import { DenomHelper } from "@keplr-wallet/common";
 import { ModularChainInfo } from "@keplr-wallet/types";
-import { INITIA_CHAIN_ID, NEUTRON_CHAIN_ID } from "../../config.ui";
 import { MainH1 } from "../../components/typography/main-h1";
 import { LockIcon } from "../../components/icon/lock";
 import { DepositModal } from "./components/deposit-modal";
@@ -70,6 +68,43 @@ export const useIsNotReady = () => {
     .queryRPCStatus;
 
   return query.response == null && query.error == null;
+};
+
+const TotalPriceVisibilityHandler: FunctionComponent<{
+  totalPriceSectionRef: React.RefObject<HTMLDivElement | null>;
+  setIsTotalPriceVisible: (visible: boolean) => void;
+}> = ({ totalPriceSectionRef, setIsTotalPriceVisible }) => {
+  const globalSimpleBar = useGlobalSimpleBar();
+
+  useEffect(() => {
+    const scrollElement =
+      globalSimpleBar.ref.current?.getScrollElement() ?? null;
+    const target = totalPriceSectionRef.current;
+
+    if (!target) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry) {
+          setIsTotalPriceVisible(entry.isIntersecting);
+        }
+      },
+      {
+        //globalSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
+        root: scrollElement,
+        threshold: 0.01,
+        rootMargin: "-60px 0px 0px 0px",
+      }
+    );
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [globalSimpleBar, setIsTotalPriceVisible, totalPriceSectionRef]);
+
+  return null;
 };
 
 export const MainPage: FunctionComponent<{
@@ -180,8 +215,6 @@ export const MainPage: FunctionComponent<{
 
   const buySupportServiceInfos = useBuySupportServiceInfos();
 
-  const globalSimpleBar = useGlobalSimpleBar();
-
   const totalPriceSectionRef = useRef<HTMLDivElement | null>(null);
   const [isTotalPriceVisible, setIsTotalPriceVisible] = useState(true);
 
@@ -205,104 +238,21 @@ export const MainPage: FunctionComponent<{
     }
   }, [uiConfigStore.changelogConfig.showingInfo.length]);
 
-  const [isRefreshButtonVisible, setIsRefreshButtonVisible] = useState(false);
-  const [isRefreshButtonLoading, setIsRefreshButtonLoading] = useState(false);
   const forcePreventScrollRefreshButtonVisible = useRef(false);
-  useEffect(() => {
-    if (!isRunningInSidePanel()) {
-      return;
-    }
-
-    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
-    if (scrollElement) {
-      // 최상단에선 안 보임
-      // 그러나 최상단에서 움직임 없이 5초 지나면 보임
-      // 스크롤 다운 하면 사라짐
-      // 스크롤 업 하면 보임
-      let lastScrollTop = 0;
-      let lastScrollTime = Date.now();
-      const listener = (e: Event) => {
-        if (e.target) {
-          const { scrollTop } = e.target as HTMLDivElement;
-
-          const gap = scrollTop - lastScrollTop;
-          if (gap > 0) {
-            setIsRefreshButtonVisible(false);
-          } else if (gap < 0) {
-            if (!forcePreventScrollRefreshButtonVisible.current) {
-              setIsRefreshButtonVisible(true);
-            }
-          }
-
-          lastScrollTop = scrollTop;
-          lastScrollTime = Date.now();
-        }
-      };
-      scrollElement.addEventListener("scroll", listener);
-
-      const interval = setInterval(() => {
-        if (lastScrollTop <= 10) {
-          if (Date.now() - lastScrollTime >= 5000) {
-            if (!forcePreventScrollRefreshButtonVisible.current) {
-              setIsRefreshButtonVisible(true);
-            } else {
-              lastScrollTime = Date.now();
-            }
-          }
-        }
-      }, 1000);
-
-      return () => {
-        scrollElement.removeEventListener("scroll", listener);
-        clearInterval(interval);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const scrollElement =
-      globalSimpleBar.ref.current?.getScrollElement() ?? null;
-    const target = totalPriceSectionRef.current;
-
-    if (!target) {
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry) {
-          setIsTotalPriceVisible(entry.isIntersecting);
-        }
-      },
-      {
-        //globalSimpleBar영역이 전체 페이지이기 때문에 상단 header 높이만큼 rootMargin에서 빼줘야함
-        root: scrollElement,
-        threshold: 0.01,
-        rootMargin: "-60px 0px 0px 0px",
-      }
-    );
-    observer.observe(target);
-    return () => {
-      observer.disconnect();
-    };
-  }, [globalSimpleBar]);
 
   return (
     <MainHeaderLayout
       isNotReady={isNotReady}
       isShowTotalPrice={!isTotalPriceVisible}
     >
-      {/* side panel에서만 보여준다. 보여주는 로직은 isRefreshButtonVisible를 다루는 useEffect를 참고. refresh button이 로딩중이면 모조건 보여준다. */}
+      <TotalPriceVisibilityHandler
+        totalPriceSectionRef={totalPriceSectionRef}
+        setIsTotalPriceVisible={setIsTotalPriceVisible}
+      />
       <RefreshButton
-        visible={
-          !isNotReady &&
-          isRunningInSidePanel() &&
-          (isRefreshButtonVisible || isRefreshButtonLoading)
+        forcePreventScrollRefreshButtonVisible={
+          forcePreventScrollRefreshButtonVisible
         }
-        onSetIsLoading={(isLoading) => {
-          setIsRefreshButtonLoading(isLoading);
-        }}
       />
 
       <Box padding="1.25rem">
@@ -531,320 +481,6 @@ export const PrivacyModeButtonStyles = {
     }
   `,
 };
-
-const visibleTranslateY = -40;
-const invisibleTranslateY = 100;
-const RefreshButton: FunctionComponent<{
-  visible: boolean;
-
-  onSetIsLoading: (isLoading: boolean) => void;
-}> = observer(({ visible, onSetIsLoading }) => {
-  const {
-    chainStore,
-    queriesStore,
-    starknetQueriesStore,
-    bitcoinQueriesStore,
-    accountStore,
-    priceStore,
-  } = useStore();
-
-  const theme = useTheme();
-
-  const translateY = useSpringValue(
-    visible ? visibleTranslateY : invisibleTranslateY,
-    {
-      config: defaultSpringConfig,
-    }
-  );
-  useEffect(() => {
-    translateY.start(visible ? visibleTranslateY : invisibleTranslateY);
-  }, [translateY, visible]);
-
-  const onSetIsLoadingRef = useRef(onSetIsLoading);
-  onSetIsLoadingRef.current = onSetIsLoading;
-
-  const [isLoading, _setIsLoading] = useState(false);
-  const setIsLoading = (isLoading: boolean) => {
-    _setIsLoading(isLoading);
-    onSetIsLoadingRef.current(isLoading);
-  };
-
-  const refresh = async () => {
-    if (isLoading) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const promises: Promise<unknown>[] = [];
-
-      promises.push(priceStore.waitFreshResponse());
-      for (const modularChainInfo of chainStore.modularChainInfosInUI) {
-        const isNeutron = modularChainInfo.chainId === NEUTRON_CHAIN_ID;
-
-        if (isNeutron) {
-          const account = accountStore.getAccount(modularChainInfo.chainId);
-          const queries = queriesStore.get(modularChainInfo.chainId);
-          const queryNeutronRewardInner =
-            queries.cosmwasm.queryNeutronStakingRewards.getRewardFor(
-              account.bech32Address
-            );
-          promises.push(queryNeutronRewardInner.waitFreshResponse());
-        } else if ("cosmos" in modularChainInfo) {
-          const chainInfo = chainStore.getChain(modularChainInfo.chainId);
-          const account = accountStore.getAccount(chainInfo.chainId);
-
-          if (
-            !chainStore.isEvmChain(chainInfo.chainId) &&
-            account.bech32Address !== ""
-          ) {
-            const queries = queriesStore.get(chainInfo.chainId);
-            const queryBalance = queries.queryBalances.getQueryBech32Address(
-              account.bech32Address
-            );
-            const queryRewards =
-              queries.cosmos.queryRewards.getQueryBech32Address(
-                account.bech32Address
-              );
-            // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-            queryBalance.fetch();
-
-            promises.push(queryRewards.waitFreshResponse());
-          }
-
-          if (
-            chainStore.isEvmChain(chainInfo.chainId) &&
-            account.ethereumHexAddress
-          ) {
-            const queries = queriesStore.get(chainInfo.chainId);
-            const queryBalance =
-              queries.queryBalances.getQueryEthereumHexAddress(
-                account.ethereumHexAddress
-              );
-            // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-            queryBalance.fetch();
-
-            for (const currency of chainInfo.currencies) {
-              const query = queriesStore
-                .get(chainInfo.chainId)
-                .queryBalances.getQueryEthereumHexAddress(
-                  account.ethereumHexAddress
-                );
-
-              const denomHelper = new DenomHelper(currency.coinMinimalDenom);
-              if (denomHelper.type === "erc20") {
-                // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-                query.fetch();
-              }
-            }
-          }
-        } else if ("starknet" in modularChainInfo) {
-          const account = accountStore.getAccount(modularChainInfo.chainId);
-
-          if (account.starknetHexAddress) {
-            const queries = starknetQueriesStore.get(modularChainInfo.chainId);
-
-            for (const currency of chainStore
-              .getModularChainInfoImpl(modularChainInfo.chainId)
-              .getCurrencies("starknet")) {
-              const query = queries.queryStarknetERC20Balance.getBalance(
-                modularChainInfo.chainId,
-                chainStore,
-                account.starknetHexAddress,
-                currency.coinMinimalDenom
-              );
-
-              if (query) {
-                // XXX: 얘는 구조상 waitFreshResponse()가 안되서 일단 쿼리가 끝인지 아닌지는 무시한다.
-                query.fetch();
-              }
-            }
-
-            // refresh starknet staking info
-            const stakingInfo = queries.stakingInfoManager.getStakingInfo(
-              account.starknetHexAddress
-            );
-            promises.push(stakingInfo.waitFreshResponse());
-          }
-        } else if ("bitcoin" in modularChainInfo) {
-          const account = accountStore.getAccount(modularChainInfo.chainId);
-          const currency = modularChainInfo.bitcoin.currencies[0];
-
-          if (account.bitcoinAddress) {
-            const queries = bitcoinQueriesStore.get(modularChainInfo.chainId);
-            const queryBalance = queries.queryBitcoinBalance.getBalance(
-              modularChainInfo.chainId,
-              chainStore,
-              account.bitcoinAddress.bech32Address,
-              currency.coinMinimalDenom
-            );
-
-            if (queryBalance) {
-              queryBalance.fetch();
-            }
-          }
-        }
-      }
-
-      for (const chainInfo of chainStore.chainInfosInUI) {
-        const account = accountStore.getAccount(chainInfo.chainId);
-        const isInitia = chainInfo.chainId === INITIA_CHAIN_ID;
-
-        if (account.bech32Address === "") {
-          continue;
-        }
-        const queries = queriesStore.get(chainInfo.chainId);
-        const queryUnbonding = isInitia
-          ? queries.cosmos.queryInitiaUnbondingDelegations.getQueryBech32Address(
-              account.bech32Address
-            )
-          : queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-              account.bech32Address
-            );
-        const queryDelegation = isInitia
-          ? queries.cosmos.queryInitiaDelegations.getQueryBech32Address(
-              account.bech32Address
-            )
-          : queries.cosmos.queryDelegations.getQueryBech32Address(
-              account.bech32Address
-            );
-
-        promises.push(queryUnbonding.waitFreshResponse());
-        promises.push(queryDelegation.waitFreshResponse());
-      }
-
-      await Promise.all([
-        Promise.all(promises),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
-      ]);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const rotate = useSpringValue(0, {
-    config: {
-      duration: 1250,
-      easing: easings.linear,
-    },
-  });
-  // 밑에서 onRest callback에서 isLoading을 써야하기 때문에 이러한 처리가 필요함.
-  const isLoadingRef = useRef(isLoading);
-  isLoadingRef.current = isLoading;
-  const prevIsLoading = useRef(isLoading);
-  useEffect(() => {
-    // 이 코드의 목적은 rotate animation을 실행하는데
-    // isLoading이 false가 되었을때 마지막 rotate까지는 끝내도록 하기 위해서 따로 작성된 것임.
-    if (prevIsLoading.current !== isLoading && isLoading) {
-      // prev 값과 비교하지 않으면 최초 mount 시점에서 0~360으로 바로 회전하게 된다.
-      if (isLoading) {
-        const onRest = () => {
-          if (isLoadingRef.current) {
-            rotate.start(360, {
-              from: 0,
-              onRest,
-            });
-          }
-        };
-
-        rotate.start(360, {
-          from: 0,
-          onRest,
-        });
-      }
-    }
-
-    prevIsLoading.current = isLoading;
-  }, [rotate, isLoading]);
-
-  return (
-    <animated.div
-      onClick={(e) => {
-        e.preventDefault();
-
-        refresh();
-      }}
-      style={{
-        pointerEvents: translateY.to((v) =>
-          // visible이 false일때는 pointer-events를 none으로 해서 클릭을 막는다.
-          // visibleTranslateY / 2는 대충 정한 값임. 이 값보다 작으면 pointer-events를 none으로 해서 클릭을 막는다.
-          v >= visibleTranslateY / 2 ? "none" : "auto"
-        ),
-
-        position: "fixed",
-        marginBottom: BottomTabsHeightRem,
-        bottom: 0,
-        zIndex: 10,
-
-        width: "100%",
-        maxWidth: SidePanelMaxWidth,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-
-        cursor: isLoading ? "progress" : "pointer",
-      }}
-    >
-      <animated.div
-        style={{
-          padding: "0.75rem 1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-
-          borderRadius: "999999px",
-          background:
-            theme.mode === "light"
-              ? ColorPalette["white"]
-              : ColorPalette["gray-500"],
-          boxShadow:
-            theme.mode === "light"
-              ? "0px 4px 12px 0px rgba(0, 0, 0, 0.12)"
-              : "0px 0px 24px 0px rgba(0, 0, 0, 0.25)",
-
-          translateY: translateY.to((v) => `${v}%`),
-        }}
-      >
-        <Subtitle4
-          color={
-            theme.mode === "light"
-              ? ColorPalette["gray-600"]
-              : ColorPalette["gray-50"]
-          }
-        >
-          Refresh
-        </Subtitle4>
-        <Gutter size="0.25rem" />
-        <animated.svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="none"
-          viewBox="0 0 16 16"
-          style={{
-            transform: rotate.to((v) => `rotate(${v}deg)`),
-          }}
-        >
-          <path
-            stroke={
-              theme.mode === "light"
-                ? ColorPalette["gray-600"]
-                : ColorPalette["gray-50"]
-            }
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.33"
-            d="M11.182 6.232h3.328v0M2.49 13.095V9.768m0 0h3.328m-3.329 0l2.12 2.122a5.5 5.5 0 009.202-2.466M3.188 6.577a5.5 5.5 0 019.202-2.467l2.121 2.121m0-3.327V6.23"
-          />
-        </animated.svg>
-      </animated.div>
-    </animated.div>
-  );
-});
 
 const StyledBox = styled(Box)`
   cursor: pointer;

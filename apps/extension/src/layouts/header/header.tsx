@@ -1,6 +1,7 @@
 import React, {
   FunctionComponent,
   PropsWithChildren,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -24,10 +25,8 @@ import {
 } from "../../components/special-button";
 import { useSpringValue, animated } from "@react-spring/web";
 import { defaultSpringConfig } from "../../styles/spring";
-import {
-  GlobalSimpleBarProvider,
-  useGlobalSimpleBar,
-} from "../../hooks/global-simplebar";
+import { GlobalSimpleBarProvider } from "../../hooks/global-simplebar";
+import { HeaderBorderScrollHandler } from "./components";
 
 const pxToRem = (px: number) => {
   const base = parseFloat(
@@ -292,28 +291,10 @@ export const HeaderLayout: FunctionComponent<
     bottomButtonAnimation.start(hasBottomButton ? 1 : 0);
   }, [bottomButtonAnimation, hasBottomButton]);
 
-  const globalSimpleBar = useGlobalSimpleBar();
   const [showBorderBottom, setShowBorderBottom] = useState(false);
 
-  useEffect(() => {
-    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
-    if (!scrollElement) return;
-
-    const handleScroll = () => {
-      if (scrollElement.scrollTop > 0) {
-        setShowBorderBottom(true);
-      } else {
-        setShowBorderBottom(false);
-      }
-    };
-
-    scrollElement.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => {
-      scrollElement.removeEventListener("scroll", handleScroll);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleShowBorderBottomChange = useCallback((show: boolean) => {
+    setShowBorderBottom(show);
   }, []);
 
   return (
@@ -359,6 +340,9 @@ export const HeaderLayout: FunctionComponent<
         style={contentContainerStyle}
       >
         <GlobalSimpleBarProvider style={{ height: "100%" }}>
+          <HeaderBorderScrollHandler
+            onShowBorderBottomChange={handleShowBorderBottomChange}
+          />
           {children}
         </GlobalSimpleBarProvider>
       </Styles.ContentContainer>
