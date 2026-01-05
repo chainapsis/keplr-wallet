@@ -62,7 +62,18 @@ class IBCSwapDestinationState {
 
     this.disposer = autorun(() => {
       const query = this.currentQuery;
-      if (!query || !query.response) {
+      if (!query) {
+        return;
+      }
+
+      if (query.error && !query.isFetching) {
+        runInAction(() => {
+          this.isFetching = false;
+        });
+        return;
+      }
+
+      if (!query.response) {
         return;
       }
 
