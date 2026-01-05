@@ -85,7 +85,6 @@ import { SignEthereumTxPage } from "./pages/sign/ethereum";
 import "simplebar-react/dist/simplebar.min.css";
 import { AppThemeProvider } from "./theme";
 import { useTheme } from "styled-components";
-import { PageChangeScrollTop } from "./use-page-change-scroll-top";
 import { IBCSwapPage } from "./pages/ibc-swap";
 import {
   BottomTabHistoryIcon,
@@ -409,7 +408,6 @@ const RoutesAfterReady: FunctionComponent = observer(() => {
           },
         ]}
       >
-        <PageChangeScrollTop />
         <RoutePageAnalytics />
         {isReady ? (
           shouldUnlockPage ? (
