@@ -2274,6 +2274,7 @@ const WarningGuideBox: FunctionComponent<{
           clearTimeout(timeoutId);
         };
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collapsed]);
 
     let errorText = (() => {
