@@ -435,7 +435,7 @@ const FoundChainView: FunctionComponent<{
               ).chainName
             }
           </Subtitle3>
-          <Body3 color={ColorPalette["gray-300"]}>{numTokens} Tokens</Body3>
+          <Body3 color={ColorPalette["gray-300"]}>{numTokens} Token(s)</Body3>
         </Stack>
 
         <Column weight={1} />

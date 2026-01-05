@@ -503,13 +503,16 @@ export const SpendableAssetView: FunctionComponent<{
     });
 
     const numFoundToken = useMemo(() => {
-      if (chainStore.tokenScansWithoutDismissed.length === 0) {
+      if (
+        chainStore.tokenScans.length === 0 ||
+        chainStore.tokenScansWithoutDismissed.length === 0
+      ) {
         return 0;
       }
 
       const set = new Set<string>();
 
-      for (const tokenScan of chainStore.tokenScansWithoutDismissed) {
+      for (const tokenScan of chainStore.tokenScans) {
         for (const info of tokenScan.infos) {
           for (const asset of info.assets) {
             const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
@@ -521,7 +524,7 @@ export const SpendableAssetView: FunctionComponent<{
       }
 
       return Array.from(set).length;
-    }, [chainStore.tokenScansWithoutDismissed]);
+    }, [chainStore.tokenScans, chainStore.tokenScansWithoutDismissed]);
 
     const { allBalancesSearchFiltered, lowBalanceTokens, isFirstTime } =
       useAllBalances(trimSearch);
