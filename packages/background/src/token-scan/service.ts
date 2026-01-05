@@ -15,7 +15,7 @@ import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { VaultService } from "../vault";
-import { KVStore } from "@keplr-wallet/common";
+import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { KeyRingStarknetService } from "../keyring-starknet";
 import { CairoUint256 } from "starknet";
 import { KeyRingBitcoinService } from "../keyring-bitcoin";
@@ -471,7 +471,9 @@ export class TokenScanService {
                   coinType: 60,
                   assets: [
                     {
-                      coinMinimalDenom: `erc20:${tokenBalance.contractAddress}`,
+                      coinMinimalDenom: DenomHelper.normalizeDenom(
+                        `erc20:${tokenBalance.contractAddress}`
+                      ),
                       amount: BigInt(tokenBalance.tokenBalance).toString(10),
                     },
                   ],

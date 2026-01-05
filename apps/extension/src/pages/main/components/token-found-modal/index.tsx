@@ -42,10 +42,36 @@ import { RequiredCurrencyTokenScan } from "../../../../stores/chain";
 export const TokenFoundModal: FunctionComponent<{
   close: () => void;
   tokenScans: RequiredCurrencyTokenScan[];
-}> = observer(({ close, tokenScans }) => {
+  emphasizeTokenScans?: RequiredCurrencyTokenScan[];
+}> = observer(({ close, tokenScans, emphasizeTokenScans }) => {
   const { chainStore, keyRingStore } = useStore();
   const intl = useIntl();
   const theme = useTheme();
+
+  const emphasizeTokenScansChainKeys = useMemo<Set<string>>(() => {
+    if (!emphasizeTokenScans) {
+      return new Set<string>();
+    }
+
+    const res = new Set<string>();
+    for (const tokenScan of emphasizeTokenScans) {
+      res.add(tokenScan.chainId);
+    }
+    return res;
+  }, [emphasizeTokenScans]);
+
+  tokenScans = tokenScans.sort((scan1, scan2) => {
+    const emphasized1 = emphasizeTokenScansChainKeys.has(scan1.chainId);
+    const emphasized2 = emphasizeTokenScansChainKeys.has(scan2.chainId);
+
+    if (emphasized1 && !emphasized2) {
+      return -1;
+    } else if (!emphasized1 && emphasized2) {
+      return 1;
+    }
+
+    return 0;
+  });
 
   const [checkedChainIdentifiers, setCheckedChainIdentifiers] = useState<
     string[]
@@ -238,6 +264,9 @@ export const TokenFoundModal: FunctionComponent<{
               <FoundChainView
                 key={tokenScan.chainId}
                 tokenScan={tokenScan}
+                emphasizeTokenScan={emphasizeTokenScans?.find(
+                  (scan) => scan.chainId === tokenScan.chainId
+                )}
                 checked={checkedChainIdentifiers.includes(
                   ChainIdHelper.parse(tokenScan.chainId).identifier
                 )}
@@ -352,140 +381,174 @@ const FoundChainView: FunctionComponent<{
   onCheckbox: (checked: boolean) => void;
   isNativeChain?: boolean;
   tokenScan: RequiredCurrencyTokenScan;
-}> = observer(({ checked, onCheckbox, isNativeChain, tokenScan }) => {
-  const { chainStore } = useStore();
-  const theme = useTheme();
+  emphasizeTokenScan?: RequiredCurrencyTokenScan;
+}> = observer(
+  ({ checked, onCheckbox, isNativeChain, tokenScan, emphasizeTokenScan }) => {
+    const { chainStore } = useStore();
+    const theme = useTheme();
 
-  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+    const emphasizedAssetMap = useMemo(() => {
+      const set = new Set<string>();
 
-  const numTokens = useMemo(() => {
-    const set = new Set<string>();
-
-    for (const info of tokenScan.infos) {
-      for (const asset of info.assets) {
-        const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
-          asset.currency.coinMinimalDenom
-        }`;
-        set.add(key);
+      for (const info of emphasizeTokenScan?.infos || []) {
+        for (const asset of info.assets) {
+          set.add(asset.currency.coinMinimalDenom);
+        }
       }
-    }
 
-    return Array.from(set).length;
-  }, [tokenScan]);
+      return set;
+    }, [emphasizeTokenScan]);
 
-  const tokenInfos = tokenScan.infos.reduce((acc, cur) => {
-    return [
-      ...acc,
-      ...cur.assets.map((asset) => ({
-        ...asset,
-        paymentType: cur.bitcoinAddress?.paymentType,
-      })),
-    ];
-  }, [] as (RequiredCurrencyTokenScan["infos"][number]["assets"][number] & { paymentType?: SupportedPaymentType })[]);
+    const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
-  return (
-    <Box
-      paddingY="0.875rem"
-      paddingX="1rem"
-      backgroundColor={
-        theme.mode === "light"
-          ? ColorPalette["gray-10"]
-          : ColorPalette["gray-650"]
+    const numTokens = useMemo(() => {
+      const set = new Set<string>();
+
+      for (const info of tokenScan.infos) {
+        for (const asset of info.assets) {
+          const key = `${ChainIdHelper.parse(tokenScan.chainId).identifier}/${
+            asset.currency.coinMinimalDenom
+          }`;
+          set.add(key);
+        }
       }
-      borderRadius="0.375rem"
-    >
-      <Columns sum={1} gutter="0.5rem" alignY="center">
-        <Box width="2.25rem" height="2.25rem" position="relative">
-          <ChainImageFallback
-            chainInfo={
-              chainStore.hasChain(tokenScan.chainId)
-                ? chainStore.getChain(tokenScan.chainId)
-                : chainStore.getModularChain(tokenScan.chainId)
-            }
-            size="2rem"
-            alt="Token Found Modal Chain Image"
-          />
-          {isNativeChain && (
-            <Box
-              position="absolute"
-              style={{
-                bottom: "0.125rem",
-                right: "0rem",
-              }}
-            >
-              <NativeChainMarkIcon
-                width="1rem"
-                height="1rem"
-                color={
-                  theme.mode === "light"
-                    ? ColorPalette["gray-10"]
-                    : ColorPalette["gray-650"]
+
+      return Array.from(set).length;
+    }, [tokenScan]);
+
+    const tokenInfos = tokenScan.infos.reduce((acc, cur) => {
+      return [
+        ...acc,
+        ...cur.assets.map((asset) => ({
+          ...asset,
+          paymentType: cur.bitcoinAddress?.paymentType,
+        })),
+      ];
+    }, [] as (RequiredCurrencyTokenScan["infos"][number]["assets"][number] & { paymentType?: SupportedPaymentType })[]);
+
+    return (
+      <Box
+        paddingY="0.875rem"
+        paddingX="1rem"
+        backgroundColor={
+          theme.mode === "light"
+            ? ColorPalette["gray-10"]
+            : ColorPalette["gray-650"]
+        }
+        borderRadius="0.375rem"
+      >
+        <Columns sum={1} gutter="0.5rem" alignY="center">
+          <Box width="2.25rem" height="2.25rem" position="relative">
+            <ChainImageFallback
+              chainInfo={
+                chainStore.hasChain(tokenScan.chainId)
+                  ? chainStore.getChain(tokenScan.chainId)
+                  : chainStore.getModularChain(tokenScan.chainId)
+              }
+              size="2rem"
+              alt="Token Found Modal Chain Image"
+            />
+            {isNativeChain && (
+              <Box
+                position="absolute"
+                style={{
+                  bottom: "0.125rem",
+                  right: "0rem",
+                }}
+              >
+                <NativeChainMarkIcon
+                  width="1rem"
+                  height="1rem"
+                  color={
+                    theme.mode === "light"
+                      ? ColorPalette["gray-10"]
+                      : ColorPalette["gray-650"]
+                  }
+                />
+              </Box>
+            )}
+          </Box>
+
+          <Stack gutter="0.25rem">
+            <XAxis alignY="center">
+              <Subtitle3>
+                {
+                  (chainStore.hasChain(tokenScan.chainId)
+                    ? chainStore.getChain(tokenScan.chainId)
+                    : chainStore.getModularChain(tokenScan.chainId)
+                  ).chainName
                 }
-              />
-            </Box>
-          )}
-        </Box>
-
-        <Stack gutter="0.25rem">
-          <Subtitle3>
-            {
-              (chainStore.hasChain(tokenScan.chainId)
-                ? chainStore.getChain(tokenScan.chainId)
-                : chainStore.getModularChain(tokenScan.chainId)
-              ).chainName
-            }
-          </Subtitle3>
-          <Body3 color={ColorPalette["gray-300"]}>{numTokens} Token(s)</Body3>
-        </Stack>
-
-        <Column weight={1} />
-
-        <Checkbox checked={checked} onChange={onCheckbox} size="large" />
-
-        <IconButton onClick={() => setIsDetailOpen(!isDetailOpen)}>
-          {isDetailOpen ? <ArrowUpIcon /> : <ArrowDownIcon />}
-        </IconButton>
-      </Columns>
-
-      <VerticalCollapseTransition collapsed={!isDetailOpen}>
-        <Box
-          backgroundColor={
-            theme.mode === "light"
-              ? ColorPalette["gray-100"]
-              : ColorPalette["gray-700"]
-          }
-          borderRadius="0.375rem"
-          paddingY="0.75rem"
-          paddingX="1rem"
-          marginTop="0.625rem"
-        >
-          <Stack gutter="0.5rem">
-            {tokenInfos.length > 0 ? (
-              <React.Fragment>
-                {tokenInfos.map((asset) => {
-                  return (
-                    <FoundTokenView
-                      key={asset.currency.coinMinimalDenom}
-                      chainId={tokenScan.chainId}
-                      asset={asset}
-                    />
-                  );
-                })}
-              </React.Fragment>
-            ) : null}
+              </Subtitle3>
+              {emphasizeTokenScan && (
+                <Box
+                  width="0.375rem"
+                  height="0.375rem"
+                  marginLeft="0.4rem"
+                  borderRadius="99999px"
+                  backgroundColor={
+                    theme.mode === "light"
+                      ? ColorPalette["blue-400"]
+                      : ColorPalette["blue-400"]
+                  }
+                />
+              )}
+            </XAxis>
+            <Body3 color={ColorPalette["gray-300"]}>{numTokens} Token(s)</Body3>
           </Stack>
-        </Box>
-      </VerticalCollapseTransition>
-    </Box>
-  );
-});
+
+          <Column weight={1} />
+
+          <Checkbox checked={checked} onChange={onCheckbox} size="large" />
+
+          <IconButton onClick={() => setIsDetailOpen(!isDetailOpen)}>
+            {isDetailOpen ? <ArrowUpIcon /> : <ArrowDownIcon />}
+          </IconButton>
+        </Columns>
+
+        <VerticalCollapseTransition collapsed={!isDetailOpen}>
+          <Box
+            backgroundColor={
+              theme.mode === "light"
+                ? ColorPalette["gray-100"]
+                : ColorPalette["gray-700"]
+            }
+            borderRadius="0.375rem"
+            paddingY="0.75rem"
+            paddingX="1rem"
+            marginTop="0.625rem"
+          >
+            <Stack gutter="0.5rem">
+              {tokenInfos.length > 0 ? (
+                <React.Fragment>
+                  {tokenInfos.map((asset) => {
+                    return (
+                      <FoundTokenView
+                        key={asset.currency.coinMinimalDenom}
+                        chainId={tokenScan.chainId}
+                        asset={asset}
+                        emphasize={emphasizedAssetMap.has(
+                          asset.currency.coinMinimalDenom
+                        )}
+                      />
+                    );
+                  })}
+                </React.Fragment>
+              ) : null}
+            </Stack>
+          </Box>
+        </VerticalCollapseTransition>
+      </Box>
+    );
+  }
+);
 
 const FoundTokenView: FunctionComponent<{
   chainId: string;
   asset: RequiredCurrencyTokenScan["infos"][0]["assets"][0] & {
     paymentType?: SupportedPaymentType;
   };
-}> = observer(({ chainId, asset }) => {
+  emphasize: boolean;
+}> = observer(({ chainId, asset, emphasize }) => {
   const { chainStore, uiConfigStore } = useStore();
   const theme = useTheme();
 
@@ -537,58 +600,74 @@ const FoundTokenView: FunctionComponent<{
           gap: "0.25rem",
         }}
       >
-        <Subtitle3
-          color={
-            theme.mode === "light"
-              ? ColorPalette["gray-400"]
-              : ColorPalette["gray-50"]
-          }
-        >
-          {(() => {
-            const coinDenom = (() => {
-              if (chainStore.hasChain(chainId)) {
-                return chainStore
-                  .getChain(chainId)
-                  .forceFindCurrency(asset.currency.coinMinimalDenom).coinDenom;
-              } else {
-                const modularChainInfo = chainStore.getModularChain(chainId);
-                const isBitcoin = "bitcoin" in modularChainInfo;
-                const isStarknet = "starknet" in modularChainInfo;
-                const isCosmos = "cosmos" in modularChainInfo;
-
-                if (isBitcoin || isStarknet || isCosmos) {
-                  return (
-                    chainStore
-                      .getModularChainInfoImpl(chainId)
-                      .getCurrencies(
-                        isBitcoin
-                          ? "bitcoin"
-                          : isStarknet
-                          ? "starknet"
-                          : "cosmos"
-                      )
-                      .find(
-                        (cur) =>
-                          cur.coinMinimalDenom ===
-                          asset.currency.coinMinimalDenom
-                      )?.coinDenom ?? asset.currency.coinDenom
-                  );
-                } else {
-                  return asset.currency.coinDenom;
-                }
-              }
-            })();
-
-            if (
-              asset.currency.coinMinimalDenom.startsWith("ibc/") &&
-              coinDenom
-            ) {
-              const cut = coinDenom.indexOf(" (");
-              return cut > 0 ? coinDenom.slice(0, cut) : coinDenom;
+        <XAxis>
+          <Subtitle3
+            color={
+              theme.mode === "light"
+                ? ColorPalette["gray-400"]
+                : ColorPalette["gray-50"]
             }
-            return coinDenom;
-          })()}
-        </Subtitle3>
+          >
+            {(() => {
+              const coinDenom = (() => {
+                if (chainStore.hasChain(chainId)) {
+                  return chainStore
+                    .getChain(chainId)
+                    .forceFindCurrency(asset.currency.coinMinimalDenom)
+                    .coinDenom;
+                } else {
+                  const modularChainInfo = chainStore.getModularChain(chainId);
+                  const isBitcoin = "bitcoin" in modularChainInfo;
+                  const isStarknet = "starknet" in modularChainInfo;
+                  const isCosmos = "cosmos" in modularChainInfo;
+
+                  if (isBitcoin || isStarknet || isCosmos) {
+                    return (
+                      chainStore
+                        .getModularChainInfoImpl(chainId)
+                        .getCurrencies(
+                          isBitcoin
+                            ? "bitcoin"
+                            : isStarknet
+                            ? "starknet"
+                            : "cosmos"
+                        )
+                        .find(
+                          (cur) =>
+                            cur.coinMinimalDenom ===
+                            asset.currency.coinMinimalDenom
+                        )?.coinDenom ?? asset.currency.coinDenom
+                    );
+                  } else {
+                    return asset.currency.coinDenom;
+                  }
+                }
+              })();
+
+              if (
+                asset.currency.coinMinimalDenom.startsWith("ibc/") &&
+                coinDenom
+              ) {
+                const cut = coinDenom.indexOf(" (");
+                return cut > 0 ? coinDenom.slice(0, cut) : coinDenom;
+              }
+              return coinDenom;
+            })()}
+          </Subtitle3>
+          {emphasize && (
+            <Box
+              width="0.375rem"
+              height="0.375rem"
+              marginLeft="0.4rem"
+              borderRadius="99999px"
+              backgroundColor={
+                theme.mode === "light"
+                  ? ColorPalette["blue-400"]
+                  : ColorPalette["blue-400"]
+              }
+            />
+          )}
+        </XAxis>
         {addressTag ? <TokenTag text={addressTag.text} /> : null}
         {tokenTag && tokenTag.text === "IBC" ? (
           <TokenTag text={tokenTag.text} tooltip={tokenTag.tooltip} />

@@ -935,6 +935,7 @@ export const SpendableAssetView: FunctionComponent<{
           */}
           <TokenFoundModal
             tokenScans={chainStore.tokenScans}
+            emphasizeTokenScans={chainStore.tokenScansWithoutDismissed}
             close={() => setIsFoundTokenModalOpen(false)}
           />
         </Modal>
