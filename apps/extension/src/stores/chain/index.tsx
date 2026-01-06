@@ -153,41 +153,49 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       return !this.enabledChainIdentifiesMap.get(chainIdentifier);
     });
 
-    res = res.map((scan) => {
-      return {
-        ...scan,
-        infos: scan.infos.map((info) => {
-          return {
-            ...info,
-            assets: info.assets
-              .map((asset) => {
-                if (asset.currency) {
-                  return asset;
-                }
-
-                if (asset.coinMinimalDenom) {
-                  if (this.hasChain(scan.chainId)) {
-                    const currency = this.getChain(scan.chainId).findCurrency(
-                      asset.coinMinimalDenom
-                    );
-                    if (currency) {
-                      return {
-                        ...asset,
-                        currency,
-                      };
+    res = res
+      .map((scan) => {
+        return {
+          ...scan,
+          infos: scan.infos
+            .map((info) => {
+              return {
+                ...info,
+                assets: info.assets
+                  .map((asset) => {
+                    if (asset.currency) {
+                      return asset;
                     }
-                  }
-                }
 
-                return asset;
-              })
-              .filter((asset) => {
-                return !!asset.currency;
-              }),
-          };
-        }),
-      };
-    });
+                    if (asset.coinMinimalDenom) {
+                      if (this.hasChain(scan.chainId)) {
+                        const currency = this.getChain(
+                          scan.chainId
+                        ).findCurrency(asset.coinMinimalDenom);
+                        if (currency) {
+                          return {
+                            ...asset,
+                            currency,
+                          };
+                        }
+                      }
+                    }
+
+                    return asset;
+                  })
+                  .filter((asset) => {
+                    return !!asset.currency;
+                  }),
+              };
+            })
+            .filter((info) => {
+              return info.assets.length > 0;
+            }),
+        };
+      })
+      .filter((scan) => {
+        return scan.infos.length > 0;
+      });
 
     return res as RequiredCurrencyTokenScan[];
   }
@@ -203,41 +211,49 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       return !this.enabledChainIdentifiesMap.get(chainIdentifier);
     });
 
-    res = res.map((scan) => {
-      return {
-        ...scan,
-        infos: scan.infos.map((info) => {
-          return {
-            ...info,
-            assets: info.assets
-              .map((asset) => {
-                if (asset.currency) {
-                  return asset;
-                }
-
-                if (asset.coinMinimalDenom) {
-                  if (this.hasChain(scan.chainId)) {
-                    const currency = this.getChain(scan.chainId).findCurrency(
-                      asset.coinMinimalDenom
-                    );
-                    if (currency) {
-                      return {
-                        ...asset,
-                        currency,
-                      };
+    res = res
+      .map((scan) => {
+        return {
+          ...scan,
+          infos: scan.infos
+            .map((info) => {
+              return {
+                ...info,
+                assets: info.assets
+                  .map((asset) => {
+                    if (asset.currency) {
+                      return asset;
                     }
-                  }
-                }
 
-                return asset;
-              })
-              .filter((asset) => {
-                return !!asset.currency;
-              }),
-          };
-        }),
-      };
-    });
+                    if (asset.coinMinimalDenom) {
+                      if (this.hasChain(scan.chainId)) {
+                        const currency = this.getChain(
+                          scan.chainId
+                        ).findCurrency(asset.coinMinimalDenom);
+                        if (currency) {
+                          return {
+                            ...asset,
+                            currency,
+                          };
+                        }
+                      }
+                    }
+
+                    return asset;
+                  })
+                  .filter((asset) => {
+                    return !!asset.currency;
+                  }),
+              };
+            })
+            .filter((info) => {
+              return info.assets.length > 0;
+            }),
+        };
+      })
+      .filter((scan) => {
+        return scan.infos.length > 0;
+      });
 
     return res as RequiredCurrencyTokenScan[];
   }
