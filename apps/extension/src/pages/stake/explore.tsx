@@ -362,12 +362,11 @@ const Styles = {
   AssetCard: styled.div`
     display: flex;
     flex-direction: column;
-    width: 9.875rem;
+    width: 100%;
     height: 8rem;
     padding: 0.75rem 1rem;
     align-items: flex-start;
     justify-content: center;
-    flex-shrink: 0;
     border-radius: 1.25rem;
     border: 1px solid
       ${(props) =>
