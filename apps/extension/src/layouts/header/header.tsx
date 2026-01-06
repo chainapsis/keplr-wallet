@@ -1,7 +1,6 @@
 import React, {
   FunctionComponent,
   PropsWithChildren,
-  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -223,9 +222,9 @@ export const HeaderLayout: FunctionComponent<
 
   const [showBorderBottom, setShowBorderBottom] = useState(false);
 
-  const handleShowBorderBottomChange = useCallback((show: boolean) => {
+  const handleShowBorderBottomChange = (show: boolean) => {
     setShowBorderBottom(show);
-  }, []);
+  };
 
   return (
     <Styles.Container as={onSubmit ? "form" : undefined} onSubmit={onSubmit}>
