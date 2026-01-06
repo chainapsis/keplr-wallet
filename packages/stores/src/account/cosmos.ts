@@ -712,7 +712,7 @@ export class CosmosAccountImpl {
                   if (chainIsCysic) {
                     return "/cysicmint.crypto.v1.ethsecp256k1.PubKey";
                   }
-                  
+
                   return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                 })(),
                 value: PubKey.encode({
