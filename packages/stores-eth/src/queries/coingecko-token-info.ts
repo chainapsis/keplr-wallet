@@ -4,7 +4,25 @@ import {
   ObservableQuery,
   QuerySharedContext,
 } from "@keplr-wallet/stores";
+import { parseBytes32String } from "@ethersproject/strings";
 import { makeObservable } from "mobx";
+
+/**
+ * Some ERC20 contracts (e.g., MKR) return bytes32 for name() and symbol().
+ * CoinGecko API returns bytes32 as hex strings without conversion.
+ * This function detects and converts bytes32 hex strings to readable strings.
+ */
+function decodeBytes32IfNeeded(value: string | undefined): string | undefined {
+  if (!value) return value;
+  if (value.length === 64 && /^[0-9a-fA-F]+$/.test(value)) {
+    try {
+      return parseBytes32String("0x" + value);
+    } catch {
+      // noop
+    }
+  }
+  return value;
+}
 export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
   networkId: string;
   contractAddress: string;
@@ -36,7 +54,7 @@ export class ObservableQueryCoingeckoTokenInfoInner extends ObservableQuery<{
   }
 
   get symbol(): string | undefined {
-    return this.response?.data?.symbol;
+    return decodeBytes32IfNeeded(this.response?.data?.symbol);
   }
 
   get decimals(): number | undefined {
