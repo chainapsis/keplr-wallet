@@ -90,7 +90,7 @@ export class KeyRingStarknetService {
     }
     return new RpcProvider({
       nodeUrl: modularChainInfo.starknet.rpc,
-      specVersion: "0.8.1",
+      specVersion: "0.9.0",
     });
   }
 
