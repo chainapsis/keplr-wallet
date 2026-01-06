@@ -468,6 +468,7 @@ export class CosmosAccountImpl {
         const chainInfo = this.chainGetter.getChain(this.chainId);
         const chainIsInjective = this.chainId.startsWith("injective");
         const chainIsStratos = this.chainId.startsWith("stratos");
+        const chainIsCysic = this.chainId.startsWith("cysic");
         const ethSignPlainJson: boolean =
           chainInfo.features &&
           chainInfo.features.includes("evm-ledger-sign-plain-json");
@@ -589,6 +590,10 @@ export class CosmosAccountImpl {
                         return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                       }
 
+                      if (chainIsCysic) {
+                        return "/cysicmint.crypto.v1.ethsecp256k1.PubKey";
+                      }
+
                       return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                     })(),
                     value: PubKey.encode({
@@ -654,6 +659,7 @@ export class CosmosAccountImpl {
 
     const chainIsInjective = this.chainId.startsWith("injective");
     const chainIsStratos = this.chainId.startsWith("stratos");
+    const chainIsCysic = this.chainId.startsWith("cysic");
 
     // Should use bind to avoid "this" problem
     let signDirect = keplr.signDirect.bind(keplr);
@@ -702,6 +708,11 @@ export class CosmosAccountImpl {
                   ) {
                     return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                   }
+
+                  if (chainIsCysic) {
+                    return "/cysicmint.crypto.v1.ethsecp256k1.PubKey";
+                  }
+                  
                   return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                 })(),
                 value: PubKey.encode({
