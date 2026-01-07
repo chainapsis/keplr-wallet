@@ -16,7 +16,7 @@ import { EyeIcon, EyeSlashIcon } from "../../components/icon";
 import { Gutter } from "../../components/gutter";
 import { TextButton } from "../../components/button-text";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
-import { useViewStakingTokens } from "../../hooks/use-view-staking-tokens";
+import { useViewStakingTokens } from "./hooks/use-view-staking-tokens";
 import { useIntl } from "react-intl";
 import { useStakableTokens } from "./hooks/use-stakable-tokens";
 import { CollapsibleList } from "../../components/collapsible-list";

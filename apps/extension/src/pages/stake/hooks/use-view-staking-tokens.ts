@@ -1,8 +1,11 @@
 import { useMemo } from "react";
 import { useIntl } from "react-intl";
 import { Dec, PricePretty } from "@keplr-wallet/unit";
-import { useStore } from "../stores";
-import { ViewStakedToken, ViewUnbondingToken } from "../stores/huge-queries";
+import { useStore } from "../../../stores";
+import {
+  ViewStakedToken,
+  ViewUnbondingToken,
+} from "../../../stores/huge-queries";
 
 function formatRelativeTime(
   time: string | number,

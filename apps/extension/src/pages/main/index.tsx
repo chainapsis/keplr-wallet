@@ -418,7 +418,7 @@ export const MainPage: FunctionComponent<{
           <Gutter size="0" />
 
           {/*
-            SpendableAssetView, StakedTabView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
+            SpendableAssetView가 컴포넌트로 빠지면서 밑의 얘들의 각각의 item들에는 stack이 안먹힌다는 걸 주의
             각 컴포넌트에서 알아서 gutter를 처리해야한다.
            */}
           <SpendableAssetView
