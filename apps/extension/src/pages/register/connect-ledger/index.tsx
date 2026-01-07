@@ -415,29 +415,36 @@ export const ConnectLedgerScene: FunctionComponent<{
         }
         case "Bitcoin":
         case "Bitcoin Test": {
-          transport = await LedgerUtils.tryAppOpen(transport, propApp);
           let btcApp = new AppClient(transport as any);
 
-          // ensure that the ledger is connected
-          try {
-            const coinType = propApp === "Bitcoin" ? 0 : 1;
+          if (step === "unknown") {
+            try {
+              const coinType = propApp === "Bitcoin" ? 0 : 1;
 
-            await btcApp.getExtendedPubkey(`m/44'/${coinType}'/0'/0/0`);
-          } catch (e) {
-            // Device is locked or user is in home sceen or other app.
-            if (
-              e?.message.includes("(0x6b0c)") ||
-              e?.message.includes("(0x6511)") ||
-              e?.message.includes("(0x6e00)")
-            ) {
+              await btcApp.getExtendedPubkey(`m/44'/${coinType}'/0'/0/0`);
               setStep("connected");
-            } else {
-              console.log(e);
-              setStep("unknown");
               await transport.close();
-
               setIsLoading(false);
               return;
+            } catch (e) {
+              if (
+                e?.message.includes("(0x6b0c)") ||
+                e?.message.includes("(0x6511)") ||
+                e?.message.includes("(0x6e00)") ||
+                e?.message.includes("(0x6a82)")
+              ) {
+                setStep("connected");
+                await transport.close();
+                setIsLoading(false);
+                return;
+              } else {
+                console.log(e);
+                setStep("unknown");
+                await transport.close();
+
+                setIsLoading(false);
+                return;
+              }
             }
           }
 
