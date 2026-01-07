@@ -68,6 +68,45 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
 
   const keyType = keyRingStore.selectedKeyInfo?.type;
 
+  const checkIsLedgerSupportedEthermintChain = useCallback(
+    (chainInfo: ChainInfo): boolean => {
+      if (keyType !== "ledger") {
+        return true;
+      }
+
+      const isEthermintLike =
+        chainInfo.bip44.coinType === 60 ||
+        !!chainInfo.features?.includes("eth-address-gen") ||
+        !!chainInfo.features?.includes("eth-key-sign");
+
+      if (isEthermintLike) {
+        const isEvmOnlyChain =
+          chainStore.hasChain(chainInfo.chainId) &&
+          chainStore.isEvmOnlyChain(chainInfo.chainId);
+
+        if (isEvmOnlyChain) {
+          return true;
+        }
+
+        try {
+          if (chainInfo.features?.includes("force-enable-evm-ledger")) {
+            return true;
+          }
+
+          KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
+            chainInfo.chainId
+          );
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      return true;
+    },
+    [keyType, chainStore]
+  );
+
   const { chains: searchedNonNativeChainInfos, infiniteScrollTriggerRef } =
     useGetAllNonNativeChain({
       search,
@@ -272,18 +311,36 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
     [sortPriorityChainIdentifierMap, totalPriceByIdentifier]
   );
 
-  const nativeChainIdentifierSet = useMemo(
-    () =>
-      new Set(
-        EmbedChainInfos.filter((chainInfo) => {
-          if ("hideInUI" in chainInfo && chainInfo.hideInUI) {
-            return false;
+  const nativeChainIdentifierSet = useMemo(() => {
+    const filtered = EmbedChainInfos.filter((chainInfo) => {
+      if ("hideInUI" in chainInfo && chainInfo.hideInUI) {
+        return false;
+      }
+
+      if (keyType === "ledger") {
+        const cosmosChainInfo = (() => {
+          if ("cosmos" in chainInfo) {
+            return chainInfo.cosmos;
           }
-          return true;
-        }).map((chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier)
-      ),
-    []
-  );
+          if ("bip44" in chainInfo && "features" in chainInfo) {
+            return chainInfo;
+          }
+        })();
+
+        if (cosmosChainInfo) {
+          return checkIsLedgerSupportedEthermintChain(cosmosChainInfo);
+        }
+      }
+
+      return true;
+    });
+
+    return new Set(
+      filtered.map(
+        (chainInfo) => ChainIdHelper.parse(chainInfo.chainId).identifier
+      )
+    );
+  }, [keyType, checkIsLedgerSupportedEthermintChain]);
 
   const { nativeGroupedModularChainInfos, suggestGroupedModularChainInfos } =
     useMemo(() => {
@@ -379,44 +436,7 @@ export const ManageChainsPage: FunctionComponent = observer(() => {
       })();
 
       if (cosmosChainInfo) {
-        const isEthermintLike =
-          cosmosChainInfo.bip44.coinType === 60 ||
-          !!cosmosChainInfo.features?.includes("eth-address-gen") ||
-          !!cosmosChainInfo.features?.includes("eth-key-sign");
-
-        if (isEthermintLike) {
-          // don't filter evm only chains
-          const isEvmOnlyChain =
-            chainStore.hasChain(cosmosChainInfo.chainId) &&
-            chainStore.isEvmOnlyChain(cosmosChainInfo.chainId);
-
-          if (isEvmOnlyChain) {
-            return true;
-          }
-
-          // cosmos 계열이면서 ledger일때
-          // background에서 ledger를 지원하지 않는 체인은 다 지워줘야한다.
-          const isLedgerSupported = (() => {
-            try {
-              if (
-                cosmosChainInfo.features?.includes("force-enable-evm-ledger")
-              ) {
-                return true;
-              }
-
-              KeyRingCosmosService.throwErrorIfEthermintWithLedgerButNotSupported(
-                chainInfo.chainId
-              );
-              return true;
-            } catch {
-              return false;
-            }
-          })();
-
-          return isLedgerSupported;
-        }
-
-        return true;
+        return checkIsLedgerSupportedEthermintChain(cosmosChainInfo);
       }
 
       return true;
