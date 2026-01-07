@@ -221,11 +221,17 @@ export class ObservableQueryTxInnerV2 extends ObservableQuery<TxResponse> {
       from_token: normalizeDenom(
         this.chainStore,
         this.fromChainId,
-        this.fromDenom
+        this.fromDenom,
+        true
       ),
       amount: this.fromAmount,
       to_chain: normalizeChainId(this.toChainId),
-      to_token: normalizeDenom(this.chainStore, this.toChainId, this.toDenom),
+      to_token: normalizeDenom(
+        this.chainStore,
+        this.toChainId,
+        this.toDenom,
+        true
+      ),
       chain_ids_to_addresses: normalizedChainIdsToAddresses,
       slippage: this.slippage,
     };

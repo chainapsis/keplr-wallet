@@ -26,14 +26,16 @@ import {
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { useQueryRouteRefresh } from "./hooks/use-query-route-refresh";
+import { useSwapInitParams } from "./hooks/use-swap-init-params";
+import { useSwapQueryParams } from "./hooks/use-swap-query-params";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
-import { H4, Subtitle4 } from "../../components/typography";
+import { Body3, H4, Subtitle4 } from "../../components/typography";
 import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
@@ -76,6 +78,7 @@ import { amountToAmbiguousString, amountToAmbiguousAverage } from "../../utils";
 import { Button } from "../../components/button";
 import { EvmGasSimulationOutcome, EthTxStatus } from "@keplr-wallet/types";
 import { useSwapAnalytics } from "./hooks/use-swap-analytics";
+import { StepIndicator } from "../../components/step-indicator";
 
 const TextButtonStyles = {
   Container: styled.div`
@@ -145,45 +148,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const notification = useNotification();
   const navigate = useNavigate();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // ---- search params로부터 받더라도 store 자체에서 현재 없는 체인은 기본 체인으로 설정하는 등의 로직이 있으므로
-  //      좀 복잡하더라도 아래처럼 처리해야한다.
-  const searchParamsChainId = searchParams.get("chainId");
-  const searchParamsCoinMinimalDenom = searchParams.get("coinMinimalDenom");
-  const searchParamsOutChainId = searchParams.get("outChainId");
-  const searchParamsOutCoinMinimalDenom = searchParams.get(
-    "outCoinMinimalDenom"
+  // Read initial chain/currency values from query params
+  const { inChainId, inCurrency, outChainId, outCurrency } = useSwapInitParams(
+    uiConfigStore.ibcSwapConfig
   );
-  const inChainId = (() => {
-    if (searchParamsChainId) {
-      uiConfigStore.ibcSwapConfig.setAmountInChainId(searchParamsChainId);
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountInChainInfo().chainId;
-  })();
-  const inCurrency = (() => {
-    if (searchParamsCoinMinimalDenom) {
-      uiConfigStore.ibcSwapConfig.setAmountInMinimalDenom(
-        searchParamsCoinMinimalDenom
-      );
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountInCurrency();
-  })();
-  const outChainId = (() => {
-    if (searchParamsOutChainId) {
-      uiConfigStore.ibcSwapConfig.setAmountOutChainId(searchParamsOutChainId);
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountOutChainInfo().chainId;
-  })();
-  const outCurrency = (() => {
-    if (searchParamsOutCoinMinimalDenom) {
-      uiConfigStore.ibcSwapConfig.setAmountOutMinimalDenom(
-        searchParamsOutCoinMinimalDenom
-      );
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountOutCurrency();
-  })();
-  // ----
 
   const isInChainEVMOnly = chainStore.isEvmOnlyChain(inChainId);
   const inChainAccount = accountStore.getAccount(inChainId);
@@ -226,9 +194,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   );
 
   const swapFeeBps = useSwapFeeBps(swapConfigs.amountConfig);
-  const { isHighPriceImpact, unableToPopulatePrices } = useSwapPriceImpact(
-    swapConfigs.amountConfig
-  );
+  const { isHighPriceImpact, unableToPopulatePrices, isPriceCheckDelayed } =
+    useSwapPriceImpact(swapConfigs.amountConfig);
 
   swapConfigs.amountConfig.setCurrency(inCurrency);
   swapConfigs.amountConfig.setSwapFeeBps(swapFeeBps);
@@ -383,46 +350,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
-  useEffect(() => {
-    setSearchParams(
-      (prev) => {
-        if (swapConfigs.amountConfig.outChainId) {
-          prev.set("outChainId", swapConfigs.amountConfig.outChainId);
-        } else {
-          prev.delete("outChainId");
-        }
-        if (swapConfigs.amountConfig.outCurrency.coinMinimalDenom) {
-          prev.set(
-            "outCoinMinimalDenom",
-            swapConfigs.amountConfig.outCurrency.coinMinimalDenom
-          );
-        } else {
-          prev.delete("outCoinMinimalDenom");
-        }
-
-        return prev;
-      },
-      {
-        replace: true,
-      }
-    );
-  }, [
-    swapConfigs.amountConfig.outChainId,
-    swapConfigs.amountConfig.outCurrency.coinMinimalDenom,
-    setSearchParams,
-  ]);
-
-  const tempSwitchAmount = searchParams.get("tempSwitchAmount");
-  useEffect(() => {
-    if (tempSwitchAmount != null) {
-      swapConfigs.amountConfig.setValue(tempSwitchAmount);
-      setSearchParams((prev) => {
-        prev.delete("tempSwitchAmount");
-        return prev;
-      });
-    }
-  }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
-
   // NOTE: key ring id와 inChainId만 사용하여 swap loading key를 생성하는 이유는
   // 동일한 체인에서 연달아 스왑을 실행하는 경우를 우선적으로 방지하기 위함
   const swapLoadingKey = useMemo(() => {
@@ -433,14 +360,20 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     return `${selectedKeyInfo.id}-${inChainId}`;
   }, [keyRingStore.selectedKeyInfo, inChainId]);
 
-  const isSwapLoading =
-    uiConfigStore.ibcSwapConfig.getIsSwapLoading(swapLoadingKey);
+  const isSwapExecuting =
+    uiConfigStore.ibcSwapConfig.getIsSwapExecuting(swapLoadingKey);
+
+  // Query params management (outChainId/outCurrency sync, tempSwitchAmount, amount reset)
+  const { setSearchParams, clearInitialAmount } = useSwapQueryParams(
+    swapConfigs.amountConfig,
+    isSwapExecuting
+  );
 
   const [isButtonHolding, setIsButtonHolding] = useState(false);
 
   const queryRoute = swapConfigs.amountConfig.getQueryRoute();
 
-  useQueryRouteRefresh(queryRoute, isSwapLoading, isButtonHolding);
+  useQueryRouteRefresh(queryRoute, isSwapExecuting, isButtonHolding);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -546,7 +479,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const oneClickSwapEnabled =
     swapConfigs.amountConfig.isQuoteReady &&
-    !swapConfigs.amountConfig.requiresMultipleTxs &&
+    !swapConfigs.amountConfig.requiresMultipleTxBundles &&
     !isHardwareWallet &&
     (isInChainEVMOnly ? isEvmOneClickSwapEnabled : isCosmosOneClickSwapEnabled);
 
@@ -615,8 +548,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         let routeDurationSeconds: number | undefined;
         let isInterChainSwap: boolean = false;
         let isSingleEVMChainOperation: boolean = false;
+        let requiresMultipleTxBundles: boolean = false;
 
-        uiConfigStore.ibcSwapConfig.setIsSwapLoading(true, swapLoadingKey);
+        uiConfigStore.ibcSwapConfig.setIsSwapExecuting(true, swapLoadingKey);
 
         //================================================================================
         // 1. Get route information and prepare txs
@@ -640,10 +574,86 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             isInChainEVMOnly && inChainId === outChainId && !isInterChainSwap;
           provider = queryRoute.response.data.provider;
 
+          const initializedAccounts: Map<
+            string,
+            { isEvm: boolean; address: string }
+          > = new Map();
+
+          for (const chainId of queryRoute.response.data.required_chain_ids) {
+            const evmLikeChainId = Number(chainId);
+            const isEVMChainId =
+              !Number.isNaN(evmLikeChainId) && evmLikeChainId > 0;
+
+            const chainIdInKeplr = isEVMChainId
+              ? `eip155:${evmLikeChainId}`
+              : chainId;
+
+            if (initializedAccounts.has(chainIdInKeplr)) {
+              continue;
+            }
+
+            const receiverAccount = accountStore.getAccount(chainIdInKeplr);
+            if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
+              await receiverAccount.init();
+            }
+
+            const address = isEVMChainId
+              ? receiverAccount.ethereumHexAddress
+              : receiverAccount.bech32Address;
+
+            if (!address) {
+              const receiverChainInfo = chainStore.hasChain(chainIdInKeplr)
+                ? chainStore.getChain(chainIdInKeplr)
+                : undefined;
+              if (
+                receiverAccount.isNanoLedger &&
+                receiverChainInfo &&
+                (receiverChainInfo.bip44.coinType === 60 ||
+                  receiverChainInfo.features.includes("eth-address-gen") ||
+                  receiverChainInfo.features.includes("eth-key-sign") ||
+                  receiverChainInfo.evm != null)
+              ) {
+                throw new Error(
+                  "Please connect Ethereum app on Ledger with Keplr to get the address"
+                );
+              }
+
+              throw new Error(
+                isEVMChainId
+                  ? "receiverAccount.ethereumHexAddress is undefined"
+                  : "receiverAccount.bech32Address is undefined"
+              );
+            }
+
+            initializedAccounts.set(chainIdInKeplr, {
+              isEvm: isEVMChainId,
+              address,
+            });
+          }
+
+          // NOTE: txs를 새로 가져오기 때문에 ui에서 보여주는 one click swap 가능 여부라던가
+          // total signature count도 새로 계산되므로, 기대되는 결과와 다르게 로직이 실행될 가능성이 있다.
+          // 그러나 우선 낙관적으로 처리하고, 추후에 변동성이 커질 경우에 이를 처리하도록 한다.
+          const [_txs] = await Promise.all([
+            swapConfigs.amountConfig.getTxs(undefined, priorOutAmount),
+          ]);
+
+          if (_txs.length === 0) {
+            throw new Error("Txs are not ready");
+          }
+
+          txs = _txs;
+          requiresMultipleTxBundles = txs.length > 1;
+
           // 브릿지를 사용하는 경우, ibc swap channel까지 보여주면 ui가 너무 복잡해질 수 있으므로 (operation이 최소 3개 이상)
           // evm -> osmosis -> destination 식으로 뭉퉁그려서 보여주는 것이 좋다고 판단, 경로를 간소화한다.
           // 단일 evm 체인 위에서의 스왑인 경우에는 history data 구성을 위해 여기서 처리한다.
-          if (isInterChainSwap || isSingleEVMChainOperation) {
+          // requiresMultipleTxBundles인 경우에도 swap v2 history를 사용하므로 simpleRoute를 구성한다.
+          if (
+            isInterChainSwap ||
+            isSingleEVMChainOperation ||
+            requiresMultipleTxBundles
+          ) {
             routeDurationSeconds = queryRoute.response.data.estimated_time;
 
             for (const chainId of queryRoute.response.data.required_chain_ids) {
@@ -655,29 +665,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 ? `eip155:${evmLikeChainId}`
                 : chainId;
 
-              const receiverAccount = accountStore.getAccount(chainIdInKeplr);
-              if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                await receiverAccount.init();
-              }
-
-              if (isEVMChainId && !receiverAccount.ethereumHexAddress) {
-                const receiverChainInfo =
-                  chainStore.hasChain(chainId) && chainStore.getChain(chainId);
-                if (
-                  receiverAccount.isNanoLedger &&
-                  receiverChainInfo &&
-                  (receiverChainInfo.bip44.coinType === 60 ||
-                    receiverChainInfo.features.includes("eth-address-gen") ||
-                    receiverChainInfo.features.includes("eth-key-sign") ||
-                    receiverChainInfo.evm != null)
-                ) {
-                  throw new Error(
-                    "Please connect Ethereum app on Ledger with Keplr to get the address"
-                  );
-                }
-
+              const accountInfo = initializedAccounts.get(chainIdInKeplr);
+              if (!accountInfo) {
                 throw new Error(
-                  "receiverAccount.ethereumHexAddress is undefined"
+                  `Account for ${chainIdInKeplr} is not initialized`
                 );
               }
 
@@ -690,14 +681,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 simpleRoute.push({
                   isOnlyEvm: isEVMChainId,
                   chainId: chainIdInKeplr,
-                  receiver: isEVMChainId
-                    ? receiverAccount.ethereumHexAddress
-                    : receiverAccount.bech32Address,
+                  receiver: accountInfo.address,
                 });
               }
             }
           } else {
-            // 브릿지를 사용하지 않는 경우, 자세한 ibc swap channel 정보를 보여준다.
+            // 브릿지를 사용하지 않고 single tx인 경우, 자세한 ibc swap channel 정보를 보여준다.
             const skipOperations =
               queryRoute.response.data.provider === "skip"
                 ? queryRoute.response.data.skip_operations
@@ -769,27 +758,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
               for (const receiverChainId of receiverChainIds) {
                 const receiverAccount =
                   accountStore.getAccount(receiverChainId);
-                if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                  await receiverAccount.init();
-                }
+                // 계정은 이미 초기화되어 있음
 
                 if (!receiverAccount.bech32Address) {
-                  const receiverChainInfo =
-                    chainStore.hasChain(receiverChainId) &&
-                    chainStore.getChain(receiverChainId);
-                  if (
-                    receiverAccount.isNanoLedger &&
-                    receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
-                  ) {
-                    throw new Error(
-                      "Please connect Ethereum app on Ledger with Keplr to get the address"
-                    );
-                  }
-
                   throw new Error("receiverAccount.bech32Address is undefined");
                 }
                 swapReceiver.push(receiverAccount.bech32Address);
@@ -871,46 +842,18 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                 const receiverAccount = accountStore.getAccount(
                   receiverChainIdInKeplr
                 );
-                if (receiverAccount.walletStatus !== WalletStatus.Loaded) {
-                  await receiverAccount.init();
-                }
+                // 계정은 이미 초기화되어 있음
 
                 if (!receiverAccount.bech32Address) {
-                  const receiverChainInfo =
-                    chainStore.hasChain(receiverChainIdInKeplr) &&
-                    chainStore.getChain(receiverChainIdInKeplr);
-                  if (
-                    receiverAccount.isNanoLedger &&
-                    receiverChainInfo &&
-                    (receiverChainInfo.bip44.coinType === 60 ||
-                      receiverChainInfo.features.includes("eth-address-gen") ||
-                      receiverChainInfo.features.includes("eth-key-sign") ||
-                      receiverChainInfo.evm != null)
-                  ) {
-                    throw new Error(
-                      "Please connect Ethereum app on Ledger with Keplr to get the address"
-                    );
-                  }
-
                   throw new Error("receiverAccount.bech32Address is undefined");
                 }
                 swapReceiver.push(receiverAccount.bech32Address);
               }
             }
           }
-
-          const [_txs] = await Promise.all([
-            swapConfigs.amountConfig.getTxs(undefined, priorOutAmount),
-          ]);
-
-          if (_txs.length === 0) {
-            throw new Error("Txs are not ready");
-          }
-
-          txs = _txs;
         } catch (e) {
           setCalculatingTxError(e);
-          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
+          uiConfigStore.ibcSwapConfig.setIsSwapExecuting(false, swapLoadingKey);
           return;
         }
 
@@ -926,7 +869,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           | IBCSwapHistoryData
           | SwapV2HistoryData
           | undefined;
-        if (isInterChainSwap || isSingleEVMChainOperation) {
+        if (
+          isInterChainSwap ||
+          isSingleEVMChainOperation ||
+          requiresMultipleTxBundles
+        ) {
           executionType = TxExecutionType.SWAP_V2;
           historyData = {
             fromChainId: inChainId,
@@ -1037,7 +984,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           status: BackgroundTxStatus.PENDING | BackgroundTxStatus.CONFIRMED;
         })[] = [];
 
-        const requiresMultipleTxs = txs.length > 1;
         const totalSignatureCount = txs.reduce((acc, curr) => {
           if ("send" in curr) {
             return acc + 1;
@@ -1149,7 +1095,11 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
                 // if multiple txs are required or the wallet is hardware wallet or topup is required,
                 // sign the tx here
-                if (requiresMultipleTxs || isHardwareWallet || shouldTopUp) {
+                if (
+                  requiresMultipleTxBundles ||
+                  isHardwareWallet ||
+                  shouldTopUp
+                ) {
                   signatureNavigationCount += 1;
                   const result = await tx.sign(
                     swapConfigs.feeConfig.topUpStatus.topUpOverrideStdFee ??
@@ -1253,7 +1203,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
                         };
 
                   if (
-                    requiresMultipleTxs ||
+                    requiresMultipleTxBundles ||
                     isHardwareWallet ||
                     gasSimulator.evmSimulationOutcome ===
                       EvmGasSimulationOutcome.APPROVAL_ONLY_SIMULATED
@@ -1513,8 +1463,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ""
           );
 
-          // reset amount config
-          swapConfigs.amountConfig.setValue("");
+          // reset amount config via query params
+          // (using clearInitialAmount instead of setValue because the component may have remounted)
+          clearInitialAmount();
 
           // update balance for inChainId
           updateBalanceCallback?.();
@@ -1647,7 +1598,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ""
           );
         } finally {
-          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
+          uiConfigStore.ibcSwapConfig.setIsSwapExecuting(false, swapLoadingKey);
           uiConfigStore.ibcSwapConfig.resetSignatureProgress();
         }
       }}
@@ -1805,7 +1756,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             );
           }}
         />
-        <Gutter size="0.75rem" />
+        <Gutter size="1rem" />
         <VerticalCollapseTransition collapsed={shouldTopUp}>
           <SwapFeeInfo
             senderConfig={swapConfigs.senderConfig}
@@ -1824,7 +1775,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           <FeeCoverageDescription isTopUpAvailable={isTopUpAvailable} />
         </VerticalCollapseTransition>
 
-        <VerticalCollapseTransition collapsed={shouldTopUp}>
+        <VerticalCollapseTransition
+          collapsed={shouldTopUp || isPriceCheckDelayed}
+        >
           <WarningGuideBox
             showUSDNWarning={showUSDNWarning}
             showCelestiaWarning={showCelestiaWarning}
@@ -1887,12 +1840,54 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           />
         </VerticalCollapseTransition>
 
-        <Gutter size="0.75rem" />
+        <Gutter size="1rem" />
+        <VerticalCollapseTransition
+          collapsed={
+            oneClickSwapEnabled ||
+            swapConfigs.amountConfig.totalIndividualTxCount <= 1 ||
+            swapConfigs.amountConfig.isFetchingInAmount ||
+            swapConfigs.amountConfig.isFetchingOutAmount ||
+            gasSimulator.isSimulating ||
+            isSwapExecuting
+          }
+        >
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <StepIndicator
+              totalCount={swapConfigs.amountConfig.totalIndividualTxCount}
+              completedCount={0}
+              blinkCurrentStep={true}
+            />
+            <Gutter size="0.25rem" />
+            <Body3
+              color={
+                theme.mode === "light"
+                  ? ColorPalette["gray-300"]
+                  : ColorPalette["gray-200"]
+              }
+            >
+              <FormattedMessage
+                id="page.ibc-swap.info.required-approvals"
+                values={{
+                  total: swapConfigs.amountConfig.totalIndividualTxCount,
+                }}
+              />
+            </Body3>
+          </Box>
+          <Gutter size="0.75rem" />
+        </VerticalCollapseTransition>
 
         {oneClickSwapEnabled ? (
           <HoldButton
             type="submit"
-            holdDurationMs={1500}
+            holdDurationMs={1000}
             disabled={
               interactionBlocked ||
               showUSDNWarning ||
@@ -1915,7 +1910,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              isSwapLoading ||
+              isSwapExecuting ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
             onHoldStart={() => setIsButtonHolding(true)}
@@ -1940,7 +1935,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              isSwapLoading ||
+              isSwapExecuting ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
           />

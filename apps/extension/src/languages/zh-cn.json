@@ -404,6 +404,7 @@
   "page.ibc-transfer.add-channel-modal.channel-id-placeholder": "源通道ID",
 
   "page.ibc-swap.title.swap": "兑换",
+  "page.ibc-swap.info.required-approvals": "{total}个批准",
   "page.ibc-swap.button.next": "交换",
   "page.ibc-swap.button.hold-to-swap": "按住以交换",
   "page.ibc-swap.button.hold-to-approve-and-swap": "按住以批准并交换",
