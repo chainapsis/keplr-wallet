@@ -26,10 +26,12 @@ import {
 } from "@keplr-wallet/hooks";
 import { useNotification } from "../../hooks/notification";
 import { useQueryRouteRefresh } from "./hooks/use-query-route-refresh";
+import { useSwapInitParams } from "./hooks/use-swap-init-params";
+import { useSwapQueryParams } from "./hooks/use-swap-query-params";
 import { FormattedMessage, useIntl } from "react-intl";
 import { SwapFeeBps, TermsOfUseUrl } from "../../config.ui";
 import { BottomTabsHeightRem } from "../../bottom-tabs";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTxConfigsQueryString } from "../../hooks/use-tx-config-query-string";
 import { MainHeaderLayout } from "../main/layouts/header";
 import { XAxis } from "../../components/axis";
@@ -146,45 +148,10 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
   const notification = useNotification();
   const navigate = useNavigate();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // ---- search params로부터 받더라도 store 자체에서 현재 없는 체인은 기본 체인으로 설정하는 등의 로직이 있으므로
-  //      좀 복잡하더라도 아래처럼 처리해야한다.
-  const searchParamsChainId = searchParams.get("chainId");
-  const searchParamsCoinMinimalDenom = searchParams.get("coinMinimalDenom");
-  const searchParamsOutChainId = searchParams.get("outChainId");
-  const searchParamsOutCoinMinimalDenom = searchParams.get(
-    "outCoinMinimalDenom"
+  // Read initial chain/currency values from query params
+  const { inChainId, inCurrency, outChainId, outCurrency } = useSwapInitParams(
+    uiConfigStore.ibcSwapConfig
   );
-  const inChainId = (() => {
-    if (searchParamsChainId) {
-      uiConfigStore.ibcSwapConfig.setAmountInChainId(searchParamsChainId);
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountInChainInfo().chainId;
-  })();
-  const inCurrency = (() => {
-    if (searchParamsCoinMinimalDenom) {
-      uiConfigStore.ibcSwapConfig.setAmountInMinimalDenom(
-        searchParamsCoinMinimalDenom
-      );
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountInCurrency();
-  })();
-  const outChainId = (() => {
-    if (searchParamsOutChainId) {
-      uiConfigStore.ibcSwapConfig.setAmountOutChainId(searchParamsOutChainId);
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountOutChainInfo().chainId;
-  })();
-  const outCurrency = (() => {
-    if (searchParamsOutCoinMinimalDenom) {
-      uiConfigStore.ibcSwapConfig.setAmountOutMinimalDenom(
-        searchParamsOutCoinMinimalDenom
-      );
-    }
-    return uiConfigStore.ibcSwapConfig.getAmountOutCurrency();
-  })();
-  // ----
 
   const isInChainEVMOnly = chainStore.isEvmOnlyChain(inChainId);
   const inChainAccount = accountStore.getAccount(inChainId);
@@ -383,46 +350,6 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     gasSimulator,
   });
 
-  useEffect(() => {
-    setSearchParams(
-      (prev) => {
-        if (swapConfigs.amountConfig.outChainId) {
-          prev.set("outChainId", swapConfigs.amountConfig.outChainId);
-        } else {
-          prev.delete("outChainId");
-        }
-        if (swapConfigs.amountConfig.outCurrency.coinMinimalDenom) {
-          prev.set(
-            "outCoinMinimalDenom",
-            swapConfigs.amountConfig.outCurrency.coinMinimalDenom
-          );
-        } else {
-          prev.delete("outCoinMinimalDenom");
-        }
-
-        return prev;
-      },
-      {
-        replace: true,
-      }
-    );
-  }, [
-    swapConfigs.amountConfig.outChainId,
-    swapConfigs.amountConfig.outCurrency.coinMinimalDenom,
-    setSearchParams,
-  ]);
-
-  const tempSwitchAmount = searchParams.get("tempSwitchAmount");
-  useEffect(() => {
-    if (tempSwitchAmount != null) {
-      swapConfigs.amountConfig.setValue(tempSwitchAmount);
-      setSearchParams((prev) => {
-        prev.delete("tempSwitchAmount");
-        return prev;
-      });
-    }
-  }, [swapConfigs.amountConfig, setSearchParams, tempSwitchAmount]);
-
   // NOTE: key ring id와 inChainId만 사용하여 swap loading key를 생성하는 이유는
   // 동일한 체인에서 연달아 스왑을 실행하는 경우를 우선적으로 방지하기 위함
   const swapLoadingKey = useMemo(() => {
@@ -435,6 +362,12 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
 
   const isSwapExecuting =
     uiConfigStore.ibcSwapConfig.getIsSwapExecuting(swapLoadingKey);
+
+  // Query params management (outChainId/outCurrency sync, tempSwitchAmount, amount reset)
+  const { setSearchParams, clearInitialAmount } = useSwapQueryParams(
+    swapConfigs.amountConfig,
+    isSwapExecuting
+  );
 
   const [isButtonHolding, setIsButtonHolding] = useState(false);
 
@@ -1530,8 +1463,9 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ""
           );
 
-          // reset amount config
-          swapConfigs.amountConfig.setValue("");
+          // reset amount config via query params
+          // (using clearInitialAmount instead of setValue because the component may have remounted)
+          clearInitialAmount();
 
           // update balance for inChainId
           updateBalanceCallback?.();
