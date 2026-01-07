@@ -1602,7 +1602,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
       return;
     }
 
-    uiConfigStore.ibcSwapConfig.setIsSwapLoading(true, swapLoadingKey);
+    uiConfigStore.ibcSwapConfig.setIsSwapExecuting(true, swapLoadingKey);
     uiConfigStore.ibcSwapConfig.setSignatureProgress(
       totalTxCount,
       executedTxCount,
@@ -2014,7 +2014,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
         navigate("/");
       }
     } finally {
-      uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
+      uiConfigStore.ibcSwapConfig.setIsSwapExecuting(false, swapLoadingKey);
       uiConfigStore.ibcSwapConfig.resetSignatureProgress();
     }
   }

@@ -2,7 +2,7 @@ import {
   IBCSwapAmountConfig,
   SwapAmountConfig,
 } from "@keplr-wallet/hooks-internal";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
 import { autorun } from "mobx";
 import { useStore } from "../../../stores";
@@ -21,15 +21,15 @@ export const useSwapPriceImpact = (
   // 실제로 쿼리를 해보고 있는지 아닌지 판단하는 로직도 있음
   // coingecko로부터 가격이 undefined거나 0이면 알 수 없는 것으로 처리함.
   const [isPriceCheckDelayed, setIsPriceCheckDelayed] = useState(true);
-  const debounceCompletedRef = useRef(false);
+  const [debounceCompleted, setDebounceCompleted] = useState(false);
 
   // 자산 변경이 감지되면 1초 대기 후 debounce 완료 표시
   useEffect(() => {
     setIsPriceCheckDelayed(true);
-    debounceCompletedRef.current = false;
+    setDebounceCompleted(false);
 
     const timeoutId = setTimeout(() => {
-      debounceCompletedRef.current = true;
+      setDebounceCompleted(true);
     }, 1000);
 
     return () => {
@@ -42,14 +42,10 @@ export const useSwapPriceImpact = (
 
   // debounce 완료 후 price fetching이 완료되면 딜레이 해제
   useEffect(() => {
-    if (
-      isPriceCheckDelayed &&
-      debounceCompletedRef.current &&
-      !priceStore.isFetching
-    ) {
+    if (isPriceCheckDelayed && debounceCompleted && !priceStore.isFetching) {
       setIsPriceCheckDelayed(false);
     }
-  }, [isPriceCheckDelayed, priceStore.isFetching]);
+  }, [isPriceCheckDelayed, debounceCompleted, priceStore.isFetching]);
 
   const isFetching =
     amountConfig.isFetchingInAmount || amountConfig.isFetchingOutAmount;
