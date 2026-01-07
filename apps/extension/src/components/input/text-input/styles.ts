@@ -193,6 +193,8 @@ export const Styles = {
   `,
   SubText: styled(Caption2)<Pick<TextInputProps, "error" | "paragraph">>`
     margin-top: 4px;
+    overflow-wrap: break-word;
+    word-break: break-word;
     ${({ error, paragraph }) =>
       getSubTextStyleForErrorOrParagraph(error, paragraph)}
   `,

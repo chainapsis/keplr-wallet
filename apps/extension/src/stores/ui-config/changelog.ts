@@ -9,14 +9,12 @@ import {
 import { KVStore, PrefixKVStore } from "@keplr-wallet/common";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import Joi from "joi";
-import { GetSidePanelIsSupportedMsg } from "@keplr-wallet/background";
-import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
-import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
 interface VersionHistory {
   version: string;
   scenes: {
     title: string;
+    subtitle?: string;
     image?: {
       default: string;
       light: string;
@@ -26,8 +24,9 @@ interface VersionHistory {
     links?: {
       [key: string]: string;
     };
+    closeText?: string;
+    closeLink?: string;
   }[];
-  isSidePanelBeta?: boolean;
 }
 
 const Schema = Joi.object<{
@@ -41,6 +40,7 @@ const Schema = Joi.object<{
           .items(
             Joi.object({
               title: Joi.string().required(),
+              subtitle: Joi.string().optional(),
               image: Joi.object({
                 default: Joi.string().required(),
                 light: Joi.string().required(),
@@ -50,11 +50,12 @@ const Schema = Joi.object<{
               links: Joi.object()
                 .pattern(Joi.string(), Joi.string())
                 .optional(),
+              closeText: Joi.string().optional(),
+              closeLink: Joi.string().optional(),
             })
           )
           .min(1)
           .required(),
-        isSidePanelBeta: Joi.boolean().optional(),
       })
     )
     .required(),
@@ -69,6 +70,7 @@ export class ChangelogConfig {
         lastVersion: string;
         currentVersion: string;
         cleared: boolean;
+        forceClearNext?: boolean;
         histories: VersionHistory[];
       }
     | undefined = undefined;
@@ -85,9 +87,18 @@ export class ChangelogConfig {
         "lastInfo"
       );
       if (saved) {
-        runInAction(() => {
-          this._lastInfo = saved;
-        });
+        if (saved.forceClearNext) {
+          runInAction(() => {
+            this._lastInfo = {
+              ...saved,
+              cleared: true,
+            };
+          });
+        } else {
+          runInAction(() => {
+            this._lastInfo = saved;
+          });
+        }
       }
     }
 
@@ -118,28 +129,6 @@ export class ChangelogConfig {
 
       const validated = await Schema.validateAsync(res.data);
 
-      if (
-        validated.versions &&
-        validated.versions.find((v: any) => v.isSidePanelBeta === true)
-      ) {
-        const msg = new GetSidePanelIsSupportedMsg();
-        const res = await new InExtensionMessageRequester().sendMessage(
-          BACKGROUND_PORT,
-          msg
-        );
-        if (!res.supported) {
-          runInAction(() => {
-            this._lastInfo = {
-              lastVersion,
-              currentVersion,
-              cleared: true,
-              histories: [],
-            };
-          });
-          return;
-        }
-      }
-
       runInAction(() => {
         this._lastInfo = {
           lastVersion,
@@ -160,6 +149,16 @@ export class ChangelogConfig {
       this._lastInfo = {
         ...this._lastInfo,
         cleared: true,
+      };
+    }
+  }
+
+  @action
+  forceClearNext() {
+    if (this._lastInfo) {
+      this._lastInfo = {
+        ...this._lastInfo,
+        forceClearNext: true,
       };
     }
   }

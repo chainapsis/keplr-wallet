@@ -15,7 +15,11 @@ import { ChainImageFallback } from "../../../../components/image";
 import { QRCodeSVG } from "qrcode.react";
 import { AddressChip } from "../address-chip";
 import { Button } from "../../../../components/button";
-import { GENESIS_HASH_TO_NETWORK, GenesisHash } from "@keplr-wallet/types";
+import {
+  GENESIS_HASH_TO_NETWORK,
+  GenesisHash,
+  Network,
+} from "@keplr-wallet/types";
 
 export const ReceiveModal: FunctionComponent<{
   chainId: string;
@@ -53,6 +57,9 @@ export const ReceiveModal: FunctionComponent<{
         .split(":")[0];
       const network = GENESIS_HASH_TO_NETWORK[genesisHash as GenesisHash];
       if (network) {
+        if (network === Network.MAINNET) {
+          return account.bitcoinAddress?.bech32Address ?? "";
+        }
         return `bitcoin:${account.bitcoinAddress?.bech32Address}?message=${network}`;
       }
     }

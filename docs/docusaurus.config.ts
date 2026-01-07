@@ -110,7 +110,7 @@ const config: Config = {
           title: "Need Help?",
           items: [
             {
-              label: "Keplr Helpdesk",
+              label: "Keplr Support",
               href: "https://help.keplr.app/",
             },
           ],

@@ -2610,74 +2610,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
     features: [],
   },
   {
-    rpc: "https://rpc.flame.astria.org",
-    rest: "https://rpc.flame.astria.org",
-    evm: {
-      chainId: 253368190,
-      rpc: "https://rpc.flame.astria.org",
-      websocket: "wss://ws.flame.astria.org",
-    },
-    chainId: "eip155:253368190",
-    chainName: "Flame",
-    chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/chain.png",
-    bip44: {
-      coinType: 60,
-    },
-    currencies: [
-      {
-        coinDenom: "TIA",
-        coinMinimalDenom: "flame-native",
-        coinDecimals: 18,
-        coinGeckoId: "celestia",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/utia.png",
-      },
-      {
-        coinDenom: "WTIA",
-        coinMinimalDenom: "erc20:0x61b7794b6a0cc383b367c327b91e5ba85915a071",
-        coinDecimals: 18,
-        coinGeckoId: "celestia",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/wtia.png",
-      },
-      {
-        coinDenom: "USDC",
-        coinMinimalDenom: "erc20:0x3f65144f387f6545bf4b19a1b39c94231e1c849f",
-        coinDecimals: 6,
-        coinGeckoId: "usd-coin",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/uusdc.png",
-      },
-      {
-        coinDenom: "stTIA",
-        coinMinimalDenom: "erc20:0xdf941d092b10ff07eab44bd174dee915c13feccd",
-        coinDecimals: 18,
-        coinGeckoId: "stride-staked-tia",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/sttia.png",
-      },
-      {
-        coinDenom: "milkTIA",
-        coinMinimalDenom: "erc20:0xcbb93e854aa4ef5db51c3b094f28952ef0dc67be",
-        coinDecimals: 18,
-        coinGeckoId: "milkyway-staked-tia",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/milktia.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "TIA",
-        coinMinimalDenom: "flame-native",
-        coinDecimals: 18,
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:253368190/utia.png",
-      },
-    ],
-    features: [],
-  },
-  {
     rpc: "https://rpc-xion.keplr.app",
     rest: "https://lcd-xion.keplr.app",
     chainId: "xion-mainnet-1",
@@ -2834,89 +2766,6 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
         },
       },
     ],
-    features: [],
-  },
-  {
-    chainId: "elys-1",
-    chainName: "Elys Network",
-    chainSymbolImageUrl:
-      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
-    rpc: "https://rpc-elys.keplr.app",
-    rest: "https://lcd-elys.keplr.app",
-    walletUrlForStaking:
-      process.env.NODE_ENV === "production"
-        ? "https://wallet.keplr.app/chains/elys-network?modal=staking&chain=elys-1&step_id=2"
-        : "http://localhost:8080/chains/elys-network?modal=staking&chain=elys-1&step_id=2",
-    bip44: {
-      coinType: 118,
-    },
-    bech32Config: {
-      bech32PrefixAccAddr: "elys",
-      bech32PrefixAccPub: "elyspub",
-      bech32PrefixValAddr: "elysvaloper",
-      bech32PrefixValPub: "elysvaloperpub",
-      bech32PrefixConsAddr: "elysvalcons",
-      bech32PrefixConsPub: "elysvalconspub",
-    },
-    currencies: [
-      {
-        coinDenom: "ELYS",
-        coinMinimalDenom: "uelys",
-        coinDecimals: 6,
-        coinGeckoId: "elys-network",
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
-      },
-    ],
-    feeCurrencies: [
-      {
-        coinDenom: "ELYS",
-        coinMinimalDenom: "uelys",
-        coinDecimals: 6,
-        gasPriceStep: {
-          low: 0.01,
-          average: 0.025,
-          high: 0.03,
-        },
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
-      },
-      {
-        coinDenom: "USDC",
-        coinMinimalDenom:
-          "ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349",
-        coinDecimals: 6,
-        coinGeckoId: "usd-coin",
-        gasPriceStep: {
-          low: 0.01,
-          average: 0.025,
-          high: 0.03,
-        },
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uusdc.png",
-      },
-      {
-        coinDenom: "ATOM",
-        coinMinimalDenom:
-          "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
-        coinDecimals: 6,
-        coinGeckoId: "cosmos",
-        gasPriceStep: {
-          low: 0.01,
-          average: 0.025,
-          high: 0.03,
-        },
-        coinImageUrl:
-          "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/uatom.png",
-      },
-    ],
-    stakeCurrency: {
-      coinDenom: "ELYS",
-      coinMinimalDenom: "uelys",
-      coinDecimals: 6,
-      coinImageUrl:
-        "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/elys/chain.png",
-    },
     features: [],
   },
   {
@@ -4009,6 +3858,47 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
       coinImageUrl:
         "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/zigchain/uzig.png",
     },
+    features: ["cosmwasm"],
+  },
+  {
+    chainId: "pio-mainnet-1",
+    chainName: "Provenance",
+    chainSymbolImageUrl:
+      "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/pio-mainnet/chain.png",
+    rpc: "https://rpc-provenance.keplr.app",
+    rest: "https://lcd-provenance.keplr.app",
+    bip44: {
+      coinType: 505,
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: "pb",
+      bech32PrefixAccPub: "pbpub",
+      bech32PrefixConsAddr: "pbvalcons",
+      bech32PrefixConsPub: "pbvalconspub",
+      bech32PrefixValAddr: "pbvaloper",
+      bech32PrefixValPub: "pbvaloperpub",
+    },
+    currencies: [
+      {
+        coinDecimals: 9,
+        coinDenom: "HASH",
+        coinGeckoId: "hash-2",
+        coinMinimalDenom: "nhash",
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDecimals: 9,
+        coinDenom: "HASH",
+        coinGeckoId: "hash-2",
+        coinMinimalDenom: "nhash",
+        gasPriceStep: {
+          low: 1,
+          average: 1,
+          high: 1,
+        },
+      },
+    ],
     features: ["cosmwasm"],
   },
 ];

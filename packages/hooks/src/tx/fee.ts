@@ -1279,7 +1279,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   readonly getTopUpStatus = computedFn(() => {
     const keplrETCQueries = this.queriesStore.get(this.chainId).keplrETC;
-    if (!keplrETCQueries) {
+    if (!keplrETCQueries || !this.senderConfig.sender) {
       return {
         isTopUpAvailable: false,
         remainingTimeMs: undefined,
@@ -1396,7 +1396,7 @@ export class FeeConfig extends TxChainSetter implements IFeeConfig {
 
   refreshTopUpStatus(): void {
     const keplrETCQueries = this.queriesStore.get(this.chainId).keplrETC;
-    if (!keplrETCQueries) {
+    if (!keplrETCQueries || !this.senderConfig.sender) {
       return;
     }
 

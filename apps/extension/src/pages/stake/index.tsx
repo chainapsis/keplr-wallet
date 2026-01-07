@@ -17,7 +17,8 @@ import { Gutter } from "../../components/gutter";
 import { TextButton } from "../../components/button-text";
 import { ViewStakedToken, ViewUnbondingToken } from "../../stores/huge-queries";
 import { useIntl } from "react-intl";
-import { Dec } from "@keplr-wallet/unit";
+import { Dec, PricePretty } from "@keplr-wallet/unit";
+import { useStakableTokens } from "./hooks/use-stakable-tokens";
 import { CollapsibleList } from "../../components/collapsible-list";
 import { Stack } from "../../components/stack";
 import { TokenItem, TokenTitleView } from "../main/components";
@@ -32,16 +33,13 @@ import styled from "styled-components";
 import { COMMON_HOVER_OPACITY } from "../../styles/constant";
 import debounce from "lodash.debounce";
 
-const zeroDec = new Dec(0);
-
 export const StakePage: FunctionComponent = observer(() => {
   const intl = useIntl();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialExpand = params.get("intitialExpand") === "true";
 
-  const { uiConfigStore, hugeQueriesStore, analyticsAmplitudeStore } =
-    useStore();
+  const { uiConfigStore, analyticsAmplitudeStore } = useStore();
   const isNotReady = useIsNotReady();
 
   const animatedPrivacyModeHover = useSpringValue(0, {
@@ -50,7 +48,8 @@ export const StakePage: FunctionComponent = observer(() => {
 
   const { stakedTotalPrice } = useStakedTotalPrice();
 
-  const { delegations, unbondings } = useViewStakingTokens();
+  const { delegations, unbondings, unbondingsTotalPrice } =
+    useViewStakingTokens();
 
   const hasLoggedAnalytics = useRef(false);
 
@@ -77,11 +76,7 @@ export const StakePage: FunctionComponent = observer(() => {
     };
   }, [delegations.length, isNotReady, debouncedLogEvent, unbondings.length]);
 
-  const hasAnyStakableAsset = useMemo(() => {
-    return hugeQueriesStore.stakables.some((token) =>
-      token.token.toDec().gt(zeroDec)
-    );
-  }, [hugeQueriesStore.stakables]);
+  const { stakableTokens } = useStakableTokens();
 
   const TokenViewData: {
     title: string;
@@ -92,6 +87,8 @@ export const StakePage: FunctionComponent = observer(() => {
           altSentence: string;
         }[];
     lenAlwaysShown: number;
+    titleRight?: React.ReactElement;
+    hideApr?: boolean;
   }[] = [
     {
       title: intl.formatMessage({
@@ -106,14 +103,23 @@ export const StakePage: FunctionComponent = observer(() => {
       }),
       balance: unbondings,
       lenAlwaysShown: 3,
+      titleRight: unbondingsTotalPrice ? (
+        <Subtitle3 color={ColorPalette["gray-200"]}>
+          {uiConfigStore.hideStringIfPrivacyMode(
+            unbondingsTotalPrice.toString(),
+            2
+          )}
+        </Subtitle3>
+      ) : undefined,
+      hideApr: true,
     },
   ];
 
-  if (!hasAnyStakableAsset) {
-    return <StakeExplorePage />;
-  }
-
   if (delegations.length === 0 && unbondings.length === 0) {
+    if (stakableTokens.length === 0) {
+      return <StakeExplorePage />;
+    }
+
     return <StakeEmptyPage />;
   }
 
@@ -232,66 +238,69 @@ export const StakePage: FunctionComponent = observer(() => {
         <Gutter size="1.5rem" />
 
         <Stack gutter="1.5rem">
-          {TokenViewData.map(({ title, balance, lenAlwaysShown }) => {
-            if (balance.length === 0) {
-              return null;
-            }
+          {TokenViewData.map(
+            ({ title, balance, lenAlwaysShown, titleRight, hideApr }) => {
+              if (balance.length === 0) {
+                return null;
+              }
 
-            return (
-              <CollapsibleList
-                key={title}
-                title={<TokenTitleView title={title} />}
-                lenAlwaysShown={lenAlwaysShown}
-                hideNumInTitle={uiConfigStore.isPrivacyMode}
-                items={balance.map((viewToken) => {
-                  const chainId =
-                    "chainInfo" in viewToken
-                      ? viewToken.chainInfo.chainId
-                      : viewToken.unbonding.chainInfo.chainId;
-                  const stakingAprDec = useGetStakingApr(chainId);
+              return (
+                <CollapsibleList
+                  key={title}
+                  title={<TokenTitleView title={title} right={titleRight} />}
+                  lenAlwaysShown={lenAlwaysShown}
+                  hideNumInTitle={uiConfigStore.isPrivacyMode}
+                  items={balance.map((viewToken) => {
+                    const chainId =
+                      "chainInfo" in viewToken
+                        ? viewToken.chainInfo.chainId
+                        : viewToken.unbonding.chainInfo.chainId;
+                    const stakingAprDec = useGetStakingApr(chainId);
 
-                  const stakingApr = stakingAprDec
-                    ? `APR ${stakingAprDec.toString(2)}%`
-                    : undefined;
+                    const stakingApr =
+                      !hideApr && stakingAprDec
+                        ? `APR ${stakingAprDec.toString(2)}%`
+                        : undefined;
 
-                  if ("altSentence" in viewToken) {
+                    if ("altSentence" in viewToken) {
+                      return (
+                        <TokenItem
+                          viewToken={viewToken.unbonding}
+                          key={`${viewToken.unbonding.chainInfo.chainId}-${viewToken.unbonding.token.currency.coinMinimalDenom}`}
+                          disabled={!viewToken.unbonding.stakingUrl}
+                          onClick={() => {
+                            if (viewToken.unbonding.stakingUrl) {
+                              browser.tabs.create({
+                                url: viewToken.unbonding.stakingUrl,
+                              });
+                            }
+                          }}
+                          altSentence={viewToken.altSentence}
+                          stakingApr={stakingApr}
+                        />
+                      );
+                    }
+
                     return (
                       <TokenItem
-                        viewToken={viewToken.unbonding}
-                        key={`${viewToken.unbonding.chainInfo.chainId}-${viewToken.unbonding.token.currency.coinMinimalDenom}`}
-                        disabled={!viewToken.unbonding.stakingUrl}
+                        viewToken={viewToken}
+                        key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
+                        disabled={!viewToken.stakingUrl}
                         onClick={() => {
-                          if (viewToken.unbonding.stakingUrl) {
+                          if (viewToken.stakingUrl) {
                             browser.tabs.create({
-                              url: viewToken.unbonding.stakingUrl,
+                              url: viewToken.stakingUrl,
                             });
                           }
                         }}
-                        altSentence={viewToken.altSentence}
                         stakingApr={stakingApr}
                       />
                     );
-                  }
-
-                  return (
-                    <TokenItem
-                      viewToken={viewToken}
-                      key={`${viewToken.chainInfo.chainId}-${viewToken.token.currency.coinMinimalDenom}`}
-                      disabled={!viewToken.stakingUrl}
-                      onClick={() => {
-                        if (viewToken.stakingUrl) {
-                          browser.tabs.create({
-                            url: viewToken.stakingUrl,
-                          });
-                        }
-                      }}
-                      stakingApr={stakingApr}
-                    />
-                  );
-                })}
-              />
-            );
-          })}
+                  })}
+                />
+              );
+            }
+          )}
         </Stack>
 
         <Gutter size="1.25rem" />
@@ -301,7 +310,7 @@ export const StakePage: FunctionComponent = observer(() => {
 });
 
 const useViewStakingTokens = () => {
-  const { hugeQueriesStore } = useStore();
+  const { hugeQueriesStore, priceStore } = useStore();
   const intl = useIntl();
 
   const delegations: ViewStakedToken[] = useMemo(
@@ -337,9 +346,27 @@ const useViewStakingTokens = () => {
     [hugeQueriesStore.unbondings, intl]
   );
 
+  const unbondingsTotalPrice = useMemo(() => {
+    const fiat = priceStore.getFiatCurrency(priceStore.defaultVsCurrency);
+    if (!fiat) {
+      return undefined;
+    }
+
+    let total = new PricePretty(fiat, 0);
+    for (const { unbonding } of unbondings) {
+      const price = priceStore.calculatePrice(unbonding.token);
+      if (price) {
+        total = total.add(price);
+      }
+    }
+
+    return total;
+  }, [unbondings, priceStore]);
+
   return {
     delegations,
     unbondings,
+    unbondingsTotalPrice,
   };
 };
 

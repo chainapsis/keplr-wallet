@@ -6,9 +6,7 @@ import { ColorPalette } from "../../styles";
 import { Box } from "../../components/box";
 import { Gutter } from "../../components/gutter";
 import { Subtitle2 } from "../../components/typography";
-import { useStore } from "../../stores";
 import { TokenItem } from "../main/components";
-import { Dec } from "@keplr-wallet/unit";
 import { TextButton } from "../../components/button-text";
 import { useNavigate } from "react-router";
 import { ChevronRightIcon } from ".";
@@ -16,27 +14,13 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { MainH1 } from "../../components/typography/main-h1";
 import { useGetStakingApr } from "../../hooks/use-get-staking-apr";
 import { EarnRewardsIcon } from "./components/earn-rewards-icon";
-
-const zeroDec = new Dec(0);
+import { useStakableTokens } from "./hooks/use-stakable-tokens";
 
 export const StakeEmptyPage: FunctionComponent = observer(() => {
   const theme = useTheme();
   const navigate = useNavigate();
   const intl = useIntl();
-  const { hugeQueriesStore, priceStore } = useStore();
-
-  const stakableTokens = hugeQueriesStore.stakables
-    .filter((token) => token.token.toDec().gt(zeroDec))
-    .sort((a, b) => {
-      const aPrice = priceStore.calculatePrice(a.token)?.toDec() ?? zeroDec;
-      const bPrice = priceStore.calculatePrice(b.token)?.toDec() ?? zeroDec;
-
-      if (aPrice.equals(bPrice)) {
-        return 0;
-      }
-      return aPrice.gt(bPrice) ? -1 : 1;
-    })
-    .slice(0, 4);
+  const { stakableTokens, getStakingUrl } = useStakableTokens();
 
   return (
     <MainHeaderLayout>
@@ -81,13 +65,7 @@ export const StakeEmptyPage: FunctionComponent = observer(() => {
         <Gutter size="1rem" />
 
         {stakableTokens.map((viewToken) => {
-          const isStarknet = "starknet" in viewToken.chainInfo;
-          const stakingUrl = isStarknet
-            ? "https://dashboard.endur.fi/stake"
-            : "walletUrlForStaking" in viewToken.chainInfo
-            ? viewToken.chainInfo.walletUrlForStaking
-            : undefined;
-
+          const stakingUrl = getStakingUrl(viewToken);
           const stakingAprDec = useGetStakingApr(viewToken.chainInfo.chainId);
 
           return (

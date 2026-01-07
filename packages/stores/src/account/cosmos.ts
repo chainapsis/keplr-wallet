@@ -475,6 +475,7 @@ export class CosmosAccountImpl {
         const chainInfo = this.chainGetter.getChain(this.chainId);
         const chainIsInjective = this.chainId.startsWith("injective");
         const chainIsStratos = this.chainId.startsWith("stratos");
+        const chainIsCysic = this.chainId.startsWith("cysic");
         const ethSignPlainJson: boolean =
           chainInfo.features &&
           chainInfo.features.includes("evm-ledger-sign-plain-json");
@@ -549,38 +550,21 @@ export class CosmosAccountImpl {
                 timeoutHeight: signResponse.signed.timeout_height,
                 memo: signResponse.signed.memo,
                 extensionOptions:
-                  eip712Signing && !ethSignPlainJson
+                  eip712Signing && chainIsInjective
                     ? [
                         {
-                          typeUrl: (() => {
-                            if (
-                              chainInfo.hasFeature(
-                                "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx"
-                              )
-                            ) {
-                              return "/cosmos.evm.types.v1.ExtensionOptionsWeb3Tx";
-                            }
-
-                            if (chainIsInjective) {
-                              return "/injective.types.v1beta1.ExtensionOptionsWeb3Tx";
-                            }
-
-                            return "/ethermint.types.v1.ExtensionOptionsWeb3Tx";
-                          })(),
+                          typeUrl:
+                            "/injective.types.v1beta1.ExtensionOptionsWeb3Tx",
                           value: ExtensionOptionsWeb3Tx.encode(
                             ExtensionOptionsWeb3Tx.fromPartial({
                               typedDataChainId: EthermintChainIdHelper.parse(
                                 this.chainId
                               ).ethChainId.toString(),
-                              feePayer: !chainIsInjective
-                                ? signResponse.signed.fee.feePayer
-                                : undefined,
-                              feePayerSig: !chainIsInjective
-                                ? Buffer.from(
-                                    signResponse.signature.signature,
-                                    "base64"
-                                  )
-                                : undefined,
+                              feePayer: signResponse.signed.fee.feePayer,
+                              feePayerSig: Buffer.from(
+                                signResponse.signature.signature,
+                                "base64"
+                              ),
                             })
                           ).finish(),
                         },
@@ -613,6 +597,10 @@ export class CosmosAccountImpl {
                         return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                       }
 
+                      if (chainIsCysic) {
+                        return "/cysicmint.crypto.v1.ethsecp256k1.PubKey";
+                      }
+
                       return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                     })(),
                     value: PubKey.encode({
@@ -637,18 +625,11 @@ export class CosmosAccountImpl {
               fee: Fee.fromPartial({
                 amount: signResponse.signed.fee.amount as Coin[],
                 gasLimit: signResponse.signed.fee.gas,
-                payer:
-                  eip712Signing && !chainIsInjective && !ethSignPlainJson
-                    ? // Fee delegation feature not yet supported. But, for eip712 ethermint signing, we must set fee payer.
-                      signResponse.signed.fee.feePayer
-                    : undefined,
               }),
             }).finish(),
-            signatures:
-              // Injective needs the signature in the signatures list even if eip712
-              !eip712Signing || chainIsInjective || ethSignPlainJson
-                ? [Buffer.from(signResponse.signature.signature, "base64")]
-                : [new Uint8Array(0)],
+            signatures: [
+              Buffer.from(signResponse.signature.signature, "base64"),
+            ],
           }).finish(),
           signDoc: signResponse.signed,
         };
@@ -701,6 +682,7 @@ export class CosmosAccountImpl {
 
     const chainIsInjective = this.chainId.startsWith("injective");
     const chainIsStratos = this.chainId.startsWith("stratos");
+    const chainIsCysic = this.chainId.startsWith("cysic");
 
     // Should use bind to avoid "this" problem
     let signDirect = keplr.signDirect.bind(keplr);
@@ -749,6 +731,11 @@ export class CosmosAccountImpl {
                   ) {
                     return "/initia.crypto.v1beta1.ethsecp256k1.PubKey";
                   }
+
+                  if (chainIsCysic) {
+                    return "/cysicmint.crypto.v1.ethsecp256k1.PubKey";
+                  }
+
                   return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
                 })(),
                 value: PubKey.encode({
