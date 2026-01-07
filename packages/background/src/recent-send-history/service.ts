@@ -2866,6 +2866,8 @@ export class RecentSendHistoryService {
         runInAction(() => {
           history.additionalTrackDone = true;
           history.assetLocationInfo = undefined;
+          // Update routeIndex to the last index to show completion state in UI
+          history.routeIndex = history.simpleRoute.length;
           this.notifySwapV2Success(history);
         });
       },

@@ -121,6 +121,7 @@ export class SwapAmountConfig extends AmountConfig {
   get maxAmount(): CoinPretty {
     let result = this.queriesStore
       .get(this.chainId)
+      // CHECK: queryBalances대신 querySpendableBalance를 사용해야 하는지 확인
       .queryBalances.getQueryBech32Address(this.senderConfig.sender)
       .getBalanceFromCurrency(this.currency);
     if (this.feeConfig && !this.disableSubFeeFromFaction) {
