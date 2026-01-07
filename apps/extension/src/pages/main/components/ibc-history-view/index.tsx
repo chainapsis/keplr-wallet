@@ -1570,10 +1570,14 @@ const SwapV2HistoryViewItem: FunctionComponent<{
     return `${selectedKeyInfo.id}-${history.id}`;
   }, [history, keyRingStore.selectedKeyInfo]);
 
-  const isSwapLoading =
-    uiConfigStore.ibcSwapConfig.getIsSwapLoading(swapLoadingKey);
+  const isSwapExecuting =
+    uiConfigStore.ibcSwapConfig.getIsSwapExecuting(swapLoadingKey);
 
   async function handleContinueSigning() {
+    if (isSwapExecuting) {
+      return;
+    }
+
     if (!history.backgroundExecutionId || !txExecution) {
       return;
     }
@@ -2410,7 +2414,7 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                     arrowWarning={(() => {
                       // 환불 시 왼쪽 화살표에 경고 색상 적용 (에러가 있을 때만)
                       if (
-                        !!history.trackError &&
+                        hasTrackError &&
                         assetReleasedRouteIndex >= 0 &&
                         assetReleasedRouteIndex < history.routeIndex &&
                         i >= assetReleasedRouteIndex &&
@@ -2616,9 +2620,10 @@ const SwapV2HistoryViewItem: FunctionComponent<{
                       padding: 0,
                       height: "auto",
                     }}
-                    isLoading={isSwapLoading}
+                    disabled={isSwapExecuting}
+                    isLoading={isSwapExecuting}
                     right={
-                      isSwapLoading ? null : (
+                      isSwapExecuting ? null : (
                         <ChevronRightIcon width="1rem" height="1rem" />
                       )
                     }

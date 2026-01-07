@@ -433,14 +433,14 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
     return `${selectedKeyInfo.id}-${inChainId}`;
   }, [keyRingStore.selectedKeyInfo, inChainId]);
 
-  const isSwapLoading =
-    uiConfigStore.ibcSwapConfig.getIsSwapLoading(swapLoadingKey);
+  const isSwapExecuting =
+    uiConfigStore.ibcSwapConfig.getIsSwapExecuting(swapLoadingKey);
 
   const [isButtonHolding, setIsButtonHolding] = useState(false);
 
   const queryRoute = swapConfigs.amountConfig.getQueryRoute();
 
-  useQueryRouteRefresh(queryRoute, isSwapLoading, isButtonHolding);
+  useQueryRouteRefresh(queryRoute, isSwapExecuting, isButtonHolding);
 
   // ------ 기능상 의미는 없고 이 페이지에서 select asset page로의 전환시 UI flash를 막기 위해서 필요한 값들을 prefetch하는 용도
   useEffect(() => {
@@ -617,7 +617,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
         let isSingleEVMChainOperation: boolean = false;
         let requiresMultipleTxBundles: boolean = false;
 
-        uiConfigStore.ibcSwapConfig.setIsSwapLoading(true, swapLoadingKey);
+        uiConfigStore.ibcSwapConfig.setIsSwapExecuting(true, swapLoadingKey);
 
         //================================================================================
         // 1. Get route information and prepare txs
@@ -920,7 +920,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
           }
         } catch (e) {
           setCalculatingTxError(e);
-          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
+          uiConfigStore.ibcSwapConfig.setIsSwapExecuting(false, swapLoadingKey);
           return;
         }
 
@@ -1664,7 +1664,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             ""
           );
         } finally {
-          uiConfigStore.ibcSwapConfig.setIsSwapLoading(false, swapLoadingKey);
+          uiConfigStore.ibcSwapConfig.setIsSwapExecuting(false, swapLoadingKey);
           uiConfigStore.ibcSwapConfig.resetSignatureProgress();
         }
       }}
@@ -1913,7 +1913,8 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             swapConfigs.amountConfig.totalIndividualTxCount <= 1 ||
             swapConfigs.amountConfig.isFetchingInAmount ||
             swapConfigs.amountConfig.isFetchingOutAmount ||
-            gasSimulator.isSimulating
+            gasSimulator.isSimulating ||
+            isSwapExecuting
           }
         >
           <Box
@@ -1975,7 +1976,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              isSwapLoading ||
+              isSwapExecuting ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
             onHoldStart={() => setIsButtonHolding(true)}
@@ -2000,7 +2001,7 @@ export const IBCSwapPage: FunctionComponent = observer(() => {
             color="primary"
             size="large"
             isLoading={
-              isSwapLoading ||
+              isSwapExecuting ||
               accountStore.getAccount(inChainId).isSendingMsg === "ibc-swap"
             }
           />
