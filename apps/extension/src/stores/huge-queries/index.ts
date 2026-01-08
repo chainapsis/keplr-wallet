@@ -14,12 +14,12 @@ import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import { AppCurrency, ModularChainInfo } from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore, TokensStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
-import { Asset, SkipQueries } from "@keplr-wallet/stores-internal";
+import { SkipQueries } from "@keplr-wallet/stores-internal";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
 import { INITIA_CHAIN_ID } from "../../config.ui";
 import { sortByPrice } from "../../utils/token-sort";
@@ -1262,22 +1262,6 @@ export class HugeQueriesStore {
       return 1;
     }
   };
-
-  protected getErc20AssetForToken = computedFn(
-    (chainId: string, currency: AppCurrency): Asset | undefined => {
-      if (!currency.coinMinimalDenom.startsWith("erc20:")) {
-        return undefined;
-      }
-
-      return this.skipQueriesStore.queryAssets
-        .getAssets(chainId)
-        .assetsRaw.find(
-          (asset) =>
-            asset.tokenContract?.toLowerCase() ===
-            currency.coinMinimalDenom.split(":")[1].toLowerCase()
-        );
-    }
-  );
 
   protected findBitcoinGroupKey = computedFn(
     (chainId: string): string | undefined => {
