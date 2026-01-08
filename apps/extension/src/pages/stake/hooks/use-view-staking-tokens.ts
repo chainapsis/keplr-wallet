@@ -7,6 +7,19 @@ import {
   ViewUnbondingToken,
 } from "../../../stores/huge-queries";
 
+function parseTimeToMs(time: string | number): number {
+  if (typeof time === "number") {
+    return time;
+  }
+
+  const parsed = Number(time);
+  if (!isNaN(parsed)) {
+    return parsed;
+  }
+
+  return new Date(time).getTime();
+}
+
 function formatRelativeTime(
   time: string | number,
   discardDecimal?: boolean
@@ -14,17 +27,7 @@ function formatRelativeTime(
   unit: "minute" | "hour" | "day";
   value: number;
 } {
-  let timeMs: number;
-  if (typeof time === "number") {
-    timeMs = time;
-  } else {
-    const parsed = Number(time);
-    if (!isNaN(parsed)) {
-      timeMs = parsed;
-    } else {
-      timeMs = new Date(time).getTime();
-    }
-  }
+  const timeMs = parseTimeToMs(time);
 
   const remaining = timeMs - Date.now();
 
@@ -69,7 +72,7 @@ function formatRelativeTime(
   };
 }
 
-export function useViewStakingTokens(includeUnbondingTotalPrice = false) {
+export function useViewStakingTokens() {
   const { hugeQueriesStore, priceStore } = useStore();
   const intl = useIntl();
 
@@ -93,20 +96,7 @@ export function useViewStakingTokens(includeUnbondingTotalPrice = false) {
         }
 
         if (unbonding.completeTime) {
-          let timeMs: number;
-          // starknet unbonding time is in milliseconds
-          if (typeof unbonding.completeTime === "number") {
-            timeMs = unbonding.completeTime;
-          } else {
-            const parsed = Number(unbonding.completeTime);
-            if (!isNaN(parsed)) {
-              timeMs = parsed;
-            } else {
-              // completeTime is in ISO string
-              timeMs = new Date(unbonding.completeTime).getTime();
-            }
-          }
-
+          const timeMs = parseTimeToMs(unbonding.completeTime);
           const remaining = timeMs - currentTime;
           if (remaining <= 0) {
             return false;
@@ -131,10 +121,6 @@ export function useViewStakingTokens(includeUnbondingTotalPrice = false) {
   }, [hugeQueriesStore.unbondings, intl]);
 
   const unbondingsTotalPrice = useMemo(() => {
-    if (!includeUnbondingTotalPrice) {
-      return undefined;
-    }
-
     const fiat = priceStore.getFiatCurrency(priceStore.defaultVsCurrency);
     if (!fiat) {
       return undefined;
@@ -149,7 +135,7 @@ export function useViewStakingTokens(includeUnbondingTotalPrice = false) {
     }
 
     return total;
-  }, [unbondings, priceStore, includeUnbondingTotalPrice]);
+  }, [unbondings, priceStore]);
 
   return {
     delegations,

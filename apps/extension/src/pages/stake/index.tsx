@@ -49,7 +49,7 @@ export const StakePage: FunctionComponent = observer(() => {
   const { stakedTotalPrice } = useStakedTotalPrice();
 
   const { delegations, unbondings, unbondingsTotalPrice } =
-    useViewStakingTokens(true);
+    useViewStakingTokens();
 
   const hasLoggedAnalytics = useRef(false);
 
