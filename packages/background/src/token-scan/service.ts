@@ -2,35 +2,56 @@ import { ChainsService } from "../chains";
 import { KeyRingCosmosService } from "../keyring-cosmos";
 import { KeyRingService } from "../keyring";
 import { ChainsUIForegroundService, ChainsUIService } from "../chains-ui";
-import { autorun, makeObservable, observable, runInAction, toJS } from "mobx";
+import {
+  action,
+  autorun,
+  makeObservable,
+  observable,
+  runInAction,
+  toJS,
+} from "mobx";
 import { AppCurrency, SupportedPaymentType } from "@keplr-wallet/types";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { VaultService } from "../vault";
-import { KVStore } from "@keplr-wallet/common";
+import { DenomHelper, KVStore } from "@keplr-wallet/common";
 import { KeyRingStarknetService } from "../keyring-starknet";
 import { CairoUint256 } from "starknet";
 import { KeyRingBitcoinService } from "../keyring-bitcoin";
 import { MessageRequester } from "@keplr-wallet/router";
 
+const thirdpartySupportedChainIdMap: Record<string, string> = {
+  "eip155:1": "eth",
+  "eip155:10": "opt",
+  "eip155:137": "polygon",
+  "eip155:8453": "base",
+  "eip155:42161": "arb",
+};
+
+type Asset = {
+  currency?: AppCurrency;
+  coinMinimalDenom?: string;
+  amount: string;
+};
+
+export type TokenScanInfo = {
+  bech32Address?: string;
+  ethereumHexAddress?: string;
+  starknetHexAddress?: string;
+  bitcoinAddress?: {
+    bech32Address: string;
+    paymentType: SupportedPaymentType;
+  };
+  coinType?: number;
+  assets: Asset[];
+};
+
 export type TokenScan = {
   chainId: string;
-  infos: {
-    bech32Address?: string;
-    ethereumHexAddress?: string;
-    starknetHexAddress?: string;
-    bitcoinAddress?: {
-      bech32Address: string;
-      paymentType: SupportedPaymentType;
-    };
-    coinType?: number;
-    assets: {
-      currency: AppCurrency;
-      amount: string;
-    }[];
-  }[];
+  infos: TokenScanInfo[];
   linkedChainKey?: string;
+  dismissedInfos?: TokenScanInfo[];
 };
 
 export class TokenScanService {
@@ -127,29 +148,28 @@ export class TokenScanService {
         });
       }
     );
-    this.chainsUIService.addChainUIEnabledChangedHandler(
-      (vaultId, chainIdentifiers) => {
-        runInAction(() => {
-          let prevTokenScans = this.vaultToMap.get(vaultId);
-          if (prevTokenScans) {
-            prevTokenScans = prevTokenScans.filter((tokenScan) => {
-              return !chainIdentifiers.includes(
-                ChainIdHelper.parse(tokenScan.chainId).identifier
-              );
-            });
-            this.vaultToMap.set(vaultId, prevTokenScans);
-          }
-        });
-      }
-    );
+
+    this.chainsService.addChainRemovedHandler((chainInfo) => {
+      runInAction(() => {
+        for (const [vaultId, tokenScans] of this.vaultToMap.entries()) {
+          let prevTokenScans = tokenScans;
+          prevTokenScans = prevTokenScans.filter((scan) => {
+            return scan.chainId !== chainInfo.chainId;
+          });
+
+          this.vaultToMap.set(vaultId, prevTokenScans);
+        }
+      });
+    });
   }
 
   getTokenScans(vaultId: string): TokenScan[] {
     return (this.vaultToMap.get(vaultId) ?? [])
       .filter((tokenScan) => {
         return (
-          this.chainsService.hasChainInfo(tokenScan.chainId) ||
-          this.chainsService.hasModularChainInfo(tokenScan.chainId)
+          (this.chainsService.hasChainInfo(tokenScan.chainId) ||
+            this.chainsService.hasModularChainInfo(tokenScan.chainId)) &&
+          !this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)
         );
       })
       .sort((a, b) => {
@@ -225,6 +245,13 @@ export class TokenScanService {
         const chainIdentifier = ChainIdHelper.parse(
           tokenScan.chainId
         ).identifier;
+
+        const prevTokenScan = prevTokenScans.find((scan) => {
+          return (
+            ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+          );
+        });
+
         prevTokenScans = prevTokenScans.filter((scan) => {
           const prevChainIdentifier = ChainIdHelper.parse(
             scan.chainId
@@ -232,7 +259,10 @@ export class TokenScanService {
           return chainIdentifier !== prevChainIdentifier;
         });
 
-        prevTokenScans.push(tokenScan);
+        prevTokenScans.push({
+          ...prevTokenScan,
+          ...tokenScan,
+        });
 
         this.vaultToMap.set(vaultId, prevTokenScans);
       });
@@ -254,6 +284,7 @@ export class TokenScanService {
     const tokenScans: TokenScan[] = [];
     const processedLinkedChainKeys = new Set<string>();
     const promises: Promise<void>[] = [];
+    const logChains: string[] = [];
 
     for (const modularChainInfo of modularChainInfos) {
       if ("linkedChainKey" in modularChainInfo) {
@@ -275,10 +306,18 @@ export class TokenScanService {
           }
         })()
       );
+      logChains.push(modularChainInfo.chainId);
     }
 
     // ignore error
-    await Promise.allSettled(promises);
+    const settled = await Promise.allSettled(promises);
+    for (let i = 0; i < settled.length; i++) {
+      const s = settled[i];
+      if (s.status === "rejected") {
+        console.error("failed to calculateTokenScan", logChains[i]);
+        console.error(s.reason);
+      }
+    }
 
     if (tokenScans.length > 0) {
       runInAction(() => {
@@ -288,6 +327,13 @@ export class TokenScanService {
           const chainIdentifier = ChainIdHelper.parse(
             tokenScan.chainId
           ).identifier;
+
+          const prevTokenScan = prevTokenScans.find((scan) => {
+            return (
+              ChainIdHelper.parse(scan.chainId).identifier === chainIdentifier
+            );
+          });
+
           prevTokenScans = prevTokenScans.filter((scan) => {
             const prevChainIdentifier = ChainIdHelper.parse(
               scan.chainId
@@ -295,12 +341,11 @@ export class TokenScanService {
             return chainIdentifier !== prevChainIdentifier;
           });
 
-          prevTokenScans.push(tokenScan);
+          prevTokenScans.push({
+            ...prevTokenScan,
+            ...tokenScan,
+          });
         }
-
-        prevTokenScans = prevTokenScans.filter((scan) => {
-          return !this.chainsUIService.isEnabled(vaultId, scan.chainId);
-        });
 
         this.vaultToMap.set(vaultId, prevTokenScans);
       });
@@ -346,6 +391,8 @@ export class TokenScanService {
           pubkey.getEthAddress()
         ).toString("hex")}`;
 
+        const assets: Asset[] = [];
+
         const res = await simpleFetch<{
           result: string;
         }>(evmInfo.rpc, {
@@ -373,16 +420,76 @@ export class TokenScanService {
           res.status === 200 &&
           BigInt(res.data.result).toString(10) !== "0"
         ) {
+          assets.push({
+            currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
+            amount: BigInt(res.data.result).toString(10),
+          });
+        }
+
+        if (thirdpartySupportedChainIdMap[chainId]) {
+          const tokenAPIURL = `https://evm-${chainId.replace(
+            "eip155:",
+            ""
+          )}.keplr.app/api`;
+
+          const res = await simpleFetch<{
+            jsonrpc: string;
+            id: number;
+            result: {
+              address: string;
+              tokenBalances: {
+                contractAddress: string;
+                tokenBalance: string | null;
+                error: {
+                  code: number;
+                  message: string;
+                } | null;
+              }[];
+              // TODO: Support pagination.
+              pageKey: string;
+            };
+          }>(tokenAPIURL, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              ...(() => {
+                if (typeof browser !== "undefined") {
+                  return {
+                    "request-source": new URL(browser.runtime.getURL("/"))
+                      .origin,
+                  };
+                }
+                return undefined;
+              })(),
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              method: "alchemy_getTokenBalances",
+              params: [ethereumHexAddress, "erc20"],
+              id: 1,
+            }),
+          });
+
+          if (res.status === 200) {
+            for (const tokenBalance of res.data.result?.tokenBalances ?? []) {
+              if (tokenBalance.tokenBalance && tokenBalance.error == null) {
+                assets.push({
+                  coinMinimalDenom: DenomHelper.normalizeDenom(
+                    `erc20:${tokenBalance.contractAddress}`
+                  ),
+                  amount: BigInt(tokenBalance.tokenBalance).toString(10),
+                });
+              }
+            }
+          }
+        }
+
+        if (assets.length > 0) {
           tokenScan.infos.push({
             bech32Address: "",
             ethereumHexAddress,
             coinType: 60,
-            assets: [
-              {
-                currency: chainInfo.stakeCurrency ?? chainInfo.currencies[0],
-                amount: BigInt(res.data.result).toString(10),
-              },
-            ],
+            assets,
           });
         }
       } else {
@@ -422,26 +529,26 @@ export class TokenScanService {
           );
 
           if (res.status === 200) {
-            const assets: TokenScan["infos"][number]["assets"] = [];
+            const assets: TokenScanInfo["assets"] = [];
 
             const balances = res.data?.balances ?? [];
             for (const bal of balances) {
               const currency = chainInfo.currencies.find(
                 (cur) => cur.coinMinimalDenom === bal.denom
               );
-              if (currency) {
-                // validate
-                if (typeof bal.amount !== "string") {
-                  throw new Error("Invalid amount");
-                }
 
-                const dec = new Dec(bal.amount);
-                if (dec.gt(new Dec(0))) {
-                  assets.push({
-                    currency,
-                    amount: bal.amount,
-                  });
-                }
+              // validate
+              if (typeof bal.amount !== "string") {
+                throw new Error("Invalid amount");
+              }
+
+              const dec = new Dec(bal.amount);
+              if (dec.gte(new Dec(0))) {
+                assets.push({
+                  currency,
+                  coinMinimalDenom: bal.denom,
+                  amount: bal.amount,
+                });
               }
             }
 
@@ -502,28 +609,26 @@ export class TokenScanService {
               .toBigInt()
               .toString(10);
 
-            if (amount !== "0") {
-              // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
-              //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
-              if (tokenScan.infos.length === 0) {
-                tokenScan.infos.push({
-                  starknetHexAddress,
-                  assets: [
-                    {
-                      currency,
-                      amount,
-                    },
-                  ],
-                });
-              } else {
-                if (
-                  tokenScan.infos[0].starknetHexAddress === starknetHexAddress
-                ) {
-                  tokenScan.infos[0].assets.push({
+            // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
+            //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
+            if (tokenScan.infos.length === 0) {
+              tokenScan.infos.push({
+                starknetHexAddress,
+                assets: [
+                  {
                     currency,
                     amount,
-                  });
-                }
+                  },
+                ],
+              });
+            } else {
+              if (
+                tokenScan.infos[0].starknetHexAddress === starknetHexAddress
+              ) {
+                tokenScan.infos[0].assets.push({
+                  currency,
+                  amount,
+                });
               }
             }
           }
@@ -613,40 +718,135 @@ export class TokenScanService {
           );
         }
 
-        let hasNonZeroAmount = false;
-
-        for (const bitcoinScanInfo of bitcoinScanInfos) {
-          // 우선 main currency만 처리한다.
-          if (
-            bitcoinScanInfo.assets.length > 0 &&
-            bitcoinScanInfo.assets[0].amount !== "0"
-          ) {
-            hasNonZeroAmount = true;
-            break;
-          }
-        }
-
-        // 하나라도 0이 아닌 값이 있으면 연결된 모든 체인에 대해 토큰 스캔 정보를 추가한다.
-        if (hasNonZeroAmount) {
-          tokenScan.infos.push(...bitcoinScanInfos);
-        }
+        tokenScan.infos.push(...bitcoinScanInfos);
       } else {
         const bitcoinScanInfo = await getBitcoinScanInfo(
           vaultId,
           chainId,
-          false
+          true
         );
-
         if (bitcoinScanInfo) {
           tokenScan.infos.push(bitcoinScanInfo);
         }
       }
     }
-
     if (tokenScan.infos.length > 0) {
       return tokenScan;
     }
 
     return undefined;
+  }
+
+  @action
+  dismissNewTokenFoundInHome(vaultId: string) {
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    for (const prevTokenScan of prevTokenScans) {
+      prevTokenScan.dismissedInfos = prevTokenScan.infos;
+    }
+    this.vaultToMap.set(vaultId, prevTokenScans);
+  }
+
+  @action
+  resetDismiss(vaultId: string) {
+    const prevTokenScans = this.vaultToMap.get(vaultId) ?? [];
+    for (const prevTokenScan of prevTokenScans) {
+      prevTokenScan.dismissedInfos = undefined;
+    }
+    this.vaultToMap.set(vaultId, prevTokenScans);
+  }
+
+  public isMeaningfulTokenScanChangeBetweenDismissed(
+    tokenScan: TokenScan
+  ): boolean {
+    if (!tokenScan.dismissedInfos || tokenScan.dismissedInfos.length === 0) {
+      return tokenScan.infos.length > 0;
+    }
+
+    const makeKey = (info: TokenScanInfo): string | undefined => {
+      if (info.bech32Address) return `bech32:${info.bech32Address}`;
+      if (info.ethereumHexAddress) return `eth:${info.ethereumHexAddress}`;
+      if (info.starknetHexAddress) return `stark:${info.starknetHexAddress}`;
+      if (info.bitcoinAddress?.bech32Address)
+        return `btc:${info.bitcoinAddress.bech32Address}`;
+      if (info.coinType != null) return `coin:${info.coinType}`;
+      return undefined;
+    };
+
+    const toBigIntSafe = (v: string): bigint | undefined => {
+      try {
+        return BigInt(v);
+      } catch {
+        return undefined;
+      }
+    };
+
+    const dismissedTokenInfosMap = new Map<string, TokenScanInfo>();
+    for (const info of tokenScan.dismissedInfos ?? []) {
+      const key = makeKey(info);
+      if (key) {
+        dismissedTokenInfosMap.set(key, info);
+      }
+    }
+
+    for (const info of tokenScan.infos) {
+      const key = makeKey(info);
+      if (!key) {
+        continue;
+      }
+
+      const dismissedTokenInfo = dismissedTokenInfosMap.get(key);
+
+      if (!dismissedTokenInfo) {
+        if (info.assets.length > 0) {
+          return true;
+        }
+        continue;
+      }
+
+      const dismissedAssetMap = new Map<string, Asset>();
+      for (const asset of dismissedTokenInfo.assets) {
+        const coinMinimalDenom =
+          asset.currency?.coinMinimalDenom || asset.coinMinimalDenom;
+        if (!coinMinimalDenom) {
+          continue;
+        }
+        dismissedAssetMap.set(coinMinimalDenom, asset);
+      }
+
+      for (const asset of info.assets) {
+        const coinMinimalDenom =
+          asset.currency?.coinMinimalDenom || asset.coinMinimalDenom;
+        if (!coinMinimalDenom) {
+          continue;
+        }
+        const prevAsset = dismissedAssetMap.get(coinMinimalDenom);
+
+        // 없던 토큰이 생긴경우
+        if (!prevAsset) {
+          return true;
+        }
+
+        const prevAmount = toBigIntSafe(prevAsset.amount);
+        const curAmount = toBigIntSafe(asset.amount);
+        if (prevAmount == null || curAmount == null) {
+          continue;
+        }
+
+        // 이전에 0이였다가 밸런스가 생긴경우.
+        if (prevAmount === BigInt(0) && curAmount > BigInt(0)) {
+          return true;
+        }
+
+        // 이전 밸런스에 배해서 10% 밸런스가 증가한 경우
+        if (
+          prevAmount > BigInt(0) &&
+          curAmount * BigInt(10) >= prevAmount * BigInt(11)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

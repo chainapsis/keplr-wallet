@@ -8,7 +8,7 @@ import {
   toJS,
 } from "mobx";
 
-import { ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
+import { AppCurrency, ChainInfo, ModularChainInfo } from "@keplr-wallet/types";
 import {
   ChainStore as BaseChainStore,
   IChainInfoImpl,
@@ -33,10 +33,28 @@ import {
   TokenScan,
   TryUpdateAllChainInfosMsg,
   TryUpdateEnabledChainInfosMsg,
+  DismissNewTokenFoundInMainMsg,
+  TokenScanInfo,
 } from "@keplr-wallet/background";
 import { BACKGROUND_PORT, MessageRequester } from "@keplr-wallet/router";
 import { KVStore, toGenerator } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+
+export type RequiredCurrencyTokenScan = Omit<
+  TokenScan,
+  "infos" | "dismissedInfos"
+> & {
+  infos: (Omit<TokenScanInfo, "assets"> & {
+    assets: (TokenScan["infos"][number]["assets"][number] & {
+      currency: AppCurrency;
+    })[];
+  })[];
+  dismissedInfos?: (Omit<TokenScanInfo, "assets"> & {
+    assets: (TokenScan["infos"][number]["assets"][number] & {
+      currency: AppCurrency;
+    })[];
+  })[];
+};
 
 export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   @observable
@@ -49,6 +67,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
   @observable.ref
   protected _tokenScans: TokenScan[] = [];
+  @observable.ref
+  protected _tokenScansWithoutDismissed: TokenScan[] = [];
 
   @observable
   protected _lastTokenScanRevalidateTimestamp: Map<string, number> = new Map();
@@ -123,8 +143,8 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @computed
-  get tokenScans(): TokenScan[] {
-    return this._tokenScans.filter((scan) => {
+  get tokenScans(): RequiredCurrencyTokenScan[] {
+    let res = this._tokenScans.filter((scan) => {
       if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
         return false;
       }
@@ -132,6 +152,110 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
       return !this.enabledChainIdentifiesMap.get(chainIdentifier);
     });
+
+    res = res
+      .map((scan) => {
+        return {
+          ...scan,
+          infos: scan.infos
+            .map((info) => {
+              return {
+                ...info,
+                assets: info.assets
+                  .map((asset) => {
+                    if (asset.currency) {
+                      return asset;
+                    }
+
+                    if (asset.coinMinimalDenom) {
+                      if (this.hasChain(scan.chainId)) {
+                        const currency = this.getChain(
+                          scan.chainId
+                        ).findCurrency(asset.coinMinimalDenom);
+                        if (currency) {
+                          return {
+                            ...asset,
+                            currency,
+                          };
+                        }
+                      }
+                    }
+
+                    return asset;
+                  })
+                  .filter((asset) => {
+                    return !!asset.currency;
+                  }),
+              };
+            })
+            .filter((info) => {
+              return info.assets.length > 0;
+            }),
+        };
+      })
+      .filter((scan) => {
+        return scan.infos.length > 0;
+      });
+
+    return res as RequiredCurrencyTokenScan[];
+  }
+
+  @computed
+  get tokenScansWithoutDismissed(): RequiredCurrencyTokenScan[] {
+    let res = this._tokenScansWithoutDismissed.filter((scan) => {
+      if (!this.hasChain(scan.chainId) && !this.hasModularChain(scan.chainId)) {
+        return false;
+      }
+
+      const chainIdentifier = ChainIdHelper.parse(scan.chainId).identifier;
+      return !this.enabledChainIdentifiesMap.get(chainIdentifier);
+    });
+
+    res = res
+      .map((scan) => {
+        return {
+          ...scan,
+          infos: scan.infos
+            .map((info) => {
+              return {
+                ...info,
+                assets: info.assets
+                  .map((asset) => {
+                    if (asset.currency) {
+                      return asset;
+                    }
+
+                    if (asset.coinMinimalDenom) {
+                      if (this.hasChain(scan.chainId)) {
+                        const currency = this.getChain(
+                          scan.chainId
+                        ).findCurrency(asset.coinMinimalDenom);
+                        if (currency) {
+                          return {
+                            ...asset,
+                            currency,
+                          };
+                        }
+                      }
+                    }
+
+                    return asset;
+                  })
+                  .filter((asset) => {
+                    return !!asset.currency;
+                  }),
+              };
+            })
+            .filter((info) => {
+              return info.assets.length > 0;
+            }),
+        };
+      })
+      .filter((scan) => {
+        return scan.infos.length > 0;
+      });
+
+    return res as RequiredCurrencyTokenScan[];
   }
 
   @computed
@@ -393,6 +517,22 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
   }
 
   @flow
+  *dismissNewTokenFoundInMain() {
+    const msg = new DismissNewTokenFoundInMainMsg(
+      this.keyRingStore.selectedKeyInfo?.id ?? ""
+    );
+
+    const res = yield* toGenerator(
+      this.requester.sendMessage(BACKGROUND_PORT, msg)
+    );
+
+    if (this.keyRingStore.selectedKeyInfo?.id === msg.vaultId) {
+      this._tokenScans = res.tokenScans;
+      this._tokenScansWithoutDismissed = res.tokenScansWithoutDismissed;
+    }
+  }
+
+  @flow
   protected *init() {
     this._isInitializing = true;
 
@@ -507,9 +647,16 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       this.requester.sendMessage(BACKGROUND_PORT, msg)
     );
 
-    this._tokenScans = yield* toGenerator(
+    const getTokenScansResult = yield* toGenerator(
       this.requester.sendMessage(BACKGROUND_PORT, new GetTokenScansMsg(id))
     );
+
+    if (this.keyRingStore.selectedKeyInfo?.id === getTokenScansResult.vaultId) {
+      this._tokenScans = getTokenScansResult.tokenScans;
+      this._tokenScansWithoutDismissed =
+        getTokenScansResult.tokenScansWithoutDismissed;
+    }
+
     (async () => {
       await new Promise<void>((resolve) => {
         const disposal = autorun(() => {
@@ -526,7 +673,9 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
       const lastTimestamp = this._lastTokenScanRevalidateTimestamp.get(id);
       if (
         lastTimestamp == null ||
-        Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+        // Date.now() - lastTimestamp > 5 * 60 * 60 * 1000
+        // QA 용으로 1분으로 설정
+        Date.now() - lastTimestamp > 1 * 60 * 1000
       ) {
         runInAction(() => {
           this._lastTokenScanRevalidateTimestamp.set(id, Date.now());
@@ -540,6 +689,7 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
         if (res.vaultId === this.keyRingStore.selectedKeyInfo?.id) {
           runInAction(() => {
             this._tokenScans = res.tokenScans;
+            this._tokenScansWithoutDismissed = res.tokenScansWithoutDismissed;
           });
         }
       }
