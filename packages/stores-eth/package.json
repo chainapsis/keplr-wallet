@@ -23,6 +23,7 @@
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/address": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
+    "@ethersproject/strings": "^5.7.0",
     "@ethersproject/transactions": "^5.7.0",
     "@ethersproject/units": "^5.7.0",
     "@keplr-wallet/common": "0.12.308",
