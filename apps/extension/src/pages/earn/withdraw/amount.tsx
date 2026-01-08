@@ -196,7 +196,6 @@ export const EarnWithdrawAmountPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title={""} // No title for this page
       displayFlex={true}
-      fixedMinHeight={true}
       left={
         <BackButton
           {...(isConfirmView

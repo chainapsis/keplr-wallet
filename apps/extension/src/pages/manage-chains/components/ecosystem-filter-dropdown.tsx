@@ -9,7 +9,7 @@ import { ColorPalette } from "../../../styles";
 import { Subtitle4 } from "../../../components/typography";
 import { Ecosystem } from "..";
 import { useIntl } from "react-intl";
-import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../../hooks/page-simplebar";
 import { ContextMenuStyles } from "../../../components/context-menu";
 import { COMMON_HOVER_OPACITY } from "../../../styles/constant";
 
@@ -26,7 +26,7 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
   const theme = useTheme();
   const intl = useIntl();
 
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
 
   const closeDropdown = useCallback(() => {
     setIsOpen(false);
@@ -37,7 +37,7 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
       return;
     }
 
-    const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+    const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
 
     if (scrollElement) {
       /**
@@ -70,7 +70,7 @@ export const EcosystemFilterDropdown: FunctionComponent<Props> = ({
         scrollElement.removeEventListener("touchmove", onTouchMove);
       };
     }
-  }, [closeDropdown, globalSimpleBar, isOpen]);
+  }, [closeDropdown, pageSimpleBar, isOpen]);
 
   return (
     <Styles.MenuContainer>

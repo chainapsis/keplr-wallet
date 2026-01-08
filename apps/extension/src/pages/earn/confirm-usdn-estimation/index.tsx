@@ -141,7 +141,6 @@ export const EarnConfirmUsdnEstimationPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title=""
       displayFlex={true}
-      fixedHeight={false}
       left={<BackButton />}
       bottomButtons={[
         {

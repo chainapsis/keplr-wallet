@@ -82,7 +82,6 @@ export const PermissionBasicAccessForBitcoinPage: FunctionComponent<{
   return (
     <HeaderLayout
       title=""
-      fixedHeight={true}
       bottomButtons={[
         {
           textOverrideIcon: (

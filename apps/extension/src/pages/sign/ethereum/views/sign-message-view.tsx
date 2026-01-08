@@ -320,7 +320,6 @@ export const EthereumSignMessageView: FunctionComponent<{
   return (
     <HeaderLayout
       title={""}
-      fixedHeight={true}
       headerContainerStyle={{
         height: "0",
       }}

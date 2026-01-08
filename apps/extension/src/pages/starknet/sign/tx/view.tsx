@@ -393,7 +393,6 @@ export const SignStarknetTxView: FunctionComponent<{
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.sign.cosmos.tx.title" })}
-      fixedHeight={true}
       left={
         <BackButton
           hidden={

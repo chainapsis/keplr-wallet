@@ -136,7 +136,6 @@ export const SettingAdvancedEndpointPage: FunctionComponent = observer(() => {
       title={intl.formatMessage({
         id: "page.setting.advanced.change-endpoints-title",
       })}
-      fixedHeight={true}
       left={<BackButton />}
       bottomButtons={[
         {

@@ -139,7 +139,6 @@ export const IBCTransferPage: FunctionComponent = observer(() => {
   return (
     <HeaderLayout
       title={intl.formatMessage({ id: "page.ibc-transfer.title" })}
-      fixedHeight={true}
       left={
         <Box
           paddingLeft="1rem"

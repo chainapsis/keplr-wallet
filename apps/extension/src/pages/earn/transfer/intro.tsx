@@ -29,7 +29,6 @@ export const EarnTransferIntroPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title={""}
       displayFlex={true}
-      fixedHeight={true}
       left={<BackButton />}
       bottomButtons={[
         {

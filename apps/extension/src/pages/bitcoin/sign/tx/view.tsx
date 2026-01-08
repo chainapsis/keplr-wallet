@@ -621,7 +621,6 @@ export const SignBitcoinTxView: FunctionComponent<{
       contentContainerStyle={{
         paddingTop: isExternal ? "1.75rem" : undefined,
       }}
-      fixedHeight={true}
       left={<BackButton hidden={isExternal} />}
       // 유저가 enter를 눌러서 우발적으로(?) approve를 누르지 않도록 onSubmit을 의도적으로 사용하지 않았음.
       bottomButtons={getBottomButtons()}

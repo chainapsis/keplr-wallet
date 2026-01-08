@@ -61,7 +61,7 @@ import { useGroupedTokensMap } from "../../hooks/use-grouped-tokens-map";
 import { useBalanceAnalytics } from "./hooks/use-balance-analytics";
 import { KeyRingCosmosService } from "@keplr-wallet/background";
 import { useSpringValue } from "@react-spring/web";
-import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../hooks/page-simplebar";
 import { defaultSpringConfig } from "../../styles/spring";
 import { useSearch } from "../../hooks/use-search";
 import { SearchTextInput } from "../../components/input";
@@ -290,7 +290,7 @@ const useSearchBar = (isNotReady?: boolean) => {
     config: defaultSpringConfig,
   });
   const { analyticsStore, uiConfigStore } = useStore();
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState("");
   const [isEnteredSearch, setIsEnteredSearch] = useState(false);
@@ -336,7 +336,7 @@ const useSearchBar = (isNotReady?: boolean) => {
 
   return {
     searchScrollAnim,
-    globalSimpleBar,
+    pageSimpleBar,
     search,
     setSearch,
     isEnteredSearch,
@@ -373,7 +373,7 @@ export const SpendableAssetView: FunctionComponent<{
     );
     const {
       searchScrollAnim,
-      globalSimpleBar,
+      pageSimpleBar,
       search,
       setSearch,
       isEnteredSearch,
@@ -697,7 +697,7 @@ export const SpendableAssetView: FunctionComponent<{
                         }
 
                         const simpleBarScrollRef =
-                          globalSimpleBar.ref.current?.getScrollElement();
+                          pageSimpleBar.ref.current?.getScrollElement();
                         if (
                           simpleBarScrollRef &&
                           simpleBarScrollRef.scrollTop < 218

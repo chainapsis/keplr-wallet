@@ -25,7 +25,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { SearchTextInput } from "../../../components/input";
 import { SpringValue, animated, to, useSpringValue } from "@react-spring/web";
 import { defaultSpringConfig } from "../../../styles/spring";
-import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../../hooks/page-simplebar";
 import { EmptyView } from "../../../components/empty-view";
 import { dispatchGlobalEventExceptSelf } from "../../../utils/global-events";
 import { useSearchKeyInfos } from "../../../hooks/use-search-key-infos";
@@ -44,7 +44,7 @@ const Styles = {
   `,
   AddButton: styled.div`
     position: absolute;
-    top: 8.125rem;
+    top: 4.25rem;
     right: 0.75rem;
   `,
   Content: styled(Stack)`
@@ -192,7 +192,7 @@ const KeyInfoList: FunctionComponent<{
 }> = observer(({ sortKey, title, keyInfos }) => {
   const { uiConfigStore } = useStore();
 
-  const globalSimpleBar = useGlobalSimpleBar();
+  const pageSimpleBar = usePageSimpleBar();
   const scrollAnim = useSpringValue(0, {
     config: defaultSpringConfig,
   });
@@ -388,7 +388,7 @@ const KeyInfoList: FunctionComponent<{
             if (dy - prevScrollDy.current > 2) {
               if (document.body.scrollHeight - e.clientY < 100) {
                 const simpleBarScrollRef =
-                  globalSimpleBar.ref.current?.getScrollElement();
+                  pageSimpleBar.ref.current?.getScrollElement();
                 if (
                   simpleBarScrollHeightRef.current > 0 &&
                   simpleBarScrollRef &&
@@ -420,7 +420,7 @@ const KeyInfoList: FunctionComponent<{
             } else if (dy - prevScrollDy.current < -2) {
               if (e.clientY < 100) {
                 const simpleBarScrollRef =
-                  globalSimpleBar.ref.current?.getScrollElement();
+                  pageSimpleBar.ref.current?.getScrollElement();
                 if (
                   simpleBarScrollHeightRef.current > 0 &&
                   simpleBarScrollRef &&
@@ -582,9 +582,9 @@ const KeyInfoList: FunctionComponent<{
                     prevScrollDy.current = 0;
                     scrollDeltaDyRef.current = 0;
                     refDragDelta.current = 0;
-                    if (globalSimpleBar.ref.current) {
+                    if (pageSimpleBar.ref.current) {
                       const scrollElement =
-                        globalSimpleBar.ref.current.getScrollElement();
+                        pageSimpleBar.ref.current.getScrollElement();
                       if (scrollElement) {
                         simpleBarScrollHeightRef.current =
                           scrollElement.scrollHeight;

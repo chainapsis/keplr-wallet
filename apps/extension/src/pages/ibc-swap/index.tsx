@@ -39,7 +39,7 @@ import { SlippageModal } from "./components/slippage-modal";
 import styled, { useTheme } from "styled-components";
 import { GuideBox } from "../../components/guide-box";
 import { VerticalCollapseTransition } from "../../components/transition/vertical-collapse";
-import { useGlobalSimpleBar } from "../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../hooks/page-simplebar";
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { MakeTxResponse, WalletStatus } from "@keplr-wallet/stores";
 import { autorun } from "mobx";
@@ -2255,11 +2255,11 @@ const WarningGuideBox: FunctionComponent<{
 
     let collapsed = error == null;
 
-    const globalSimpleBar = useGlobalSimpleBar();
+    const pageSimpleBar = usePageSimpleBar();
     useEffect(() => {
       if (!collapsed) {
         const timeoutId = setTimeout(() => {
-          const el = globalSimpleBar.ref.current?.getScrollElement();
+          const el = pageSimpleBar.ref.current?.getScrollElement();
           if (el) {
             // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
             // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
@@ -2274,6 +2274,7 @@ const WarningGuideBox: FunctionComponent<{
           clearTimeout(timeoutId);
         };
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collapsed]);
 
     let errorText = (() => {

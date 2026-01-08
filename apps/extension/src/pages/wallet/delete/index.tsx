@@ -94,7 +94,6 @@ export const WalletDeletePage: FunctionComponent = observer(() => {
       title={intl.formatMessage({
         id: "page.wallet.keyring-item.dropdown.delete-wallet-title",
       })}
-      fixedHeight={true}
       left={<BackButton />}
       bottomButtons={[
         {

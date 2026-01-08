@@ -173,7 +173,6 @@ export const SignCosmosADR36Page: FunctionComponent = observer(() => {
       contentContainerStyle={{
         paddingTop: "2rem",
       }}
-      fixedHeight={true}
       left={
         <BackButton
           hidden={

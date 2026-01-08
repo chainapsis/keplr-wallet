@@ -169,7 +169,6 @@ export const EarnAmountPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title=""
       displayFlex={true}
-      fixedHeight={true}
       left={
         <BackButton
           {...(isFromEarnTransfer

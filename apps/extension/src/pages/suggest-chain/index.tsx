@@ -80,7 +80,6 @@ const SuggestChainPageImpl: FunctionComponent<{
 
   return (
     <HeaderLayout
-      fixedHeight
       isNotReady={isLoadingPlaceholder}
       title={(() => {
         if (isLoadingPlaceholder) {

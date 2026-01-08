@@ -154,7 +154,6 @@ export const SignBitcoinMessageView: FunctionComponent<{
   return (
     <HeaderLayout
       title={""}
-      fixedHeight={true}
       headerContainerStyle={{
         height: "0",
       }}

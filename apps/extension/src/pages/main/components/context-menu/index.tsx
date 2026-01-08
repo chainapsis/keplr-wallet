@@ -18,7 +18,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Toggle } from "../../../../components/toggle/toggle";
 import { AdjustmentIcon, CloseIcon } from "../../../../components/icon";
 import { IconProps } from "../../../../components/icon/types";
-import { useGlobalSimpleBar } from "../../../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../../../hooks/page-simplebar";
 import { Tooltip } from "../../../../components/tooltip";
 import { Gutter } from "../../../../components/gutter";
 import { isRunningInSidePanel } from "../../../../utils";
@@ -272,7 +272,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
     const menuContentRef = useRef<HTMLDivElement>(null);
     const [initialized, setInitialized] = useState(false);
     const theme = useTheme();
-    const globalSimpleBar = useGlobalSimpleBar();
+    const pageSimpleBar = usePageSimpleBar();
 
     useLayoutEffect(() => {
       if (!initialized) {
@@ -282,7 +282,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
 
     useEffect(() => {
       if (isOpen) {
-        const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+        const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
         if (scrollElement && containerRef.current) {
           const containerRect = containerRef.current.getBoundingClientRect();
           const scrollRect = scrollElement.getBoundingClientRect();
@@ -309,7 +309,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
         return;
       }
 
-      const scrollElement = globalSimpleBar.ref.current?.getScrollElement();
+      const scrollElement = pageSimpleBar.ref.current?.getScrollElement();
 
       if (scrollElement) {
         /**
@@ -342,7 +342,7 @@ export const ViewOptionsContextMenu: FunctionComponent<{
           scrollElement.removeEventListener("touchmove", onTouchMove);
         };
       }
-    }, [isOpen, closeMenu, globalSimpleBar]);
+    }, [isOpen, closeMenu, pageSimpleBar]);
 
     const toggleMenu = () => {
       analyticsAmplitudeStore.logEvent("click_view_options_context_menu", {

@@ -50,7 +50,6 @@ export const PermissionBasicAccessForStarknetPage: FunctionComponent<{
   return (
     <HeaderLayout
       title=""
-      fixedHeight={true}
       bottomButtons={[
         {
           textOverrideIcon: (

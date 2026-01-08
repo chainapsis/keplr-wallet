@@ -103,7 +103,7 @@ import { autorun } from "mobx";
 import { usePreviousDistinct } from "../../../hooks/use-previous";
 import { SwapFeeInfoForBridgeOnSend } from "./swap-fee-info";
 import { useEffectOnce } from "../../../hooks/use-effect-once";
-import { useGlobalSimpleBar } from "../../../hooks/global-simplebar";
+import { usePageSimpleBar } from "../../../hooks/page-simplebar";
 import { FeeCoverageDescription } from "../../../components/top-up";
 import { useTopUp } from "../../../hooks/use-topup";
 import { getShouldTopUpSignOptions } from "../../../utils/should-top-up-sign-options";
@@ -887,7 +887,6 @@ export const SendAmountPage: FunctionComponent = observer(() => {
     <HeaderLayout
       title={intl.formatMessage({ id: "page.send.amount.title" })}
       displayFlex={true}
-      fixedMinHeight={true}
       left={<BackButton />}
       right={
         // side panel 모드에서는 detach 모드가 필요가 없다...
@@ -2630,11 +2629,11 @@ const WarningGuideBox: FunctionComponent<{
 
     let collapsed = error == null;
 
-    const globalSimpleBar = useGlobalSimpleBar();
+    const pageSimpleBar = usePageSimpleBar();
     useEffect(() => {
       if (!collapsed) {
         const timeoutId = setTimeout(() => {
-          const el = globalSimpleBar.ref.current?.getScrollElement();
+          const el = pageSimpleBar.ref.current?.getScrollElement();
           if (el) {
             // 오류 메세지가 가장 밑에 있는 관계로 유저가 잘 못볼수도 있기 때문에
             // 트랜지션 종료 이후에 스크롤을 맨 밑으로 내린다.
@@ -2649,6 +2648,7 @@ const WarningGuideBox: FunctionComponent<{
           clearTimeout(timeoutId);
         };
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collapsed]);
 
     let errorText = (() => {

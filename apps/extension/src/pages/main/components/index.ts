@@ -12,3 +12,4 @@ export * from "./update-note-modal";
 export * from "./receive-button";
 export * from "./buy-button";
 export * from "./copy-check-animation";
+export * from "./refresh-button";
