@@ -14,16 +14,12 @@ import { computedFn } from "mobx-utils";
 import { BinarySortArray } from "./sort";
 import { StarknetQueriesStore } from "@keplr-wallet/stores-starknet";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-import {
-  AppCurrency,
-  IBCCurrency,
-  ModularChainInfo,
-} from "@keplr-wallet/types";
+import { ModularChainInfo } from "@keplr-wallet/types";
 import { BitcoinQueriesStore } from "@keplr-wallet/stores-bitcoin";
 import { UIConfigStore } from "../ui-config";
 import { KeyRingStore, TokensStore } from "@keplr-wallet/stores-core";
 import { AllTokenMapByChainIdentifierState } from "./all-token-map-state";
-import { Asset, SkipQueries } from "@keplr-wallet/stores-internal";
+import { SkipQueries } from "@keplr-wallet/stores-internal";
 import { getBabylonUnbondingRemainingTime } from "../../utils/get-babylon-unbonding-remaining-time";
 import { INITIA_CHAIN_ID } from "../../config.ui";
 import { sortByPrice } from "../../utils/token-sort";
@@ -1112,13 +1108,10 @@ export class HugeQueriesStore {
       }
 
       const currency = viewToken.token.currency;
-      const chainId = viewToken.chainInfo.chainId;
 
-      const erc20Asset = this.getErc20AssetForToken(chainId, currency);
-
-      if (erc20Asset && erc20Asset.recommendedSymbol && currency.coinGeckoId) {
+      if (currency.coinGeckoId) {
         const groupKey = this.findERC20GroupKey(
-          erc20Asset.recommendedSymbol,
+          currency.coinDenom,
           currency.coinGeckoId,
           tokensMap
         );
@@ -1270,37 +1263,6 @@ export class HugeQueriesStore {
     }
   };
 
-  protected getIBCAssetForToken = computedFn(
-    (currency: IBCCurrency): Asset | undefined => {
-      const originChainId = currency.originChainId;
-      const coinMinimalDenom = currency.originCurrency?.coinMinimalDenom;
-
-      if (!originChainId || !coinMinimalDenom) {
-        return undefined;
-      }
-
-      return this.skipQueriesStore.queryAssets
-        .getAssets(originChainId)
-        .assetsRaw.find((asset) => asset.originDenom === coinMinimalDenom);
-    }
-  );
-
-  protected getErc20AssetForToken = computedFn(
-    (chainId: string, currency: AppCurrency): Asset | undefined => {
-      if (!currency.coinMinimalDenom.startsWith("erc20:")) {
-        return undefined;
-      }
-
-      return this.skipQueriesStore.queryAssets
-        .getAssets(chainId)
-        .assetsRaw.find(
-          (asset) =>
-            asset.tokenContract?.toLowerCase() ===
-            currency.coinMinimalDenom.split(":")[1].toLowerCase()
-        );
-    }
-  );
-
   protected findBitcoinGroupKey = computedFn(
     (chainId: string): string | undefined => {
       const groupedModularChainInfo =
@@ -1327,7 +1289,7 @@ export class HugeQueriesStore {
   );
 
   protected findERC20GroupKey(
-    recommendedSymbol: string,
+    coinDenom: string,
     coinGeckoId: string,
     tokensMap: Map<string, ViewToken[]>
   ): string {
@@ -1337,10 +1299,8 @@ export class HugeQueriesStore {
       const tokenCurrency = viewTokens[0].token.currency;
 
       if ("paths" in tokenCurrency) {
-        const ibcAsset = this.getIBCAssetForToken(tokenCurrency);
-
         if (
-          ibcAsset?.recommendedSymbol === recommendedSymbol &&
+          tokenCurrency.originCurrency?.coinDenom === coinDenom &&
           tokenCurrency.coinGeckoId === coinGeckoId
         ) {
           return key;
@@ -1348,7 +1308,7 @@ export class HugeQueriesStore {
       }
     }
 
-    return `erc20:${recommendedSymbol}/${coinGeckoId}`;
+    return `erc20:${coinDenom}/${coinGeckoId}`;
   }
 
   protected findGroupKeyByCoinGeckoId(

@@ -2324,7 +2324,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
           coinDecimals: 6,
-          coinGeckoId: "tether",
+          coinGeckoId: "tether", //native USDT가 따로 없기 때문에 다른 체인의 USDT와 그루핑되도록 함
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdt.png",
         },
@@ -2336,7 +2336,7 @@ export const EmbedChainInfos: (ChainInfo | ModularChainInfo)[] = [
           coinMinimalDenom:
             "erc20:0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
           coinDecimals: 6,
-          coinGeckoId: "usd-coin",
+          coinGeckoId: "starkgate-bridged-usdc-starknet",
           coinImageUrl:
             "https://keplr-ext-update-note-images.s3.amazonaws.com/token/usdc.png",
         },
