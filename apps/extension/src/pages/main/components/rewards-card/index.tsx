@@ -87,7 +87,7 @@ export const RewardsCard: FunctionComponent<{
 
   const navigateToStake = React.useCallback(() => {
     mainHeaderAnimationStore.triggerShowForMainHeaderPrice();
-    navigate("/stake?intitialExpand=true");
+    navigate("/stake?initialExpand=true");
   }, [mainHeaderAnimationStore, navigate]);
 
   return (
