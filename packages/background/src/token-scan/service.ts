@@ -172,6 +172,18 @@ export class TokenScanService {
           !this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)
         );
       })
+      .filter((tokenScan) => {
+        let hasAmount = false;
+        for (const info of tokenScan.infos) {
+          for (const asset of info.assets) {
+            if (asset.amount && asset.amount !== "0") {
+              hasAmount = true;
+              break;
+            }
+          }
+        }
+        return hasAmount;
+      })
       .sort((a, b) => {
         // Sort by chain name
         const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
@@ -473,12 +485,15 @@ export class TokenScanService {
           if (res.status === 200) {
             for (const tokenBalance of res.data.result?.tokenBalances ?? []) {
               if (tokenBalance.tokenBalance && tokenBalance.error == null) {
-                assets.push({
-                  coinMinimalDenom: DenomHelper.normalizeDenom(
-                    `erc20:${tokenBalance.contractAddress}`
-                  ),
-                  amount: BigInt(tokenBalance.tokenBalance).toString(10),
-                });
+                const amount = BigInt(tokenBalance.tokenBalance).toString(10);
+                if (amount !== "0") {
+                  assets.push({
+                    coinMinimalDenom: DenomHelper.normalizeDenom(
+                      `erc20:${tokenBalance.contractAddress}`
+                    ),
+                    amount,
+                  });
+                }
               }
             }
           }
@@ -543,7 +558,7 @@ export class TokenScanService {
               }
 
               const dec = new Dec(bal.amount);
-              if (dec.gte(new Dec(0))) {
+              if (dec.gt(new Dec(0))) {
                 assets.push({
                   currency,
                   coinMinimalDenom: bal.denom,
@@ -609,26 +624,28 @@ export class TokenScanService {
               .toBigInt()
               .toString(10);
 
-            // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
-            //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
-            if (tokenScan.infos.length === 0) {
-              tokenScan.infos.push({
-                starknetHexAddress,
-                assets: [
-                  {
+            if (amount !== "0") {
+              // XXX: Starknet의 경우는 여러 주소가 나올수가 없으므로
+              //      starknetHexAddress는 같은 값으로 나온다고 생각하고 처리한다.
+              if (tokenScan.infos.length === 0) {
+                tokenScan.infos.push({
+                  starknetHexAddress,
+                  assets: [
+                    {
+                      currency,
+                      amount,
+                    },
+                  ],
+                });
+              } else {
+                if (
+                  tokenScan.infos[0].starknetHexAddress === starknetHexAddress
+                ) {
+                  tokenScan.infos[0].assets.push({
                     currency,
                     amount,
-                  },
-                ],
-              });
-            } else {
-              if (
-                tokenScan.infos[0].starknetHexAddress === starknetHexAddress
-              ) {
-                tokenScan.infos[0].assets.push({
-                  currency,
-                  amount,
-                });
+                  });
+                }
               }
             }
           }
@@ -718,12 +735,28 @@ export class TokenScanService {
           );
         }
 
-        tokenScan.infos.push(...bitcoinScanInfos);
+        let hasNonZeroAmount = false;
+
+        for (const bitcoinScanInfo of bitcoinScanInfos) {
+          // 우선 main currency만 처리한다.
+          if (
+            bitcoinScanInfo.assets.length > 0 &&
+            bitcoinScanInfo.assets[0].amount !== "0"
+          ) {
+            hasNonZeroAmount = true;
+            break;
+          }
+        }
+
+        // 하나라도 0이 아닌 값이 있으면 연결된 모든 체인에 대해 토큰 스캔 정보를 추가한다.
+        if (hasNonZeroAmount) {
+          tokenScan.infos.push(...bitcoinScanInfos);
+        }
       } else {
         const bitcoinScanInfo = await getBitcoinScanInfo(
           vaultId,
           chainId,
-          true
+          false
         );
         if (bitcoinScanInfo) {
           tokenScan.infos.push(bitcoinScanInfo);
