@@ -172,6 +172,18 @@ export class TokenScanService {
           !this.chainsUIService.isEnabled(vaultId, tokenScan.chainId)
         );
       })
+      .filter((tokenScan) => {
+        let hasAmount = false;
+        for (const info of tokenScan.infos) {
+          for (const asset of info.assets) {
+            if (asset.amount && asset.amount !== "0") {
+              hasAmount = true;
+              break;
+            }
+          }
+        }
+        return hasAmount;
+      })
       .sort((a, b) => {
         // Sort by chain name
         const aChainInfo = this.chainsService.hasChainInfo(a.chainId)
