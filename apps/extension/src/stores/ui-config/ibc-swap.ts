@@ -27,6 +27,17 @@ export class IBCSwapConfig {
   @observable
   protected _celestiaDisabled: boolean = false;
 
+  @observable
+  protected _isSwapExecuting: Map<string, boolean> = new Map();
+
+  // multi tx swap signature progress state
+  @observable
+  protected _totalSignatureCount: number | undefined = undefined;
+  @observable
+  protected _completedSignatureCount: number | undefined = undefined;
+  @observable
+  protected _showSignatureProgress: boolean = false;
+
   constructor(
     kvStore: KVStore,
     protected readonly chainStore: ChainStore,
@@ -242,5 +253,57 @@ export class IBCSwapConfig {
 
   get celestiaDisabled(): boolean {
     return this._celestiaDisabled;
+  }
+
+  get isSwapExecuting(): boolean {
+    return this._isSwapExecuting.get("default") ?? false;
+  }
+
+  getIsSwapExecuting(key: string): boolean {
+    return this._isSwapExecuting.get(key) ?? false;
+  }
+
+  @action
+  setIsSwapExecuting(isExecuting: boolean, key: string = "default") {
+    if (isExecuting) {
+      this._isSwapExecuting.set(key, isExecuting);
+    } else {
+      this._isSwapExecuting.delete(key);
+    }
+  }
+
+  get signatureProgress(): { show: boolean; total: number; completed: number } {
+    const total = this._totalSignatureCount ?? 0;
+    const completed = this._completedSignatureCount ?? 0;
+
+    return {
+      show:
+        this._showSignatureProgress &&
+        this._totalSignatureCount != null &&
+        this._completedSignatureCount != null,
+      total,
+      completed,
+    };
+  }
+
+  @action
+  setSignatureProgress(total: number, completed: number, show: boolean) {
+    this._totalSignatureCount = total;
+    this._completedSignatureCount = completed;
+    this._showSignatureProgress = show;
+  }
+
+  @action
+  incrementCompletedSignature() {
+    if (this._completedSignatureCount != null) {
+      this._completedSignatureCount += 1;
+    }
+  }
+
+  @action
+  resetSignatureProgress() {
+    this._totalSignatureCount = undefined;
+    this._completedSignatureCount = undefined;
+    this._showSignatureProgress = false;
   }
 }

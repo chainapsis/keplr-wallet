@@ -54,6 +54,8 @@ import { useNavigate } from "react-router";
 import { ApproveIcon, CancelIcon } from "../../../../components/button";
 import { HeaderProps } from "../../../../layouts/header/types";
 import { getKeplrFromWindow } from "@keplr-wallet/stores";
+import { UnsignedEVMTransactionWithErc20Approvals } from "@keplr-wallet/stores-eth";
+import { StepIndicator } from "../../../../components/step-indicator";
 
 export const EthereumSignTxView: FunctionComponent<{
   interactionData: NonNullable<SignEthereumInteractionStore["waitingData"]>;
@@ -103,8 +105,39 @@ export const EthereumSignTxView: FunctionComponent<{
     gasConfig
   );
 
-  const [signingDataBuff, setSigningDataBuff] = useState(Buffer.from(message));
+  const [requiredErc20Approvals] = useState<
+    NonNullable<
+      UnsignedEVMTransactionWithErc20Approvals["requiredErc20Approvals"]
+    >
+  >(() => {
+    const parsed = JSON.parse(Buffer.from(message).toString("utf8"));
+    if (
+      parsed.requiredErc20Approvals &&
+      Array.isArray(parsed.requiredErc20Approvals) &&
+      parsed.requiredErc20Approvals.length > 0
+    ) {
+      return parsed.requiredErc20Approvals;
+    }
+    return [];
+  });
+
+  const [signingDataBuff, setSigningDataBuff] = useState(() => {
+    const parsed = JSON.parse(Buffer.from(message).toString("utf8"));
+    if (parsed.requiredErc20Approvals) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { requiredErc20Approvals: _, ...unsignedTx } = parsed;
+      return Buffer.from(JSON.stringify(unsignedTx), "utf8");
+    }
+    return Buffer.from(message);
+  });
   const [preferNoSetFee, setPreferNoSetFee] = useState<boolean>(false);
+
+  const simulatorKey = useMemo(() => {
+    if (requiredErc20Approvals.length === 0) {
+      return "evm/native";
+    }
+    return "evm/native/bundle";
+  }, [requiredErc20Approvals]);
 
   const gasSimulator = useGasSimulator(
     new MemoryKVStore("gas-simulator.ethereum.sign"),
@@ -112,21 +145,49 @@ export const EthereumSignTxView: FunctionComponent<{
     chainInfo.chainId,
     gasConfig,
     feeConfig,
-    "evm/native",
+    simulatorKey,
     () => {
       if (chainInfo.evm == null) {
         throw new Error("Gas simulator is only working with EVM info");
       }
 
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
+      if (requiredErc20Approvals.length === 0) {
+        return {
+          simulate: () =>
+            ethereumAccount.simulateGas(account.ethereumHexAddress, {
+              to: unsignedTx.to,
+              data: unsignedTx.data,
+              value: unsignedTx.value,
+            }),
+        };
+      }
 
+      if (requiredErc20Approvals.length > 1) {
+        throw new Error("Multiple required ERC20 approvals are not supported");
+      }
+
+      // NOTE:
+      // If multiple ERC20 approvals are needed, or
+      // bundle simulation using state diff tracing is not possible,
+      // execute ERC20 approvals first—then simulate the main transaction on this page.
       return {
         simulate: () =>
-          ethereumAccount.simulateGas(account.ethereumHexAddress, {
-            to: unsignedTx.to,
-            data: unsignedTx.data,
-            value: unsignedTx.value,
-          }),
+          ethereumAccount
+            .simulateGasWithPendingErc20Approval(account.ethereumHexAddress, {
+              to: unsignedTx.to,
+              data: unsignedTx.data,
+              value: unsignedTx.value,
+              requiredErc20Approvals,
+            })
+            .then((result) => {
+              const { gasUsed } = result;
+              // only consider the gas used for the main tx
+              if (gasUsed == null || gasUsed <= 0) {
+                throw new Error("Gas used is not positive");
+              }
+              return { gasUsed };
+            }),
       };
     }
   );
@@ -185,6 +246,7 @@ export const EthereumSignTxView: FunctionComponent<{
   }, []);
 
   useEffect(() => {
+    // NOTE: set fee only for external requests
     if (!interactionData.isInternal) {
       const unsignedTx = JSON.parse(Buffer.from(message).toString("utf8"));
 
@@ -435,10 +497,51 @@ export const EthereumSignTxView: FunctionComponent<{
       },
     },
     {
-      text: intl.formatMessage({ id: "button.approve" }),
-      color: "primary",
+      isSpecial: true,
+      text: (() => {
+        const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
+        if (progress.show) {
+          if (isLedgerInteracting) {
+            return intl.formatMessage({ id: "button.continue-on-ledger" });
+          }
+          if (isKeystoneInteracting) {
+            return intl.formatMessage({ id: "button.continue-on-keystone" });
+          }
+          return intl.formatMessage(
+            { id: "button.approve-with-progress" },
+            {
+              total: progress.total,
+              completed: progress.completed,
+            }
+          );
+        }
+        return intl.formatMessage({ id: "button.approve" });
+      })(),
       size: "large",
-      left: !isLoading && <ApproveIcon />,
+      left: (() => {
+        const progress = uiConfigStore.ibcSwapConfig.signatureProgress;
+        if (progress.show) {
+          return (
+            <StepIndicator
+              totalCount={progress.total}
+              completedCount={progress.completed}
+              inactiveOpacity={0.4}
+              activeColor={ColorPalette["white"]}
+              blinkCurrentStep={true}
+              style={{ marginRight: "0.125rem" }}
+            />
+          );
+        }
+        if (isLoading) {
+          return undefined;
+        }
+        return <ApproveIcon />;
+      })(),
+      ...(uiConfigStore.ibcSwapConfig.signatureProgress.show &&
+        (isLedgerInteracting || isKeystoneInteracting) && {
+          suppressDefaultLoadingIndicator: true,
+          showTextWhileLoading: true,
+        }),
       disabled: buttonDisabled,
       isLoading,
       onClick: async () => {

@@ -5,6 +5,7 @@ import { ITxChainSetter } from "./types";
 import { CallData, constants } from "starknet";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
 import { StarknetIDIsFetchingError } from "./errors";
+import { JsonRpcResponse } from "@keplr-wallet/types";
 
 export class StarknetIdNameService implements NameService {
   readonly type = "starknet-id";
@@ -184,37 +185,33 @@ export class StarknetIdNameService implements NameService {
       const domain = this.value;
       const username = domain + "." + suffix;
 
-      const res = await simpleFetch<{
-        jsonrpc: "2.0";
-        result?: string[];
-        id: string;
-        error?: {
-          code?: number;
-          message?: string;
-        };
-      }>(modularChainInfoImpl.embedded.starknet.rpc, "", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: "1",
-          method: "starknet_call",
-          params: [
-            {
-              contract_address: this._starknetID.namingContractAddress,
-              calldata: CallData.toHex({
-                domain: encodeDomain(username).map((v) => v.toString(10)),
-                hint: [],
-              }),
-              entry_point_selector:
-                "0x2e269d930f6d7ab92b15ce8ff9f5e63709391617e3465fff79ba6baf278ce60", // selector.getSelectorFromName("domain_to_address"),
-            },
-            "latest",
-          ],
-        }),
-      });
+      const res = await simpleFetch<JsonRpcResponse<string[]>>(
+        modularChainInfoImpl.embedded.starknet.rpc,
+        "",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: "1",
+            method: "starknet_call",
+            params: [
+              {
+                contract_address: this._starknetID.namingContractAddress,
+                calldata: CallData.toHex({
+                  domain: encodeDomain(username).map((v) => v.toString(10)),
+                  hint: [],
+                }),
+                entry_point_selector:
+                  "0x2e269d930f6d7ab92b15ce8ff9f5e63709391617e3465fff79ba6baf278ce60", // selector.getSelectorFromName("domain_to_address"),
+              },
+              "latest",
+            ],
+          }),
+        }
+      );
 
       if (this.value === prevValue) {
         if (res.data.error && res.data.error.message) {

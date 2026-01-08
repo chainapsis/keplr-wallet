@@ -18,6 +18,11 @@ import {
   RemoveSkipHistoryMsg,
   ClearAllSkipHistoryMsg,
   RecordTxWithSkipSwapMsg,
+  RecordTxWithSwapV2Msg,
+  GetSwapV2HistoriesMsg,
+  RemoveSwapV2HistoryMsg,
+  ClearAllSwapV2HistoryMsg,
+  HideSwapV2HistoryMsg,
 } from "./messages";
 import { RecentSendHistoryService } from "./service";
 
@@ -85,6 +90,31 @@ export const getHandler: (service: RecentSendHistoryService) => Handler = (
         return handleClearAllSkipHistoryMsg(service)(
           env,
           msg as ClearAllSkipHistoryMsg
+        );
+      case RecordTxWithSwapV2Msg:
+        return handleRecordTxWithSwapV2Msg(service)(
+          env,
+          msg as RecordTxWithSwapV2Msg
+        );
+      case GetSwapV2HistoriesMsg:
+        return handleGetSwapV2HistoriesMsg(service)(
+          env,
+          msg as GetSwapV2HistoriesMsg
+        );
+      case RemoveSwapV2HistoryMsg:
+        return handleRemoveSwapV2HistoryMsg(service)(
+          env,
+          msg as RemoveSwapV2HistoryMsg
+        );
+      case ClearAllSwapV2HistoryMsg:
+        return handleClearAllSwapV2HistoryMsg(service)(
+          env,
+          msg as ClearAllSwapV2HistoryMsg
+        );
+      case HideSwapV2HistoryMsg:
+        return handleHideSwapV2HistoryMsg(service)(
+          env,
+          msg as HideSwapV2HistoryMsg
         );
       default:
         throw new KeplrError("tx", 110, "Unknown msg type");
@@ -251,5 +281,59 @@ const handleClearAllSkipHistoryMsg: (
 ) => InternalHandler<ClearAllSkipHistoryMsg> = (service) => {
   return (_env, _msg) => {
     service.clearAllRecentSkipHistory();
+  };
+};
+
+const handleRecordTxWithSwapV2Msg: (
+  service: RecentSendHistoryService
+) => InternalHandler<RecordTxWithSwapV2Msg> = (service) => {
+  return async (_env, msg) => {
+    return service.recordTxWithSwapV2(
+      msg.fromChainId,
+      msg.toChainId,
+      msg.provider,
+      msg.destinationAsset,
+      msg.simpleRoute,
+      msg.sender,
+      msg.recipient,
+      msg.amount,
+      msg.notificationInfo,
+      msg.routeDurationSeconds,
+      msg.txHash,
+      msg.isOnlyUseBridge
+    );
+  };
+};
+
+const handleGetSwapV2HistoriesMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<GetSwapV2HistoriesMsg> = (service) => {
+  return (_env, _msg) => {
+    return service.getRecentSwapV2Histories();
+  };
+};
+
+const handleRemoveSwapV2HistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<RemoveSwapV2HistoryMsg> = (service) => {
+  return (_env, msg) => {
+    service.removeRecentSwapV2History(msg.id);
+    return service.getRecentSwapV2Histories();
+  };
+};
+
+const handleClearAllSwapV2HistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<ClearAllSwapV2HistoryMsg> = (service) => {
+  return (_env, _msg) => {
+    service.clearAllRecentSwapV2History();
+  };
+};
+
+const handleHideSwapV2HistoryMsg: (
+  service: RecentSendHistoryService
+) => InternalHandler<HideSwapV2HistoryMsg> = (service) => {
+  return (_env, msg) => {
+    service.hideSwapV2History(msg.id);
   };
 };

@@ -20,7 +20,7 @@ import {
   RawImageFallback,
 } from "../../../../components/image";
 import { AppCurrency } from "@keplr-wallet/types";
-import { IBCSwapAmountConfig } from "@keplr-wallet/hooks-internal";
+import { SwapAmountConfig } from "@keplr-wallet/hooks-internal";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -79,7 +79,7 @@ export const SwapAssetInfo: FunctionComponent<{
   type: "from" | "to";
 
   senderConfig: ISenderConfig;
-  amountConfig: IBCSwapAmountConfig;
+  amountConfig: SwapAmountConfig;
 
   onDestinationChainSelect?: (
     chainId: string,
@@ -459,7 +459,9 @@ export const SwapAssetInfo: FunctionComponent<{
                       }
                       return q;
                     })()}&entryPoint=select_to_asset`
-                  )}`
+                  )}&inChainId=${amountConfig.chainInfo.chainId}&inDenom=${
+                    amountConfig.amount[0].currency.coinMinimalDenom
+                  }`
                 );
               }
             }}
@@ -770,10 +772,10 @@ const PriceSymbol: FunctionComponent<{
 
 const SelectDestinationChainModal: FunctionComponent<{
   close: () => void;
-  amountConfig: IBCSwapAmountConfig;
+  amountConfig: SwapAmountConfig;
   onDestinationChainSelect: (chainId: string, coinMinimalDenom: string) => void;
 }> = observer(({ close, amountConfig, onDestinationChainSelect }) => {
-  const { chainStore, skipQueriesStore } = useStore();
+  const { chainStore, swapQueriesStore } = useStore();
 
   const theme = useTheme();
 
@@ -784,7 +786,7 @@ const SelectDestinationChainModal: FunctionComponent<{
     chainId: string;
     denom: string;
   }[] =
-    skipQueriesStore.queryIBCSwap.getSwapDestinationCurrencyAlternativeChains(
+    swapQueriesStore.querySwapHelper.getSwapDestinationCurrencyAlternativeChains(
       chainStore.getChain(amountConfig.outChainId),
       amountConfig.outCurrency
     );

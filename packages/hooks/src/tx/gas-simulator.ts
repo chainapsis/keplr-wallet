@@ -13,7 +13,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { TxChainSetter } from "./chain";
 import { ChainGetter, MakeTxResponse } from "@keplr-wallet/stores";
-import { Coin, StdFee } from "@keplr-wallet/types";
+import { Coin, EvmGasSimulationOutcome, StdFee } from "@keplr-wallet/types";
 import { isSimpleFetchError } from "@keplr-wallet/simple-fetch";
 
 type TxSimulate = Pick<MakeTxResponse, "simulate">;
@@ -39,6 +39,11 @@ class GasSimulatorState {
   protected _stdFee: StdFee | undefined = undefined;
   @observable.ref
   protected _error: Error | undefined = undefined;
+
+  // Optional EVM gas simulation metadata for the most recent run (if any).
+  @observable.ref
+  protected _recentEvmSimulationOutcome: EvmGasSimulationOutcome | undefined =
+    undefined;
 
   constructor() {
     makeObservable(this);
@@ -105,6 +110,15 @@ class GasSimulatorState {
   @action
   setError(error: Error | undefined) {
     this._error = error;
+  }
+
+  get recentEvmSimulationOutcome(): EvmGasSimulationOutcome | undefined {
+    return this._recentEvmSimulationOutcome;
+  }
+
+  @action
+  setRecentEvmSimulationOutcome(outcome: EvmGasSimulationOutcome | undefined) {
+    this._recentEvmSimulationOutcome = outcome;
   }
 
   static isZeroFee(amount: readonly Coin[] | undefined): boolean {
@@ -257,6 +271,12 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
     return undefined;
   }
 
+  get evmSimulationOutcome(): EvmGasSimulationOutcome | undefined {
+    const key = this.storeKey;
+    const state = this.getState(key);
+    return state.recentEvmSimulationOutcome;
+  }
+
   get gasAdjustment(): number {
     if (this._gasAdjustmentValue === "") {
       return 0;
@@ -383,27 +403,39 @@ export class GasSimulator extends TxChainSetter implements IGasSimulator {
         });
 
         promise
-          .then(({ gasUsed }) => {
-            // Changing the gas in the gas config definitely will make the reaction to the fee config,
-            // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
-            // These potential reactions can create repeated meaningless reactions.
-            // To avoid this potential problem, change the value when there is a meaningful change in the gas estimated.
-            if (
-              !state.recentGasEstimated ||
-              Math.abs(state.recentGasEstimated - gasUsed) /
-                state.recentGasEstimated >
-                0.02
-            ) {
-              state.setRecentGasEstimated(gasUsed);
+          .then(
+            (res: {
+              gasUsed: number;
+              evmSimulationOutcome?: EvmGasSimulationOutcome;
+            }) => {
+              const { gasUsed, evmSimulationOutcome } = res;
+
+              // Changing the gas in the gas config definitely will make the reaction to the fee config,
+              // and, this reaction can potentially create a reaction in the amount config as well (Ex, when the "Max" option set).
+              // These potential reactions can create repeated meaningless reactions.
+              // To avoid this potential problem, change the value when there is a meaningful change in the gas estimated.
+              const shouldUpdate =
+                !state.recentGasEstimated ||
+                Math.abs(state.recentGasEstimated - gasUsed) /
+                  state.recentGasEstimated >
+                  0.02 ||
+                evmSimulationOutcome !== state.recentEvmSimulationOutcome;
+
+              if (shouldUpdate) {
+                // Update gas and EVM simulate kind atomically so they always
+                // represent the same simulation context.
+                state.setRecentGasEstimated(gasUsed);
+                state.setRecentEvmSimulationOutcome(evmSimulationOutcome);
+              }
+
+              state.setOutdatedCosmosSdk(false);
+              state.setError(undefined);
+
+              this.kvStore.set(key, gasUsed).catch((e) => {
+                console.log(e);
+              });
             }
-
-            state.setOutdatedCosmosSdk(false);
-            state.setError(undefined);
-
-            this.kvStore.set(key, gasUsed).catch((e) => {
-              console.log(e);
-            });
-          })
+          )
           .catch((e) => {
             console.log(e);
             if (isSimpleFetchError(e) && e.response) {

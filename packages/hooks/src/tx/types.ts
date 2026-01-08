@@ -1,4 +1,9 @@
-import { AppCurrency, FeeCurrency, StdFee } from "@keplr-wallet/types";
+import {
+  AppCurrency,
+  EvmGasSimulationOutcome,
+  FeeCurrency,
+  StdFee,
+} from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { NameService } from "./name-service";
 import { IChainInfoImpl } from "@keplr-wallet/stores";
@@ -144,6 +149,9 @@ export interface IGasSimulator {
 
   gasAdjustmentValue: string;
   setGasAdjustmentValue(gasAdjustment: string | number): void;
+
+  // Optional EVM gas simulation metadata
+  evmSimulationOutcome?: EvmGasSimulationOutcome;
 
   uiProperties: UIProperties;
 }

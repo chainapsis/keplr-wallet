@@ -55,7 +55,7 @@ const searchFields = [
 ];
 
 export const SendSelectAssetPage: FunctionComponent = observer(() => {
-  const { hugeQueriesStore, skipQueriesStore, chainStore } = useStore();
+  const { hugeQueriesStore, swapQueriesStore, chainStore } = useStore();
   const navigate = useNavigate();
   const intl = useIntl();
   const theme = useTheme();
@@ -113,9 +113,9 @@ export const SendSelectAssetPage: FunctionComponent = observer(() => {
   const filteredTokens = _filteredTokens.filter((token) => {
     if (paramIsIBCSwap) {
       // skipQueriesStore.queryIBCSwap.isSwappableCurrency는 useMemo 안에 들어가면 observation이 안되서 따로 빼야한다...
-      return skipQueriesStore.queryIBCSwap.isSwappableCurrency(
+      return swapQueriesStore.querySwappable.isSwappableToken(
         token.chainInfo.chainId,
-        token.token.currency
+        token.token.currency.coinMinimalDenom
       );
     }
 

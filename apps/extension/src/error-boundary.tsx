@@ -14,7 +14,11 @@ import { Button } from "./components/button";
 import { observer } from "mobx-react-lite";
 import { useStore } from "./stores";
 import { useTheme } from "styled-components";
-import { ClearAllIBCHistoryMsg } from "@keplr-wallet/background";
+import {
+  ClearAllIBCHistoryMsg,
+  ClearAllSkipHistoryMsg,
+  ClearAllSwapV2HistoryMsg,
+} from "@keplr-wallet/background";
 import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
 import { BACKGROUND_PORT } from "@keplr-wallet/router";
 
@@ -81,10 +85,22 @@ const ErrorBoundaryView: FunctionComponent = observer(() => {
     };
 
     const fn3 = async () => {
+      const msg = new ClearAllSkipHistoryMsg();
+      const requester = new InExtensionMessageRequester();
+      await requester.sendMessage(BACKGROUND_PORT, msg);
+    };
+
+    const fn4 = async () => {
+      const msg = new ClearAllSwapV2HistoryMsg();
+      const requester = new InExtensionMessageRequester();
+      await requester.sendMessage(BACKGROUND_PORT, msg);
+    };
+
+    const fn5 = async () => {
       await uiConfigStore.removeStatesWhenErrorOccurredDuringRending();
     };
 
-    await Promise.allSettled([fn1(), fn2(), fn3()]);
+    await Promise.allSettled([fn1(), fn2(), fn3(), fn4(), fn5()]);
   };
 
   return (

@@ -5,6 +5,7 @@ import { Hash } from "@keplr-wallet/crypto";
 import { Buffer } from "buffer/";
 import { HasMapStore } from "../map";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
+import { JsonRpcResponse } from "@keplr-wallet/types";
 
 /**
  * Experimental implementation for json rpc.
@@ -44,27 +45,23 @@ export class ObservableJsonRPCQuery<
   protected override async fetchResponse(
     abortController: AbortController
   ): Promise<{ headers: any; data: T }> {
-    const result = await simpleFetch<{
-      jsonrpc: "2.0";
-      result?: T;
-      id: string;
-      error?: {
-        code?: number;
-        message?: string;
-      };
-    }>(this.baseURL, this.url, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: "1",
-        method: this.method,
-        params: this.params,
-      }),
-      signal: abortController.signal,
-    });
+    const result = await simpleFetch<JsonRpcResponse<T>>(
+      this.baseURL,
+      this.url,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: "1",
+          method: this.method,
+          params: this.params,
+        }),
+        signal: abortController.signal,
+      }
+    );
 
     if (result.data.error && result.data.error.message) {
       throw new Error(result.data.error.message);

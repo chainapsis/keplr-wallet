@@ -21,10 +21,14 @@
     "@keplr-wallet/types": "0.12.308",
     "@keplr-wallet/unit": "0.12.308",
     "joi": "^17.5.0",
+    "lodash.chunk": "^4.2.0",
     "utility-types": "^3.10.0"
   },
   "peerDependencies": {
     "mobx": "^6",
     "mobx-utils": "^6"
+  },
+  "devDependencies": {
+    "@types/lodash.chunk": "^4"
   }
 }

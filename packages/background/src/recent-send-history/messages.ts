@@ -1,6 +1,12 @@
 import { Message } from "@keplr-wallet/router";
 import { ROUTE } from "./constants";
-import { IBCHistory, RecentSendHistory, SkipHistory } from "./types";
+import {
+  IBCHistory,
+  RecentSendHistory,
+  SkipHistory,
+  SwapProvider,
+  SwapV2History,
+} from "./types";
 import { AppCurrency } from "@keplr-wallet/types";
 
 export class GetRecentSendHistoriesMsg extends Message<RecentSendHistory[]> {
@@ -537,5 +543,161 @@ export class ClearAllSkipHistoryMsg extends Message<void> {
 
   type(): string {
     return ClearAllSkipHistoryMsg.type();
+  }
+}
+
+export class RecordTxWithSwapV2Msg extends Message<string> {
+  public static type() {
+    return "record-tx-with-swap-v2";
+  }
+
+  constructor(
+    public readonly fromChainId: string,
+    public readonly toChainId: string,
+    public readonly provider: SwapProvider,
+    public readonly destinationAsset: {
+      chainId: string;
+      denom: string;
+      expectedAmount: string;
+    },
+    public readonly simpleRoute: {
+      isOnlyEvm: boolean;
+      chainId: string;
+      receiver: string;
+    }[],
+    public readonly sender: string,
+    public readonly recipient: string,
+    public readonly amount: {
+      readonly amount: string;
+      readonly denom: string;
+    }[],
+    public readonly notificationInfo: {
+      currencies: AppCurrency[];
+    },
+    public readonly routeDurationSeconds: number,
+    public readonly txHash: string,
+    public readonly isOnlyUseBridge?: boolean
+  ) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.fromChainId) {
+      throw new Error("chain id is empty");
+    }
+
+    if (!this.toChainId) {
+      throw new Error("chain id is empty");
+    }
+
+    if (!this.simpleRoute) {
+      throw new Error("simple route is empty");
+    }
+
+    if (!this.sender) {
+      throw new Error("sender is empty");
+    }
+
+    if (!this.recipient) {
+      throw new Error("recipient is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RecordTxWithSwapV2Msg.type();
+  }
+}
+
+export class GetSwapV2HistoriesMsg extends Message<SwapV2History[]> {
+  public static type() {
+    return "get-swap-v2-histories";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return GetSwapV2HistoriesMsg.type();
+  }
+}
+
+export class RemoveSwapV2HistoryMsg extends Message<SwapV2History[]> {
+  public static type() {
+    return "remove-swap-v2-histories";
+  }
+
+  constructor(public readonly id: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    if (!this.id) {
+      throw new Error("id is empty");
+    }
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return RemoveSwapV2HistoryMsg.type();
+  }
+}
+
+export class ClearAllSwapV2HistoryMsg extends Message<void> {
+  public static type() {
+    return "clear-all-swap-v2-histories";
+  }
+
+  constructor() {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return ClearAllSwapV2HistoryMsg.type();
+  }
+}
+
+export class HideSwapV2HistoryMsg extends Message<void> {
+  public static type() {
+    return "hide-swap-v2-history";
+  }
+
+  constructor(public readonly id: string) {
+    super();
+  }
+
+  validateBasic(): void {
+    // noop
+  }
+
+  route(): string {
+    return ROUTE;
+  }
+
+  type(): string {
+    return HideSwapV2HistoryMsg.type();
   }
 }
